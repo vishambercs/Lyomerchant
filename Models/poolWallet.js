@@ -1,0 +1,47 @@
+const mongoose = require('mongoose');
+const validator = require('validator');
+const poolWalletSchema = new mongoose.Schema({
+    id:
+    {
+        type: String,
+        required: true,
+        unique:true,
+    },
+    network_id:
+    {
+        type: String,
+        required: true,
+    },
+    balance:
+    {
+        type: String,
+        required: true,
+        default : 0
+    },
+    address:
+    {
+        type: String,
+        required: true,
+    },
+    privateKey: {
+        type: String,
+        required: true,
+    },
+
+    status: {
+        type: Number,
+        required: false,
+        default: 0,
+    },
+},
+    {
+        toJSON: {
+            transform(doc, ret) {
+                delete ret.privateKey;
+                delete ret.__v;
+            },
+        },
+    },
+    { timestamps: true }
+)
+module.exports = mongoose.model('poolWallet', poolWalletSchema)
