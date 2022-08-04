@@ -1,5 +1,4 @@
 var express = require('express');
-var app = express();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 var client = require('./Route/clientsRoute');
@@ -14,7 +13,7 @@ var path = require('path');
 const Web3 = require('web3');
 var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
-
+var app = express();
 // const https              = require('https');
 const https = require('http');
 const Utility = require('./common/Utility');
