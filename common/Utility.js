@@ -13,7 +13,6 @@ var crypto              = require("crypto");
 var CryptoJS            = require('crypto-js')
 const url               = require('url')
 const querystring       = require('querystring');
-
 const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});

@@ -721,4 +721,61 @@ module.exports =
         // return response;
         res.json({ status: 200, data: response, message: "Invalid" })
     },
+    async kyc_verification_status(req, res) 
+    {
+        // clients.findOne({ api_key: req.body.client_user_name }).then(async (val) => {
+        //     if (val != null) 
+        //     {
+        //         if (req.body.review_answer == "GREEN") {
+        //             let networks = await network.find()
+        //             networks.forEach(async function (item) {
+        //                 var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
+        //                 var accountAddress = web3.eth.accounts.create();
+        //                 const clientWallet = new clientWallets({
+        //                     id: mongoose.Types.ObjectId(),
+        //                     client_api_key: val.api_key,
+        //                     address: accountAddress.address,
+        //                     privatekey: accountAddress.privateKey,
+        //                     status: 1,
+        //                     network_id: item.id
+        //                 });
+        //                 let client_Wallet = await clientWallet.save()
+        //             });
+        //             let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: true } }, { $new: true })
+        //             res.json({ status: 200, message: "", data: { "status": clientskyc.status } })
+
+        //         }
+        //         else if (req.body.review_answer == "RED") 
+        //         {
+        //             let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: false } }, { $new: true })
+        //             res.json({ status: 200, message: "KYC Rejected", data: null })
+        //         }
+        //         else 
+        //         {
+        //             res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
+        //         }
+        //     }
+        //     else 
+        //     {
+        //         res.json({ status: 400, message: "Invalid Request", data: null })
+        //     }
+        // }).catch(error => {
+        //     console.log(error)
+        //     res.json({ status: 400, data: {}, message: error })
+        // })
+        // return response;
+        console.log("kyc_verification_status ==============================",req)
+        console.log("kyc_verification_status ==============================",res)
+        console.log("kyc_verification_status ==============================",req.body)
+        res.json({ status: 200, data: {}, message: "Getting Data" })
+    },
+    async clients_kyc_levels(req, res) 
+    {
+        let kycurl = process.env.KYC_URL + Constant.kyc_levels 
+        let getRequestData = await commonFunction.Get_Request_FOR_KYC(kycurl, { "Authorization": process.env.KYC_URL_TOKEN })
+        let json_response = JSON.parse(getRequestData.data)
+        console.log(json_response.data)
+        res.json({ status: 200, data: json_response.data, message: "" })
+    },
+   
 }

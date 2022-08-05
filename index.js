@@ -30,19 +30,18 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/', function (req, res) { res.send('Welcome to Lyo Merchant'); });
-app.use('/v1', client);
-app.use('/admin/v1', poolRoute);
-app.use('/network/v1', networkRoute);
-app.use('/wallet/v1', walletRoute);
+app.get('/',    function (req, res) { res.send('Welcome to Lyo Merchant'); });
+app.use('/v1',           client);
+app.use('/admin/v1',     poolRoute);
+app.use('/network/v1',   networkRoute);
+app.use('/wallet/v1',    walletRoute);
 app.use('/hotWallet/v1', hotWalletRoute);
-app.use('/withdraw/v1', withdrawRoute);
-app.use('/admin/v1', adminRoute);
+app.use('/withdraw/v1',  withdrawRoute);
+app.use('/admin/v1',     adminRoute);
 
 
-// cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
-
-//Database
+//  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
+//  Database
 
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
@@ -61,7 +60,6 @@ var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {
 const wsServer = new webSocketServer({ httpServer: server });
 
 wsServer.on('request', Utility.receiveMessage)
-
 
 var kycserver = https.createServer().listen(process.env.KYC_PORT, () => {
     console.log(`Example app listening at ${process.env.KYC_PORT}`);
