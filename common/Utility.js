@@ -11,14 +11,14 @@ const clients           = require('../Models/clients');
 var clientsController   = require('../controllers/clientsController');
 const { constant }      = require('./Constant');
 var crypto              = require("crypto");
-var CryptoJS            = require('crypto-js')
+
 const url               = require('url')
 const querystring       = require('querystring');
 const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 require("dotenv").config()
-
+var CryptoJS            = require('crypto-js')
 
 module.exports =
 {
@@ -138,13 +138,13 @@ module.exports =
             let uniqueKey      =  crypto.randomBytes(20).toString('hex')
             let url_paremeters = url.parse(request.httpRequest.url);
             let queryvariable  = querystring.parse(url_paremeters.query)
-            var security_hash  = (queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await commonFunction.get_Transcation_Data(queryvariable.transkey)
             console.log("getTranscationData =====================================",getTranscationData);
-            var hash = CryptoJS.MD5(security_hash).toString();
-            // console.log(hash);
-            // console.log(security_hash);
-            if(hash == security_hash && getTranscationData.length > 0)
+           
+            console.log(hash);
+            console.log(queryvariable.hash);
+            if(hash == queryvariable.hash && getTranscationData.length > 0)
             {
 
             const connection = request.accept(null, request.origin);
@@ -184,13 +184,13 @@ module.exports =
             let uniqueKey       =  crypto.randomBytes(20).toString('hex')
             let url_paremeters  = url.parse(request.httpRequest.url);
             let queryvariable   = querystring.parse(url_paremeters.query)
-            var security_hash   = (queryvariable.api_key + process.env.BASE_WORD_FOR_HASH)
+            var hash            =  CryptoJS.MD5(queryvariable.api_key + process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await clients.find({ api_key : queryvariable.api_key , status : false})
             console.log("getTranscationData =====================================",getTranscationData);
-            var hash = CryptoJS.MD5(security_hash).toString();
             console.log(hash);
-            console.log(security_hash);
-            if(hash == security_hash && getTranscationData.length > 0)
+            console.log(queryvariable.hash);
+
+            if(hash == queryvariable.hash && getTranscationData.length > 0)
             {
 
             const connection = request.accept(null, request.origin);
