@@ -185,12 +185,12 @@ module.exports =
             let url_paremeters  = url.parse(request.httpRequest.url);
             let queryvariable   = querystring.parse(url_paremeters.query)
             var hash            =  CryptoJS.MD5(queryvariable.api_key + process.env.BASE_WORD_FOR_HASH)
-            let getTranscationData = await clients.find({ api_key : queryvariable.api_key , status : false})
+            let getTranscationData = await clients.findOne({ api_key : queryvariable.api_key , status : false})
             console.log("getTranscationData =====================================",getTranscationData);
             console.log(hash);
             console.log(queryvariable.hash);
 
-            if( getTranscationData.length > 0)
+            if( getTranscationData != null)
             {
 
             const connection = request.accept(null, request.origin);
