@@ -24,6 +24,7 @@ router.post('/update_cron_job',                 clientsController.update_cron_jo
 router.post('/merchantNetworkTranscation',      transcationpoolController.get_Trans_by_Network_ID);
 router.post('/gettranscationlist',              clientsController.Get_Transcation_List);
 router.post('/check_kyc',                       clientsController.check_kyc);
-router.post('/createkyclink',                 clientsController.Create_Kyc_Link);
-
+router.post('/createkyclink',                   clientsController.Create_Kyc_Link);
+router.post('/kycstatus',                       Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);
+router.post('/kycLevels',                       clientsController.clients_kyc_levels);
 module.exports = router;
