@@ -62,7 +62,7 @@ const wsServer = new webSocketServer({ httpServer: server });
 wsServer.on('request', Utility.receiveMessage)
 
 var kycserver = https.createServer().listen(process.env.KYC_PORT, () => {
-    console.log(`Example app listening at ${process.env.KYC_PORT}`);
+    console.log(`Example app listening at ${process.env.KYC_PORT}   `);
 })
 const kyc = new webSocketServer({ httpServer: kycserver });
 
