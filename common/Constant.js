@@ -2,9 +2,11 @@ const address           = []
 const block             = 0
 const index             = 0
 const kycindex          = 0
+
 const translists        = []
 const kycapplication    = []
 const interval          = ""
+const kycinterval          = ""
 const kyc_path1         = "/api/users/"
 const kyc_path2         = "/kyc/client/link"
 const kyc_path3         = "/level/LMT_basic_level/kyc"
@@ -26,6 +28,7 @@ module.exports =
     kycindex       : kycindex,
     kyc_levels     : kyc_levels,
     web_hook_link  : web_hook_link,
+    kycinterval    : kycinterval,
     
          
 }

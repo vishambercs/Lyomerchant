@@ -7,6 +7,7 @@ var stringify           = require('json-stringify-safe');
 var cornJobs            = require('./cornJobs');
 const transcationLog    = require('../Models/transcationLog');
 const transactionPools  = require('../Models/transactionPool');
+const clients           = require('../Models/clients');
 var clientsController   = require('../controllers/clientsController');
 const { constant }      = require('./Constant');
 var crypto              = require("crypto");
@@ -143,7 +144,7 @@ module.exports =
             var hash = CryptoJS.MD5(security_hash).toString();
             // console.log(hash);
             // console.log(security_hash);
-            if(hash == hash && getTranscationData.length > 0)
+            if(hash == security_hash && getTranscationData.length > 0)
             {
 
             const connection = request.accept(null, request.origin);
@@ -179,18 +180,118 @@ module.exports =
     },
     async approvekyc(request) {
         try {
-            let uniqueKey      =  crypto.randomBytes(20).toString('hex')
-            const connection = request.accept(null, request.origin);
-            Constant.kycapplication.push({id: uniqueKey , "connection" : connection })
-            setInterval(commonFunction.get_data_approvekyc, 10000);
-            connection.on('message', function (message) 
+           
+            let uniqueKey       =  crypto.randomBytes(20).toString('hex')
+            let url_paremeters  = url.parse(request.httpRequest.url);
+            let queryvariable   = querystring.parse(url_paremeters.query)
+            var security_hash   = (queryvariable.api_key + process.env.BASE_WORD_FOR_HASH)
+            let getTranscationData = await clients.find({ api_key : queryvariable.api_key , status : false})
+            console.log("getTranscationData =====================================",getTranscationData);
+            var hash = CryptoJS.MD5(security_hash).toString();
+            console.log(hash);
+            console.log(security_hash);
+            if(hash == security_hash && getTranscationData.length > 0)
             {
-            connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
-            })    
+
+            const connection = request.accept(null, request.origin);
+            var index = Constant.kycapplication.findIndex(translist => translist.api_key == queryvariable.api_key)
+        
+            if(index == -1)
+            {
+            let client_object = {  "uniqueKey": uniqueKey,  "connection": connection,  "api_key": queryvariable.api_key}
+            Constant.kycapplication.push(client_object)
+            }
+            else
+            {
+              
+                Constant.kycapplication[index]["connection"] = connection
+            }
+            Constant.kycinterval = setInterval(commonFunction.get_data_approvekyc, 10000);
+
+        }
+        else
+        {
+            return request.reject(null, request.origin);
+        }
         }
         catch (error) {
             console.log(error)
             return null
         }
+
+        // try {
+            
+        //     // const connection    = request.accept(null, request.origin);
+
+        //     // let uniqueKey      =  crypto.randomBytes(20).toString('hex')
+        //     // let url_paremeters = url.parse(request.httpRequest.url);
+        //     // let queryvariable  = querystring.parse(url_paremeters.query)
+        //     // var security_hash  = (queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+        //     // let getTranscationData = await commonFunction.get_Transcation_Data(queryvariable.transkey)
+        //     // console.log("getTranscationData =====================================",getTranscationData);
+        //     // var hash = CryptoJS.MD5(security_hash).toString();
+        //     // // console.log(hash);
+        //     // // console.log(security_hash);
+        //     // if(hash == hash && getTranscationData.length > 0)
+        //     // {
+            
+        //     // }
+
+        //     // Constant.kycapplication.push({id: uniqueKey , "connection" : connection })
+        //     // setInterval(commonFunction.get_data_approvekyc, 10000);
+        //     // connection.on('message', function (message) 
+        //     // {
+        //     // connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+        //     // })   
+            
+            
+        //     try {
+        //         let uniqueKey      =  crypto.randomBytes(20).toString('hex')
+        //         let url_paremeters = url.parse(request.httpRequest.url);
+        //         let queryvariable  = querystring.parse(url_paremeters.query)
+        //         var security_hash  = (queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+        //         let getTranscationData = await commonFunction.get_Transcation_Data(queryvariable.transkey)
+        //         console.log("getTranscationData =====================================",getTranscationData);
+        //         var hash = CryptoJS.MD5(security_hash).toString();
+        //         // console.log(hash);
+        //         // console.log(security_hash);
+        //         if(hash == hash && getTranscationData.length > 0)
+        //         {
+    
+        //         const connection = request.accept(null, request.origin);
+        //         var index = Constant.translists.findIndex(translist => translist.transkey == queryvariable.transkey)
+            
+        //         if(index == -1)
+        //         {
+        //         let client_object = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+        //         Constant.translists.push(client_object)
+        //         }
+        //         else
+        //         {
+        //             // let client_object = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+        //             Constant.translists[index]["connection"] = connection
+        //         }
+        //         Constant.interval = setInterval(commonFunction.get_data_of_transcation, 10000);
+        //         connection.on('message', function (message) {
+        //         if(index == -1)
+        //         {
+        //             connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+        //         }
+        //         })
+        //     }
+        //     else
+        //     {
+        //         return request.reject(null, request.origin);
+        //     }
+        //     }
+        //     catch (error) {
+        //         console.log(error)
+        //         return null
+        //     }
+        // }
+        // catch (error) {
+        //     console.log(error)
+        //     return null
+        // }
     },
 }

@@ -12,6 +12,7 @@ const Utility = require('./Utility');
 const clientWallets = require('../Models/clientWallets');
 const poolWallets = require('../Models/poolWallet');
 const transactionPools = require('../Models/transactionPool');
+const clients = require('../Models/clients');
 require("dotenv").config()
 
 
@@ -262,7 +263,7 @@ module.exports =
         })
         return response;
     },
-    
+
     async amount_check(previous, need, current) {
         var net_amount = current - previous
         if (net_amount > 0 && net_amount == need) {
@@ -299,9 +300,9 @@ module.exports =
         })
         return response
     },
-    async Get_Request_FOR_KYC(URL,  headers) {
+    async Get_Request_FOR_KYC(URL, headers) {
         let response = {}
-        await axios.get(URL,{ headers: headers })
+        await axios.get(URL, { headers: headers })
             .then(res => {
                 var stringify_response = stringify(res)
                 console.log("res", res.data)
@@ -404,12 +405,22 @@ module.exports =
         }
     },
 
-    async get_data_approvekyc() {
-
-        if (Constant.kycindex < Constant.kycapplication.length) {
+    async get_data_approvekyc() 
+    {
+        if (Constant.kycindex < Constant.kycapplication.length) 
+        {
             let transData = Constant.kycapplication[Constant.kycindex]
-             transData.connection.sendUTF(JSON.stringify({ status: 200, result: true}));
-             Constant.kycindex = Constant.kycindex + 1
+            let transcationData = await clients.find({ "api_key": transData.api_key, "status": true })
+            if (transcationData.length > 0) {
+                transData.connection.sendUTF(JSON.stringify({ status: 200, result: true }));
+                transData.connection.close(1000)
+                Constant.kycapplication = await Constant.kycapplication.filter(translist => translist.api_key != transData.api_key);
+            }
+            else {
+                transData.connection.sendUTF(JSON.stringify({ status: 200, result: false }));
+            }
+
+            Constant.kycindex = Constant.kycindex + 1
         }
         else {
             Constant.kycindex = 0;
