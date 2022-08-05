@@ -144,7 +144,7 @@ module.exports =
            
             console.log(hash);
             console.log(queryvariable.hash);
-            if(hash == queryvariable.hash && getTranscationData.length > 0)
+            if(getTranscationData.length > 0)
             {
 
             const connection = request.accept(null, request.origin);
@@ -190,7 +190,7 @@ module.exports =
             console.log(hash);
             console.log(queryvariable.hash);
 
-            if(hash == queryvariable.hash && getTranscationData.length > 0)
+            if( getTranscationData.length > 0)
             {
 
             const connection = request.accept(null, request.origin);
