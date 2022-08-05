@@ -9,7 +9,7 @@ var hotWalletRoute = require('./Route/hotWalletRoute');
 var withdrawRoute = require('./Route/withdrawRoute');
 var adminRoute = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
-
+const fs                = require('fs');
 var path = require('path');
 const Web3 = require('web3');
 var cron = require('node-cron');
