@@ -9,13 +9,15 @@ var hotWalletRoute = require('./Route/hotWalletRoute');
 var withdrawRoute = require('./Route/withdrawRoute');
 var adminRoute = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
+
 var path = require('path');
 const Web3 = require('web3');
 var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
 var app = express();
 // const https              = require('https');
-const https = require('http');
+// const https = require('http');
+const https             = require('https');
 const Utility = require('./common/Utility');
 
 require('dotenv').config()
@@ -43,6 +45,9 @@ app.use('/admin/v1',     adminRoute);
 //  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
 //  Database
 
+const privateKey   = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/privkey.pem',  'utf8');
+const certificate  = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/cert.pem',     'utf8');
+const ca           = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/chain.pem',    'utf8');
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
@@ -54,14 +59,26 @@ app.listen(process.env.SERVER_PORT, function () {
     console.log('Listening to Port 5000');
 });
 
-var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {
+var server = https.createServer({
+    key                 :  privateKey,
+    cert                :  certificate,  
+    ca                  :  ca, 
+    requestCert         :  false, 
+    rejectUnauthorized  :  false
+    }).listen(process.env.SCOKECT_PORT, () => {
     console.log(`Example app listening at ${process.env.SCOKECT_PORT}`);
 })
 const wsServer = new webSocketServer({ httpServer: server });
 
 wsServer.on('request', Utility.receiveMessage)
 
-var kycserver = https.createServer().listen(process.env.KYC_PORT, () => {
+var kycserver = https.createServer({
+    key                 :  privateKey,
+    cert                :  certificate,  
+    ca                  :  ca, 
+    requestCert         :  false, 
+    rejectUnauthorized  :  false
+    }).listen(process.env.KYC_PORT, () => {
     console.log(`Example app listening at ${process.env.KYC_PORT}   `);
 })
 const kyc = new webSocketServer({ httpServer: kycserver });
