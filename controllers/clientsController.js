@@ -764,8 +764,7 @@ module.exports =
         //     res.json({ status: 400, data: {}, message: error })
         // })
         // return response;
-        console.log("kyc_verification_status ==============================",req)
-        console.log("kyc_verification_status ==============================",res)
+
         console.log("kyc_verification_status ==============================",req.body)
         res.json({ status: 200, data: {}, message: "Getting Data" })
     },
