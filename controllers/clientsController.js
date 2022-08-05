@@ -764,9 +764,14 @@ module.exports =
         //     res.json({ status: 400, data: {}, message: error })
         // })
         // return response;
-
+        try{
         console.log("kyc_verification_status ==============================",req.body)
         res.json({ status: 200, data: {}, message: "Getting Data" })
+        }
+        catch (error) {
+            console.log("error",error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
     },
     async clients_kyc_levels(req, res) 
     {

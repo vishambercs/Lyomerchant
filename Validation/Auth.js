@@ -18,8 +18,8 @@ module.exports =
     },
     async Verfiy_Kyc_Header(req, res, next) {
         try {
-         
-            if (process.env.KYC_HEADER_AUTH == req.headers.secret_key) 
+            console.log("Verfiy_Kyc_Header ===========",req.body)
+            if (process.env.KYC_HEADER_AUTH == req.headers.auth) 
             {
                 next()
             }
