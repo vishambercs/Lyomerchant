@@ -1,24 +1,18 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const kycWebHook = new mongoose.Schema
+const kycwebhooklog = new mongoose.Schema
     ({
         id:
         {
             type        : String,
             required    : true,
-            unique      : true,
         },
-        kyc_url_webhook:
+        webhook_data:
         {
             type        : String,
-            required    : true,
-        },
-        status:
-        {
-            type        : Number,
             required    : true,
         },
     },
         { timestamps: true }
     )
-module.exports = mongoose.model('kycWebHook', kycWebHook)
+module.exports = mongoose.model('kycwebhooklog', kycwebhooklog)

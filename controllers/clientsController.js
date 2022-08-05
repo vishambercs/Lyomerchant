@@ -1,5 +1,5 @@
 const clients           = require('../Models/clients');
-
+const kycWebHookLogs    = require('../Models/kycWebHookLog');
 const transcationLog    = require('../Models/transcationLog');
 const cornJobs          = require('../common/cornJobs');
 var CryptoJS            = require('crypto-js')
@@ -84,7 +84,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Hash" })
         }
     },
-
     async Create_Kyc_Link(req, res) {
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
@@ -93,6 +92,8 @@ module.exports =
                     let kyc_link = null
                     let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LMT_basic_level" }, { "Authorization": process.env.KYC_URL_TOKEN })
                     let json_response = JSON.parse(postRequests.data)
+                    console.log("json_response",json_response)
+                    if(json_response.status == 200 ){
                     if (json_response.data.body.length != 0) {
                         let KYC_ID = json_response.data.body.kyc_link.split("/");
                         kyc_link = process.env.KYC_URL_APPROVE + KYC_ID[1];
@@ -103,7 +104,10 @@ module.exports =
                         console.log(error)
                         res.json({ status: 400, data: {}, message: error })
                     })
-                       
+                }
+                else{
+                    res.json({ status: 400, message: "Invalid Request", data: {} })
+                }    
                    
                 }
                 else {
@@ -723,50 +727,55 @@ module.exports =
     },
     async kyc_verification_status(req, res) 
     {
-        // clients.findOne({ api_key: req.body.client_user_name }).then(async (val) => {
-        //     if (val != null) 
-        //     {
-        //         if (req.body.review_answer == "GREEN") {
-        //             let networks = await network.find()
-        //             networks.forEach(async function (item) {
-        //                 var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
-        //                 var accountAddress = web3.eth.accounts.create();
-        //                 const clientWallet = new clientWallets({
-        //                     id: mongoose.Types.ObjectId(),
-        //                     client_api_key: val.api_key,
-        //                     address: accountAddress.address,
-        //                     privatekey: accountAddress.privateKey,
-        //                     status: 1,
-        //                     network_id: item.id
-        //                 });
-        //                 let client_Wallet = await clientWallet.save()
-        //             });
-        //             let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: true } }, { $new: true })
-        //             res.json({ status: 200, message: "", data: { "status": clientskyc.status } })
-
-        //         }
-        //         else if (req.body.review_answer == "RED") 
-        //         {
-        //             let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: false } }, { $new: true })
-        //             res.json({ status: 200, message: "KYC Rejected", data: null })
-        //         }
-        //         else 
-        //         {
-        //             res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
-        //         }
-        //     }
-        //     else 
-        //     {
-        //         res.json({ status: 400, message: "Invalid Request", data: null })
-        //     }
-        // }).catch(error => {
-        //     console.log(error)
-        //     res.json({ status: 400, data: {}, message: error })
-        // })
-        // return response;
         try{
         console.log("kyc_verification_status ==============================",req.body)
-        res.json({ status: 200, data: {}, message: "Getting Data" })
+        const kycWebHookLog  = new kycWebHookLogs({ id:  req.body.client_user_name, webhook_data : JSON.stringify (req.body) });
+        let kycWebHookLogdata = await kycWebHookLog.save()
+
+        clients.findOne({ api_key: req.body.client_user_name }).then(async (val) => {
+            if (val != null) 
+            {
+                if (req.body.review_answer == "GREEN") {
+                    let networks = await network.find()
+                    networks.forEach(async function (item) {
+                        var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
+                        var accountAddress = web3.eth.accounts.create();
+                        const clientWallet = new clientWallets({
+                            id: mongoose.Types.ObjectId(),
+                            client_api_key: val.api_key,
+                            address: accountAddress.address,
+                            privatekey: accountAddress.privateKey,
+                            status: 1,
+                            network_id: item.id
+                        });
+                        let client_Wallet = await clientWallet.save()
+                    });
+                    
+                   
+                    let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: true } }, { $new: true })
+                    let kycclients = await clients.findOne({ api_key: req.body.client_user_name })
+                    res.json({ status: 200, message: "Successfully", data: { "status": kycclients.status } })
+
+                }
+                else if (req.body.review_answer == "RED") 
+                {
+                    let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: false } }, { $new: true })
+                    res.json({ status: 200, message: "KYC Rejected", data: null })
+                }
+                else 
+                {
+                    res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
+                }
+            }
+            else 
+            {
+                res.json({ status: 400, message: "Invalid Request", data: null })
+            }
+        }).catch(error => {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: error })
+        })
+       
         }
         catch (error) {
             console.log("error",error)

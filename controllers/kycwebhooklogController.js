@@ -1,4 +1,4 @@
-const kycWebHook  = require('../Models/kycWebHook');
+const kycWebHookLog  = require('../Models/kycWebHookLog');
 const network     = require('../Models/network');
 const Utility     = require('../common/Utility');
 var mongoose      = require('mongoose');
@@ -7,13 +7,11 @@ const poolWallets = require('../Models/poolWallet');
 require("dotenv").config()
 module.exports =
 {
-    async createWebHook(req, res) {
+    async getkycWebHookLog(req, res) {
         try {
-            
-            const kycWebHook = new kycWebHook({ id: mongoose.Types.ObjectId(), network_id: req.body.network_id, address: account.address, privateKey: account.privateKey, });
-            kycWebHook.save().then(async (val) => 
+            await kycWebHookLog.find().then(async (val) => 
             {
-                res.json({ status: 200, message: "Successfully", data: val })
+            res.json({ status: 200, message: "Successfully", data: val })
             }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
 
         }
