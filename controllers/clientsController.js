@@ -73,7 +73,7 @@ module.exports =
                 client.save().then(async (val) => {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
-                    res.json({ status: 200, message: "We sent token to your Email", data: val.email })
+                    res.json({ status: 200, message: "We sent token to your Email", data: val })
                 }).catch(error => {
                     console.log(error)
                     res.json({ status: 400, data: {}, message: error })
