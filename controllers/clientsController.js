@@ -69,7 +69,7 @@ module.exports =
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
         if (hash == req.body.hash) {
             QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
-                const client = new clients({ emailtoken: otp, emailstatus: false, kycLink: " ", two_fa: false, secret: secret, qrcode: url, status: true, password: password_hash, api_key: api_key, email: req.body.email, hash: hash, });
+                const client = new clients({ emailtoken: otp, emailstatus: false, kycLink: " ", two_fa: false, secret: secret, qrcode: url, status: false, password: password_hash, api_key: api_key, email: req.body.email, hash: hash, });
                 client.save().then(async (val) => {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
