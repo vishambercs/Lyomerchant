@@ -9,5 +9,5 @@ router.post('/adminlogin',        adminController.Login);
 router.post('/admingoogleauth',   adminController.Verfiy_Google_Auth);
 router.post('/getTransForAdmin',  transcationpoolController.getTransForAdmin);
 router.post('/get_admin_withdraw',  withdrawController.get_admin_wihdraw);
-
+router.post('/allAdmin',  adminController.allAdmin);
 module.exports = router;

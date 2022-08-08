@@ -35,13 +35,13 @@ module.exports =
         if (hash == req.body.hash) {
             QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
                 const admin = new admins({
-                    two_fa          : false,
-                    secret          : secret,
-                    qrcode          : url,
-                    status          : false,
-                    password        : password_hash,
-                    admin_api_key   : admin_api_key,
-                    email           : req.body.email,
+                    two_fa: false,
+                    secret: secret,
+                    qrcode: url,
+                    status: false,
+                    password: password_hash,
+                    admin_api_key: admin_api_key,
+                    email: req.body.email,
                 });
                 admin.save().then(async (val) => {
                     res.json({ status: 200, message: "Client Added Successfully", data: val })
@@ -54,9 +54,8 @@ module.exports =
                 res.json({ status: 400, data: {}, message: error.message })
             });
         }
-        else
-        {
-                res.json({ status: 400, data: {}, message: "Invalid Hash" })
+        else {
+            res.json({ status: 400, data: {}, message: "Invalid Hash" })
         }
     },
     async Login(req, res) {
@@ -108,6 +107,19 @@ module.exports =
         }
         catch (error) {
             res.json({ status: 400, data: {}, message: "Verification Failed" })
+        }
+    },
+    async allAdmin(req, res) {
+        try {
+            await admins.find().then(val => {
+                res.json({ "status": 200, "data": val, "message": "All Admins" })
+            }).catch(error => {
+                console.log("get_clients_data", error)
+                res.json({ status: 400, data: {}, message: "Error" })
+            })
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Error" })
         }
     },
 }
