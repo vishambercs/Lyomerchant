@@ -130,5 +130,102 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
+    async get_admin_wihdraw(req, res) {
+        try {
+            if (req.body.status != "" && req.body.status != undefined) {
+            await withdrawLogs.aggregate( 
+                [
+                    { $match: { status: parseInt(req.body.status) } },
+                    {
+                        $skip: parseInt(req.body.offest)
+                    },
+                    {
+                        $limit: parseInt(req.body.limit)
+                    },
 
+                    {
+                        $lookup:
+                        {
+                            from: "clients", // collection to join
+                            localField: "api_key",//field from the input documents
+                            foreignField: "api_key",//field from the documents of the "from" collection
+                            as: "clientsDetails"// output array field
+                        }
+                    },
+                    {
+                        $lookup: 
+                        {
+                            from: "networks", // collection to join
+                            localField: "network_id",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "networkDetails"// output array field
+                        }
+                    },
+                    {
+                        "$project": {
+                            "networkDetails.__v": 0,
+                            "networkDetails.id": 0,
+                            "networkDetails.nodeUrl": 0,
+                            "networkDetails.created_by": 0,
+                            "networkDetails.createdAt": 0,
+                            "networkDetails.updatedAt": 0,
+                            "networkDetails._id": 0
+                        }
+                    }
+                ]).then(async (data) => {
+                    res.json({ status: 200, message: "Withdraw Pool", data: data })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+            }
+            else{
+                await withdrawLogs.aggregate( 
+                    [
+                        {
+                            $skip: parseInt(req.body.offest)
+                        },
+                        {
+                            $limit: parseInt(req.body.limit)
+                        },
+                        {
+                            $lookup:
+                            {
+                                from: "clients", // collection to join
+                                localField: "api_key",//field from the input documents
+                                foreignField: "api_key",//field from the documents of the "from" collection
+                                as: "clientsDetails"// output array field
+                            }
+                        },
+                        {
+                            $lookup: {
+                                from: "networks", // collection to join
+                                localField: "network_id",//field from the input documents
+                                foreignField: "id",//field from the documents of the "from" collection
+                                as: "networkDetails"// output array field
+                            }
+                        },
+                        {
+                            "$project": {
+                                "networkDetails.__v": 0,
+                                "networkDetails.id": 0,
+                                "networkDetails.nodeUrl": 0,
+                                "networkDetails.created_by": 0,
+                                "networkDetails.createdAt": 0,
+                                "networkDetails.updatedAt": 0,
+                                "networkDetails._id": 0
+                            }
+                        }
+                    ]).then(async (data) => {
+                        res.json({ status: 200, message: "Withdraw Pool", data: data })
+                    }).catch(error => {
+                        console.log("get_clients_data", error)
+                        res.json({ status: 400, data: {}, message: error })
+                    }) 
+            }
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid" })
+        }
+    },
 }

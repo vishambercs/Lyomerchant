@@ -14,7 +14,8 @@ const poolWallets = require('../Models/poolWallet');
 const transactionPools = require('../Models/transactionPool');
 const clients = require('../Models/clients');
 require("dotenv").config()
-
+var nodemailer          = require('nodemailer');
+const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -425,5 +426,34 @@ module.exports =
         else {
             Constant.kycindex = 0;
         }
+    },
+    async sendEmailFunction(paramters){
+         try {
+            let respone = {} 
+            let views = "./views/emailtemplate/" + paramters.emailTemplateName
+            let info = transporter.sendMail
+                ({
+                    from: process.env.FROM,
+                    to: paramters.to,
+                    subject: paramters.subject,
+                    html: ejs.render(fs.readFileSync(views, 'utf-8'), { "data": paramters.templateData }),
+                },
+                    function (error, info) {
+                        if (error) {
+                            console.log("Message error", error);
+                            respone = { status: 400, data: info, message: error }
+                        } else {
+                            console.log("Message %s sent: %s", info.messageId, info);
+                            respone = { status: 200, data: info, message: "Get The Data" }
+                        }
+                    });
+                    return JSON.stringify(respone)
+        }
+        catch (error) {
+            respone = { status: 400, data: {}, message: error.message }
+            return JSON.stringify(respone)
+        }
+       
+        
     },
 }

@@ -16,8 +16,9 @@ const url               = require('url')
 const querystring       = require('querystring');
 const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
-const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 require("dotenv").config()
+const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
+
 var CryptoJS            = require('crypto-js')
 
 module.exports =
@@ -26,32 +27,36 @@ module.exports =
     {
         return crypto.randomBytes(20).toString('hex')
     },
-    Send_Email_Function(data) {
-        try {
-            console.log(transporter)
-            let views = "./views/emailtemplate/" + data.emailTemplateName
-            let info = transporter.sendMail
-                ({
-                    from: process.env.FROM,
-                    to: data.to,
-                    subject: data.subject,
-                    html: ejs.render(fs.readFileSync(views, 'utf-8'), { "data": data.templateData }),
-                },
-                    function (error, info) {
-                        if (error) {
-                            console.log("Message error", error);
-                            return JSON.stringify({ status: 400, data: info, message: error })
-                        } else {
-                            console.log("Message %s sent: %s", info.messageId, info);
-                            return JSON.stringify({ status: 200, data: info, message: "Get The Data" })
-                        }
-                    });
-            return JSON.stringify({ status: 200, data: info, message: "Get The Data" })
-        }
-        catch (error) {
-            return JSON.stringify({ status: 400, data: {}, message: error.message })
-        }
+    Send_Email_Function(parameters) {
+        // try {
+        //     let respone = {} 
+        //     let views = "./views/emailtemplate/" + data.emailTemplateName
+        //     let info = transporter.sendMail
+        //         ({
+        //             from: process.env.FROM,
+        //             to: data.to,
+        //             subject: data.subject,
+        //             html: ejs.render(fs.readFileSync(views, 'utf-8'), { "data": data.templateData }),
+        //         },
+        //             function (error, info) {
+        //                 if (error) {
+        //                     console.log("Message error", error);
+        //                     respone = { status: 400, data: info, message: error }
+        //                 } else {
+        //                     console.log("Message %s sent: %s", info.messageId, info);
+        //                     respone = { status: 200, data: info, message: "Get The Data" }
+        //                 }
+        //             });
+          
+        // }
+        // catch (error) {
+        //     respone = { status: 400, data: {}, message: error.message }
+        // }
+        respone = { status: 400, data: {}, message: "" }
+        return JSON.stringify(respone)
+
     },
+ 
     Get_New_Address() {
         try {
             var web3 = new Web3(new Web3.providers.HttpProvider(process.env.ETHEREUM_LOCAL_RPC));
