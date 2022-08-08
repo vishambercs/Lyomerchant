@@ -181,13 +181,13 @@ module.exports =
             let email = req.body.email;
             clients.findOne({ 'email': email }).select('+password').then(val => {
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
-                if (val.emailstatus == false) {
-                    res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
-                }
-                if (val.status == false) {
-                    res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
-                }
-                else if (password_status == true) {
+                // if (val.emailstatus == false) {
+                //     res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
+                // }
+                // if (val.status == false) {
+                //     res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
+                // }
+                 if (password_status == true) {
                     val["api_key"] = ""
                     val["hash"] = ""
                     val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
