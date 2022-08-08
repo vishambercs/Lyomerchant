@@ -29,4 +29,8 @@ router.post('/createkyclink',                   clientsController.Create_Kyc_Lin
 router.post('/kycstatus',                       Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);
 router.post('/kycLevels',                       clientsController.clients_kyc_levels);
 router.post('/webHookLog',                      kycwebhooklogController.getkycWebHookLog);
+router.post('/resendingemail',                  clientsController.resendingemail);
+router.post('/verfiyemail',                     clientsController.verfiyemail);
+router.post('/allMerchant',                     clientsController.allMerchant);
+router.post('/customerstatus',                  clientsController.customerstatus);
 module.exports = router;

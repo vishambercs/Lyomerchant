@@ -32,6 +32,7 @@ module.exports =
                 transferlimit       : req.body.transferlimit,
                 created_by          : req.body.created_by,
                 scanurl             : req.body.scanurl,
+                gaspriceurl         : req.body.scanurl,
             });
             NetworkItem.save().then(async (val) => {
                 res.json({ status: 200, message: "Successfully", data: val })
