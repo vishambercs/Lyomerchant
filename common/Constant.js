@@ -13,6 +13,12 @@ const kyc_path3         = "/level/LMT_basic_level/kyc"
 const kyc_levels        = "/api/kyc/levels"
 const web_hook_link     = "/api/clients/webhook/"
 
+// HOST                    =   'srv.lyotechlabs.com'
+// PORT                    =   465
+// USER                    =   "no-reply@loan.lyotrade.com"
+// PASS                    =   "UIDGGXP#mB0$"
+// FROM                    =   "'No Reply' <no-reply@loan.lyotrade.com>"
+
 
 module.exports =
 {
