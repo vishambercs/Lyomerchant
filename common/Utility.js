@@ -17,6 +17,10 @@ const querystring       = require('querystring');
 const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
 require("dotenv").config()
+console.log(process.env.HOST)
+console.log(process.env.PORT)
+console.log(process.env.USER)
+console.log(process.env.PASS)
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 
 var CryptoJS            = require('crypto-js')
