@@ -20,7 +20,7 @@ console.log(process.env.PORT)
 console.log(process.env.USER)
 console.log(process.env.PASS)
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
-
+//const transporter       = nodemailer.createTransport({ name: 'localhost' });
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
     if (net_amount > 0 && net_amount == need) {
