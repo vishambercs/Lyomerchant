@@ -33,6 +33,10 @@ const clientsSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
     },
+    loginstatus: {
+        type: Boolean,
+        required: true,
+    },
     emailtoken: {
         type: String,
         required: true,
