@@ -122,4 +122,14 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async sendEmail(req, res) {
+        try {
+            var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Email Verfication Token", "templateData": { "password": "sdnkfn" } }
+            let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+            res.json({ status: 200, message: "We sent token to your Email", data: val })
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }
