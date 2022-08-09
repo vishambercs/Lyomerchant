@@ -450,6 +450,7 @@ module.exports =
                     return JSON.stringify(respone)
         }
         catch (error) {
+            console.log("Message %s sent: %s", error);
             respone = { status: 400, data: {}, message: error.message }
             return JSON.stringify(respone)
         }

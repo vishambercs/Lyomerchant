@@ -126,9 +126,11 @@ module.exports =
         try {
             var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Email Verfication Token", "templateData": { "password": "sdnkfn" } }
             let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
-            res.json({ status: 200, message: "We sent token to your Email", data: val })
+            console.log("error",email_response)
+            res.json({ status: 200, message: "We sent token to your Email", data: email_response })
         }
         catch (error) {
+            console.log("error",error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
