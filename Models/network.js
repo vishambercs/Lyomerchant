@@ -68,6 +68,7 @@ const networkSchema = new mongoose.Schema
         deleted_by: {
             type: Number,
             required: false,
+            default : 0
         },
         deleted_at: {
             type: String,
