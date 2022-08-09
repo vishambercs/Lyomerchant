@@ -91,7 +91,7 @@ module.exports =
         var email = req.body.email
         var otp =  otpGenerator.generate(6, { upperCase: false, specialChars: false })
        
-        await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "emailtoken": otp ,"status":false} }, { $new: true })
+        await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "emailtoken": otp ,"emailstatus": false,"loginstatus":false} }, { $new: true })
             .then(async (val) => {
                 console.log("val otp",val)
                 if (val != null) {
@@ -109,10 +109,12 @@ module.exports =
             });
     },
     async verfiyemail(req, res) {
-        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken }, { $set: { "emailstatus": true,"loginstatus ":true } }, { $new: true })
+        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken }, { $set: { "emailstatus": true , "loginstatus":true } })
             .then(async (val) => {
-                if (val != null) {
-                    res.json({ status: 200, message: "Email Verification Successfully", data: val })
+                if (val != null) 
+                {
+                    let clientsdata = await clients.findOne({ email: req.body.email})
+                    res.json({ status: 200, message: "Email Verification Successfully", data: clientsdata })
                 }
                 else {
                     res.json({ status: 400, message: "Invalid Token", data: null })
