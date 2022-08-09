@@ -209,6 +209,32 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }
     },
+    async reset_merchant_two_fa(req, res) {
+        try {
+           
+            await clients.findOneAndUpdate({ email: req.body.email }, { $set: {  two_fa: false } }, { $new: true })
+                .then(async (val) => {
+                    if (val != null) 
+                    {
+                        let data = await clients.findOne({ 'email':  req.body.email })
+                        res.json({ status: 200, message: "Reset Two Fa", data:  { "qrcode" : val.qrcode , "secret" : val.secret } })
+                    }
+                    else {
+                        res.json({ status: 400, message: "Invalid Email", data: null })
+                    }
+                })
+                .catch(error => {
+                    console.log('create_merchant ', error);
+                    res.json({ status: 400, data: {}, message: error.message })
+                });
+
+            
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
+        }
+    },
+
     async Verfiy_Google_Auth(req, res) {
         try {
             let email = req.body.email

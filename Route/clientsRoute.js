@@ -33,4 +33,6 @@ router.post('/resendingemail',                  clientsController.resendingemail
 router.post('/verfiyemail',                     clientsController.verfiyemail);
 router.post('/allMerchant',                     clientsController.allMerchant);
 router.post('/customerstatus',                  clientsController.customerstatus);
+router.post('/resetMerchantTwoFa',              clientsController.reset_merchant_two_fa);
+
 module.exports = router;
