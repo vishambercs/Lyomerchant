@@ -48,31 +48,43 @@ module.exports =
     },
     async update_Network(req, res) {
         try {
-           await  Network.updateOne({ 'id': req.body.id },
+            if(req.body.cointype == "Token" && (req.body.contractAddress == undefined || req.body.contractAddress == ""))
+            {
+                res.json({ status: 200, message: "Please Provide Contract Address of Token", data: null })
+            }
+            else if(req.body.cointype == "Token" && (req.body.contractABI == undefined || req.body.contractABI == ""))
+            {
+                res.json({ status: 200, message: "Please Provide Contract ABI of Token", data: null })
+            }
+            else
+            {
+            await  Network.updateOne({ 'id': req.body.id },
                 {
                     $set:
                     {
-                        // network             : req.body.network,
-                        // coin                : req.body.coin,
-                        // nodeUrl             : req.body.nodeUrl,
-                        // apiKey              : req.body.apiKey,
-                        // transcationurl      : req.body.transcationurl,
-                        // latest_block_number : req.body.latest_block_number,
-                        // processingfee       : req.body.processingfee,
-                        // cointype            : req.body.cointype,
-                        // contractAddress     : req.body.contractAddress  == undefined ? " " : req.body.contractAddress,
-                        // contractABI         : req.body.contractABI      == undefined ? " " :JSON.stringify(req.body.contractABI),
-                        // transferlimit       : req.body.transferlimit,
-                        // created_by          : req.body.created_by,
+                        network             : req.body.network,
+                        coin                : req.body.coin,
+                        nodeUrl             : req.body.nodeUrl,
+                        apiKey              : req.body.apiKey,
+                        transcationurl      : req.body.transcationurl,
+                        latest_block_number : req.body.latest_block_number,
+                        processingfee       : req.body.processingfee,
+                        cointype            : req.body.cointype,
+                        contractAddress     : req.body.contractAddress  == undefined ? " " : req.body.contractAddress,
+                        contractABI         : req.body.contractABI      == undefined ? " " :JSON.stringify(req.body.contractABI),
+                        transferlimit       : req.body.transferlimit,
+                        created_by          : req.body.created_by,
                         scanurl             : req.body.scanurl,
+                        gaspriceurl         : req.body.scanurl,
                     }
                 }).then(async (val) => {
                     res.json({ status: 200, message: "Successfully", data: val })
                 }).catch(error => {
                     res.json({ status: 400, data: {}, message: error })
                 })
-
+           
         }
+    }
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Error" })
