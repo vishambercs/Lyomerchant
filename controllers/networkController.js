@@ -94,7 +94,7 @@ module.exports =
 
     async all_network(req, res) {
         try {
-            Network.find().then(async (val) => {
+            Network.find({ 'deleted_by': 0 }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {

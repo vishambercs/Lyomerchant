@@ -4,6 +4,7 @@ const adminController               = require('../controllers/adminController');
 const transcationpoolController     = require('../controllers/transcationpoolController');
 const withdrawController            = require('../controllers/withdrawController');
 const networkController             = require('../controllers/networkController');
+
 const Auth              = require('../Validation/Auth');
 router.post('/signupadmin',         adminController.signup_admin_api);
 router.post('/adminlogin',          adminController.Login);
@@ -12,6 +13,7 @@ router.post('/getTransForAdmin',    transcationpoolController.getTransForAdmin);
 router.post('/get_admin_withdraw',  withdrawController.get_admin_wihdraw);
 router.post('/allAdmin',            adminController.allAdmin);
 router.post('/sendemail',           adminController.sendEmail);
+router.post('/transcationListByNetworkID',           transcationpoolController.get_Trans_by_Network_ID_For_Admin);
 
 
 module.exports = router;
