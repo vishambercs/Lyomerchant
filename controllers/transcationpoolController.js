@@ -408,5 +408,61 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+    async get_Trans_by_Network_ID_For_Admin(req, res) {
+        try {
+            await transactionPools.aggregate(
+                [
+                    {
+                        $lookup: {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "poolWallet"// output array field
+                        },
 
+                    }, {
+                        $lookup: {
+                            from: "networks", // collection to join
+                            localField: "poolWallet.network_id",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "networkDetails"// output array field
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "transcationlogs", // collection to join
+                            localField: "id",//field from the input documents
+                            foreignField: "trans_pool_id",//field from the documents of the "from" collection
+                            as: "transactionDetails"// output array field
+                        }
+                    },
+                    { $match: { "poolWallet.network_id": req.body.networkid } },
+                    {
+                        "$project": {
+                            "poolWallet.privateKey": 0,
+                            "poolWallet.balance": 0,
+                            "poolWallet.id": 0,
+                            "poolWallet._id": 0,
+                            "poolWallet.status": 0,
+                            "poolWallet.__v": 0,
+                            "networkDetails.__v": 0,
+                            "networkDetails.nodeUrl": 0,
+                            "networkDetails.created_by": 0,
+                            "networkDetails.createdAt": 0,
+                            "networkDetails.updatedAt": 0,
+                            "networkDetails._id": 0
+                        }
+                    }
+                ]).then(async (data) => {
+                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
 }

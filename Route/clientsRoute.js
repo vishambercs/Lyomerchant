@@ -31,8 +31,9 @@ router.post('/kycLevels',                       clientsController.clients_kyc_le
 router.post('/webHookLog',                      kycwebhooklogController.getkycWebHookLog);
 router.post('/resendingemail',                  clientsController.resendingemail);
 router.post('/verfiyemail',                     clientsController.verfiyemail);
-router.post('/allMerchant',                     clientsController.allMerchant);
-router.post('/customerstatus',                  clientsController.customerstatus);
-router.post('/resetMerchantTwoFa',              clientsController.reset_merchant_two_fa);
+router.post('/allMerchant',                          clientsController.allMerchant);
+router.post('/customerstatus',                       clientsController.customerstatus);
+router.post('/resetMerchantTwoFa',                   clientsController.reset_merchant_two_fa);
+router.post('/clientwithdrawnetworkid',              withdrawController.get_client_withdraw_with_network_id);
 
 module.exports = router;

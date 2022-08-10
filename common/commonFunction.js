@@ -265,7 +265,6 @@ module.exports =
         })
         return response;
     },
-
     async amount_check(previous, need, current) {
         var net_amount = current - previous
         if (net_amount > 0 && net_amount == need) {
@@ -406,7 +405,6 @@ module.exports =
             Constant.index = 0;
         }
     },
-
     async get_data_approvekyc() 
     {
         if (Constant.kycindex < Constant.kycapplication.length) 
