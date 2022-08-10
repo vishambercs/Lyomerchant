@@ -44,7 +44,7 @@ module.exports =
                     }
                     else {
                         // res.json({ status: 200, message: "Clients Data", data: val })
-                        res.json({ status: 200, message: "Clients Data", data: { id: val._id, api_key: val.api_key, email: val.email } })
+                        res.json({ status: 200, message: "Clients Data", data: { id: val._id, token:val.token, api_key:val.api_key, email:val.email } })
                     }
                 })
                     .catch(error => {
@@ -58,18 +58,45 @@ module.exports =
         }
 
     },
+    async updateClientToken(req, res) 
+    {
+        var token           = crypto.randomBytes(20).toString('hex');
+        var hash            = CryptoJS.MD5(req.body.email + req.headers.authorization + process.env.BASE_WORD_FOR_HASH).toString();
+        if (hash == req.body.hash) 
+        {
+            await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "token": token } }, { $new: true }).then(async (val) => {
+                if (val != null) 
+                {
+                    res.json({ status: 200, message: "Verification Email Sent", data: { "email": val.email, "token": token }})
+                }
+                else 
+                {
+                    res.json({ status: 400, message: "Invalid Email", data: null })
+                }
+            }).catch(error => {
+                console.log('create_merchant ', error);
+                res.json({ status: 400, data: {}, message: error.message })
+            });
+        }
+        else 
+        {
+            res.json({ status: 400, data: {}, message: "Invalid Hash" })
+        }
+    },
     async create_merchant(req, res) {
-        var api_key = crypto.randomBytes(20).toString('hex');
-        var email = req.body.email
-        var password = req.body.password
-        var hash = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
-        const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+        var api_key         = crypto.randomBytes(20).toString('hex');
+        var email           = req.body.email
+        var password        = req.body.password
+        var hash            = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
+        const salt          = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(password, salt);
         let secret = authenticator.generateSecret()
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+        var token           =  crypto.randomBytes(20).toString('hex');
+
         if (hash == req.body.hash) {
             QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
-                const client = new clients({ loginstatus : false,emailtoken: otp, emailstatus: false, kycLink: " ", two_fa: false, secret: secret, qrcode: url, status: false, password: password_hash, api_key: api_key, email: req.body.email, hash: hash, });
+                const client = new clients({ token : token,loginstatus : false,emailtoken: otp, emailstatus: false, kycLink: " ", two_fa: false, secret: secret, qrcode: url, status: false, password: password_hash, api_key: api_key, email: req.body.email, hash: hash, });
                 client.save().then(async (val) => {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
@@ -87,6 +114,8 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Hash" })
         }
     },
+
+
     async resendingemail(req, res) {
         var email = req.body.email
         var otp =  otpGenerator.generate(6, { upperCase: false, specialChars: false })
