@@ -136,4 +136,33 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async change_status_network(req, res) {
+        try {
+            await Network.updateOne({ 'id': req.body.id },
+            {
+                $set:
+                {
+                    status: req.body.status,
+                   
+                }
+            }).then(async (val) => {
+                if (val != null) 
+                {
+                    const NetworkDetails = await Network.find({ 'id': req.body.id })
+                    res.json({ status: 200, message: "Successfully", data: NetworkDetails })
+                }
+                else {
+                    res.json({ status: 200, message: "Not Found the Data", data: null })
+                }
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }

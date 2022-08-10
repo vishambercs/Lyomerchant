@@ -15,14 +15,15 @@ module.exports =
 {
     async assignMerchantWallet(req, res) {
         try {
-            var merchantKey = req.headers.authorization
-            var networkType = req.body.networkType
-            var callbackURL = req.body.callbackURL
+            var merchantKey  = req.headers.authorization
+            var networkType  = req.body.networkType
+            var callbackURL  = req.body.callbackURL
             var securityHash = req.body.securityHash
-            var orderid = req.body.orderid
+            var orderid      = req.body.orderid
             var security_hash = (merchantKey + networkType + callbackURL + process.env.BASE_WORD_FOR_HASH)
             var hash = CryptoJS.MD5(security_hash).toString();
-            if (hash == securityHash) {
+            if (hash == securityHash) 
+            {
                 let currentDateTemp = Date.now();
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
                 let account = await poolWallet.findOne({ network_id: networkType, status: 0 })

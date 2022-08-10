@@ -4,8 +4,9 @@ module.exports =
 {
     async Verfiy_Merchant(req, res, next) {
         try {
-            let token = req.headers.authorization;
-            client.find({ 'api_key': token , status : true}).then(val => {
+            let api_key = req.headers.authorization;
+            let token   = req.headers.token;
+            client.find({ 'token': token ,'api_key': api_key , status : true}).then(val => {
                 next()
             }).catch(error => {
                 res.json({ status: 400, data: {}, message: "Unauthorize Access" })

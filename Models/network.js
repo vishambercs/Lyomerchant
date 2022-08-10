@@ -11,7 +11,6 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
-        
         coin: {
             type: String,
             required: true,
@@ -44,6 +43,12 @@ const networkSchema = new mongoose.Schema
         scanurl:{
             type: String,
             required: true,
+        },
+        status:
+        {
+            type: Number,
+            required: true,
+            default: 0,
         },
         gaspriceurl:{
             type: String,

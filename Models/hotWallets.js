@@ -18,11 +18,6 @@ const hotwalletsSchema = new mongoose.Schema
             type: String,
             required: true,
         },
-        privateKey:
-        {
-            type: String,
-            required: true,
-        },
         status:
         {
             type: Number,

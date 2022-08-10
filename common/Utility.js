@@ -22,9 +22,11 @@ const transporter       = nodemailer.createTransport({ host: process.env.HOST, p
 var CryptoJS            = require('crypto-js')
 module.exports =
 {
-    generateKey() 
+     async generateKey() 
+
     {
-        return crypto.randomBytes(20).toString('hex')
+       let key =  await crypto.randomBytes(20).toString('hex')
+        return key ;
     },
     Send_Email_Function(parameters) {
         // try {
