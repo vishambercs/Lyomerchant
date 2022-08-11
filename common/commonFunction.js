@@ -228,74 +228,75 @@ async function postRequest(URL, parameters, headers) {
 }
 
 async function transfer_amount_to_hot_wallet(poolwalletID,account_balance) {
-    try{
-    const from_wallet = await poolWallets.aggregate(
-        [
-            { $match:  { "id": poolwalletID } },
-            { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "walletNetwork" } },
-        ])
-        console.log("transfer_amount_to_hot_wallet========from_wallet",from_wallet)
-        const hotWallet     = await hotWallets.findOne({ "network_id": from_wallet[0].walletNetwork[0].network_id , "status" : 1})
-        console.log("hotWallet========hotWallet",hotWallet)
-        if(hotWallet != null)
-        {
-        let abi = [
+    // try{
+    // const from_wallet = await poolWallets.aggregate(
+    //     [
+    //         { $match:  { "id": poolwalletID } },
+    //         { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "walletNetwork" } },
+    //     ])
+    //     console.log("transfer_amount_to_hot_wallet========from_wallet",from_wallet)
+    //     const hotWallet     = await hotWallets.findOne({ "network_id": from_wallet[0].walletNetwork[0].network_id , "status" : 1})
+    //     console.log("hotWallet========hotWallet",hotWallet)
+    //     if(hotWallet != null)
+    //     {
+    //     let abi = [
           
-            {
-                "constant": false,
-                "inputs": [
-                    {
-                        "name": "_to",
-                        "type": "address"
-                    },
-                    {
-                        "name": "_value",
-                        "type": "uint256"
-                    }
-                ],
-                "name": "transfer",
-                "outputs": [
-                    {
-                        "name": "",
-                        "type": "bool"
-                    }
-                ],
-                "type": "function"
-            }
-        ];
-        var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl));
-        const contract = new web3.eth.Contract(abi, from_wallet[0].walletNetwork[0].contractAddress, {from: from_wallet[0].address})
-        let amount =  web3.utils.toHex(Web3.utils.toWei(account_balance.toString()))
-        const accounttransfer = contract.methods.transfer(hotWallet.address, amount).encodeABI();
-        const nonce = await web3.eth.getTransactionCount(from_wallet[0].address, 'latest');
-        const transaction = {   gas: web3.utils.toHex(100000), "to": hotWallet.address , "value": "0x00","data": accounttransfer, "from": from_wallet[0].address }
-        const signedTx = await web3.eth.accounts.signTransaction(transaction, from_wallet[0].privateKey);
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) 
-        {
-            if (!error) 
-            {
-                console.log(" transaction:", hash)
+    //         {
+    //             "constant": false,
+    //             "inputs": [
+    //                 {
+    //                     "name": "_to",
+    //                     "type": "address"
+    //                 },
+    //                 {
+    //                     "name": "_value",
+    //                     "type": "uint256"
+    //                 }
+    //             ],
+    //             "name": "transfer",
+    //             "outputs": [
+    //                 {
+    //                     "name": "",
+    //                     "type": "bool"
+    //                 }
+    //             ],
+    //             "type": "function"
+    //         }
+    //     ];
+    //     var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl));
+    //     const contract = new web3.eth.Contract(abi, from_wallet[0].walletNetwork[0].contractAddress, {from: from_wallet[0].address})
+    //     let amount =  web3.utils.toHex(Web3.utils.toWei(account_balance.toString()))
+    //     const accounttransfer = contract.methods.transfer(hotWallet.address, amount).encodeABI();
+    //     const nonce = await web3.eth.getTransactionCount(from_wallet[0].address, 'latest');
+    //     const transaction = {   gas: web3.utils.toHex(100000), "to": hotWallet.address , "value": "0x00","data": accounttransfer, "from": from_wallet[0].address }
+    //     const signedTx = await web3.eth.accounts.signTransaction(transaction, from_wallet[0].privateKey);
+    //     web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) 
+    //     {
+    //         if (!error) 
+    //         {
+    //             console.log(" transaction:", hash)
 
-                return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
+    //             return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
 
-            } else 
-            {
-                console.log("❗Something went wrong while submitting your transaction:", error)
-                return JSON.stringify({ status: 200, message: "Pool Wallet", data: error })
+    //         } else 
+    //         {
+    //             console.log("❗Something went wrong while submitting your transaction:", error)
+    //             return JSON.stringify({ status: 200, message: "Pool Wallet", data: error })
 
-            }
-        })
-    }
-    else{
-        return JSON.stringify({ status: 400, message: "Network is not supported", data: null })
-    }
-    }
-    catch (error) {
-            console.log("Message %s sent: %s", error);
-            respone = { status: 400, data: {}, message: error.message }
-            return JSON.stringify(respone)
-        }
-
+    //         }
+    //     })
+    // }
+    // else{
+    //     return JSON.stringify({ status: 400, message: "Network is not supported", data: null })
+    // }
+    // }
+    // catch (error) {
+    //         console.log("Message %s sent: %s", error);
+    //         respone = { status: 400, data: {}, message: error.message }
+    //         return JSON.stringify(respone)
+    //     }
+        respone = { status: 400, data: {}, message:"aslda"}
+        return JSON.stringify(respone)
 }
 
 module.exports =
