@@ -9,14 +9,14 @@ var hotWalletRoute = require('./Route/hotWalletRoute');
 var withdrawRoute = require('./Route/withdrawRoute');
 var adminRoute = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
-const fs                = require('fs');
+const fs = require('fs');
 var path = require('path');
 const Web3 = require('web3');
 var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
 var app = express();
 // const https              = require('https');
- const https = require('http');
+const https = require('http');
 // const https             = require('https');
 const Utility = require('./common/Utility');
 
@@ -32,14 +32,14 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get('/',    function (req, res) { res.send('Welcome to Lyo Merchant'); });
-app.use('/v1',           client);
-app.use('/admin/v1',     poolRoute);
-app.use('/network/v1',   networkRoute);
-app.use('/wallet/v1',    walletRoute);
+app.get('/', function (req, res) { res.send('Welcome to Lyo Merchant'); });
+app.use('/v1', client);
+app.use('/admin/v1', poolRoute);
+app.use('/network/v1', networkRoute);
+app.use('/wallet/v1', walletRoute);
 app.use('/hotWallet/v1', hotWalletRoute);
-app.use('/withdraw/v1',  withdrawRoute);
-app.use('/admin/v1',     adminRoute);
+app.use('/withdraw/v1', withdrawRoute);
+app.use('/admin/v1', adminRoute);
 
 
 //  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
