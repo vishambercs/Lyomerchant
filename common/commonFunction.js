@@ -1,23 +1,25 @@
-const ejs               = require('ejs');
-const fs                = require('fs');
-const Web3              = require('web3');
-const axios             = require('axios')
-var stringify           = require('json-stringify-safe');
-const constant          = require('./Constant');
-const transcationLog    = require('../Models/transcationLog');
-const network           = require('../Models/network');
-var qs                  = require('qs');
-const Constant          = require('./Constant');
-const Utility           = require('./Utility');
-const clientWallets     = require('../Models/clientWallets');
-const poolWallets       = require('../Models/poolWallet');
-const transactionPools  = require('../Models/transactionPool');
-const clients           = require('../Models/clients');
-const hotWallets        = require('../Models/hotWallets');
+const ejs = require('ejs');
+const fs = require('fs');
+const Web3 = require('web3');
+const axios = require('axios')
+var stringify = require('json-stringify-safe');
+const constant = require('./Constant');
+const transcationLog = require('../Models/transcationLog');
+const network = require('../Models/network');
+var qs = require('qs');
+const Constant = require('./Constant');
+const Utility = require('./Utility');
+const clientWallets = require('../Models/clientWallets');
+const poolWallets = require('../Models/poolWallet');
+const transactionPools = require('../Models/transactionPool');
+const clients = require('../Models/clients');
+const hotWallets = require('../Models/hotWallets');
+const hot_wallet_trans_logs = require('../Models/hot_wallet_trans_logs');
 require("dotenv").config()
-var nodemailer          = require('nodemailer');
+var nodemailer = require('nodemailer');
+var mongoose = require('mongoose');
 
-const transporter       = nodemailer.createTransport({ host:"srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", }});
+const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -97,13 +99,13 @@ async function getTranscationDataForClient(transkey) {
     return pooldata
 }
 async function getBalance(transdata, transData) {
+    try{
     let addressObject = transdata[0]
     let response = {}
     let account_balance_in_ether = 0
     let account_balance = 0
     const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-    if (addressObject.networkDetails[0].cointype == "Token") 
-    {
+    if (addressObject.networkDetails[0].cointype == "Token") {
         let abi = [
             {
                 constant: true,
@@ -113,13 +115,12 @@ async function getBalance(transdata, transData) {
                 type: "function",
             },
         ];
-        const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress);
+        const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress, );
         account_balance = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
         account_balance_in_ether = await WEB3.utils.fromWei(account_balance.toString());
         console.log("account_balance_in_ether Token", account_balance_in_ether)
     }
-    else if (addressObject.networkDetails[0].cointype == "Native") 
-    {
+    else if (addressObject.networkDetails[0].cointype == "Native") {
         account_balance = await WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
         account_balance_in_ether = await Web3.utils.fromWei(account_balance.toString(), 'ether')
         console.log("account_balance_in_ether Native", account_balance_in_ether)
@@ -132,8 +133,8 @@ async function getBalance(transdata, transData) {
     console.log("merchantbalance addressObject.amount ", addressObject.amount)
     console.log("merchantbalance account_balance_in_ether", account_balance_in_ether)
     console.log("merchantbalance poolWallet", addressObject.poolWallet)
-    console.log("merchantbalance transdata",transdata.poolWallet)
-    console.log("merchantbalance account_balance",account_balance)
+    console.log("merchantbalance transdata", transdata.poolWallet)
+    console.log("merchantbalance account_balance", account_balance)
     if (amountstatus != 0) {
         let val = await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id })
         let clientWallet = await clientWallets.updateOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
@@ -142,13 +143,12 @@ async function getBalance(transdata, transData) {
         let get_transcation_response = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
         let trans_data = await getTranscationDataForClient(addressObject.id)
         let logData = { "transcationDetails": trans_data[0] }
-        if (amountstatus == 1 || amountstatus == 3) 
-        {
-           
-            let hot_wallet_transcation       =  await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, account_balance_in_ether)
+        if (amountstatus == 1 || amountstatus == 3) {
+
+            let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id,addressObject.id,account_balance_in_ether)
             console.log(hot_wallet_transcation)
             let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
-            
+
         }
         response = { amountstatus: amountstatus, status: 200, "data": logData, };
     }
@@ -158,6 +158,12 @@ async function getBalance(transdata, transData) {
         response = { amountstatus: amountstatus, status: 200, "data": logData, };
     }
     return JSON.stringify(response)
+}catch (error) {
+    console.log("Message %s sent: %s", error);
+    respone = { status: 400, data: {}, message: error.message }
+    return JSON.stringify(respone)
+}
+
 }
 async function getTranscationList(address, trans_id, network_id) {
     response = {}
@@ -215,7 +221,7 @@ async function postRequest(URL, parameters, headers) {
         { headers: headers })
         .then(res => {
             var stringify_response = stringify(res)
-          
+
             response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
         })
         .catch(error => {
@@ -226,77 +232,94 @@ async function postRequest(URL, parameters, headers) {
 
 
 }
+async function savelogs(merchant_trans_id, hot_wallet_id, trans_id, network_id, status, remarks) {
+    const hot_wallet_trans_log = new hot_wallet_trans_logs({
+        id: mongoose.Types.ObjectId(),
+        merchant_trans_id: merchant_trans_id,
+        hot_wallet_id: hot_wallet_id,
+        trans_id: trans_id,
+        network_id: network_id,
+        status: status,
+        remarks: remarks,
+    });
+    let logs = await hot_wallet_trans_log.save().then(async (val) => {
+        return JSON.stringify({ status: 200, message: "Client Added Successfully", data: val })
+    }).catch(error => {
+        console.log(error)
+        return JSON.stringify({ status: 400, data: {}, message: error })
+    })
+    return logs;
+}
+async function transfer_amount_to_hot_wallet(poolwalletID,merchant_trans_id,account_balance) {
+    try {
+        const from_wallet = await poolWallets.aggregate(
+            [
+                { $match: { "id": poolwalletID } },
+                { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "walletNetwork" } },
+            ])
+        const hotWallet = await hotWallets.findOne({ "network_id": from_wallet[0].network_id, "status": 1 })
+        if (hotWallet != null) 
+        {
+            let abi = [        
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_to",
+                            "type": "address"
+                        },
+                        {
+                            "name": "_value",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "transfer",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "bool"
+                        }
+                    ],
+                    "type": "function"
+                }
+            ];
+        
+            var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl));
+            const contract = new web3.eth.Contract(abi, from_wallet[0].walletNetwork[0].contractAddress, { from: from_wallet[0].address })
+            let amount = web3.utils.toHex(web3.utils.toWei(account_balance))
+            const accounttransfer = contract.methods.transfer(hotWallet.address, amount).encodeABI();
+            const nonce = await web3.eth.getTransactionCount(from_wallet[0].address, 'latest');
+            const transaction = { gas: web3.utils.toHex(100000), "to": from_wallet[0].walletNetwork[0].contractAddress, "value": "0x00", "data": accounttransfer, "from": from_wallet[0].address }
+            const signedTx = await web3.eth.accounts.signTransaction(transaction, from_wallet[0].privateKey);
+            web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) {
+                if (!error) 
+                {
+                    savelogs(merchant_trans_id, hotWallet.id, hash,  from_wallet[0].network_id, 1, "Done")
+                    console.log("your transaction:", hash)
+                    return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
+                } else {
+                    console.log("❗Something went wrong while submitting your transaction:", error)
+                    savelogs(merchant_trans_id, hotWallet.id, " ",  from_wallet[0].network_id, 2, error)
+                    return JSON.stringify({ status: 200, message: "Pool Wallet", data: error })
+                }
+            })
+        }
+       
+        
+        else 
+        {
+            savelogs(merchant_trans_id," ",  " ",from_wallet[0].network_id, 2, "Network is not supported")
+            return JSON.stringify({ status: 400, message: "Network is not supported", data: null })
+        }
 
-async function transfer_amount_to_hot_wallet(poolwalletID,account_balance) {
-    // try{
-    // const from_wallet = await poolWallets.aggregate(
-    //     [
-    //         { $match:  { "id": poolwalletID } },
-    //         { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "walletNetwork" } },
-    //     ])
-    //     console.log("transfer_amount_to_hot_wallet========from_wallet",from_wallet)
-    //     const hotWallet     = await hotWallets.findOne({ "network_id": from_wallet[0].walletNetwork[0].network_id , "status" : 1})
-    //     console.log("hotWallet========hotWallet",hotWallet)
-    //     if(hotWallet != null)
-    //     {
-    //     let abi = [
-          
-    //         {
-    //             "constant": false,
-    //             "inputs": [
-    //                 {
-    //                     "name": "_to",
-    //                     "type": "address"
-    //                 },
-    //                 {
-    //                     "name": "_value",
-    //                     "type": "uint256"
-    //                 }
-    //             ],
-    //             "name": "transfer",
-    //             "outputs": [
-    //                 {
-    //                     "name": "",
-    //                     "type": "bool"
-    //                 }
-    //             ],
-    //             "type": "function"
-    //         }
-    //     ];
-    //     var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl));
-    //     const contract = new web3.eth.Contract(abi, from_wallet[0].walletNetwork[0].contractAddress, {from: from_wallet[0].address})
-    //     let amount =  web3.utils.toHex(Web3.utils.toWei(account_balance.toString()))
-    //     const accounttransfer = contract.methods.transfer(hotWallet.address, amount).encodeABI();
-    //     const nonce = await web3.eth.getTransactionCount(from_wallet[0].address, 'latest');
-    //     const transaction = {   gas: web3.utils.toHex(100000), "to": hotWallet.address , "value": "0x00","data": accounttransfer, "from": from_wallet[0].address }
-    //     const signedTx = await web3.eth.accounts.signTransaction(transaction, from_wallet[0].privateKey);
-    //     web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) 
-    //     {
-    //         if (!error) 
-    //         {
-    //             console.log(" transaction:", hash)
-
-    //             return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
-
-    //         } else 
-    //         {
-    //             console.log("❗Something went wrong while submitting your transaction:", error)
-    //             return JSON.stringify({ status: 200, message: "Pool Wallet", data: error })
-
-    //         }
-    //     })
-    // }
-    // else{
-    //     return JSON.stringify({ status: 400, message: "Network is not supported", data: null })
-    // }
-    // }
-    // catch (error) {
-    //         console.log("Message %s sent: %s", error);
-    //         respone = { status: 400, data: {}, message: error.message }
-    //         return JSON.stringify(respone)
-    //     }
-        respone = { status: 400, data: {}, message:"aslda"}
+    }
+    catch (error) {
+        console.log("Message %s sent: %s", error);
+        savelogs(merchant_trans_id," ",  " ",from_wallet[0].network_id, 2, error)
+        respone = { status: 400, data: {}, message: error.message }
         return JSON.stringify(respone)
+    }
+
 }
 
 module.exports =
@@ -483,10 +506,8 @@ module.exports =
             Constant.index = 0;
         }
     },
-    async get_data_approvekyc() 
-    {
-        if (Constant.kycindex < Constant.kycapplication.length) 
-        {
+    async get_data_approvekyc() {
+        if (Constant.kycindex < Constant.kycapplication.length) {
             let transData = Constant.kycapplication[Constant.kycindex]
             let transcationData = await clients.find({ "api_key": transData.api_key, "status": true })
             if (transcationData.length > 0) {
@@ -504,9 +525,9 @@ module.exports =
             Constant.kycindex = 0;
         }
     },
-    async sendEmailFunction(paramters){
-         try {
-            let respone = {} 
+    async sendEmailFunction(paramters) {
+        try {
+            let respone = {}
             let views = "./views/emailtemplate/" + paramters.emailTemplateName
             let info = transporter.sendMail
                 ({
@@ -524,14 +545,14 @@ module.exports =
                             respone = { status: 200, data: info, message: "Get The Data" }
                         }
                     });
-                    return JSON.stringify(respone)
+            return JSON.stringify(respone)
         }
         catch (error) {
             console.log("Message %s sent: %s", error);
             respone = { status: 400, data: {}, message: error.message }
             return JSON.stringify(respone)
         }
-       
-        
+
+
     },
 }

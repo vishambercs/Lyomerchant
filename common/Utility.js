@@ -162,6 +162,7 @@ module.exports =
             {
                 // let client_object = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
                 Constant.translists[index]["connection"] = connection
+                // request.reject(null, request.origin);
             }
             Constant.interval = setInterval(commonFunction.get_data_of_transcation, 20000);
             connection.on('message', function (message) {

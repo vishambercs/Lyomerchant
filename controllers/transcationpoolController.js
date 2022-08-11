@@ -26,6 +26,7 @@ module.exports =
             {
                 let currentDateTemp = Date.now();
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
+                // let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
                 let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
                 console.log(account)
                 console.log(networkType)

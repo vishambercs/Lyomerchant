@@ -1,5 +1,8 @@
+const poolWallet = require('../Models/poolWallet');
 const Network = require('../Models/network');
+const Utility = require('../common/Utility');
 var mongoose = require('mongoose');
+var crypto = require("crypto");
 require("dotenv").config()
 
 module.exports =
@@ -13,7 +16,8 @@ module.exports =
             else if (req.body.cointype == "Token" && (req.body.contractABI == undefined || req.body.contractABI == "")) {
                 res.json({ status: 200, message: "Please Provide Contract ABI of Token", data: null })
             }
-            else {
+            else 
+            {
                 const NetworkItem = new Network({
                     id: mongoose.Types.ObjectId(),
                     network: req.body.network,
@@ -32,7 +36,22 @@ module.exports =
                     gaspriceurl: req.body.scanurl,
                 });
                 NetworkItem.save().then(async (val) => {
-                    res.json({ status: 200, message: "Successfully", data: val })
+                    console.log("val",val)
+                    for (let i = 0; i < 100; i++) 
+                    { 
+                    let account = await Utility.GetAddress(val.nodeUrl)
+                    const poolWalletItem = new poolWallet({ id : crypto.randomBytes(20).toString('hex'), network_id: val.id, address: account.address, privateKey: account.privateKey, });
+                    poolWalletItem.save().then(async (val) => {
+                         console.log("val",i,val) 
+                        // res.json({ status: 200, message: "Successfully", data: val })
+                    }).catch(error => { 
+                            console.log("val",error) 
+                            // res.json({ status: 400, data: {}, message: error }) 
+                        
+                        })
+        
+                  }
+                  res.json({ status: 200, message: "Successfully", data: val })
                 }).catch(error => {
                     res.json({ status: 400, data: {}, message: error })
                 })
