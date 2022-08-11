@@ -144,12 +144,9 @@ module.exports =
             let uniqueKey      =  crypto.randomBytes(20).toString('hex')
             let url_paremeters = url.parse(request.httpRequest.url);
             let queryvariable  = querystring.parse(url_paremeters.query)
+            console.log("getTranscationData =====================================",queryvariable);
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await commonFunction.get_Transcation_Data(queryvariable.transkey)
-            console.log("getTranscationData =====================================",getTranscationData);
-           
-            console.log(hash);
-            console.log(queryvariable.hash);
             if(getTranscationData.length > 0)
             {
 
@@ -166,7 +163,7 @@ module.exports =
                 // let client_object = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
                 Constant.translists[index]["connection"] = connection
             }
-            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 40000);
+            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 20000);
             connection.on('message', function (message) {
             if(index == -1)
             {
