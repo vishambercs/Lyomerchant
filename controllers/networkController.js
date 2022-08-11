@@ -3,6 +3,9 @@ const Network = require('../Models/network');
 const Utility = require('../common/Utility');
 var mongoose = require('mongoose');
 var crypto = require("crypto");
+const TronWeb = require('tronweb')
+const { generateAccount } = require('tron-create-address')
+
 require("dotenv").config()
 
 module.exports =
@@ -37,10 +40,11 @@ module.exports =
                 });
                 NetworkItem.save().then(async (val) => {
                     console.log("val",val)
-                    for (let i = 0; i < 100; i++) 
+                    for (let i = 0; i < 10; i++) 
                     { 
-                    let account = await Utility.GetAddress(val.nodeUrl)
-                    const poolWalletItem = new poolWallet({ id : crypto.randomBytes(20).toString('hex'), network_id: val.id, address: account.address, privateKey: account.privateKey, });
+                    // let account = await Utility.GetAddress(val.nodeUrl)
+                    const { address, privateKey } = generateAccount()
+                    const poolWalletItem = new poolWallet({ id : crypto.randomBytes(20).toString('hex'), network_id: val.id, address: address, privateKey: privateKey, });
                     poolWalletItem.save().then(async (val) => {
                          console.log("val",i,val) 
                         // res.json({ status: 200, message: "Successfully", data: val })
