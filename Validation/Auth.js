@@ -6,6 +6,7 @@ module.exports =
         try {
             let api_key = req.headers.authorization;
             let token   = req.headers.token;
+            console.log(req.headers.authorization,req.headers.token)
             client.find({ 'token': token ,'api_key': api_key , status : true}).then(val => {
                 next()
             }).catch(error => {

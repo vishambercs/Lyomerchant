@@ -16,8 +16,8 @@ var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
 var app = express();
 // const https              = require('https');
-// const https = require('http');
-const https             = require('https');
+ const https = require('http');
+// const https             = require('https');
 const Utility = require('./common/Utility');
 
 require('dotenv').config()
@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,Authorization");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,Authorization,Token");
     next();
 });
 
@@ -55,28 +55,15 @@ app.listen(process.env.SERVER_PORT, function () {
     console.log('Listening to Port 5000');
 });
 
-// var server = https.createServer({
-//     key                 :  privateKey,
-//     cert                :  certificate,  
-//     ca                  :  ca, 
-//     requestCert         :  false, 
-//     rejectUnauthorized  :  false
-//     }).listen(process.env.SCOKECT_PORT, () => {
-//     console.log(`Example app listening at ${process.env.SCOKECT_PORT}`);
-// })
-// const wsServer = new webSocketServer({ httpServer: server });
+var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {
+    console.log(`Example app listening at ${process.env.SCOKECT_PORT}`);
+})
+const wsServer = new webSocketServer({ httpServer: server });
 
-// wsServer.on('request', Utility.receiveMessage)
+wsServer.on('request', Utility.receiveMessage)
 
-// var kycserver = https.createServer({
-//     key                 :  privateKey,
-//     cert                :  certificate,  
-//     ca                  :  ca, 
-//     requestCert         :  false, 
-//     rejectUnauthorized  :  false
-//     }).listen(process.env.KYC_PORT, () => {
-//     console.log(`Example app listening at ${process.env.KYC_PORT}   `);
-// })
-// const kyc = new webSocketServer({ httpServer: kycserver });
-
-// kyc.on('request', Utility.approvekyc)
+var kycserver = https.createServer().listen(process.env.KYC_PORT, () => {
+    console.log(`Example app listening at ${process.env.KYC_PORT}   `);
+})
+const kyc = new webSocketServer({ httpServer: kycserver });
+kyc.on('request', Utility.approvekyc)

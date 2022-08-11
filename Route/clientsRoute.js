@@ -6,6 +6,7 @@ const poolController = require('../controllers/poolController');
 const withdrawController = require('../controllers/withdrawController');
 const kycwebhooklogController = require('../controllers/kycwebhooklogController');
 const Auth = require('../Validation/Auth');
+
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
