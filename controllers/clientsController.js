@@ -321,7 +321,7 @@ module.exports =
                         }
                     }
                 ])
-            console.log(addressObject)
+            console.log("get_BalancebyAddress addressObject==========================",addressObject)
 
             const minABI = [
                 // balanceOf
@@ -335,7 +335,7 @@ module.exports =
             ];
 
 
-
+            console.log("get_BalancebyAddress minABI==========================",minABI)
             if (addressObject.length > 0) {
                 if (addressObject[0].networkDetails[0].cointype == "Token") {
                     console.log(addressObject[0].networkDetails[0].nodeUrl)
@@ -349,19 +349,28 @@ module.exports =
                             type: "function",
                         },
                     ];
-
+                    console.log("get_BalancebyAddress abi==========================",abi)
+                    console.log("get_BalancebyAddress==========================",addressObject)
+                    console.log("get_BalancebyAddress contractAddress==========================",addressObject[0].networkDetails[0].contractAddress)
                     const contract = new WEB3.eth.Contract(abi, addressObject[0].networkDetails[0].contractAddress);
                     const result = await contract.methods.balanceOf(addressObject[0].address).call();
                     const format = Web3.utils.fromWei(result);
                     let amount = parseFloat(format) - parseFloat(format * 0.01)
+                    console.log("get_BalancebyAddress amount==========================",amount)
+                    console.log("get_BalancebyAddress contract==========================",contract)
+                    console.log("get_BalancebyAddress result==========================",result)
+                    console.log("get_BalancebyAddress format==========================",format)
                     res.json({ status: 200, data: amount, message: "Done" })
                 }
                 else if (addressObject[0].networkDetails[0].cointype == "Native") {
+                    console.log("get_BalancebyAddress nodeUrl==========================",addressObject[0].networkDetails[0].nodeUrl)
                     const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject[0].networkDetails[0].nodeUrl))
+                    console.log("get_BalancebyAddress address==========================",addressObject[0].address)
                     let account_balance = await BSC_WEB3.eth.getBalance(addressObject[0].address)
-
                     let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
+                    console.log("get_BalancebyAddress account_balance_in_ether==========================",account_balance_in_ether)
                     let amount = parseFloat(account_balance_in_ether) - parseFloat(account_balance_in_ether * 0.01)
+                    console.log("get_BalancebyAddress account_balance_in_ether==========================",amount)
                     res.json({ status: 200, data: amount, message: "Done" })
                 }
                 else {

@@ -50,7 +50,8 @@ module.exports =
         try {
 
             let network_details = await network.findOne({ 'id': req.body.network_id })
-            for (let i = 0; i < 10; i++) { 
+            for (let i = 0; i < 10; i++) 
+            { 
             let account = await Utility.GetAddress(network_details.nodeUrl)
             const poolWalletItem = new poolWallet({ id : crypto.randomBytes(20).toString('hex'), network_id: req.body.network_id, address: account.address, privateKey: account.privateKey, });
             poolWalletItem.save().then(async (val) => {
@@ -62,7 +63,7 @@ module.exports =
                 
                 })
 
-        }
+          }
         res.json({ status: 200, message: "Successfully", data: {} })
     }
         catch (error) {
