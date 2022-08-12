@@ -75,7 +75,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
-    
     async get_client_wihdraw(req, res) {
         try {
             await withdrawLogs.aggregate( 
