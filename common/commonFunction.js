@@ -147,6 +147,8 @@ async function getBalance(transdata, transData) {
         tokenBalance              = tronWeb.toBigNumber(tokenBalance)
         tokenBalance              = tronWeb.toDecimal(tokenBalance)
         account_balance_in_ether  = tronWeb.fromSun(tokenBalance)
+        console.log(account_balance_in_ether)
+        console.log(tokenBalance)
         let merchantbalance       = account_balance_in_ether - addressObject.poolWallet[0].balance
         var amountstatus          = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
 
@@ -159,6 +161,7 @@ async function getBalance(transdata, transData) {
             let get_transcation_response = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
             let trans_data               = await getTranscationDataForClient(addressObject.id)
             let logData                  = { "transcationDetails": trans_data[0] }
+
             if (amountstatus == 1 || amountstatus == 3) 
             {
                 let hot_wallet_transcation  = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, account_balance_in_ether)
