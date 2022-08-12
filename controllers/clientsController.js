@@ -420,15 +420,20 @@ module.exports =
             const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, addressObject[0].privateKey);
             let contract = await tronWeb.contract().at(addressObject[0].networkDetails[0].contractAddress);
             let result23 = await tronWeb.trx.getBalance(addressObject[0].address)
+
             let account_balance_in_ether = await tronWeb.trx.getBalance(addressObject[0].address)
+
             let result = await contract.balanceOf(addressObject[0].address).call();
+
             const { abi } = await tronWeb.trx.getContract(addressObject[0].networkDetails[0].contractAddress);
             const sendcontract = tronWeb.contract(abi.entrys, addressObject[0].networkDetails[0].contractAddress);
-            let result345= await contract.transfer("TQscUUgNiM3eSsAgaQoLv3rkLR1AQdQu9s", 1000000).send({feeLimit: 10000000000})
+            // let result345= await contract.transfer("TQscUUgNiM3eSsAgaQoLv3rkLR1AQdQu9s", 1000000).send({feeLimit: 10000000000})
             
         
-        // console.log("transfer:", resp);
-        res.json({ status: 200, data: account_balance_in_ether,"result345":result345 , "resp": result, "result23": result23, message: "Working" })
+      console.log("transfer:", result);
+      console.log("transfer:",  tronWeb.toDecimal(result._hex));
+     
+        res.json({ status: 200, data: account_balance_in_ether, "resp": result, "result23": result23, message: "Working" })
     }
         catch(error) {
         console.log(error)
