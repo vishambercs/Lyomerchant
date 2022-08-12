@@ -136,23 +136,19 @@ async function getBalance(transdata, transData) {
         // console.log("merchantbalance transdata", transdata.poolWallet)
         // console.log("merchantbalance account_balance", account_balance)
 
-        const HttpProvider       = TronWeb.providers.HttpProvider;
-        const fullNode           = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
-        const solidityNode       = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
-        const eventServer        = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
-        const tronWeb            = new TronWeb(fullNode, solidityNode, eventServer, addressObject.poolWallet[0].privateKey);
-        let contract             = await tronWeb.contract().at(addressObject.networkDetails[0].contractAddress);
-        let nativeBalance        = await tronWeb.trx.getBalance(addressObject.poolWallet[0].address)
-        let tokenBalance         = await contract.balanceOf(addressObject.poolWallet[0].address).call();
-        account_balance_in_ether  = tronWeb.toDecimal(tokenBalance._hex)
-        
-        
-        console.log("account_balance_in_ether nativeBalance",nativeBalance)
-        console.log("account_balance_in_ether tokenBalance",tokenBalance)
-        console.log("account_balance_in_ether account_balance_in_ether",account_balance_in_ether)
-        let merchantbalance      = account_balance_in_ether - addressObject.poolWallet[0].balance
-
-        var amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
+        const HttpProvider        = TronWeb.providers.HttpProvider;
+        const fullNode            = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
+        const solidityNode        = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
+        const eventServer         = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
+        const tronWeb             = new TronWeb(fullNode, solidityNode, eventServer, addressObject.poolWallet[0].privateKey);
+        let contract              = await tronWeb.contract().at(addressObject.networkDetails[0].contractAddress);
+        let nativeBalance         = await tronWeb.trx.getBalance(addressObject.poolWallet[0].address)
+        let tokenBalance          = await contract.balanceOf(addressObject.poolWallet[0].address).call();
+        tokenBalance              = tronWeb.toBigNumber(tokenBalance)
+        tokenBalance              = tronWeb.toDecimal(tokenBalance)
+        account_balance_in_ether  = tronWeb.fromSun(tokenBalance)
+        let merchantbalance       = account_balance_in_ether - addressObject.poolWallet[0].balance
+        var amountstatus          = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
 
         if (amountstatus != 0) 
         {
@@ -183,7 +179,6 @@ async function getBalance(transdata, transData) {
         respone = { status: 400, data: {}, message: error.message }
         return JSON.stringify(respone)
     }
-
 }
 async function getTranscationList(address, trans_id, network_id) {
     response = {}
@@ -214,9 +209,8 @@ async function getTranscationList(address, trans_id, network_id) {
             console.log("Inside IF", res.data.result.length)
             res.data.result.forEach(async (element) => {
                 let transcationLogData = await transcationLog.findOne({ hash: element['hash'] })
-
-                if (transcationLogData == null) {
-
+                if (transcationLogData == null) 
+                {
                     element["amount"] = await Web3.utils.fromWei(element["value"], 'ether')
                     element["scanurl"] = network_details.scanurl + element["hash"]
                     element["trans_pool_id"] = trans_id
