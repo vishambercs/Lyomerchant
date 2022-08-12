@@ -322,20 +322,19 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
             //         return JSON.stringify({ status: 200, message: "Pool Wallet", data: error })
             //     }
             // })
-            const HttpProvider = TronWeb.providers.HttpProvider;
-            const fullNode = new HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl);
-            const solidityNode = new HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl);
-            const eventServer = new HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl);
+            const HttpProvider  = TronWeb.providers.HttpProvider;
+            const fullNode      = new HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl);
+            const solidityNode  = new HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl);
+            const eventServer   = new HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl);
             const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, from_wallet[0].privateKey);
             let contract = await tronWeb.contract().at(from_wallet[0].walletNetwork[0].contractAddress);
             let result23 = await tronWeb.trx.getBalance(from_wallet[0].address)
-            let account_balance_in_ether = await tronWeb.trx.getBalance(addressObject[0].address)
+            let account_balance_in_ether = await tronWeb.trx.getBalance(from_wallet[0].address)
             let result = await contract.balanceOf(from_wallet[0].address).call();
             const { abi } = await tronWeb.trx.getContract(from_wallet[0].walletNetwork[0].contractAddress);
             const sendcontract = tronWeb.contract(abi.entrys, from_wallet[0].walletNetwork[0].contractAddress);
             let result345 = await contract.transfer(hotWallet.address, account_balance).send({ feeLimit: 10000000000 })
             savelogs(merchant_trans_id, hotWallet.id, result345, from_wallet[0].network_id, 1, "Done")
-            console.log("result345", result345)
             return JSON.stringify({ status: 200, message: "Pool Wallet", data: result345 })
         }
 
