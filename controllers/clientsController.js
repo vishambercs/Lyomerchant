@@ -1,8 +1,8 @@
-const clients = require('../Models/clients');
-const kycWebHookLogs = require('../Models/kycWebHookLog');
-const transcationLog = require('../Models/transcationLog');
-const cornJobs = require('../common/cornJobs');
-var CryptoJS = require('crypto-js')
+const clients           = require('../Models/clients');
+const kycWebHookLogs    = require('../Models/kycWebHookLog');
+const transcationLog    = require('../Models/transcationLog');
+const cornJobs          = require('../common/cornJobs');
+var CryptoJS            = require('crypto-js')
 var crypto = require("crypto");
 var Utility = require('../common/Utility');
 var constant = require('../common/Constant');
@@ -413,70 +413,178 @@ module.exports =
                     }
                 ])
             console.log(addressObject)
-            const HttpProvider = TronWeb.providers.HttpProvider;
-            const fullNode = new HttpProvider(addressObject[0].networkDetails[0].nodeUrl);
-            const solidityNode = new HttpProvider(addressObject[0].networkDetails[0].nodeUrl);
-            const eventServer = new HttpProvider(addressObject[0].networkDetails[0].nodeUrl);
-            const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, addressObject[0].privateKey);
-            let contract = await tronWeb.contract().at(addressObject[0].networkDetails[0].contractAddress);
-            let result23 = await tronWeb.trx.getBalance(addressObject[0].address)
-
-            let account_balance_in_ether = await tronWeb.trx.getBalance(addressObject[0].address)
-
-            let result = await contract.balanceOf(addressObject[0].address).call();
-
-            const { abi } = await tronWeb.trx.getContract(addressObject[0].networkDetails[0].contractAddress);
-            const sendcontract = tronWeb.contract(abi.entrys, addressObject[0].networkDetails[0].contractAddress);
-            // let result345= await contract.transfer("TQscUUgNiM3eSsAgaQoLv3rkLR1AQdQu9s", 1000000).send({feeLimit: 10000000000})
-            
-        
-      console.log("transfer:", result);
-      console.log("transfer:",  tronWeb.toDecimal(result._hex));
-     
-        res.json({ status: 200, data: account_balance_in_ether, "resp": result, "result23": result23, message: "Working" })
-    }
-        catch(error) {
-        console.log(error)
-        res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-    }
-},
+            if (addressObject[0].networkDetails[0].libarayType == "Tronweb") {
+                const HttpProvider = TronWeb.providers.HttpProvider;
+                const fullNode = new HttpProvider(addressObject[0].networkDetails[0].nodeUrl);
+                const solidityNode = new HttpProvider(addressObject[0].networkDetails[0].nodeUrl);
+                const eventServer = new HttpProvider(addressObject[0].networkDetails[0].nodeUrl);
+                const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, addressObject[0].privateKey);
+                let contract = await tronWeb.contract().at(addressObject[0].networkDetails[0].contractAddress);
+                let result23 = await tronWeb.trx.getBalance(addressObject[0].address)
+                let account_balance_in_ether = await tronWeb.trx.getBalance(addressObject[0].address)
+                let result = await contract.balanceOf(addressObject[0].address).call();
+                const { abi } = await tronWeb.trx.getContract(addressObject[0].networkDetails[0].contractAddress);
+                const sendcontract = tronWeb.contract(abi.entrys, addressObject[0].networkDetails[0].contractAddress);
+                var value = tronWeb.BigNumber(tronWeb.toDecimal("0x013e2550"));
+                result = tronWeb.toBigNumber(result)
+                result = tronWeb.toDecimal(result)
+                result = tronWeb.fromSun(result)
+                console.log("==============", result)
+                res.json({ status: 200, data: account_balance_in_ether, "resp": result, "result23": result23, message: "Working" })
+            }
+            else {
+                const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject[0].networkDetails[0].nodeUrl))
+                const contract = new WEB3.eth.Contract(Constant.USDT_ABI, addressObject[0].networkDetails[0].contractAddress);
+                const result = await contract.methods.balanceOf(addressObject[0].address).call();
+                const format = Web3.utils.fromWei(result);
+                const toweiformat = result / 1e6
+                let account_balance = await WEB3.eth.getBalance(addressObject[0].address)
+                let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
+                let decimals = await contract.methods.decimals().call();
+                // console.log(result.div(Web3.utils.toBN(10).pow(decimals)));
+                let decimals_call = await contract.methods.decimals().call();
+                console.log(result, decimals)
+                console.log(result, decimals, result / (1 * 10 ** decimals))
+                res.json({ status: 200, "value": value, data: account_balance_in_ether, result: result, "toweiformat": toweiformat, "format": format })
+            }
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
     async update_cron_job(req, res) {
-    try {
-        let pooldata = await transactionPools.aggregate(
-            [
-                { $match: { $or: [{ status: 0 }, { status: 2 }] } },
-                {
-                    $lookup: {
-                        from: "poolwallets", // collection to join
-                        localField: "poolwalletID",//field from the input documents
-                        foreignField: "id",//field from the documents of the "from" collection
-                        as: "poolWallet"// output array field
-                    },
-                }, {
-                    $lookup: {
-                        from: "networks", // collection to join
-                        localField: "poolWallet.network_id",//field from the input documents
-                        foreignField: "id",//field from the documents of the "from" collection
-                        as: "networkDetails"// output array field
-                    }
-                },
-                {
-                    "$project":
+        try {
+            let pooldata = await transactionPools.aggregate(
+                [
+                    { $match: { $or: [{ status: 0 }, { status: 2 }] } },
                     {
-                        "poolWallet.privateKey": 0,
-                        "poolWallet.id": 0,
-                        "poolWallet._id": 0,
-                        "poolWallet.status": 0,
-                        "poolWallet.__v": 0,
-                        "networkDetails.__v": 0,
-                        "networkDetails.created_by": 0,
-                        "networkDetails.createdAt": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails._id": 0
+                        $lookup: {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "poolWallet"// output array field
+                        },
+                    }, {
+                        $lookup: {
+                            from: "networks", // collection to join
+                            localField: "poolWallet.network_id",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "networkDetails"// output array field
+                        }
+                    },
+                    {
+                        "$project":
+                        {
+                            "poolWallet.privateKey": 0,
+                            "poolWallet.id": 0,
+                            "poolWallet._id": 0,
+                            "poolWallet.status": 0,
+                            "poolWallet.__v": 0,
+                            "networkDetails.__v": 0,
+                            "networkDetails.created_by": 0,
+                            "networkDetails.createdAt": 0,
+                            "networkDetails.updatedAt": 0,
+                            "networkDetails._id": 0
+                        }
+                    }
+                ])
+            let addressObject = pooldata[0];
+            console.log("addressObject", addressObject)
+            if (addressObject.networkDetails[0].cointype == "Token") {
+                const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
+                let abi = [
+                    {
+                        constant: true,
+                        inputs: [{ name: "_owner", type: "address" }],
+                        name: "balanceOf",
+                        outputs: [{ name: "balance", type: "uint256" }],
+                        type: "function",
+                    },
+                ];
+                const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress);
+                let result = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
+                const account_balance_in_ether = await WEB3.utils.fromWei(result.toString());
+                var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
+                if (amountstatus != 0) {
+                    let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
+                    await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
+                        then(async (val) => {
+                            console.log("merchantbalance 4", val)
+                            if (val != null) {
+                                console.log("merchantbalance 2", val.balance)
+                                let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
+                                console.log("merchantbalance 3", clientdetails)
+                            }
+                        }).catch(error => {
+                            console.log("get_clients_data", error)
+                            res.json({ status: 400, data: {}, message: "Verification Failed" })
+                        })
+                    // "balance" :
+                    let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
+                    let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
+                    let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
+                    if (amountstatus != 0) {
+
+                        let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
+                        let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
+                        let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
+                        console.log("parameters", parameters)
+                        let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
+                        console.log("get_addressObject", get_addressObject)
+                        // let get_addressObject    = await commonFunction.Post_Request(addressObject.callbackURL,parameters,headers) 
+
+                        // let get_addressObject = await commonFunction.get_Request(addressObject.callbackURL)
+
+                    }
+
+                }
+                // return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Done" })
+                res.json({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
+            }
+            else if (addressObject.networkDetails[0].cointype == "Native") {
+
+                const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
+                let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
+                let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
+                var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
+                if (amountstatus != 0) {
+                    let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
+                    await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
+                        then(async (val) => {
+                            if (val != null) {
+
+                                console.log("merchantbalance 2", val.balance)
+                                let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
+                                console.log("merchantbalance 3", clientdetails)
+                            }
+                        }).catch(error => {
+                            console.log("get_clients_data", error)
+                            res.json({ status: 400, data: {}, message: "Verification Failed" })
+                        })
+                    let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
+                    let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
+                    let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
+                    if (amountstatus != 0) {
+                        // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
+                        let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
+                        let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
+                        let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
+
+                        console.log("parameters", parameters)
+                        let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
+                        console.log("get_addressObject", get_addressObject)
                     }
                 }
-            ])
-        let addressObject = pooldata[0];
+                res.json({ status: 400, data: {}, message: "Verification Failed" })
+            }
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async get_Balance(addressObject) {
         console.log("addressObject", addressObject)
         if (addressObject.networkDetails[0].cointype == "Token") {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
@@ -493,41 +601,36 @@ module.exports =
             let result = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
             const account_balance_in_ether = await WEB3.utils.fromWei(result.toString());
             var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
+            var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
             if (amountstatus != 0) {
                 let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
                 await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
                     then(async (val) => {
-                        console.log("merchantbalance 4", val)
+
                         if (val != null) {
-                            console.log("merchantbalance 2", val.balance)
                             let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
-                            console.log("merchantbalance 3", clientdetails)
                         }
                     }).catch(error => {
-                        console.log("get_clients_data", error)
+
                         res.json({ status: 400, data: {}, message: "Verification Failed" })
                     })
-                // "balance" :
-                let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
+                let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, } })
                 let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
                 let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
                 if (amountstatus != 0) {
 
                     let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
-                    let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
-                    let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
-                    console.log("parameters", parameters)
-                    let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
-                    console.log("get_addressObject", get_addressObject)
-                    // let get_addressObject    = await commonFunction.Post_Request(addressObject.callbackURL,parameters,headers) 
 
-                    // let get_addressObject = await commonFunction.get_Request(addressObject.callbackURL)
+                    let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
+                    let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
+                    let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
+
 
                 }
 
             }
-            // return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Done" })
-            res.json({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
+
+            return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
         }
         else if (addressObject.networkDetails[0].cointype == "Native") {
 
@@ -535,200 +638,72 @@ module.exports =
             let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
             let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
             var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
+            var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
             if (amountstatus != 0) {
                 let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
                 await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
                     then(async (val) => {
                         if (val != null) {
 
-                            console.log("merchantbalance 2", val.balance)
                             let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
-                            console.log("merchantbalance 3", clientdetails)
+
                         }
                     }).catch(error => {
-                        console.log("get_clients_data", error)
-                        res.json({ status: 400, data: {}, message: "Verification Failed" })
+
+                        return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
                     })
-                let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
+                let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
                 let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
                 let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
                 if (amountstatus != 0) {
                     // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
                     let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
-                    let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
+                    console.log("transcationHistory", transcationHistory)
+                    let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
                     let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
-
-                    console.log("parameters", parameters)
                     let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
-                    console.log("get_addressObject", get_addressObject)
                 }
             }
-            res.json({ status: 400, data: {}, message: "Verification Failed" })
-        }
-    }
-    catch (error) {
-        console.log(error)
-        res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-    }
-},
-    async get_Balance(addressObject) {
-    console.log("addressObject", addressObject)
-    if (addressObject.networkDetails[0].cointype == "Token") {
-        const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-        let abi = [
-            {
-                constant: true,
-                inputs: [{ name: "_owner", type: "address" }],
-                name: "balanceOf",
-                outputs: [{ name: "balance", type: "uint256" }],
-                type: "function",
-            },
-        ];
-        const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress);
-        let result = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
-        const account_balance_in_ether = await WEB3.utils.fromWei(result.toString());
-        var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
-        var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
-        if (amountstatus != 0) {
-            let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
-            await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
-                then(async (val) => {
-
-                    if (val != null) {
-                        let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
-                    }
-                }).catch(error => {
-
-                    res.json({ status: 400, data: {}, message: "Verification Failed" })
-                })
-            let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, } })
-            let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
-            let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
-            if (amountstatus != 0) {
-
-                let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
-
-                let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
-                let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
-                let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
-
-
-            }
-
+            return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
         }
 
-        return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
-    }
-    else if (addressObject.networkDetails[0].cointype == "Native") {
-
-        const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-        let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
-        let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
-        var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
-        var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
-        if (amountstatus != 0) {
-            let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
-            await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
-                then(async (val) => {
-                    if (val != null) {
-
-                        let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
-
-                    }
-                }).catch(error => {
-
-                    return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
-                })
-            let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
-            let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
-            let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
-            if (amountstatus != 0) {
-                // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
-                let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
-                console.log("transcationHistory", transcationHistory)
-                let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
-                let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
-                let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
-            }
-        }
-        return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
-    }
-
-},
+    },
     async Get_Transcation_From_Address(req, res) {
-    try {
-        let get_transcation_response = await commonFunction.Get_Transcation_List(req.body.address)
-        let json_response = JSON.parse(get_transcation_response.data)
-        cornJobs.block = json_response.data.result[0]["blockNumber"]
-        let transcationLogs = await transcationLog.insertMany(json_response.data.result);
-        res.json({ status: 200, message: "Clients Data", data: json_response.data, "transcationLogs": transcationLogs })
-    }
-    catch (error) {
-        console.log(error)
-        res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-    }
-},
+        try {
+            let get_transcation_response = await commonFunction.Get_Transcation_List(req.body.address)
+            let json_response = JSON.parse(get_transcation_response.data)
+            cornJobs.block = json_response.data.result[0]["blockNumber"]
+            let transcationLogs = await transcationLog.insertMany(json_response.data.result);
+            res.json({ status: 200, message: "Clients Data", data: json_response.data, "transcationLogs": transcationLogs })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
     async get_client_Balance(req, res) {
-    try {
-        poolWallet.aggregate(
-            [
-                { $group: { _id: '$network_id', total: { $sum: '$balance' } } },
-                { $lookup: { from: "networks", localField: "_id", foreignField: "id", as: "networkDetails" } },
-            ]).then(val => {
-                res.json({ status: 200, message: "Clients Data", data: val })
-            }).catch(error => {
-                console.log("get_clients_data", error)
-                res.json({ status: 400, data: {}, message: error })
-            })
-    }
-    catch (error) {
-        res.json({ status: 400, data: {}, message: "Invalid" })
-    }
-},
+        try {
+            poolWallet.aggregate(
+                [
+                    { $group: { _id: '$network_id', total: { $sum: '$balance' } } },
+                    { $lookup: { from: "networks", localField: "_id", foreignField: "id", as: "networkDetails" } },
+                ]).then(val => {
+                    res.json({ status: 200, message: "Clients Data", data: val })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid" })
+        }
+    },
     async kyc_approved(req, res) {
-    try {
+        try {
 
-        clients.findOneAndUpdate({ api_key: req.headers.authorization }, { $set: { status: true } }, { $new: true }).then(async (val) => {
-            let networks = await network.find()
-            if (val != null) {
-                networks.forEach(async function (item) {
-                    var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
-                    var accountAddress = web3.eth.accounts.create();
-                    const clientWallet = new clientWallets({
-                        id: mongoose.Types.ObjectId(),
-                        client_api_key: val.api_key,
-                        address: accountAddress.address,
-                        privatekey: accountAddress.privateKey,
-                        status: 1,
-                        network_id: item.id
-                    });
-                    let client_Wallet = await clientWallet.save()
-                });
-                res.json({ status: 200, message: "Client Added Successfully", data: val })
-            }
-            else {
-                res.json({ status: 400, message: "Invalid Request", data: val })
-            }
-        }).catch(error => {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: error })
-        })
-    }
-    catch (error) {
-        res.json({ status: 400, data: {}, message: "Invalid" })
-    }
-},
-    async check_kyc(req, res) {
-    try {
-        clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
-            if (val != null) {
-                let kycurl = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path3
-
-                let getRequestData = await commonFunction.Get_Request_FOR_KYC(kycurl, { "Authorization": process.env.KYC_URL_TOKEN })
-                let json_response = JSON.parse(getRequestData.data)
-                console.log(json_response.data)
-                if (json_response.data.body.review_answer == "GREEN") {
-                    let networks = await network.find()
+            clients.findOneAndUpdate({ api_key: req.headers.authorization }, { $set: { status: true } }, { $new: true }).then(async (val) => {
+                let networks = await network.find()
+                if (val != null) {
                     networks.forEach(async function (item) {
                         var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
                         var accountAddress = web3.eth.accounts.create();
@@ -742,238 +717,276 @@ module.exports =
                         });
                         let client_Wallet = await clientWallet.save()
                     });
-                    let clientskyc = await clients.findOneAndUpdate({ api_key: req.headers.authorization }, { $set: { status: true } }, { $new: true })
-                    res.json({ status: 200, message: "", data: { "status": clientskyc.status } })
-
-                }
-                else if (json_response.data.body.review_answer == "RED") {
-                    res.json({ status: 200, message: "KYC Rejected", data: null })
+                    res.json({ status: 200, message: "Client Added Successfully", data: val })
                 }
                 else {
-                    res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
+                    res.json({ status: 400, message: "Invalid Request", data: val })
                 }
-            }
-            else {
-                res.json({ status: 400, message: "Invalid Request", data: val })
-            }
-
-        }).catch(error => {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: error })
-        })
-    }
-    catch (error) {
-        res.json({ status: 400, data: {}, message: "Invalid" })
-    }
-},
-    async getClientWallets(req, res) {
-    try {
-        await clientWallets.aggregate(
-            [
-                { $match: { client_api_key: req.headers.authorization } },
-                {
-                    $lookup: {
-                        from: "networks", // collection to join
-                        localField: "network_id",//field from the input documents
-                        foreignField: "id",//field from the documents of the "from" collection
-                        as: "NetworkDetails"// output array field
-                    }
-                },
-            ]).then(async (data) => {
-
-                res.json({ status: 200, message: "Hot Wallets", data: data })
             }).catch(error => {
-                console.log("get_clients_data", error)
+                console.log(error)
                 res.json({ status: 400, data: {}, message: error })
             })
-    }
-    catch (error) {
-        res.json({ status: 400, data: {}, message: "Invalid" })
-    }
-},
-    async Get_Transcation_List(req, res) {
-    response = {}
-    let network_details = await network.findOne({ id: req.body.network_id })
-    var URL = network_details.transcationurl
-    if (network_details.cointype == "Token") {
-        URL += "?module=account&action=tokentx&address=" + req.body.address;
-        URL += "&contractaddress=" + network_details.contractAddress;
-        URL += "&startblock=" + req.body.latest_block_number
-        URL += "&endblock=" + "latest"
-        URL += "&sort=" + "desc"
-        URL += "&apikey=" + network_details.apiKey
-    }
-    else {
-        URL += "?module=account&action=txlist&address=" + req.body.address;
-        URL += "&startblock=" + req.body.latest_block_number
-        URL += "&endblock=" + "latest"
-        URL += "&sort=" + "desc"
-        URL += "&apikey=" + network_details.apiKey
-    }
-    await axios.get(URL, {
-        params: {},
-        headers: {}
-    }).then(async (res) => {
-        var stringify_response = stringify(res)
-        console.log("res.data.result=====================", res.data.result)
-        if (res.data.result.length > 0) {
-            let total_payment = 0
-            console.log("element", res.data.result.length)
-            res.data.result.forEach(async (element) => {
-                element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
-                element["scanurl"] = network_details.scanurl + element["hash"]
-                total_payment += parseFloat(Web3.utils.fromWei(element["value"], 'ether'))
-                console.log("total_payment", total_payment)
-
-            });
         }
-
-        response = { status: 200, data: res.data.result, message: "Get The Data From URL" }
-    }).catch(error => {
-        // console.error("Error===============", error)
-        var stringify_response = stringify(error)
-        response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
-    })
-    // return response;
-    res.json({ status: 200, data: response, message: "Invalid" })
-},
-    async kyc_status(req, res) {
-    response = {}
-    let network_details = await network.findOne({ id: req.body.network_id })
-    var URL = network_details.transcationurl
-    if (network_details.cointype == "Token") {
-        URL += "?module=account&action=tokentx&address=" + req.body.address;
-        URL += "&contractaddress=" + network_details.contractAddress;
-        URL += "&startblock=" + req.body.latest_block_number
-        URL += "&endblock=" + "latest"
-        URL += "&sort=" + "desc"
-        URL += "&apikey=" + network_details.apiKey
-    }
-    else {
-        URL += "?module=account&action=txlist&address=" + req.body.address;
-        URL += "&startblock=" + req.body.latest_block_number
-        URL += "&endblock=" + "latest"
-        URL += "&sort=" + "desc"
-        URL += "&apikey=" + network_details.apiKey
-    }
-    await axios.get(URL, {
-        params: {},
-        headers: {}
-    }).then(async (res) => {
-        var stringify_response = stringify(res)
-        console.log("res.data.result=====================", res.data.result)
-        if (res.data.result.length > 0) {
-            let total_payment = 0
-            console.log("element", res.data.result.length)
-            res.data.result.forEach(async (element) => {
-                element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
-                element["scanurl"] = network_details.scanurl + element["hash"]
-                total_payment += parseFloat(Web3.utils.fromWei(element["value"], 'ether'))
-                console.log("total_payment", total_payment)
-
-            });
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid" })
         }
-
-        response = { status: 200, data: res.data.result, message: "Get The Data From URL" }
-    }).catch(error => {
-        // console.error("Error===============", error)
-        var stringify_response = stringify(error)
-        response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
-    })
-    // return response;
-    res.json({ status: 200, data: response, message: "Invalid" })
-},
-    async kyc_verification_status(req, res) {
-    try {
-        console.log("kyc_verification_status ==============================", req.body)
-        const kycWebHookLog = new kycWebHookLogs({ id: req.body.client_user_name, webhook_data: JSON.stringify(req.body) });
-        let kycWebHookLogdata = await kycWebHookLog.save()
-
-        clients.findOne({ api_key: req.body.client_user_name }).then(async (val) => {
-            if (val != null) {
-                if (req.body.review_answer == "GREEN") {
-                    let networks = await network.find()
-                    networks.forEach(async function (item) {
-                        var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
-                        var accountAddress = web3.eth.accounts.create();
-                        const clientWallet = new clientWallets({
-                            id: mongoose.Types.ObjectId(),
-                            client_api_key: val.api_key,
-                            address: accountAddress.address,
-                            privatekey: accountAddress.privateKey,
-                            status: 1,
-                            network_id: item.id
-                        });
-                        let client_Wallet = await clientWallet.save()
-                    });
-
-
-                    let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: true } }, { $new: true })
-                    let kycclients = await clients.findOne({ api_key: req.body.client_user_name })
-                    res.json({ status: 200, message: "Successfully", data: { "status": kycclients.status } })
-
-                }
-                else if (req.body.review_answer == "RED") {
-                    let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: false } }, { $new: true })
-                    res.json({ status: 200, message: "KYC Rejected", data: null })
-                }
-                else {
-                    res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
-                }
-            }
-            else {
-                res.json({ status: 400, message: "Invalid Request", data: null })
-            }
-        }).catch(error => {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: error })
-        })
-
-    }
-    catch (error) {
-        console.log("error", error)
-        res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-    }
-},
-    async clients_kyc_levels(req, res) {
-    let kycurl = process.env.KYC_URL + Constant.kyc_levels
-    let getRequestData = await commonFunction.Get_Request_FOR_KYC(kycurl, { "Authorization": process.env.KYC_URL_TOKEN })
-    let json_response = JSON.parse(getRequestData.data)
-    console.log(json_response.data)
-    res.json({ status: 200, data: json_response.data, message: "" })
-},
-    async allMerchant(req, res) {
-    try {
-        await clients.find().then(async (val) => {
-            res.json({ status: 200, message: "All Merchant", data: val })
-        }).catch(error => {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: error })
-        })
-    }
-    catch (error) {
-        console.log("error", error)
-        res.json({ status: 400, data: {}, message: "Invalid Request" })
-    }
-},
-    async customerstatus(req, res) {
-    try {
-        await clients.findOneAndUpdate({ api_key: req.body.api_key }, { $set: { "loginstatus": req.body.status } }, { $new: true })
-            .then(async (val) => {
+    },
+    async check_kyc(req, res) {
+        try {
+            clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
                 if (val != null) {
-                    res.json({ status: 200, message: "Merchant Updated Successfully", data: val.email })
+                    let kycurl = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path3
+
+                    let getRequestData = await commonFunction.Get_Request_FOR_KYC(kycurl, { "Authorization": process.env.KYC_URL_TOKEN })
+                    let json_response = JSON.parse(getRequestData.data)
+                    console.log(json_response.data)
+                    if (json_response.data.body.review_answer == "GREEN") {
+                        let networks = await network.find()
+                        networks.forEach(async function (item) {
+                            var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
+                            var accountAddress = web3.eth.accounts.create();
+                            const clientWallet = new clientWallets({
+                                id: mongoose.Types.ObjectId(),
+                                client_api_key: val.api_key,
+                                address: accountAddress.address,
+                                privatekey: accountAddress.privateKey,
+                                status: 1,
+                                network_id: item.id
+                            });
+                            let client_Wallet = await clientWallet.save()
+                        });
+                        let clientskyc = await clients.findOneAndUpdate({ api_key: req.headers.authorization }, { $set: { status: true } }, { $new: true })
+                        res.json({ status: 200, message: "", data: { "status": clientskyc.status } })
+
+                    }
+                    else if (json_response.data.body.review_answer == "RED") {
+                        res.json({ status: 200, message: "KYC Rejected", data: null })
+                    }
+                    else {
+                        res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
+                    }
                 }
                 else {
-                    res.json({ status: 400, message: "Customer did not find", data: null })
+                    res.json({ status: 400, message: "Invalid Request", data: val })
                 }
+
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
             })
-            .catch(error => {
-                console.log('create_merchant ', error);
-                res.json({ status: 400, data: {}, message: error.message })
-            });
-    }
-    catch (error) {
-        res.json({ status: 400, data: {}, message: "Customer did not find" })
-    }
-},
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid" })
+        }
+    },
+    async getClientWallets(req, res) {
+        try {
+            await clientWallets.aggregate(
+                [
+                    { $match: { client_api_key: req.headers.authorization } },
+                    {
+                        $lookup: {
+                            from: "networks", // collection to join
+                            localField: "network_id",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "NetworkDetails"// output array field
+                        }
+                    },
+                ]).then(async (data) => {
+
+                    res.json({ status: 200, message: "Hot Wallets", data: data })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid" })
+        }
+    },
+    async Get_Transcation_List(req, res) {
+        response = {}
+        let network_details = await network.findOne({ id: req.body.network_id })
+        var URL = network_details.transcationurl
+        if (network_details.cointype == "Token") {
+            URL += "?module=account&action=tokentx&address=" + req.body.address;
+            URL += "&contractaddress=" + network_details.contractAddress;
+            URL += "&startblock=" + req.body.latest_block_number
+            URL += "&endblock=" + "latest"
+            URL += "&sort=" + "desc"
+            URL += "&apikey=" + network_details.apiKey
+        }
+        else {
+            URL += "?module=account&action=txlist&address=" + req.body.address;
+            URL += "&startblock=" + req.body.latest_block_number
+            URL += "&endblock=" + "latest"
+            URL += "&sort=" + "desc"
+            URL += "&apikey=" + network_details.apiKey
+        }
+        await axios.get(URL, {
+            params: {},
+            headers: {}
+        }).then(async (res) => {
+            var stringify_response = stringify(res)
+            console.log("res.data.result=====================", res.data.result)
+            if (res.data.result.length > 0) {
+                let total_payment = 0
+                console.log("element", res.data.result.length)
+                res.data.result.forEach(async (element) => {
+                    element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
+                    element["scanurl"] = network_details.scanurl + element["hash"]
+                    total_payment += parseFloat(Web3.utils.fromWei(element["value"], 'ether'))
+                    console.log("total_payment", total_payment)
+
+                });
+            }
+
+            response = { status: 200, data: res.data.result, message: "Get The Data From URL" }
+        }).catch(error => {
+            // console.error("Error===============", error)
+            var stringify_response = stringify(error)
+            response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+        })
+        // return response;
+        res.json({ status: 200, data: response, message: "Invalid" })
+    },
+    async kyc_status(req, res) {
+        response = {}
+        let network_details = await network.findOne({ id: req.body.network_id })
+        var URL = network_details.transcationurl
+        if (network_details.cointype == "Token") {
+            URL += "?module=account&action=tokentx&address=" + req.body.address;
+            URL += "&contractaddress=" + network_details.contractAddress;
+            URL += "&startblock=" + req.body.latest_block_number
+            URL += "&endblock=" + "latest"
+            URL += "&sort=" + "desc"
+            URL += "&apikey=" + network_details.apiKey
+        }
+        else {
+            URL += "?module=account&action=txlist&address=" + req.body.address;
+            URL += "&startblock=" + req.body.latest_block_number
+            URL += "&endblock=" + "latest"
+            URL += "&sort=" + "desc"
+            URL += "&apikey=" + network_details.apiKey
+        }
+        await axios.get(URL, {
+            params: {},
+            headers: {}
+        }).then(async (res) => {
+            var stringify_response = stringify(res)
+            console.log("res.data.result=====================", res.data.result)
+            if (res.data.result.length > 0) {
+                let total_payment = 0
+                console.log("element", res.data.result.length)
+                res.data.result.forEach(async (element) => {
+                    element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
+                    element["scanurl"] = network_details.scanurl + element["hash"]
+                    total_payment += parseFloat(Web3.utils.fromWei(element["value"], 'ether'))
+                    console.log("total_payment", total_payment)
+
+                });
+            }
+
+            response = { status: 200, data: res.data.result, message: "Get The Data From URL" }
+        }).catch(error => {
+            // console.error("Error===============", error)
+            var stringify_response = stringify(error)
+            response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+        })
+        // return response;
+        res.json({ status: 200, data: response, message: "Invalid" })
+    },
+    async kyc_verification_status(req, res) {
+        try {
+            console.log("kyc_verification_status ==============================", req.body)
+            const kycWebHookLog = new kycWebHookLogs({ id: req.body.client_user_name, webhook_data: JSON.stringify(req.body) });
+            let kycWebHookLogdata = await kycWebHookLog.save()
+
+            clients.findOne({ api_key: req.body.client_user_name }).then(async (val) => {
+                if (val != null) {
+                    if (req.body.review_answer == "GREEN") {
+                        let networks = await network.find()
+                        networks.forEach(async function (item) {
+                            var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
+                            var accountAddress = web3.eth.accounts.create();
+                            const clientWallet = new clientWallets({
+                                id: mongoose.Types.ObjectId(),
+                                client_api_key: val.api_key,
+                                address: accountAddress.address,
+                                privatekey: accountAddress.privateKey,
+                                status: 1,
+                                network_id: item.id
+                            });
+                            let client_Wallet = await clientWallet.save()
+                        });
+
+
+                        let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: true } }, { $new: true })
+                        let kycclients = await clients.findOne({ api_key: req.body.client_user_name })
+                        res.json({ status: 200, message: "Successfully", data: { "status": kycclients.status } })
+
+                    }
+                    else if (req.body.review_answer == "RED") {
+                        let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: false } }, { $new: true })
+                        res.json({ status: 200, message: "KYC Rejected", data: null })
+                    }
+                    else {
+                        res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
+                    }
+                }
+                else {
+                    res.json({ status: 400, message: "Invalid Request", data: null })
+                }
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async clients_kyc_levels(req, res) {
+        let kycurl = process.env.KYC_URL + Constant.kyc_levels
+        let getRequestData = await commonFunction.Get_Request_FOR_KYC(kycurl, { "Authorization": process.env.KYC_URL_TOKEN })
+        let json_response = JSON.parse(getRequestData.data)
+        console.log(json_response.data)
+        res.json({ status: 200, data: json_response.data, message: "" })
+    },
+    async allMerchant(req, res) {
+        try {
+            await clients.find().then(async (val) => {
+                res.json({ status: 200, message: "All Merchant", data: val })
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+    async customerstatus(req, res) {
+        try {
+            await clients.findOneAndUpdate({ api_key: req.body.api_key }, { $set: { "loginstatus": req.body.status } }, { $new: true })
+                .then(async (val) => {
+                    if (val != null) {
+                        res.json({ status: 200, message: "Merchant Updated Successfully", data: val.email })
+                    }
+                    else {
+                        res.json({ status: 400, message: "Customer did not find", data: null })
+                    }
+                })
+                .catch(error => {
+                    console.log('create_merchant ', error);
+                    res.json({ status: 400, data: {}, message: error.message })
+                });
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Customer did not find" })
+        }
+    },
 }

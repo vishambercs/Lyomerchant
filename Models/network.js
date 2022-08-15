@@ -7,6 +7,11 @@ const networkSchema = new mongoose.Schema
             required: true,
             unique: true,
         },
+        libarayType: {
+            type: String,
+            enum : ['Web3','Tronweb'],
+            required: true,
+        },
         network: {
             type: String,
             required: true,
