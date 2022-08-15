@@ -5,7 +5,7 @@ var mongoose = require('mongoose');
 var crypto = require("crypto");
 const TronWeb = require('tronweb')
 const { generateAccount } = require('tron-create-address')
-
+const Web3 = require('web3');
 require("dotenv").config()
 
 module.exports =
@@ -23,7 +23,8 @@ module.exports =
             {
                 const NetworkItem = new Network({
                     id: mongoose.Types.ObjectId(),
-                    network: req.body.network,
+                    network     : req.body.network,
+                    libarayType : req.body.libarayType,
                     coin: req.body.coin,
                     nodeUrl: req.body.nodeUrl,
                     apiKey: req.body.apiKey,
@@ -39,24 +40,24 @@ module.exports =
                     gaspriceurl: req.body.scanurl,
                 });
                 NetworkItem.save().then(async (val) => {
-                    console.log("val",val)
                     for (let i = 0; i < 10; i++) 
                     { 
-                    // let account = await Utility.GetAddress(val.nodeUrl)
-                    const { address, privateKey } = generateAccount()
-                    const poolWalletItem = new poolWallet({ id : crypto.randomBytes(20).toString('hex'), network_id: val.id, address: address, privateKey: privateKey, });
-                    poolWalletItem.save().then(async (val) => {
-                         console.log("val",i,val) 
-                        // res.json({ status: 200, message: "Successfully", data: val })
-                    }).catch(error => { 
-                            console.log("val",error) 
-                            // res.json({ status: 400, data: {}, message: error }) 
-                        
-                        })
-        
-                  }
+                    if(val.libarayType      == "Web3")
+                    {
+                        let account = await Utility.GetAddress(val.nodeUrl)
+                        const poolWalletItem = new poolWallet({ id : crypto.randomBytes(20).toString('hex'), network_id: val.id, address: account.address, privateKey: account.privateKey, });
+                        await poolWalletItem.save()
+                    }
+                    else if(val.libarayType == "Tronweb")
+                    {
+                        const { address, privateKey } = generateAccount()
+                        const poolWalletItem = new poolWallet({ id : crypto.randomBytes(20).toString('hex'), network_id: val.id, address: address, privateKey: privateKey, });
+                        await poolWalletItem.save()
+                    }
+                    }
                   res.json({ status: 200, message: "Successfully", data: val })
                 }).catch(error => {
+                    console.log(error)
                     res.json({ status: 400, data: {}, message: error })
                 })
             }
@@ -79,7 +80,8 @@ module.exports =
                     {
                         $set:
                         {
-                            network: req.body.network,
+                            network     : req.body.network,
+                            libarayType : req.body.libarayType,
                             coin: req.body.coin,
                             nodeUrl: req.body.nodeUrl,
                             apiKey: req.body.apiKey,
