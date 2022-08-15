@@ -311,7 +311,7 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                     if (!error) {
                         savelogs(merchant_trans_id, hotWallet.id, hash, from_wallet[0].network_id, 1, "Done")
                         console.log("your transaction:", hash)
-                        const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (from_wallet[0].balance - account_balance) }})
+                        const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
                         console.log("your transaction:", poolWallet)
                         return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
                     } else {
@@ -334,7 +334,7 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 const { abi } = await tronWeb.trx.getContract(from_wallet[0].walletNetwork[0].contractAddress);
                 const sendcontract = tronWeb.contract(abi.entrys, from_wallet[0].walletNetwork[0].contractAddress);
                 let result345 = await contract.transfer(hotWallet.address, account_balance).send({ feeLimit: 10000000000 })
-                const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (from_wallet[0].balance - account_balance) }})
+                const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
                 savelogs(merchant_trans_id, hotWallet.id, result345, from_wallet[0].network_id, 1, "Done")
                 
                 return JSON.stringify({ status: 200, message: "Pool Wallet", data: result345 })
