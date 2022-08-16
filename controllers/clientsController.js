@@ -1,8 +1,8 @@
-const clients           = require('../Models/clients');
-const kycWebHookLogs    = require('../Models/kycWebHookLog');
-const transcationLog    = require('../Models/transcationLog');
-const cornJobs          = require('../common/cornJobs');
-var CryptoJS            = require('crypto-js')
+const clients = require('../Models/clients');
+const kycWebHookLogs = require('../Models/kycWebHookLog');
+const transcationLog = require('../Models/transcationLog');
+const cornJobs = require('../common/cornJobs');
+var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
 var Utility = require('../common/Utility');
 var constant = require('../common/Constant');
@@ -35,22 +35,14 @@ module.exports =
                 const previous_client = await clients.findOne({ 'email': email }).then(async (val) => {
                     if (val == null) {
                         res.json({ status: 200, message: "Clients Data", data: {} })
-                        // client.save().then(async (val) => {
-                        //     res.json({ status: 200, message: "Client Added Successfully", data: val })
-                        // }).catch(error => {
-                        //     console.log(error)
-                        //     res.json({ status: 400, data: {}, message: error })
-                        // })
                     }
                     else {
-                        // res.json({ status: 200, message: "Clients Data", data: val })
                         res.json({ status: 200, message: "Clients Data", data: { id: val._id, token: val.token, api_key: val.api_key, email: val.email } })
                     }
+                }).catch(error => {
+                    console.log(error)
+                    res.json({ status: 400, data: {}, message: error })
                 })
-                    .catch(error => {
-                        console.log(error)
-                        res.json({ status: 400, data: {}, message: error })
-                    })
             }
         }
         catch (error) {
@@ -284,104 +276,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Verification Failed" })
         }
     },
-    // async get_BalancebyAddress(req, res) {
-    //     try {
-    //         let addressObject = await poolWallet.aggregate(
-    //             [
-    //                 { $match: { address: req.body.address } },
-
-    //                 {
-    //                     $lookup: {
-    //                         from: "networks", // collection to join
-    //                         localField: "network_id",//field from the input documents
-    //                         foreignField: "id",//field from the documents of the "from" collection
-    //                         as: "networkDetails"// output array field
-    //                     }
-    //                 },
-    //                 {
-    //                     "$project":
-    //                     {
-    //                         "poolWallet.privateKey": 0,
-    //                         "poolWallet.id": 0,
-    //                         "poolWallet._id": 0,
-    //                         "poolWallet.status": 0,
-    //                         "poolWallet.__v": 0,
-    //                         "networkDetails.__v": 0,
-    //                         "networkDetails.created_by": 0,
-    //                         "networkDetails.createdAt": 0,
-    //                         "networkDetails.updatedAt": 0,
-    //                         "networkDetails._id": 0
-    //                     }
-    //                 }
-    //             ])
-    //         console.log("get_BalancebyAddress addressObject==========================",addressObject)
-
-    //         const minABI = [
-    //             // balanceOf
-    //             {
-    //                 constant: true,
-    //                 inputs: [{ name: "_owner", type: "address" }],
-    //                 name: "balanceOf",
-    //                 outputs: [{ name: "balance", type: "uint256" }],
-    //                 type: "function",
-    //             },
-    //         ];
-
-
-    //         console.log("get_BalancebyAddress minABI==========================",minABI)
-    //         if (addressObject.length > 0) {
-    //             if (addressObject[0].networkDetails[0].cointype == "Token") {
-    //                 console.log(addressObject[0].networkDetails[0].nodeUrl)
-    //                 const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject[0].networkDetails[0].nodeUrl))
-    //                 let abi = [
-    //                     {
-    //                         constant: true,
-    //                         inputs: [{ name: "_owner", type: "address" }],
-    //                         name: "balanceOf",
-    //                         outputs: [{ name: "balance", type: "uint256" }],
-    //                         type: "function",
-    //                     },
-    //                 ];
-    //                 console.log("get_BalancebyAddress abi==========================",abi)
-    //                 console.log("get_BalancebyAddress==========================",addressObject)
-    //                 console.log("get_BalancebyAddress contractAddress==========================",addressObject[0].networkDetails[0].contractAddress)
-    //                 const contract = new WEB3.eth.Contract(abi, addressObject[0].networkDetails[0].contractAddress);
-    //                 const result = await contract.methods.balanceOf(addressObject[0].address).call();
-    //                 const format = Web3.utils.fromWei(result);
-    //                 let amount = parseFloat(format) - parseFloat(format * 0.01)
-    //                 console.log("get_BalancebyAddress amount==========================",amount)
-    //                 console.log("get_BalancebyAddress contract==========================",contract)
-    //                 console.log("get_BalancebyAddress result==========================",result)
-    //                 console.log("get_BalancebyAddress format==========================",format)
-    //                 res.json({ status: 200, data: amount, message: "Done" })
-    //             }
-    //             else if (addressObject[0].networkDetails[0].cointype == "Native") {
-    //                 console.log("get_BalancebyAddress nodeUrl==========================",addressObject[0].networkDetails[0].nodeUrl)
-    //                 const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject[0].networkDetails[0].nodeUrl))
-    //                 console.log("get_BalancebyAddress address==========================",addressObject[0].address)
-    //                 let account_balance = await BSC_WEB3.eth.getBalance(addressObject[0].address)
-    //                 let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
-    //                 console.log("get_BalancebyAddress account_balance_in_ether==========================",account_balance_in_ether)
-    //                 let amount = parseFloat(account_balance_in_ether) - parseFloat(account_balance_in_ether * 0.01)
-    //                 console.log("get_BalancebyAddress account_balance_in_ether==========================",amount)
-    //                 res.json({ status: 200, data: amount, message: "Done" })
-    //             }
-    //             else {
-    //                 res.json({ status: 200, data: {}, message: "Invalid Address" })
-    //             }
-    //         }
-    //         else {
-    //             res.json({ status: 200, data: {}, message: "Invalid Address" })
-    //         }
-
-
-
-    //     }
-    //     catch (error) {
-    //         console.log(error)
-    //         res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-    //     }
-    // },
     async get_BalancebyAddress(req, res) {
         try {
             let addressObject = await poolWallet.aggregate(
@@ -412,7 +306,6 @@ module.exports =
                         }
                     }
                 ])
-            console.log(addressObject)
             if (addressObject[0].networkDetails[0].libarayType == "Tronweb") {
                 const HttpProvider = TronWeb.providers.HttpProvider;
                 const fullNode = new HttpProvider(addressObject[0].networkDetails[0].nodeUrl);
@@ -429,7 +322,6 @@ module.exports =
                 result = tronWeb.toBigNumber(result)
                 result = tronWeb.toDecimal(result)
                 result = tronWeb.fromSun(result)
-                console.log("==============", result)
                 res.json({ status: 200, data: account_balance_in_ether, "resp": result, "result23": result23, message: "Working" })
             }
             else {
@@ -441,7 +333,6 @@ module.exports =
                 let account_balance = await WEB3.eth.getBalance(addressObject[0].address)
                 let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
                 let decimals = await contract.methods.decimals().call();
-                // console.log(result.div(Web3.utils.toBN(10).pow(decimals)));
                 let decimals_call = await contract.methods.decimals().call();
                 console.log(result, decimals)
                 console.log(result, decimals, result / (1 * 10 ** decimals))
@@ -490,7 +381,6 @@ module.exports =
                     }
                 ])
             let addressObject = pooldata[0];
-            console.log("addressObject", addressObject)
             if (addressObject.networkDetails[0].cointype == "Token") {
                 const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
                 let abi = [
@@ -728,6 +618,7 @@ module.exports =
             })
         }
         catch (error) {
+            console.log()
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
@@ -898,10 +789,8 @@ module.exports =
     },
     async kyc_verification_status(req, res) {
         try {
-            console.log("kyc_verification_status ==============================", req.body)
             const kycWebHookLog = new kycWebHookLogs({ id: req.body.client_user_name, webhook_data: JSON.stringify(req.body) });
             let kycWebHookLogdata = await kycWebHookLog.save()
-
             clients.findOne({ api_key: req.body.client_user_name }).then(async (val) => {
                 if (val != null) {
                     if (req.body.review_answer == "GREEN") {
@@ -919,12 +808,9 @@ module.exports =
                             });
                             let client_Wallet = await clientWallet.save()
                         });
-
-
                         let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: true } }, { $new: true })
                         let kycclients = await clients.findOne({ api_key: req.body.client_user_name })
                         res.json({ status: 200, message: "Successfully", data: { "status": kycclients.status } })
-
                     }
                     else if (req.body.review_answer == "RED") {
                         let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: false } }, { $new: true })

@@ -5,6 +5,7 @@ const clientsController = require('../controllers/clientsController');
 const poolController = require('../controllers/poolController');
 const withdrawController = require('../controllers/withdrawController');
 const kycwebhooklogController = require('../controllers/kycwebhooklogController');
+const hotwallettranslogsController = require('../controllers/hotwallettranslogsController');
 const Auth = require('../Validation/Auth');
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -37,5 +38,5 @@ router.post('/customerstatus',                       clientsController.customers
 router.post('/resetMerchantTwoFa',                   clientsController.reset_merchant_two_fa);
 router.post('/clientwithdrawnetworkid',              withdrawController.get_client_withdraw_with_network_id);
 router.post('/updateClientToken',                    clientsController.updateClientToken);
-
+router.post('/getTranscationData',                    hotwallettranslogsController.getTranscationData);
 module.exports = router;

@@ -105,18 +105,11 @@ async function getBalance(transdata, transData) {
         let account_balance = 0
         var amountstatus = 0
         let merchantbalance = 0;
+       
+    
         if (addressObject.networkDetails[0].libarayType == "Web3") {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
             if (addressObject.networkDetails[0].cointype == "Token") {
-                let abi = [
-                    {
-                        constant: true,
-                        inputs: [{ name: "_owner", type: "address" }],
-                        name: "balanceOf",
-                        outputs: [{ name: "balance", type: "uint256" }],
-                        type: "function",
-                    },
-                ];
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, addressObject.networkDetails[0].contractAddress,);
                 account_balance = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
                 console.log("account_balance============", account_balance)
@@ -129,7 +122,6 @@ async function getBalance(transdata, transData) {
             else if (addressObject.networkDetails[0].cointype == "Native") {
                 account_balance = await WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
                 account_balance_in_ether = await Web3.utils.fromWei(account_balance.toString(), 'ether')
-                console.log("account_balance_in_ether Native", account_balance_in_ether)
             }
             merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
             console.log("merchantbalance ================", merchantbalance)
@@ -157,6 +149,7 @@ async function getBalance(transdata, transData) {
             tokenBalance = tronWeb.toDecimal(tokenBalance)
             account_balance_in_ether = tronWeb.fromSun(tokenBalance)
             merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
+            account_balance = account_balance_in_ether
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
             console.log("TronWeb=====================", amountstatus)
             console.log("merchantbalance merchantbalance", merchantbalance)
@@ -178,7 +171,7 @@ async function getBalance(transdata, transData) {
             let logData = { "transcationDetails": trans_data[0] }
 
             if (amountstatus == 1 || amountstatus == 3) {
-                let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, account_balance_in_ether)
+                let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, account_balance)
                 let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
             }
             response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
@@ -294,13 +287,16 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl));
                 const contract = new web3.eth.Contract(Constant.USDT_ABI, from_wallet[0].walletNetwork[0].contractAddress, { from: from_wallet[0].address })
                 let decimals = await contract.methods.decimals().call();
+                console.log("hotWallet===============",hotWallet)  
+                console.log("decimals===============",decimals)  
                 // let amount = web3.utils.toHex(web3.utils.toWei(account_balance))
                 let amount = account_balance;
-                if(decimals != 18)
-                {
-                console.log("decimals===============",decimals)    
-                amount = account_balance * 1*10**decimals
-                }
+                amount = web3.utils.numberToHex(amount);
+                // if(decimals != 18)
+                // {
+                // console.log("decimals===============",decimals)    
+                // amount = account_balance * 1*10**decimals
+                // }
                 
                 console.log("amount===============",amount)  
                 const accounttransfer = contract.methods.transfer(hotWallet.address, amount).encodeABI();
