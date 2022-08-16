@@ -287,6 +287,8 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl));
                 const contract = new web3.eth.Contract(Constant.USDT_ABI, from_wallet[0].walletNetwork[0].contractAddress, { from: from_wallet[0].address })
                 let decimals = await contract.methods.decimals().call();
+                console.log("hotWallet===============",hotWallet)  
+                console.log("decimals===============",decimals)  
                 // let amount = web3.utils.toHex(web3.utils.toWei(account_balance))
                 let amount = account_balance;
                 amount = web3.utils.numberToHex(amount);
