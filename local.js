@@ -42,8 +42,18 @@ app.use('/withdraw/v1', withdrawRoute);
 app.use('/admin/v1', adminRoute);
 
 
-//  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
-//  Database
+cron.schedule('* * * * * *', () => {
+    timer++
+    if(timer == 60)    
+    {
+        console.log("balance check")
+    }
+    if(timer == 120)    
+    {
+        console.log("balance check")
+        timer = 0
+    }
+});
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {

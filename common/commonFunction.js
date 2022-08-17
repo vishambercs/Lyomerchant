@@ -275,6 +275,7 @@ async function savelogs(merchant_trans_id, hot_wallet_id, trans_id, network_id, 
 }
 async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, account_balance) {
     try {
+        let txStatus = false;
         console.log("account_balance===============",account_balance)  
         const from_wallet = await poolWallets.aggregate(
             [
@@ -307,9 +308,19 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                     if (!error) {
                         savelogs(merchant_trans_id, hotWallet.id, hash, from_wallet[0].network_id, 1, "Done")
                         console.log("your transaction:", hash)
+                        Web3jsbsc.eth.getTransactionReceipt(hash, (err, res) => {
+                            if (err) {
+                                console.log("error in tx receipt",err)
+                            } else {
+                                console.log("transaction status",res.status)
+                                txStatus = res.status
+                            }
+                          })
+                        if (txStatus == true) {
                         const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
                         console.log("your transaction:", poolWallet)
                         return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
+                        }
                     } else {
                         console.log("❗Something went wrong while submitting your transaction:", error)
                         savelogs(merchant_trans_id, hotWallet.id, " ", from_wallet[0].network_id, 2, error)
