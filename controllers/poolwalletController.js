@@ -31,8 +31,14 @@ module.exports =
                     localField: "network_id",//field from the input documents
                     foreignField: "id",//field from the documents of the "from" collection
                     as: "walletNetwork"// output array field
-                }
+                },
+               
             },
+            {"$project":
+            {
+                "privateKey": 0,
+                
+            }}
             ]).then(async (data) => {
 
                 res.json({ status: 200, message: "Pool Wallet", data: data })
@@ -81,6 +87,11 @@ module.exports =
                     localField: "network_id",//field from the input documents
                     foreignField: "id",//field from the documents of the "from" collection
                     as: "walletNetwork"// output array field
+                },
+                "$project":
+                {
+                    "poolWallet.privateKey": 0,
+                    
                 }
             },
             ]).then(async (data) => 
