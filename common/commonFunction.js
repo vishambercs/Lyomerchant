@@ -117,9 +117,12 @@ async function getBalance(transdata, transData) {
                 let decimals = await contract.methods.decimals().call();
                 console.log("account_balance_in_ether Token", decimals)
                 account_balance_in_ether = account_balance / (1 * 10 ** decimals)
+                console.log("account_balance_in_ether account_balance", account_balance)
                 console.log("account_balance_in_ether Token", account_balance_in_ether)
+               
             }
-            else if (addressObject.networkDetails[0].cointype == "Native") {
+            else if (addressObject.networkDetails[0].cointype == "Native") 
+            {
                 account_balance = await WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
                 account_balance_in_ether = await Web3.utils.fromWei(account_balance.toString(), 'ether')
             }
@@ -127,14 +130,14 @@ async function getBalance(transdata, transData) {
             console.log("merchantbalance ================", merchantbalance)
             console.log("merchantbalance ================", account_balance_in_ether,addressObject.poolWallet[0].balance)
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
-            console.log("Web3=====================", amountstatus)
-            console.log("merchantbalance merchantbalance", merchantbalance)
-            console.log("merchantbalance addressObject.poolWallet[0].balance", addressObject.poolWallet[0].balance)
-            console.log("merchantbalance addressObject.amount ", addressObject.amount)
+            console.log("amountstatus", amountstatus)
+            console.log("merchantbalance", merchantbalance)
+            console.log("poolWalletbalance", addressObject.poolWallet[0].balance)
+            console.log("Transcation amount ", addressObject.amount)
             console.log("merchantbalance account_balance_in_ether", account_balance_in_ether)
-            console.log("merchantbalance poolWallet", addressObject.poolWallet)
-            console.log("merchantbalance transdata", transdata.poolWallet)
-            console.log("merchantbalance account_balance", account_balance)
+         
+           
+            
         }
         else {
             const HttpProvider = TronWeb.providers.HttpProvider;
@@ -152,12 +155,12 @@ async function getBalance(transdata, transData) {
             account_balance = account_balance_in_ether
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
             console.log("TronWeb=====================", amountstatus)
-            console.log("merchantbalance merchantbalance", merchantbalance)
-            console.log("merchantbalance addressObject.poolWallet[0].balance", addressObject.poolWallet[0].balance)
-            console.log("merchantbalance addressObject.amount ", addressObject.amount)
-            console.log("merchantbalance account_balance_in_ether", account_balance_in_ether)
-            console.log("merchantbalance poolWallet", addressObject.poolWallet)
-            console.log("merchantbalance account_balance", account_balance)
+            console.log("merchantbalance", merchantbalance)
+            console.log("addressObject.poolWallet.balance", addressObject.poolWallet[0].balance)
+            console.log("addressObject.amount ", addressObject.amount)
+            console.log("account_balance_in_ether", account_balance_in_ether)
+            console.log("poolWallet", addressObject.poolWallet)
+            console.log("account_balance", account_balance)
         }
         console.log("merchantbalance account_balance", amountstatus)
         if (amountstatus != 0) 
