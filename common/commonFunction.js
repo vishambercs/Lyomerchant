@@ -157,11 +157,11 @@ async function getBalance(transdata, transData) {
             console.log("merchantbalance addressObject.amount ", addressObject.amount)
             console.log("merchantbalance account_balance_in_ether", account_balance_in_ether)
             console.log("merchantbalance poolWallet", addressObject.poolWallet)
-            console.log("merchantbalance transdata", transdata.poolWallet)
             console.log("merchantbalance account_balance", account_balance)
         }
         console.log("merchantbalance account_balance", amountstatus)
-        if (amountstatus != 0) {
+        if (amountstatus != 0) 
+        {
             let val = await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id })
             let clientWallet = await clientWallets.updateOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
             let transactionpool = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
@@ -170,7 +170,8 @@ async function getBalance(transdata, transData) {
             let trans_data = await getTranscationDataForClient(addressObject.id)
             let logData = { "transcationDetails": trans_data[0] }
 
-            if (amountstatus == 1 || amountstatus == 3) {
+            if (amountstatus == 1 || amountstatus == 3) 
+            {
                 let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, account_balance)
                 let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
             }
@@ -307,7 +308,8 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                     if (!error) {
                         savelogs(merchant_trans_id, hotWallet.id, hash, from_wallet[0].network_id, 1, "Done")
                         console.log("your transaction:", hash)
-                        const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
+                        // const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
+                        const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : 0 }})
                         console.log("your transaction:", poolWallet)
                         return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
                     } else {
@@ -326,11 +328,21 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 let contract = await tronWeb.contract().at(from_wallet[0].walletNetwork[0].contractAddress);
                 let result23 = await tronWeb.trx.getBalance(from_wallet[0].address)
                 let account_balance_in_ether = await tronWeb.trx.getBalance(from_wallet[0].address)
+                console.log("account_balance_in_ether ===============",account_balance_in_ether)
                 let result = await contract.balanceOf(from_wallet[0].address).call();
-                const { abi } = await tronWeb.trx.getContract(from_wallet[0].walletNetwork[0].contractAddress);
-                const sendcontract = tronWeb.contract(abi.entrys, from_wallet[0].walletNetwork[0].contractAddress);
-                let result345 = await contract.transfer(hotWallet.address, account_balance).send({ feeLimit: 10000000000 })
-                const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
+                // console.log("account_balance_in_ether ===============",result)
+                // result = tronWeb.toBigNumber(result)
+                // console.log("account_balance_in_ether3 ===============",result)
+                // result = tronWeb.toDecimal(result)
+                // console.log("account_balance_in_ether2 ===============",result)
+                // result = tronWeb.fromSun(result)
+                // console.log("account_balance_in_ether1 ===============",result)
+
+                const { abi }        = await tronWeb.trx.getContract(from_wallet[0].walletNetwork[0].contractAddress);
+                const sendcontract   = tronWeb.contract(abi.entrys, from_wallet[0].walletNetwork[0].contractAddress);
+                let result345        = await contract.transfer(hotWallet.address, result).send({ feeLimit: 10000000000 })
+                // const poolWallet  = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
+                const poolWallet     = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : 0 }})
                 savelogs(merchant_trans_id, hotWallet.id, result345, from_wallet[0].network_id, 1, "Done")
                 
                 return JSON.stringify({ status: 200, message: "Pool Wallet", data: result345 })

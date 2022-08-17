@@ -37,7 +37,7 @@ module.exports =
                     transferlimit: req.body.transferlimit,
                     created_by: req.body.created_by,
                     scanurl: req.body.scanurl,
-                    gaspriceurl: req.body.scanurl,
+                    gaspriceurl: req.body.gaspriceurl,
                 });
                 NetworkItem.save().then(async (val) => {
                     for (let i = 0; i < 10; i++) 
@@ -94,7 +94,7 @@ module.exports =
                             transferlimit: req.body.transferlimit,
                             created_by: req.body.created_by,
                             scanurl: req.body.scanurl,
-                            gaspriceurl: req.body.scanurl,
+                            gaspriceurl: req.body.gaspriceurl,
                         }
                     }).then(async (val) => {
                         if (val != null) 
@@ -185,10 +185,68 @@ module.exports =
             })
 
         }
+        catch (error) 
+        {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async changeHotWalletStatusLimit(req, res) {
+        try {
+            await Network.updateOne({ 'id': req.body.id },
+            {
+                $set:
+                {
+                    hotwallettranscationstatus: req.body.status,
+                   
+                }
+            }).then(async (val) => 
+            {
+                if (val != null) 
+                {
+                    const NetworkDetails = await Network.find({ 'id': req.body.id })
+                    res.json({ status: 200, message: "Successfully", data: NetworkDetails })
+                }
+                else {
+                    res.json({ status: 200, message: "Not Found the Data", data: null })
+                }
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+        }
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-    
+    async changeHotWalletStatusLimit(req, res) {
+        try {
+            await Network.updateOne({ 'id': req.body.id },
+            {
+                $set:
+                {
+                    hotwallettranscationstatus: req.body.status,
+                   
+                }
+            }).then(async (val) => 
+            {
+                if (val != null) 
+                {
+                    const NetworkDetails = await Network.find({ 'id': req.body.id })
+                    res.json({ status: 200, message: "Successfully", data: NetworkDetails })
+                }
+                else {
+                    res.json({ status: 200, message: "Not Found the Data", data: null })
+                }
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }
