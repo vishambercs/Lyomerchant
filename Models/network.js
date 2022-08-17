@@ -63,13 +63,19 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
-        processingfee:{
-            type: Number,
+        processingfee:{ 
+            type: Number, 
             required: true,
         },
         transferlimit:{
             type: Number,
             required: true,
+        },
+        hotwallettranscationstatus:
+        {
+            type        : Boolean,
+            required    : true,
+            default     : true,
         },
         created_by: {
             type: Number,
