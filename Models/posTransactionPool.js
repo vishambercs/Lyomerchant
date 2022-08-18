@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 
-const transactionPoolSchema = new mongoose.Schema({
+const posTransactionPoolSchema = new mongoose.Schema({
     id:
     {
         type: String,
@@ -57,4 +57,4 @@ const transactionPoolSchema = new mongoose.Schema({
   },
     { timestamps: true }
 )
-module.exports = mongoose.model('transactionPool', transactionPoolSchema)
+module.exports = mongoose.model('posTransactionPoolSchema', posTransactionPoolSchema)

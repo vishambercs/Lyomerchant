@@ -35,8 +35,8 @@ module.exports =
                     currency: req.body.currency,
                     callbackURL: req.body.callbackURL,
                     orderid: req.body.orderid,
-                    status: 0,
                     clientToken: req.body.token,
+                    status: 0,
                     walletValidity: currentDate
                 });
                 transactionPool.save().then(async (val) => {

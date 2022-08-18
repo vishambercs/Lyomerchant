@@ -32,6 +32,7 @@
     "socket.io": "^4.5.1",
     "tron-create-address": "^0.1.10",
     "tronweb": "^4.3.0",
+    "validatorjs": "^3.22.1",
     "web3": "^1.7.4",
     "websocket": "^1.0.34"
   },

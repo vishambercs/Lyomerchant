@@ -1,4 +1,5 @@
 const client = require('../Models/clients');
+const Validator = require('./index');
 require("dotenv").config()
 module.exports =
 {
@@ -32,6 +33,40 @@ module.exports =
         }
         catch (error) {
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    
+    verfiy_The_Merchant(req, res, next) {
+        try {
+            const validationRule = 
+            {
+                "networkType"   : "required|string",
+                "callbackURL"   : "required|string",
+                "securityHash"  : "required|string",
+                "orderid"       : "required|string",
+                "token"         : "required|string",
+                "currency"      : "required|string",
+                "amount"        : "required|decimal",
+                "categoryid"    : "required|string",
+            }
+            Validator(req.body, validationRule, {}, (err, status) => 
+            {
+                if (!status) 
+                {
+                    res.status(412).send({ status: 412,message: 'Validation failed', data: err });
+                }
+                // else if(){
+
+                // } 
+                else 
+                {
+                    next();
+                }
+            });
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: error.message })
         }
     },
 }
