@@ -22,22 +22,17 @@ const merchantstoreSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    storeqrcode:
-    {
-        type: String,
-        required: true,
-    },
     status:
     {
-        type: String,
+        type: Number,
         required: true,
     },
     created_by: {
-        type: Number,
+        type: String,
         required: true,
     },
     deleted_by: {
-        type: Number,
+        type: String,
         required: false,
         default: 0
     },

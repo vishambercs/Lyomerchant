@@ -44,7 +44,6 @@ router.post('/getTranscationData',                     hotwallettranslogsControl
 
 router.post('/createMerchantStore',                    merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                        merchantstoreController.allMerchantStore);
-
-
+router.post('/merchantstore',                          merchantstoreController.MerchantStore);
 
 module.exports = router;
