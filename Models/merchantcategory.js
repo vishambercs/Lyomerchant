@@ -1,52 +1,51 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const poolWalletSchema = new mongoose.Schema({
+var uniqueValidator = require('mongoose-unique-validator');
+const merchantcategorySchema = new mongoose.Schema({
     id:
     {
         type: String,
         required: true,
-        unique:true,
     },
-    network_id:
+    categoryid:
     {
         type: String,
         required: true,
     },
-    balance:
-    {
-        type: String,
-        required: true,
-        default : 0
-    },
-    address:
+    clientapikey:
     {
         type: String,
         required: true,
     },
-    privateKey: {
-        type: String,
-        required: true,
-    },
-    status: {
+    status:
+    {
         type: Number,
-        required: false,
-        default: 0,
+        required: true,
     },
     created_by: {
+        type: Number,
+        required: true,
+    },
+    deleted_by: {
+        type: Number,
+        required: false,
+        default: 0
+    },
+    deleted_at: {
         type: String,
         required: false,
-        default: 0,
     },
-    
+
 },
     {
         toJSON: {
             transform(doc, ret) {
-                delete ret.privateKey;
+                delete ret.password;
                 delete ret.__v;
             },
         },
     },
     { timestamps: true }
 )
-module.exports = mongoose.model('poolWallet', poolWalletSchema)
+merchantcategorySchema.plugin(uniqueValidator);
+module.exports = mongoose.model('merchantcategorySchema', merchantcategorySchema)

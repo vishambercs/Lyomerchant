@@ -4,23 +4,23 @@ const transcationLog = require('../Models/transcationLog');
 const cornJobs = require('../common/cornJobs');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
-var Utility = require('../common/Utility');
-var constant = require('../common/Constant');
-var commonFunction = require('../common/commonFunction');
-const bcrypt = require('bcrypt');
-const Web3 = require('web3');
-const clientWallets = require('../Models/clientWallets');
-const poolWallet = require('../Models/poolWallet');
-const transactionPools = require('../Models/transactionPool');
+var Utility             = require('../common/Utility');
+var constant            = require('../common/Constant');
+var commonFunction      = require('../common/commonFunction');
+const bcrypt            = require('bcrypt');
+const Web3              = require('web3');
+const clientWallets     = require('../Models/clientWallets');
+const poolWallet        = require('../Models/poolWallet');
+const transactionPools  = require('../Models/transactionPool');
 const { authenticator } = require('otplib')
-const QRCode = require('qrcode')
-const network = require('../Models/network');
-var mongoose = require('mongoose');
-const axios = require('axios')
-var stringify = require('json-stringify-safe');
-const Constant = require('../common/Constant');
-var otpGenerator = require('otp-generator')
-const TronWeb = require('tronweb')
+const QRCode            = require('qrcode')
+const network           = require('../Models/network');
+var mongoose            = require('mongoose');
+const axios             = require('axios')
+var stringify           = require('json-stringify-safe');
+const Constant          = require('../common/Constant');
+var otpGenerator        = require('otp-generator')
+const TronWeb           = require('tronweb')
 require("dotenv").config()
 
 module.exports =
@@ -106,7 +106,6 @@ module.exports =
     async resendingemail(req, res) {
         var email = req.body.email
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false })
-
         await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "emailtoken": otp, "emailstatus": false, "loginstatus": false } }, { $new: true })
             .then(async (val) => {
                 console.log("val otp", val)
