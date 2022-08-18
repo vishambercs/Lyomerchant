@@ -307,8 +307,8 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 web3.eth.sendSignedTransaction(signedTx.rawTransaction, async function (error, hash) {
                     if (!error) {
                         savelogs(merchant_trans_id, hotWallet.id, hash, from_wallet[0].network_id, 1, "Done")
-                        console.log("your transaction:", hash)
-                        Web3jsbsc.eth.getTransactionReceipt(hash, (err, res) => {
+                        console.log("your transaction:", stringify(hash))
+                        web3.eth.getTransactionReceipt(('0x9c68d470bce350bb590cc600bef59a5356fa3ff219dd293e300dadbc3f24a92e'), (err, res) => {
                             if (err) {
                                 console.log("error in tx receipt",err)
                             } else {
@@ -317,7 +317,8 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                             }
                           })
                         if (txStatus == true) {
-                        const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
+                        //const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
+                        const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : 0 }})
                         console.log("your transaction:", poolWallet)
                         return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
                         }
@@ -341,7 +342,8 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 const { abi } = await tronWeb.trx.getContract(from_wallet[0].walletNetwork[0].contractAddress);
                 const sendcontract = tronWeb.contract(abi.entrys, from_wallet[0].walletNetwork[0].contractAddress);
                 let result345 = await contract.transfer(hotWallet.address, account_balance).send({ feeLimit: 10000000000 })
-                const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
+                //const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
+                const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : 0 }})
                 savelogs(merchant_trans_id, hotWallet.id, result345, from_wallet[0].network_id, 1, "Done")
                 
                 return JSON.stringify({ status: 200, message: "Pool Wallet", data: result345 })
