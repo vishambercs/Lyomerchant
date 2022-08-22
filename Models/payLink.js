@@ -42,12 +42,12 @@ const payLinkSchema = new mongoose.Schema({
     duedate: 
     {
         type: String,
-        required: true,
+        
     },
     additionalNotes: 
     {
         type: String,
-        required: true,
+        
     },
     currency:
     {
@@ -58,13 +58,7 @@ const payLinkSchema = new mongoose.Schema({
     {
         type: Number,
         required: true,
-    },
-   
-    orderId: {
-        type: String,
-        required: true,
-    },
-      
+    },   
     status: {
         type: String,
         required: true,

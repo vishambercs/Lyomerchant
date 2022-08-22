@@ -12,6 +12,7 @@ const invoiceSchema = new mongoose.Schema({
     {
         type: String,
         required: true,
+        unique: true,
     },
     merchantId :
     {
@@ -51,8 +52,45 @@ const invoiceSchema = new mongoose.Schema({
 
         },
     ],
+    customerName : 
+    {
+        type: String,
+        required: true,
+    },
+    
+    email: 
+    {
+        type: String,
+        required: true,
+    },
+    mobileNumber:
+    {
+        type: String,
+        required: true,
+    },
+    duedate: 
+    {
+        type: String,
+        
+    },
+    additionalNotes: 
+    {
+        type: String,
+        
+    },
+    currency:
+    {
+        type: String,
+        required: true,
+    },
+    totalAmount: 
+    {
+        type: Number,
+        required: true,
+    },
+   
     status: {
-        type: Boolean,
+        type: String,
         required: true,
     },
 },

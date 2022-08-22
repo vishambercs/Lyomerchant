@@ -308,7 +308,7 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                     if (!error) {
                         savelogs(merchant_trans_id, hotWallet.id, hash, from_wallet[0].network_id, 1, "Done")
                         console.log("your transaction:", stringify(hash))
-                        web3.eth.getTransactionReceipt(('0x9c68d470bce350bb590cc600bef59a5356fa3ff219dd293e300dadbc3f24a92e'), (err, res) => {
+                        web3.eth.getTransaction((hash), (err, res) => {            //getTransactionReceipt
                             if (err) {
                                 console.log("error in tx receipt",err)
                             } else {
