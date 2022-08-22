@@ -9,6 +9,7 @@ router.post('/getAllInvoices',payLinkController.getAllInvoices);
 router.post('/verifyPaymentLink',payLinkController.verifyPaymentLink);
 router.post('/createFastCode',payLinkController.createFastCode);
 router.post('/verifyFastPayment',payLinkController.verifyFastPayment);
+router.post('/verifyFastCode',payLinkController.verifyFastCode);
 
 
 module.exports = router;

@@ -151,11 +151,12 @@ module.exports =
             let businessName = req.body.businessName
             let code = parseInt(Math.random() * (1000000 - 100000)) ;
             let fastCodeObject = {"businessName":businessName,"fastCode":code, "status":"active"}
-            console.log(fastCodeObject)
+            console.log("------------",req.body.businessName)
             //fastPaymentCode.find({name:{$exists:true}})
             try {
                 let new_record = new fastPaymentCode({
                     id: mongoose.Types.ObjectId(),
+                    businessName:req.body.businessName,
                     merchantId: merchantKey,
                     fastCodes: fastCodeObject,
                 })
@@ -173,40 +174,47 @@ module.exports =
         },
 
         async verifyFastPayment(req, res) {
-            console.log("fastCode",req.body.fastCode)
+            console.log("verify",req.headers.authorization,req.body.businessName)
             let findResult= ''
             let response = []            
             let status = 200;
             try{
-            findResult = await fastPaymentCode.find({
-                fastCode: req.body.fastCode,                          
-            }); 
-            //findResult = fastPaymentCode.fastCodes.find({fastCodes:{$elemMatch:{fastCode : "599469"}}}).pretty();
-            console.log("fastCode number",findResult)
-            response.push(findResult)
-            console.log(response)
-            invoiceNumber = findResult[0].invoiceNumber
-            console.log("invoice number",invoiceNumber)
-             
+            findResult = await fastPaymentCode.find({                
+            "fastCodes.businessName":req.body.businessName,
+            "merchantId": req.headers.authorization
+            })
+            //console.log("fastCode number",findResult)
+            response=findResult             
          }
          catch (error){
              response = "someting went wrong"
              status = 400
              response = error
          }
-         try{     
-            if(invoiceNumber){
-           
-            response = await invoice.find({
-            invoiceNumber : invoiceNumber
-            });
-            console.log("invoice",response)
+   
+         res.json({ status: status, data:response, message: "verify fast code" })        
+        },
+
+        async verifyFastCode(req, res) {
+        console.log("fastCode",req.body.fastCode)
+        let findResult= ''
+        let response = []            
+        let status = 200;
+        try{     
+            findResult = await fastPaymentCode.find({
+            "fastCodes.fastCode": req.body.fastCode})
+         console.log("fastCode number",findResult)
+         response=(findResult)
+         
+                     
          }
-        }
          catch (error){
-            
+             response = "someting went wrong"
+             status = 400
+             response = error
          }
-         res.json({ status: status, data:response, message: "verify invoice" })        
+        
+         res.json({ status: status, data:response, message: "verify fast code" })        
         },
     }
 
