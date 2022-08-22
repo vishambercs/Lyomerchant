@@ -27,6 +27,7 @@ module.exports =
 {
     async create_clients(req, res) {
         try {
+            console.log("create client",req.body,req.header)
             var api_key = crypto.randomBytes(20).toString('hex');
             var email = req.body.email
             var hash = CryptoJS.MD5(email + process.env.BASE_WORD_FOR_HASH).toString();
@@ -34,9 +35,11 @@ module.exports =
                 const client = new clients({ status: false, api_key: api_key, email: req.body.email, });
                 const previous_client = await clients.findOne({ 'email': email }).then(async (val) => {
                     if (val == null) {
+                        console.log(val)
                         res.json({ status: 200, message: "Clients Data", data: {} })
                     }
                     else {
+                        console.log(val)
                         res.json({ status: 200, message: "Clients Data", data: { id: val._id, token: val.token, api_key: val.api_key, email: val.email } })
                     }
                 }).catch(error => {

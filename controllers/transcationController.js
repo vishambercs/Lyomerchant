@@ -1,5 +1,5 @@
 const clients = require('../Models/clients');
-const transactions = require('../Models/WalletAddress');
+//const transactions = require('../Models/WalletAddress');
 const transactionPool = require('../Models/transactionPool');
 const transcationLog = require('../Models/transcationLog');
 const poolWallet = require('../Models/poolWallet');

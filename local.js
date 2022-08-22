@@ -5,6 +5,7 @@ var client = require('./Route/clientsRoute');
 var poolRoute = require('./Route/poolRoute');
 var networkRoute = require('./Route/networkRoute');
 var walletRoute = require('./Route/poolwalletRoute');
+var payLinkRoute = require('./Route/paylinkRoute');
 var hotWalletRoute = require('./Route/hotWalletRoute');
 var withdrawRoute = require('./Route/withdrawRoute');
 var adminRoute = require('./Route/adminRoute');
@@ -36,14 +37,25 @@ app.get('/', function (req, res) { res.send('Welcome to Lyo Merchant'); });
 app.use('/v1', client);
 app.use('/admin/v1', poolRoute);
 app.use('/network/v1', networkRoute);
+app.use('/paymentlink/v1', payLinkRoute);
 app.use('/wallet/v1', walletRoute);
 app.use('/hotWallet/v1', hotWalletRoute);
 app.use('/withdraw/v1', withdrawRoute);
 app.use('/admin/v1', adminRoute);
 
 
-//  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
-//  Database
+cron.schedule('* * * * * *', () => {
+    timer++
+    if(timer == 60)    
+    {
+        console.log("balance check")
+    }
+    if(timer == 120)    
+    {
+        console.log("balance check")
+        timer = 0
+    }
+});
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
