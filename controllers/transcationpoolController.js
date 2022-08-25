@@ -466,5 +466,84 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+
+    async get_Trans_by_txId(req, res) {
+        try {
+            console.log(req.body.id)
+            await transactionPools.aggregate(
+                [
+                    { $match: { "id": req.body.id } },
+                    {
+                        $lookup: {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "poolWallet"// output array field
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "transactionpools", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "walletValidity",//field from the documents of the "from" collection
+                            as: "walletValidity"// output array field
+                        }
+                    },
+
+                     {
+                        $lookup: {
+                            from: "networks", // collection to join
+                            localField: "poolWallet.network_id",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "networkDetails"// output array field
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "transcationlogs", // collection to join
+                            localField: "id",//field from the input documents
+                            foreignField: "trans_pool_id",//field from the documents of the "from" collection
+                            as: "transactionDetails"// output array field
+                        }
+                    },
+                    
+                    
+                    {
+                        "$project": {
+                            "poolWallet.api_key":0,
+                            "poolWallet.privateKey": 0,
+                            "poolWallet.poolwalletID": 0,
+                            "poolWallet.orderid": 0,
+                            "poolWallet.clientToken": 0,
+                            "poolWallet.currency": 0,
+                            "poolWallet.callbackURL": 0,
+                            "poolWallet.createdAt": 0,
+                            "poolWallet.updatedAt": 0,
+                            "poolWallet.__v": 0,
+                            "poolWallet.transactionDetails": 0,
+                            "poolWallet.balance": 0,
+                            "poolWallet.id": 0,
+                            "poolWallet._id": 0,
+                            "poolWallet.status": 0,                            
+                            "networkDetails.__v": 0,
+                            "networkDetails.nodeUrl": 0,
+                            "networkDetails.created_by": 0,
+                            "networkDetails.createdAt": 0,
+                            "networkDetails.updatedAt": 0,
+                            "networkDetails._id": 0
+                        }
+                    }
+                ]).then(async (data) => {
+                    res.json({ status: 200, message: "transaction details", data: data })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
     
 }

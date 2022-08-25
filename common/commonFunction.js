@@ -105,9 +105,10 @@ async function getBalance(transdata, transData) {
         let account_balance = 0
         var amountstatus = 0
         let merchantbalance = 0;
-       
+       console.log("-----------------------",addressObject)
     
         if (addressObject.networkDetails[0].libarayType == "Web3") {
+            
             const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
             if (addressObject.networkDetails[0].cointype == "Token") {
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, addressObject.networkDetails[0].contractAddress,);
@@ -443,6 +444,11 @@ module.exports =
             return 0
         }
     },
+
+    async transaction_DataForClient(transKey) {
+        getTranscationDataForClient(transKey)
+    },
+
     async remaining_balance(previous, need, current) {
         console.log("remaining_balance==============", current - previous)
         console.log("remaining_balance==============", need)

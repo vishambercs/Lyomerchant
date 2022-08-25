@@ -6,6 +6,8 @@ const Web3 = require('web3');
 const Tx = require('ethereumjs-tx')
 const poolWallets = require('../Models/poolWallet');
 const Constant = require('../common/Constant');
+//const commonFunction = require("../common/commonFunction")
+
 require("dotenv").config()
 
 module.exports =
@@ -81,4 +83,5 @@ module.exports =
         }
     },
 
+   
 }
