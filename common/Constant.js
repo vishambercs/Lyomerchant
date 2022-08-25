@@ -13,6 +13,8 @@ const kyc_path3         = "/level/LMT_basic_level/kyc"
 const kyc_levels        = "/api/kyc/levels"
 const web_hook_link     = "/api/clients/webhook/"
 const posTransList      = []
+const paymenlinkTransList = []
+const paymenlinkIndex = 0
 
 const abi = 
 [
@@ -53,5 +55,7 @@ module.exports =
     USDT_ABI       : USDT_ABI,   
     posTransList   : posTransList,
     postransindex  : postransindex,
+    paymenlinkTransList : paymenlinkTransList,
+    paymenlinkIndex : paymenlinkIndex
           
 }

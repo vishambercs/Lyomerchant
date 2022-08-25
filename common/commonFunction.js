@@ -701,4 +701,27 @@ module.exports =
             Constant.postransindex = 0;
         }
     },
+
+    async get_data_of_Paymentlink_transcation() {
+        if (Constant. paymenlinkIndex < Constant. paymenlinkTransList.length) {
+            let transData = Constant. paymenlinkTransList[Constant. paymenlinkIndex]
+            let transcationData = await transUtility.getPosTranscationData(transData.transkey)
+            let balance_data = await transUtility.getTrasnsBalance(transcationData)
+            let balanceResponse = JSON.parse(balance_data)
+            console.log("get_data_of_payment link transcation==",balanceResponse);
+            if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
+                transData.connection.sendUTF(JSON.stringify(balanceResponse));
+                transData.connection.close(1000)
+                Constant. paymenlinkTransList = await Constant. paymenlinkTransList.filter(translist => translist.transkey != transData.transkey);
+            }
+            else {
+                transData.connection.sendUTF(JSON.stringify(balanceResponse));
+            }
+            Constant. paymenlinkIndex = Constant. paymenlinkIndex + 1
+        }
+        else {
+            Constant. paymenlinkIndex = 0;
+        }
+    },
+
 }

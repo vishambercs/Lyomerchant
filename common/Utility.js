@@ -350,17 +350,17 @@ module.exports =
             if(getTranscationData.length > 0)
             {
             const connection   = request.accept(null, request.origin);
-            var index = Constant.posTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            var index = Constant.paymenlinkTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
             if(index == -1)
             {
             let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
-            Constant.posTransList.push(client_object)
+            Constant.paymenlinkTransList.push(client_object)
             }
             else
             {
-                Constant.posTransList[index]["connection"] = connection
+                Constant.paymenlinkTransList[index]["connection"] = connection
             }
-            Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 20000);
+            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 20000);
             connection.on('message', function (message) {
             if(index == -1)
             {
