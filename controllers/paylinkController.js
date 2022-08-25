@@ -205,6 +205,7 @@ module.exports =
     },
 
     async verifyFastCode(req, res) {
+        let storeProfile = ''
         console.log("fastCode", req.body.fastCode)
         let findResult = ''
         let response = []
@@ -213,8 +214,18 @@ module.exports =
             findResult = await fastPaymentCode.find({
                 "fastCodes.fastCode": req.body.fastCode
             })
-            console.log("fastCode number", findResult)
+            
+            try{
+                console.log(req.headers.authorization,findResult[0].fastCodes[0].businessName)
+                storeProfile = await merchantStore.findOne({
+                storename:findResult[0].fastCodes[0].businessName
+            });
+        }
+        catch (error){
+
+        }
             response = (findResult)
+            console.log("result",storeProfile)
         }
         catch (error) {
             response = "someting went wrong"
@@ -222,12 +233,14 @@ module.exports =
             response = error
         }
         if (response == 0) status = 400
-        res.json({ status: status, data: response, message: "verify fast code" })
+        //res.json({ status: status, data: {"data":response,"storeProfile":storeProfile}, message: "verify fast code" })
+        res.json({ status: status, data: response,storeProfile, message: "verify fast code" })
     },
 
     async createFastCode(req, res) {
         let message = ''
         let status = 200
+        let storeProfile = ''
         var merchantKey = req.headers.authorization
         let dataResponse = ''
         let fastCodeObject = []
@@ -308,6 +321,8 @@ module.exports =
             status = 400
             dataResponse = 'null'
         }
+
+        
         res.json({ status: status, data: dataResponse, message: message })
     },
 
