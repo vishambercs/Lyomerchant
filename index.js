@@ -46,9 +46,9 @@ app.use('/admin/v1',     adminRoute);
 //  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
 //  Database
 
-const privateKey   = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/privkey.pem',  'utf8');
-const certificate  = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/cert.pem',     'utf8');
-const ca           = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/chain.pem',    'utf8');
+const privateKey   = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/privkey.pem',  'utf8');
+const certificate  = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/cert.pem',     'utf8');
+const ca           = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/chain.pem',    'utf8');
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
