@@ -37,14 +37,14 @@ router.post('/resendingemail',                       clientsController.resending
 router.post('/verfiyemail',                          clientsController.verfiyemail);
 router.post('/allMerchant',                          clientsController.allMerchant);
 router.post('/customerstatus',                       clientsController.customerstatus);
-<<<<<<< HEAD
+
 router.post('/resetMerchantTwoFa',                   clientsController.reset_merchant_two_fa);
 router.post('/clientwithdrawnetworkid',              withdrawController.get_client_withdraw_with_network_id);
 router.post('/updateClientToken',                    clientsController.updateClientToken);
 router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             transcationpoolController. get_Trans_by_txId);
 
-=======
+
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
 router.post('/forgotPassword',                       clientsController.forgotPassword);
 router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);
@@ -54,7 +54,7 @@ router.post('/resetPassword',                        clientsController.ResetPass
 router.post('/clientwithdrawnetworkid',                withdrawController.get_client_withdraw_with_network_id);
 router.post('/updateClientToken',                      clientsController.updateClientToken);
 router.post('/getTranscationData',                     hotwallettranslogsController.getTranscationData);
->>>>>>> 24bfdf70e326616e1f531dcabb82b60ce066b22b
+
 // =============MerchantStore=========================================== //
 router.post('/createMerchantStore',                    merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                        merchantstoreController.allMerchantStore);

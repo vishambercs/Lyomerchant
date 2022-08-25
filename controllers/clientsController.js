@@ -1009,7 +1009,7 @@ module.exports =
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
                 if (password_status == true) 
                 {
-                    let client = await clients.findOneAndUpdate({ email: req.body.email}, { $set: { "password": password_hash } })
+                    let client =  clients.findOneAndUpdate({ email: req.body.email}, { $set: { "password": password_hash } })
                     res.json({ "status": 200, "data": client, "message": "Password Updated" })
                 }
                 else if (password_status == false) {
