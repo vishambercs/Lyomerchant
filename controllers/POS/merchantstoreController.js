@@ -107,6 +107,16 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async updateMerchantStoreProfile(req, res) {
+        try {
+            let update = await merchantstores.findOneAndUpdate({ 'clientapikey': req.headers.authorization } , { $set: { storeprofile:req.body.storeprofile} }, { $new: true } )
+            res.json({ status: 200, data: {update}, message: "update profile" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 
 
 
