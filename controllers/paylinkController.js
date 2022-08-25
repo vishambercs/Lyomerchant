@@ -2,6 +2,7 @@ const invoice = require('../Models/invoice');
 const paylinkPayment = require('../Models/payLink');
 const transaction = require("../controllers/transcationpoolController")
 const fastPaymentCode = require('../Models/fastPaymentCode');
+const merchantStore = require('../Models/merchantstore');
 var mongoose = require('mongoose');
 let message = ''
 let status = ''
@@ -238,6 +239,9 @@ module.exports =
             return
         }
         try {
+            await merchantStore.findOne({ "storename": req.body.businessName }).then(async (val) => {
+            console.log("valueeeeeeeeee",val)
+            if(val.clientapikey == req.headers.authorization ){          
             await fastPaymentCode.findOne({ "merchantId": merchantKey }).then(async (val) => {
                 if (val) {
                     fastCodeObject = val
@@ -292,10 +296,15 @@ module.exports =
                         dataResponse = 'null'
                     }
                 }
-            })
+            })}
+        
+        else {message = "Store does not exist"
+            status = 400
+            dataResponse = 'null'}
+        })
         }
         catch (error) {
-            message = error
+            message = "Store does not exist"
             status = 400
             dataResponse = 'null'
         }
