@@ -59,6 +59,7 @@ router.post('/getTranscationData',                     hotwallettranslogsControl
 router.post('/createMerchantStore',                    merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                        merchantstoreController.allMerchantStore);
 router.post('/merchantstore',                          merchantstoreController.MerchantStore);
+router.post('/merchantProfileUpdate',                  merchantstoreController.updateMerchantStoreProfile);
 // =============Pos Merchant Wallet=========================================== //
 router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
