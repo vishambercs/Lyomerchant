@@ -1,27 +1,31 @@
 const clients = require('../Models/clients');
 const kycWebHookLogs = require('../Models/kycWebHookLog');
 const transcationLog = require('../Models/transcationLog');
+const admins = require('../Models/admin');
 const cornJobs = require('../common/cornJobs');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
-var Utility             = require('../common/Utility');
-var constant            = require('../common/Constant');
-var commonFunction      = require('../common/commonFunction');
-const bcrypt            = require('bcrypt');
-const Web3              = require('web3');
-const clientWallets     = require('../Models/clientWallets');
-const poolWallet        = require('../Models/poolWallet');
-const transactionPools  = require('../Models/transactionPool');
+var Utility = require('../common/Utility');
+var constant = require('../common/Constant');
+var commonFunction = require('../common/commonFunction');
+const bcrypt = require('bcrypt');
+const Web3 = require('web3');
+const clientWallets = require('../Models/clientWallets');
+const poolWallet = require('../Models/poolWallet');
+const transactionPools = require('../Models/transactionPool');
 const { authenticator } = require('otplib')
-const QRCode            = require('qrcode')
-const network           = require('../Models/network');
-var mongoose            = require('mongoose');
-const axios             = require('axios')
-var stringify           = require('json-stringify-safe');
-const Constant          = require('../common/Constant');
-var otpGenerator        = require('otp-generator')
-const TronWeb           = require('tronweb')
+const QRCode = require('qrcode')
+const network = require('../Models/network');
+var mongoose = require('mongoose');
+const axios = require('axios')
+var stringify = require('json-stringify-safe');
+const Constant = require('../common/Constant');
+var otpGenerator = require('otp-generator')
+const TronWeb = require('tronweb')
 require("dotenv").config()
+
+const jwt = require('jsonwebtoken');
+const { generateAccount } = require('tron-create-address')
 
 module.exports =
 {
@@ -101,8 +105,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Hash" })
         }
     },
-
-
     async resendingemail(req, res) {
         var email = req.body.email
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false })
@@ -247,7 +249,42 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }
     },
+    async changeMerchantEmail(req, res) {
+        try {
+            let val = await clients.findOneAndUpdate({ email: req.body.currentemail }, { $set: { email: req.body.newemail } }, { $new: true })
+            if (val != null) {
+                res.json({ status: 200, message: "Email Changed", data: { "email": req.body.newemail } })
+            }
+            else {
+                res.json({ status: 400, message: "Invalid Email", data: null })
+            }
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
+        }
+    },
+    async changeMerchantPassword(req, res) {
+        try {
 
+            const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+            var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+            const password_hash = bcrypt.hashSync(otp, salt);
+            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { password: password_hash } }, { $new: true })
+            if (val != null) {
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
+                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+                console.log("email_response", email_response)
+                res.json({ status: 200, message: "We have changed the password . Please Check your email", data: { "email": req.body.email } })
+            }
+            else {
+                res.json({ status: 400, message: "Invalid Email", data: null })
+            }
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
+        }
+    },
     async Verfiy_Google_Auth(req, res) {
         try {
             let email = req.body.email
@@ -871,6 +908,148 @@ module.exports =
                 });
         }
         catch (error) {
+            res.json({ status: 400, data: {}, message: "Customer did not find" })
+        }
+    },
+    async merchantImpersonation(req, res) {
+        try {
+            await admins.findOne({ 'admin_api_key': req.body.admin_api_key }).then(async (val) => {
+                if (authenticator.check(code, val.secret)) {
+                    let clientsData = await clients.findOne({ api_key: req.body.client_api_key })
+                    if (clientsData == null) {
+                        res.json({ "status": 200, "data": {}, "message": "Client Does Not Exist" })
+                    }
+                    else {
+                        res.json({ "status": 200, "data": { "clientsData": clientsData }, "message": "Verification Failed" })
+                    }
+                } else {
+                    res.json({ "status": 400, "data": {}, "message": "Verification Failed" })
+                }
+            }).catch(error => {
+                console.log("get_clients_data", error)
+                // res.json({ "error": error })
+                res.json({ status: 400, data: {}, message: "Verification Failed" })
+            })
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Customer did not find" })
+        }
+    },
+    async customerstatus(req, res) {
+        try {
+            await clients.findOneAndUpdate({ api_key: req.body.api_key }, { $set: { "loginstatus": req.body.status } }, { $new: true })
+                .then(async (val) => {
+                    if (val != null) {
+                        res.json({ status: 200, message: "Merchant Updated Successfully", data: val.email })
+                    }
+                    else {
+                        res.json({ status: 400, message: "Customer did not find", data: null })
+                    }
+                })
+                .catch(error => {
+                    console.log('create_merchant ', error);
+                    res.json({ status: 400, data: {}, message: error.message })
+                });
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Customer did not find" })
+        }
+    },
+    async forgotPassword(req, res) {
+        try {
+           
+           var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp,loginstatus : false } }, { $new: true })
+            if (val != null) 
+            {
+                var emailTemplateName   = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
+                let email_response      = await commonFunction.sendEmailFunction(emailTemplateName)
+                console.log("email_response", email_response)
+                res.json({ status: 200, message: "We have sent token to your email.Please check your email", data: { } })
+            }
+            else {
+                res.json({ status: 400, message: "Invalid Email", data: null })
+            }
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
+        }
+    },
+    async checkTheTokenAndUpdatePassword(req, res) 
+    {
+        const salt              = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+        const password_hash     = bcrypt.hashSync(req.body.newpassword, salt);
+        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken }, { $set: { "password": password_hash, "loginstatus": true } })
+            .then(async (val) => {
+                if (val != null) 
+                {
+                    let clientsdata = await clients.findOne({ email: req.body.email })
+                    res.json({ status: 200, message: "Password Updated Successfully", data: clientsdata })
+                }
+                else 
+                {
+                    res.json({ status: 400, message: "Invalid Token", data: null })
+                }
+            })
+            .catch(error => {
+                console.log('create_merchant ', error);
+                res.json({ status: 400, data: {}, message: error.message })
+            });
+    },
+    async ResetPassword(req, res) {
+        try {
+            let email = req.body.email;
+            const salt              = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+            const password_hash     = bcrypt.hashSync(req.body.newpassword, salt);
+            clients.findOne({ 'email': email }).select('+password').then(val => {
+                var password_status = bcrypt.compareSync(req.body.password, val.password);
+                if (password_status == true) 
+                {
+                    let client = await clients.findOneAndUpdate({ email: req.body.email}, { $set: { "password": password_hash } })
+                    res.json({ "status": 200, "data": client, "message": "Password Updated" })
+                }
+                else if (password_status == false) {
+                    res.json({ "status": 400, "data": {}, "message": "Current password is not Correct" })
+                }
+
+            }).catch(error => {
+                console.log("get_clients_data", error)
+                // res.json({ "error": error })
+                res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
+            })
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
+        }
+    },
+    async generateNewClientAddress(req, res) {
+        try {
+            let clientWallet                    = await clientWallets.findOne({ 'client_api_key': req.body.client_api_key,status : 3 })
+            if(clientWallet == null)
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Request" })
+            }
+            let network_details                 = await network.findOne({ 'id': clientWallet.network_id })
+            if(network_details.libarayType      == "Web3")
+            {
+                let account                         = await Utility.GetAddress(network_details.nodeUrl)
+                let clientWallet                    = await clientWallets.findOneAndUpdate(
+                { 'network_id': req.body.network_id,status : 3 }, 
+                { $set: { "address": account.address , "privatekey" : account.privateKey  } }, { $new: true })
+                res.json({ status: 200, data: clientWallet, message: "Updated" })
+            }
+            else if(network_details.libarayType == "Tronweb")
+            {
+                const { address, privateKey }       = generateAccount()
+                let clientWallet                    = await clientWallets.findOneAndUpdate(
+                    { 'network_id': req.body.network_id,status : 3 }, 
+                    { $set: { "address":address , "privatekey" : privateKey  } }, { $new: true })
+                    res.json({ status: 200, data: clientWallet, message: "Updated" })
+            }
+        }
+        catch (error) 
+        {
             res.json({ status: 400, data: {}, message: "Customer did not find" })
         }
     },

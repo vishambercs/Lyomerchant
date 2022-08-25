@@ -1,12 +1,13 @@
-var express = require('express');
-var router = express.Router();
-const transcationpoolController = require('../controllers/transcationpoolController');
-const clientsController = require('../controllers/clientsController');
-const poolController = require('../controllers/poolController');
-const withdrawController = require('../controllers/withdrawController');
-const kycwebhooklogController = require('../controllers/kycwebhooklogController');
-const hotwallettranslogsController = require('../controllers/hotwallettranslogsController');
-const merchantstoreController = require('../controllers/POS/merchantstoreController');
+var express                         = require('express');
+var router                          = express.Router();
+const transcationpoolController     = require('../controllers/transcationpoolController');
+const clientsController             = require('../controllers/clientsController');
+const poolController                = require('../controllers/poolController');
+const withdrawController            = require('../controllers/withdrawController');
+const kycwebhooklogController       = require('../controllers/kycwebhooklogController');
+const hotwallettranslogsController  = require('../controllers/hotwallettranslogsController');
+const merchantstoreController       = require('../controllers/POS/merchantstoreController');
+const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 const Auth = require('../Validation/Auth');
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -35,15 +36,26 @@ router.post('/webHookLog',                           kycwebhooklogController.get
 router.post('/resendingemail',                       clientsController.resendingemail);
 router.post('/verfiyemail',                          clientsController.verfiyemail);
 router.post('/allMerchant',                          clientsController.allMerchant);
-router.post('/customerstatus',                         clientsController.customerstatus);
-router.post('/resetMerchantTwoFa',                     clientsController.reset_merchant_two_fa);
+router.post('/customerstatus',                       clientsController.customerstatus);
+router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
+router.post('/forgotPassword',                       clientsController.forgotPassword);
+router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);
+router.post('/resetPassword',                        clientsController.ResetPassword);
+
+// router.post('/resetMerchantTwoFa',                  clientsController.reset_merchant_two_fa);
 router.post('/clientwithdrawnetworkid',                withdrawController.get_client_withdraw_with_network_id);
 router.post('/updateClientToken',                      clientsController.updateClientToken);
 router.post('/getTranscationData',                     hotwallettranslogsController.getTranscationData);
 // =============MerchantStore=========================================== //
-
 router.post('/createMerchantStore',                    merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                        merchantstoreController.allMerchantStore);
 router.post('/merchantstore',                          merchantstoreController.MerchantStore);
+// =============Pos Merchant Wallet=========================================== //
+router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
+router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
+
+
+
+
 
 module.exports = router;

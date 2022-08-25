@@ -31,7 +31,7 @@ const adminSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        required: true,
+        required: false,
     },
     status: {
         type: Boolean,

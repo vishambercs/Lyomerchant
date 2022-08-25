@@ -27,7 +27,6 @@ module.exports =
                 res.json({ status: 200, message: "Successfully", data: val })
             }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
 
-
         }
         catch (error) {
             console.log(error)

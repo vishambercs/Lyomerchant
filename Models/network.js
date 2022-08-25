@@ -71,6 +71,18 @@ const networkSchema = new mongoose.Schema
             type: Number,
             required: true,
         },
+        prefix:
+        {
+            type        : String,
+            required    : false,
+            default     : "",
+        },
+        icon:
+        {
+            type: String,
+            required: false,
+            default     : "",
+        },
         hotwallettranscationstatus:
         {
             type        : Boolean,
