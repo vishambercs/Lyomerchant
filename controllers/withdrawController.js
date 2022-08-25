@@ -17,8 +17,22 @@ module.exports =
     {
         try 
         {
-            const network = await networks.findOne({id:req.body.network_id})
-            if(network != null )
+            const network        = await networks.findOne({id:req.body.network_id})
+            const withdrawLog    = await withdrawLogs.findOne({api_key:req.headers.authorization,network_id : req.body.network_id ,status : 0  })
+            const clientWallet   = await clientWallets.findOne({client_api_key:req.headers.authorization,network_id:req.body.network_id})
+            console.log(network," ",withdrawLog," ",clientWallet)
+            console.log("network        =======================",     network)
+            console.log("withdrawLog    =======================", withdrawLog)
+            console.log("clientWallet   =======================",clientWallet)
+            if(withdrawLog != null)
+            {
+                res.json({ status: 200, data: {}, message: "You have already a request in pending" }) 
+            }
+            else if(req.body.amount > clientWallet.balance)
+            {
+                res.json({ status: 200, data: {}, message: "Invalid Amount" }) 
+            }
+            else if(network != null )
             {
             let transfer_fee  = ((parseFloat(req.body.amount)/10000) + network.processingfee) * 0.03
             const withdrawLog = new withdrawLogs({ 
@@ -65,8 +79,11 @@ module.exports =
                 {
                 let val                                         = await clientWallets.findOne({ api_key: withdraw.api_key, network_id:  withdraw.network_id })
                 let clientWallet                                = await clientWallets.updateOne({ api_key: withdraw.api_key, network_id: withdraw.network_id  } ,{ $set: { balance: (val.balance - withdraw.amount ) } } )
-                }
-                res.json({ status: 200, message: "Successfully", data: withdraw })
+               
+            }
+            let withdrawLog                                 = await withdrawLogs.findOne({id : req.body.id})
+            res.json({ status: 200, message: "Successfully", data: withdrawLog })
+                
             }).catch(
                 error => { res.json({ status: 400, data: {}, message: error }) 
             })

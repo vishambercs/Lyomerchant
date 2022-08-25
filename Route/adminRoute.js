@@ -6,6 +6,8 @@ const withdrawController            = require('../controllers/withdrawController
 const networkController             = require('../controllers/networkController');
 const categoryController            = require('../controllers/categoryController');
 const merchantcategory              = require('../controllers/merchantcategoryController');
+const clientsController             = require('../controllers/clientsController');
+const orphanController             = require('../controllers/orphanTranscationController');
 const Auth                          = require('../Validation/Auth');
 
 router.post('/signupadmin',                                   adminController.signup_admin_api);
@@ -19,6 +21,18 @@ router.post('/transcationListByNetworkID',                    transcationpoolCon
 router.post('/savecategory',                                  categoryController.savecategory);
 router.get('/allcategory',                                    categoryController.allcategory);
 router.post('/createClientCategory',                          merchantcategory.createClientCategory);
+router.post('/forgetThePassword',                             adminController.forgetThePassword);
+router.post('/VerfiyTheCode',                                 adminController.VerfiyTheCode);
+router.post('/updatePassword',                                adminController.updateThePassword);
+router.post('/resettwofa',                                    adminController.reset_two_fa);
 
 
+router.post('/resetMerchantTwoFa',                                clientsController.reset_merchant_two_fa);
+router.post('/changeMerchantEmail',                               clientsController.changeMerchantEmail);
+// router.post('/changeMerchantPassword',                            clientsController.changeMerchantPassword);
+router.post('/merchantImpersonation',                             clientsController.merchantImpersonation);
+
+"============================ Orphan Transcation ==============================="
+
+router.post('/orphanPoolWallet',                             orphanController.orphanTranscation);
 module.exports = router;

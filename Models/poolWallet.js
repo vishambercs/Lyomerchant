@@ -37,7 +37,11 @@ const poolWalletSchema = new mongoose.Schema({
         required: false,
         default: 0,
     },
-    
+    remarks: {
+        type: String,
+        required: false,
+        default: " ",
+    },
 },
     {
         toJSON: {

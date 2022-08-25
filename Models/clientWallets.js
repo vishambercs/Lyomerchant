@@ -40,7 +40,13 @@ const clientWalletSchema = new mongoose.Schema
             type: Number,
             required: true,
            
-        }
+        },
+        remarks:
+        {
+            type: String,
+            required: false,
+           
+        },
     },
     {
         toJSON: {

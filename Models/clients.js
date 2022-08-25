@@ -10,14 +10,13 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-     
         validate: {
             validator: validator.isEmail,
             message: '{VALUE} is not a valid email',
             isAsync: false
         }
     },
-    token: 
+    token:
     {
         type: String,
         required: true,
@@ -59,6 +58,7 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+
     kycLink: {
         type: String,
         required: true,

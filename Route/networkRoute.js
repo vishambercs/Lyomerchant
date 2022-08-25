@@ -7,5 +7,6 @@ router.post('/updateNetwork',                networkController.update_Network);
 router.post('/deleteNetwork',                networkController.delete_network);
 router.post('/changeStatusNetwork',          networkController.change_status_network);
 router.post('/changeHotWalletStatusLimit',   networkController.changeHotWalletStatusLimit);
+router.post('/updateprefixandimage',         networkController.updateprefixandimage);
 
 module.exports = router;

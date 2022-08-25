@@ -4,8 +4,9 @@ const Utility = require('../common/Utility');
 var mongoose = require('mongoose');
 var crypto = require("crypto");
 const { create } = require('lodash');
+const { GetAddress } = require('../common/Utility');
 require("dotenv").config()
-
+const { generateAccount } = require('tron-create-address')
 module.exports =
 {
     async create_Pool_Wallet(req, res) {
@@ -55,8 +56,8 @@ module.exports =
         }
     },
     async create_Pool_Wallet_100(req, res) {
-        try {
-
+        try 
+        {
             let network_details = await network.findOne({ 'id': req.body.network_id })
             for (let i = 0; i < 10; i++) {
                 let account = await Utility.GetAddress(network_details.nodeUrl)
@@ -186,6 +187,43 @@ module.exports =
         {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Error" })
+        }
+
+    },
+    async getPoolWalletID(network_id) 
+     {
+        try 
+        {
+            let network_details             = await network.findOne({ 'id': network_id })
+            let account                     = await poolWallet.findOne({ network_id: network_id, status: 0 })
+            // let accountGetAddress           = await Utility.GetAddress(network_details.nodeUrl)
+            if (account == null) 
+            {
+            
+                if(network_details.libarayType      == "Web3")
+                {
+                    let account = await Utility.GetAddress(network_details.nodeUrl)
+                    const poolWalletItem = new poolWallet({ remarks     : "Created at Run Time: " +(new Date()).toLocaleDateString(),id : crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
+                    let val     =  await poolWalletItem.save()
+                    return val
+                }
+                else if(network_details.libarayType == "Tronweb")
+                {
+                    const { address, privateKey } = generateAccount()
+                    const poolWalletItem = new poolWallet({ remarks     : "Created at Run Time: " +(new Date()).toLocaleDateString(), id : crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
+                    let val     = await poolWalletItem.save()
+                    return val
+                }
+            }
+            else
+            {
+                return account
+            }
+        }
+        catch (error) 
+        {
+            console.log(error)
+            return null
         }
 
     },

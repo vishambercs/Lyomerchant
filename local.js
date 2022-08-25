@@ -10,6 +10,7 @@ var hotWalletRoute = require('./Route/hotWalletRoute');
 var withdrawRoute = require('./Route/withdrawRoute');
 var adminRoute = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
+const fileUpload = require('express-fileupload');
 const fs = require('fs');
 var path = require('path');
 const Web3 = require('web3');
@@ -22,7 +23,7 @@ const https = require('http');
 const Utility = require('./common/Utility');
 
 require('dotenv').config()
-
+app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.json());
@@ -79,3 +80,11 @@ var kycserver = https.createServer().listen(process.env.KYC_PORT, () => {
 })
 const kyc = new webSocketServer({ httpServer: kycserver });
 kyc.on('request', Utility.approvekyc)
+
+
+var posTranscationserver = https.createServer({
+    }).listen(process.env.POS_TRANSCATION, () => {
+    console.log(`Example app listening at ${process.env.POS_TRANSCATION}   `);
+})
+const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
+posTranscation.on('request', Utility.posTranscationWebScokect)

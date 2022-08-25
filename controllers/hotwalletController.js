@@ -97,8 +97,7 @@ module.exports =
             });
             hotWallet.save().then(async (val) => {
                 res.json({ status: 200, message: "Successfully", data: val })
-            }).
-                catch(error => { res.json({ status: 400, data: {}, message: error }) })
+            }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
 
         }
         catch (error) {
@@ -247,7 +246,8 @@ module.exports =
             ])
             hotWallet = await hotWallets.findOne({ "network_id": from_wallet[0].network_id, "status": 1 })
             let balanceAddress = await get_Balance_of_Address(from_wallet)
-            if (hotWallet != null && balanceAddress.status == 200) {
+            if (hotWallet != null && balanceAddress.status == 200) 
+            {
                 if (from_wallet[0].networkDetails[0].libarayType == "Web3") {
                     var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].networkDetails[0].nodeUrl));
                     const contract = new web3.eth.Contract(Constant.USDT_ABI, from_wallet[0].networkDetails[0].contractAddress, { from: from_wallet[0].address })

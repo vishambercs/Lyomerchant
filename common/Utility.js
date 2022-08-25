@@ -298,4 +298,44 @@ module.exports =
         //     return null
         // }
     },
+    async posTranscationWebScokect(request) {
+        try {
+            let uniqueKey      =  crypto.randomBytes(20).toString('hex')
+            let url_paremeters = url.parse(request.httpRequest.url);
+            let queryvariable  = querystring.parse(url_paremeters.query)
+            console.log("posTranscationWebScokect =====================================",queryvariable);
+            var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
+            if(getTranscationData.length > 0)
+            {
+            const connection   = request.accept(null, request.origin);
+            var index = Constant.posTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            if(index == -1)
+            {
+            let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+            Constant.posTransList.push(client_object)
+            }
+            else
+            {
+                Constant.posTransList[index]["connection"] = connection
+            }
+            Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 20000);
+            connection.on('message', function (message) {
+            if(index == -1)
+            {
+                connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            }
+            })
+        }
+        else
+        {
+            return request.reject(null, request.origin);
+        }
+        }
+        catch (error) {
+            console.log(error)
+            
+            return null
+        }
+    },
 }
