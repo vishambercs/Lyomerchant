@@ -49,6 +49,7 @@ router.post('/generateNewClientAddress',             clientsController.generateN
 router.post('/forgotPassword',                       clientsController.forgotPassword);
 router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);
 router.post('/resetPassword',                        clientsController.ResetPassword);
+router.post('/updateMerchantProfileImage',           clientsController.updateMerchantProfileImage);
 
 // router.post('/resetMerchantTwoFa',                  clientsController.reset_merchant_two_fa);
 router.post('/clientwithdrawnetworkid',                withdrawController.get_client_withdraw_with_network_id);
@@ -59,7 +60,8 @@ router.post('/getTranscationData',                     hotwallettranslogsControl
 router.post('/createMerchantStore',                    merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                        merchantstoreController.allMerchantStore);
 router.post('/merchantstore',                          merchantstoreController.MerchantStore);
-router.post('/merchantProfileUpdate',                  merchantstoreController.updateMerchantStoreProfile);
+router.post('/merchantStoreProfileUpdate',                  merchantstoreController.updateMerchantStoreProfile);
+
 // =============Pos Merchant Wallet=========================================== //
 router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);

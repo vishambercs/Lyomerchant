@@ -88,3 +88,10 @@ var posTranscationserver = https.createServer({
 })
 const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 posTranscation.on('request', Utility.posTranscationWebScokect)
+
+var paymentLinkTranscationserver = https.createServer({
+}).listen(process.env.PAYMENT_LINK_PORT, () => {
+console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}   `);
+})
+const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
+paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)

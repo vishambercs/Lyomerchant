@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-const payLinkController = require('../controllers/paylinkController');
+const payLinkController = require('../controllers/PaymentLinks/paylinkController');
 
 
 router.post('/storeInvoice',payLinkController.storeInvoice);

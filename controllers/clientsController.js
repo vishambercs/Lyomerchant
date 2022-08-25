@@ -1056,4 +1056,15 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Customer did not find" })
         }
     },
+    async updateMerchantProfileImage(req, res) {
+        try {
+            let update = await clients.findOneAndUpdate({ 'clientapikey': req.headers.authorization } , { $set: { profileimage:req.body.profileimage} }, { $new: true } )
+            res.json({ status: 200, data: {update}, message: "update profile" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+        
+    },
 }

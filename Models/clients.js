@@ -30,6 +30,12 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    profileimage:
+    {
+        type: String,
+        required: false,
+       
+    },
     hash: {
         type: String,
         required: true,
