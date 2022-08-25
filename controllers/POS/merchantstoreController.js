@@ -30,7 +30,8 @@ module.exports =
                         storeapikey: api_key,
                         status: 0,
                         created_by: req.headers.authorization,
-                        qrcode: url
+                        qrcode: url,
+                        storeprofile:req.body.storeprofile
                     });
                     merchantstore.save().then(async (val) => {
                         res.json({

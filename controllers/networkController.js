@@ -110,6 +110,7 @@ module.exports =
                             created_by: req.body.created_by,
                             scanurl: req.body.scanurl,
                             gaspriceurl: req.body.gaspriceurl,
+                            icon    : req.body.icon,
                         }
                     }).then(async (val) => {
                         if (val != null) 
