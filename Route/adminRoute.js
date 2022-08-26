@@ -7,7 +7,8 @@ const networkController             = require('../controllers/networkController'
 const categoryController            = require('../controllers/categoryController');
 const merchantcategory              = require('../controllers/merchantcategoryController');
 const clientsController             = require('../controllers/clientsController');
-const orphanController             = require('../controllers/orphanTranscationController');
+const orphanController              = require('../controllers/orphanTranscationController');
+const CurrencyController            = require('../controllers/Masters/CurrencyController');
 const Auth                          = require('../Validation/Auth');
 
 router.post('/signupadmin',                                   adminController.signup_admin_api);
@@ -32,7 +33,15 @@ router.post('/changeMerchantEmail',                               clientsControl
 // router.post('/changeMerchantPassword',                            clientsController.changeMerchantPassword);
 router.post('/merchantImpersonation',                             clientsController.merchantImpersonation);
 
+
 "============================ Orphan Transcation ==============================="
 
 router.post('/orphanPoolWallet',                             orphanController.orphanTranscation);
+
+"============================ Currency Master ==============================="
+router.post('/createCurrency',                              CurrencyController.createCurrency);
+router.get('/allCurrency',                                  CurrencyController.allCurrency);
+router.post('/deleteCurrency',                              CurrencyController.deleteCurrency);
+router.post('/updateCurrency',                              CurrencyController.updateCurrency);
+
 module.exports = router;
