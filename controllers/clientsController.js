@@ -31,6 +31,7 @@ module.exports =
 {
     async create_clients(req, res) {
         try {
+            console.log("create client",req.body,req.header)
             var api_key = crypto.randomBytes(20).toString('hex');
             var email = req.body.email
             var hash = CryptoJS.MD5(email + process.env.BASE_WORD_FOR_HASH).toString();
@@ -38,9 +39,11 @@ module.exports =
                 const client = new clients({ status: false, api_key: api_key, email: req.body.email, });
                 const previous_client = await clients.findOne({ 'email': email }).then(async (val) => {
                     if (val == null) {
+                        console.log(val)
                         res.json({ status: 200, message: "Clients Data", data: {} })
                     }
                     else {
+                        console.log(val)
                         res.json({ status: 200, message: "Clients Data", data: { id: val._id, token: val.token, api_key: val.api_key, email: val.email } })
                     }
                 }).catch(error => {
@@ -1002,7 +1005,7 @@ module.exports =
             let email = req.body.email;
             const salt              = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
             const password_hash     = bcrypt.hashSync(req.body.newpassword, salt);
-            clients.findOne({ 'email': email }).select('+password').then( async (val) => {
+            clients.findOne({ 'email': email }).select('+password').then(val => {
                 var password_status = bcrypt.compareSync(req.body.password, val.password)
                 if (password_status == true) 
                 {
@@ -1020,7 +1023,7 @@ module.exports =
             })
         }
         catch (error) {
-            res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
+            res.json({ status: 400, data: {}, message: "Email or Password is very wrong" })
         }
     },
     async generateNewClientAddress(req, res) {
@@ -1052,5 +1055,16 @@ module.exports =
         {
             res.json({ status: 400, data: {}, message: "Customer did not find" })
         }
+    },
+    async updateMerchantProfileImage(req, res) {
+        try {
+            let update = await clients.findOneAndUpdate({ 'clientapikey': req.headers.authorization } , { $set: { profileimage:req.body.profileimage} }, { $new: true } )
+            res.json({ status: 200, data: {update}, message: "update profile" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+        
     },
 }

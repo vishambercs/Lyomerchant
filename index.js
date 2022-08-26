@@ -21,6 +21,9 @@ var app = express();
 const https             = require('https');
 const Utility = require('./common/Utility');
 
+
+
+
 require('dotenv').config()
 app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
@@ -46,9 +49,9 @@ app.use('/admin/v1',     adminRoute);
 //  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
 //  Database
 
-const privateKey   = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/privkey.pem',  'utf8');
-const certificate  = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/cert.pem',     'utf8');
-const ca           = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/chain.pem',    'utf8');
+const privateKey   = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/privkey.pem',  'utf8');
+const certificate  = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/cert.pem',     'utf8');
+const ca           = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/fullchain.pem',    'utf8');
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
@@ -101,3 +104,15 @@ var posTranscationserver = https.createServer({
 const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 
 posTranscation.on('request', Utility.posTranscationWebScokect)
+
+var paymentLinkTranscationserver = https.createServer({
+    key                 :  privateKey,
+    cert                :  certificate,  
+    ca                  :  ca, 
+    requestCert         :  false, 
+    rejectUnauthorized  :  false
+}).listen(process.env.PAYMENT_LINK_PORT, () => {
+console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}   `);
+})
+const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
+paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)

@@ -37,19 +37,30 @@ router.post('/resendingemail',                       clientsController.resending
 router.post('/verfiyemail',                          clientsController.verfiyemail);
 router.post('/allMerchant',                          clientsController.allMerchant);
 router.post('/customerstatus',                       clientsController.customerstatus);
+
+router.post('/resetMerchantTwoFa',                   clientsController.reset_merchant_two_fa);
+router.post('/clientwithdrawnetworkid',              withdrawController.get_client_withdraw_with_network_id);
+router.post('/updateClientToken',                    clientsController.updateClientToken);
+router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
+router.post('/transactionDetailsClient',             transcationpoolController. get_Trans_by_txId);
+
+
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
 router.post('/forgotPassword',                       clientsController.forgotPassword);
 router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);
 router.post('/resetPassword',                        clientsController.ResetPassword);
+router.post('/updateMerchantProfileImage',           clientsController.updateMerchantProfileImage);
 
 // router.post('/resetMerchantTwoFa',                  clientsController.reset_merchant_two_fa);
 router.post('/clientwithdrawnetworkid',                withdrawController.get_client_withdraw_with_network_id);
 router.post('/updateClientToken',                      clientsController.updateClientToken);
 router.post('/getTranscationData',                     hotwallettranslogsController.getTranscationData);
+
 // =============MerchantStore=========================================== //
 router.post('/createMerchantStore',                    merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                        merchantstoreController.allMerchantStore);
 router.post('/merchantstore',                          merchantstoreController.MerchantStore);
+
 // =============Pos Merchant Wallet=========================================== //
 router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
