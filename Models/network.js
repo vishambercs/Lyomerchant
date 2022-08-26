@@ -25,6 +25,10 @@ const networkSchema = new mongoose.Schema
             enum : ['Native','Token'],
             required: true,
          },
+         coinId: {
+            type: String,
+            required: true,
+        },
         contractAddress: {
             type: String,
             required: true,

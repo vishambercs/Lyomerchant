@@ -30,6 +30,12 @@ const merchantstoreSchema = new mongoose.Schema({
         required: false,
        
     },
+    storeprofile:
+    {
+        type: String,
+        required: false,
+       
+    },
     status:
     {
         type: Number,

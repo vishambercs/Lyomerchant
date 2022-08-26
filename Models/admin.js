@@ -27,7 +27,7 @@ const adminSchema = new mongoose.Schema({
     },
     otptoken: {
         type: String,
-        required: true,
+        required: false,
     },
     type: {
         type: String,
