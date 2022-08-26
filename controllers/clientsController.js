@@ -1005,7 +1005,7 @@ module.exports =
             let email = req.body.email;
             const salt              = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
             const password_hash     = bcrypt.hashSync(req.body.newpassword, salt);
-            clients.findOne({ 'email': email }).select('+password').then(val => {
+            clients.findOne({ 'email': email }).select('+password').then(async (val) => {
                 var password_status = bcrypt.compareSync(req.body.password, val.password)
                 if (password_status == true) 
                 {
