@@ -21,6 +21,9 @@ var app = express();
 const https             = require('https');
 const Utility = require('./common/Utility');
 
+
+
+
 require('dotenv').config()
 app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
@@ -48,7 +51,7 @@ app.use('/admin/v1',     adminRoute);
 
 const privateKey   = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/privkey.pem',  'utf8');
 const certificate  = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/cert.pem',     'utf8');
-const ca           = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/chain.pem',    'utf8');
+const ca           = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/fullchain.pem',    'utf8');
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
