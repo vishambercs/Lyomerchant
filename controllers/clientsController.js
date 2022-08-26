@@ -1002,11 +1002,11 @@ module.exports =
             let email = req.body.email;
             const salt              = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
             const password_hash     = bcrypt.hashSync(req.body.newpassword, salt);
-            clients.findOne({ 'email': email }).select('+password').then(val => {
+            clients.findOne({ 'email': email }).select('+password').then( async (val) => {
                 var password_status = bcrypt.compareSync(req.body.password, val.password)
                 if (password_status == true) 
                 {
-                    // let client = await clients.findOneAndUpdate({ email: req.body.email}, { $set: { "password": password_hash } })
+                    let client = await clients.findOneAndUpdate({ email: req.body.email}, { $set: { "password": password_hash } })
                     res.json({ "status": 200, "data": client, "message": "Password Updated" })
                 }
                 else if (password_status == false) {
