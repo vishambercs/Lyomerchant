@@ -15,9 +15,10 @@ module.exports =
         try {
            
             const Currency = new Currencies({
-                id: mongoose.Types.ObjectId(),
-                title: req.body.title,
-                status: req.body.status,
+                id     : mongoose.Types.ObjectId(),
+                title  : req.body.title,
+                icon   : req.body.icon,
+                status : req.body.status,
                 remarks: await Utility.checkthevalue(req.body.remarks),
                 created_by: req.body.created_by,
             });
@@ -86,6 +87,7 @@ module.exports =
                         {
                             title: req.body.title,
                             status: req.body.status,
+                            icon   : req.body.icon,
                             remarks: await Utility.checkthevalue(req.body.remarks),
                         }
                     }).then(async (val) => {

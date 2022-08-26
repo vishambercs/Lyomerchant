@@ -68,6 +68,6 @@ router.post('/shopTransList',                           posTransactionPoolContro
 
 
 "============================ Currency Master ==============================="
-
 router.get('/allCurrency',                                  CurrencyController.allCurrency);
+
 module.exports = router;
