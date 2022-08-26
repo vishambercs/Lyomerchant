@@ -32,17 +32,18 @@ module.exports =
                 status: 'pending'
             })
             console.log(new_record)
-            let res = await new_record.save()
-            invoiceid = res.id
+            let newrecord = await new_record.save()
+            invoiceid = newrecord.id
             message = "Invoice created"
             status = 200
+            
         }
         catch (error) {
             console.log("new invoice error", error)
             invoiceid = ''
             message = error
             status = 400
-            return error
+           
         }
 
         res.json({ status: status, data: { "invoiceid": invoiceid }, message: message })

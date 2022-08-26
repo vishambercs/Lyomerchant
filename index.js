@@ -8,6 +8,7 @@ var walletRoute = require('./Route/poolwalletRoute');
 var hotWalletRoute = require('./Route/hotWalletRoute');
 var withdrawRoute = require('./Route/withdrawRoute');
 var adminRoute = require('./Route/adminRoute');
+var payLinkRoute = require('./Route/paylinkRoute');
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const fs                = require('fs');
@@ -45,7 +46,7 @@ app.use('/hotWallet/v1', hotWalletRoute);
 app.use('/withdraw/v1',  withdrawRoute);
 app.use('/admin/v1',     adminRoute);
 
-
+app.use('/paymentlink/v1', payLinkRoute);
 //  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
 //  Database
 
@@ -60,7 +61,7 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 app.listen(process.env.SERVER_PORT, function () {
-    console.log('Listening to Port 5000');
+    console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });
 
 var server = https.createServer({
@@ -104,15 +105,3 @@ var posTranscationserver = https.createServer({
 const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 
 posTranscation.on('request', Utility.posTranscationWebScokect)
-
-var paymentLinkTranscationserver = https.createServer({
-    key                 :  privateKey,
-    cert                :  certificate,  
-    ca                  :  ca, 
-    requestCert         :  false, 
-    rejectUnauthorized  :  false
-}).listen(process.env.PAYMENT_LINK_PORT, () => {
-console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}   `);
-})
-const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
-paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
