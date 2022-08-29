@@ -26,7 +26,7 @@ require("dotenv").config()
 
 const jwt = require('jsonwebtoken');
 const { generateAccount } = require('tron-create-address')
-const jwt = require('jsonwebtoken');
+
 module.exports =
 {
     async create_clients(req, res) {
