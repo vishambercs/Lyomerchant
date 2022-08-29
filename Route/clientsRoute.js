@@ -46,6 +46,7 @@ router.post('/clientwithdrawnetworkid',              withdrawController.get_clie
 router.post('/updateClientToken',                    clientsController.updateClientToken);
 router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             transcationpoolController. get_Trans_by_txId);
+router.post('/transactionFastDetails',             transcationpoolController. get_Fastlink_Trans_by_txId);
 
 
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
@@ -65,9 +66,8 @@ router.get('/allMerchantStore',                      merchantstoreController.all
 router.post('/merchantstore',                        merchantstoreController.MerchantStore);
 
 // =============Pos Merchant Wallet=========================================== //
-router.post('/assignPosMerchantWallet',              posTransactionPoolController.assignPosMerchantWallet);
-router.post('/shopTransList',                        posTransactionPoolController.getShopTransList);
-
+router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
+router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
 
 "============================ Currency Master ==============================="
 router.get('/allCurrency',                                   CurrencyController.allCurrency);
