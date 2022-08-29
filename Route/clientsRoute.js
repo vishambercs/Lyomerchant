@@ -10,6 +10,7 @@ const merchantstoreController       = require('../controllers/POS/merchantstoreC
 const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 
 const CurrencyController            = require('../controllers/Masters/CurrencyController');
+const networkController             = require('../controllers/networkController');
 const Auth                          = require('../Validation/Auth');
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -73,6 +74,11 @@ router.get('/allCurrency',                                   CurrencyController.
 router.post('/priceConversition',                            CurrencyController.priceConversition);
 
 
-
+"============================ NETWORK Master ==============================="
+router.post('/allNetworks',                            networkController.allNetworkForClient);
 
 module.exports = router;
+
+
+
+

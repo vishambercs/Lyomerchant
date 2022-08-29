@@ -99,7 +99,7 @@ module.exports =
             if (user != null) 
             {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
-                req.user = profile
+                req.user    = profile
                 next()
             }
             else 
