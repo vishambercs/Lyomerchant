@@ -8,6 +8,7 @@ const kycwebhooklogController       = require('../controllers/kycwebhooklogContr
 const hotwallettranslogsController  = require('../controllers/hotwallettranslogsController');
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
+const payLinkController = require('../controllers/PaymentLinks/paylinkController');
 const Auth = require('../Validation/Auth');
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -43,6 +44,7 @@ router.post('/clientwithdrawnetworkid',              withdrawController.get_clie
 router.post('/updateClientToken',                    clientsController.updateClientToken);
 router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             transcationpoolController. get_Trans_by_txId);
+router.post('/transactionFastDetails',             transcationpoolController. get_Fastlink_Trans_by_txId);
 
 
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
@@ -65,6 +67,8 @@ router.post('/merchantstore',                          merchantstoreController.M
 router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
 
+router.post('/assignPaymentLinkMerchantWallet',payLinkController.assignPaymentLinkMerchantWallet)
+router.post('/verifyPaymentLink',payLinkController.verifyPaymentLink);
 
 
 

@@ -11,6 +11,7 @@ router.post('/createFastCode',payLinkController.createFastCode);
 router.post('/verifyFastPayment',payLinkController.verifyFastPayment);
 router.post('/verifyFastCode',payLinkController.verifyFastCode);
 router.post('/deleteFastCode',payLinkController.deleteFastCode);
+router.post('/assignPaymentLinkMerchantWallet',payLinkController.assignPaymentLinkMerchantWallet)
 
 
 
