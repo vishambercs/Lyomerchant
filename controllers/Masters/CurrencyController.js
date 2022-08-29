@@ -8,7 +8,7 @@ const TronWeb = require('tronweb')
 const { generateAccount } = require('tron-create-address')
 const Web3 = require('web3');
 require("dotenv").config()
-
+var stringify           = require('json-stringify-safe');
 module.exports =
 {
     async createCurrency(req, res) {
@@ -109,6 +109,22 @@ module.exports =
             
         }
         catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async priceConversition(req, res) {
+        try 
+        {
+
+            let parameters = `ids=${req.body.coinid}&vs_currencies=${req.body.currenid}`
+            let COINGECKO_URL   =  process.env.COINGECKO+parameters
+            let axiosGetData    =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
+            var stringify_response = JSON.parse(axiosGetData.data)
+            res.json({ status: 200, data: stringify_response.data, message: "kasd" })
+        }
+        catch (error) 
+        {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Error" })
         }

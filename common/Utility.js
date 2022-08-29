@@ -11,7 +11,7 @@ const clients           = require('../Models/clients');
 var clientsController   = require('../controllers/clientsController');
 const { constant }      = require('./Constant');
 var crypto              = require("crypto");
-
+const jwt               = require('jsonwebtoken');
 const url               = require('url')
 const querystring       = require('querystring');
 const Constant          = require('./Constant');
@@ -30,6 +30,12 @@ module.exports =
         let key =  (title == "" || title == undefined) ? " " : title
         return key ;
      },
+
+    async Get_JWT_Token(userid,expiretime='1h') 
+    {
+        var token = jwt.sign({ id: userid }, process.env.AUTH_KEY, { expiresIn: expiretime });
+        return token ;
+    }, 
     Send_Email_Function(parameters) {
         // try {
         //     let respone = {} 
@@ -59,7 +65,6 @@ module.exports =
         return JSON.stringify(respone)
 
     },
- 
     Get_New_Address() {
         try {
             var web3 = new Web3(new Web3.providers.HttpProvider(process.env.ETHEREUM_LOCAL_RPC));
@@ -84,7 +89,7 @@ module.exports =
     },
     async Get_Request_By_Axios(URL, parameters, headers) {
         response = {}
-        axios.get(URL, {
+        await axios.get(URL, {
             params: parameters,
             headers: headers
         }).then(res => {
@@ -340,7 +345,6 @@ module.exports =
             return null
         }
     },
-
     async paymentLinkTranscationWebScokect(request) {
         try {
             let uniqueKey      =  crypto.randomBytes(20).toString('hex')

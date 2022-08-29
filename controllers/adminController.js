@@ -3,24 +3,24 @@ const transcationLog    = require('../Models/transcationLog');
 const cornJobs          = require('../common/cornJobs');
 var CryptoJS            = require('crypto-js')
 var crypto              = require("crypto");
-var Utility = require('../common/Utility');
-var constant = require('../common/Constant');
-var commonFunction = require('../common/commonFunction');
-const bcrypt = require('bcrypt');
-const Web3 = require('web3');
-const clientWallets = require('../Models/clientWallets');
-const poolWallet = require('../Models/poolWallet');
-const transactionPools = require('../Models/transactionPool');
+var Utility             = require('../common/Utility');
+var constant            = require('../common/Constant');
+var commonFunction      = require('../common/commonFunction');
+const bcrypt            = require('bcrypt');
+const Web3              = require('web3');
+const clientWallets     = require('../Models/clientWallets');
+const poolWallet        = require('../Models/poolWallet');
+const transactionPools  = require('../Models/transactionPool');
 const { authenticator } = require('otplib')
-const QRCode = require('qrcode')
-const network    = require('../Models/network');
-var mongoose     = require('mongoose');
-const axios      = require('axios')
-var stringify    = require('json-stringify-safe');
-const Constant   = require('../common/Constant');
-var otpGenerator = require('otp-generator')
+const QRCode            = require('qrcode')
+const network           = require('../Models/network');
+var mongoose            = require('mongoose');
+const axios             = require('axios')
+var stringify           = require('json-stringify-safe');
+const Constant          = require('../common/Constant');
+var otpGenerator        = require('otp-generator')
 require("dotenv").config()
-
+const jwt = require('jsonwebtoken');
 module.exports =
 {
     async signup_admin_api(req, res) 
@@ -69,8 +69,9 @@ module.exports =
     async Login(req, res) {
         try {
             let email = req.body.email;
-            await admins.findOne({ 'email': email }).select('+password').then(val => {
+            await admins.findOne({ 'email': email }).select('+password').then(async (val) => {
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
+
                 if (val.status == false) 
                 {
                     res.json({ "status": 400, "data": {}, "message": "Your account has disabled" })
@@ -79,6 +80,8 @@ module.exports =
                 {
                     val["admin_api_key"] = ""
                     val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
+                    let jwttoken    = await Utility.Get_JWT_Token(val.id) 
+                    let wallet      = await admins.findOneAndUpdate({ 'email': email }, { $set: { token:jwttoken } }, { $new: true })
                     res.json({ "status": 200, "data": val, "message": "Successfully Login" })
                 }
                 else if (password_status == false) {
@@ -101,9 +104,12 @@ module.exports =
             let code = req.body.code
             admins.findOne({ 'email': email }).then(async (val) => {
                 if (authenticator.check(code, val.secret)) {
-                    if (val.two_fa == false) {
+                    if (val.two_fa == false) 
+                    {
+                       
                         let wallet = await admins.findOneAndUpdate({ 'email': email }, { $set: { two_fa: true } }, { $new: true })
-                        let data = await admins.findOne({ 'email': email })
+                    
+                        let data   = await admins.findOne({ 'email': email })
                         res.json({ "status": 200, "data": data, "message": "Get The Data Successfully" })
                     } else {
                         res.json({ "status": 200, "data": val, "message": "Get The Data Successfully" })
