@@ -1,19 +1,24 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const hotwalletsSchema = new mongoose.Schema
+const currencySchema = new mongoose.Schema
     ({
-        id: 
+        id:
         {
             type: String,
             required: true,
             unique: true,
         },
-        network_id: 
+        title:
         {
             type: String,
             required: true,
         },
-        address: 
+        name:
+        {
+            type: String,
+            required: true,
+        },
+        icon:
         {
             type: String,
             required: true,
@@ -22,35 +27,32 @@ const hotwalletsSchema = new mongoose.Schema
         {
             type: Number,
             required: true,
-           
         },
-        created_by:
-        {
-            type: Number,
-            required: true,
-           
-        },
-        deleted_by:
-        {
-            type: Number,
-            required: false,
-            default : 0
-        },
-        deleted_at:
+
+        remarks:
         {
             type: String,
             required: false,
-            default : ""
+
         },
-    },
-    {
-        toJSON: {
-            transform(doc, ret) {
-                delete ret.privateKey;
-                delete ret.__v;
-            },
+        created_by:
+        {
+            type: String,
+            required: true,
+           
         },
-    },
+        deleted_by: {
+            type: String,
+            required: false,
+            default: 0,
+        },
+        deleted_at: {
+            type: String,
+            required: false,
+            default: 0,
+        },
+       
+      },
         { timestamps: true }
     )
-module.exports = mongoose.model('hotwallets', hotwalletsSchema)
+module.exports = mongoose.model('currency', currencySchema)
