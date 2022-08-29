@@ -8,6 +8,7 @@ const kycwebhooklogController       = require('../controllers/kycwebhooklogContr
 const hotwallettranslogsController  = require('../controllers/hotwallettranslogsController');
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
+const CurrencyController            = require('../controllers/Masters/CurrencyController')
 const Auth = require('../Validation/Auth');
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
