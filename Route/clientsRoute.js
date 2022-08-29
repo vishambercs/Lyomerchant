@@ -8,6 +8,7 @@ const kycwebhooklogController       = require('../controllers/kycwebhooklogContr
 const hotwallettranslogsController  = require('../controllers/hotwallettranslogsController');
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
+
 const CurrencyController            = require('../controllers/Masters/CurrencyController');
 const Auth                          = require('../Validation/Auth');
 
@@ -66,7 +67,12 @@ router.post('/merchantstore',                        merchantstoreController.Mer
 router.post('/assignPosMerchantWallet',              posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                        posTransactionPoolController.getShopTransList);
 
+
 "============================ Currency Master ==============================="
 router.get('/allCurrency',                                   CurrencyController.allCurrency);
 router.post('/priceConversition',                            CurrencyController.priceConversition);
+
+
+
+
 module.exports = router;
