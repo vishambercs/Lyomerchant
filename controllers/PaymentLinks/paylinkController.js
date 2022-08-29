@@ -3,7 +3,12 @@ const paylinkPayment = require('../../Models/payLink');
 const transaction = require("../transcationpoolController")
 const fastPaymentCode = require('../../Models/fastPaymentCode');
 const merchantStore = require('../../Models/merchantstore');
+const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
+const poolWallet = require('../../Models/poolWallet');
+var crypto = require("crypto");
 var mongoose = require('mongoose');
+var CryptoJS            = require('crypto-js')
+var poolwalletController = require('../poolwalletController');
 let message = ''
 let status = ''
 module.exports =
@@ -125,7 +130,7 @@ module.exports =
 
         }
         catch (error) {
-            response = "someting went wrong"
+            response = "something went wrong"
             status = 400
             response = error
         }
@@ -146,44 +151,34 @@ module.exports =
 
     async assignPaymentLinkMerchantWallet(req, res) {
         try {
-            var merchantKey   = req.headers.authorization
-            var networkType   = req.body.networkType
-            var callbackURL   = req.body.callbackURL
-            var securityHash  = req.body.securityHash
-            var orderid       = req.body.orderid
-            var security_hash = (merchantKey + networkType + callbackURL + process.env.BASE_WORD_FOR_HASH)
-            var hash          = CryptoJS.MD5(security_hash).toString();
-            let account       = await poolwalletController.getPoolWalletID(networkType) 
-            if (hash == securityHash) 
-            {
+            var networkType   = req.body.networkType         
+            let account       = await poolwalletController.getPoolWalletID(networkType)            
                 let currentDateTemp = Date.now();
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
                 const newRecord = new paymentLinkTransactionPool({
-                    id: crypto.randomBytes(20).toString('hex'),
+                    id: mongoose.Types.ObjectId(), // crypto.randomBytes(20).toString('hex'),
                     api_key: req.headers.authorization,
                     poolwalletID: account.id,
                     amount: req.body.amount,
                     currency: req.body.currency,
                     callbackURL: req.body.callbackURL,
-                    orderid: req.body.orderid,
+                    payLinkId: req.body.payLinkId,
+                    orderType : req.body.orderType,
                     clientToken: req.body.token,
                     status: 0,
                     walletValidity: currentDate,
                     timestamps : new Date().getTime()
                 });
                 newRecord.save().then(async (val) => {
+                    console.log("new record save",val)
                     await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
                     let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
-                    res.json({ status: 200, message: "POS Wallet Assigned Successfully", data: data })
+                    res.json({ status: 200, message: "Payment Link Wallet Assigned Successfully", data: data })
                 }).catch(error => {
-                    res.json({ status: 400, data: {}, message: error })
+                    console.log("errorr",error)
+                    res.json({ status: 401, data: {}, message: error })
                 })
             }
-            else 
-            {
-                res.json({ status: 400, data: {}, message: "Invalid Hash" })
-            }
-        }
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
