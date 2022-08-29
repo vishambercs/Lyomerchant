@@ -16,6 +16,11 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
+        currencyid: 
+        {
+            type: String,
+            required: true,
+        },
         coin: {
             type: String,
             required: true,

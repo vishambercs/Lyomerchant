@@ -26,18 +26,18 @@ require("dotenv").config()
 
 const jwt = require('jsonwebtoken');
 const { generateAccount } = require('tron-create-address')
-
+const jwt = require('jsonwebtoken');
 module.exports =
 {
     async create_clients(req, res) {
         try {
             console.log("create client",req.body,req.header)
             var api_key = crypto.randomBytes(20).toString('hex');
-            var email = req.body.email
-            var hash = CryptoJS.MD5(email + process.env.BASE_WORD_FOR_HASH).toString();
+            var email   = req.body.email
+            var hash    = CryptoJS.MD5(email + process.env.BASE_WORD_FOR_HASH).toString();
             if (hash == req.body.hash) {
-                const client = new clients({ status: false, api_key: api_key, email: req.body.email, });
-                const previous_client = await clients.findOne({ 'email': email }).then(async (val) => {
+                const client            = new clients({ status: false, api_key: api_key, email: req.body.email, });
+                const previous_client   = await clients.findOne({ 'email': email }).then(async (val) => {
                     if (val == null) {
                         console.log(val)
                         res.json({ status: 200, message: "Clients Data", data: {} })
@@ -89,7 +89,8 @@ module.exports =
         var token = crypto.randomBytes(20).toString('hex');
 
         if (hash == req.body.hash) {
-            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
+            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => 
+            {
                 const client = new clients({ token: token, loginstatus: false, emailtoken: otp, emailstatus: false, kycLink: " ", two_fa: false, secret: secret, qrcode: url, status: false, password: password_hash, api_key: api_key, email: req.body.email, hash: hash, });
                 client.save().then(async (val) => {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }

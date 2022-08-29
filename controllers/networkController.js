@@ -40,6 +40,8 @@ module.exports =
                     contractABI         : req.body.contractABI == undefined ? " " : JSON.stringify(req.body.contractABI),
                     transferlimit       : req.body.transferlimit,
                     created_by          : req.body.created_by,
+                    currencyid          : req.body.currencyid,
+                    
                     scanurl: req.body.scanurl,
                     gaspriceurl: req.body.gaspriceurl,
                 });
@@ -110,7 +112,8 @@ module.exports =
                             created_by: req.body.created_by,
                             scanurl: req.body.scanurl,
                             gaspriceurl: req.body.gaspriceurl,
-                            icon    : req.body.icon,
+                            icon                : req.body.icon,
+                            currencyid          : req.body.currencyid,
                             coinId : req.body.coinId
                         }
                     }).then(async (val) => {
@@ -274,4 +277,45 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
+
+
+    async updatecurrencyid(req, res) {
+        try {
+
+            // // simpleImage = req.files.simpleImage;
+            // if (!req.files || Object.keys(req.files).length === 0) {
+            //     return res.status(400).send('No files were uploaded.');
+            // }
+            // else{
+            //     return res.status(400).send(req.files.simpleImage);
+            // }
+
+            await Network.updateOne({ 'id': req.body.id },
+            {
+                $set:
+                {
+                    currencyid          : req.body.currencyid,
+                }
+            }).then(async (val) => 
+            {
+                if (val != null) 
+                {
+                    const NetworkDetails = await Network.find({ 'id': req.body.id })
+                    res.json({ status: 200, message: "Successfully", data: NetworkDetails })
+                }
+                else {
+                    res.json({ status: 200, message: "Not Found the Data", data: null })
+                }
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+   
 }

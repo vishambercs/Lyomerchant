@@ -10,12 +10,17 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
-
-        validate: {
+        validate: 
+        {
             validator: validator.isEmail,
             message: '{VALUE} is not a valid email',
             isAsync: false
         }
+    },
+    token: 
+    {
+        type: String,
+        required: false,
     },
     secret: {
         type: String,
@@ -45,7 +50,6 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
 },
     {
         toJSON: {

@@ -9,7 +9,7 @@ const hotwallettranslogsController  = require('../controllers/hotwallettranslogs
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 const CurrencyController            = require('../controllers/Masters/CurrencyController');
-const Auth = require('../Validation/Auth');
+const Auth                          = require('../Validation/Auth');
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
@@ -52,22 +52,21 @@ router.post('/tokenAndUpdatePassword',               clientsController.checkTheT
 router.post('/resetPassword',                        clientsController.ResetPassword);
 router.post('/updateMerchantProfileImage',           clientsController.updateMerchantProfileImage);
 
-// router.post('/resetMerchantTwoFa',                  clientsController.reset_merchant_two_fa);
-router.post('/clientwithdrawnetworkid',                withdrawController.get_client_withdraw_with_network_id);
-router.post('/updateClientToken',                      clientsController.updateClientToken);
-router.post('/getTranscationData',                     hotwallettranslogsController.getTranscationData);
+// router.post('/resetMerchantTwoFa',                clientsController.reset_merchant_two_fa);
+router.post('/clientwithdrawnetworkid',              withdrawController.get_client_withdraw_with_network_id);
+router.post('/updateClientToken',                    clientsController.updateClientToken);
+router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
 
 // =============MerchantStore=========================================== //
-router.post('/createMerchantStore',                    merchantstoreController.createMerchantStore);
-router.get('/allMerchantStore',                        merchantstoreController.allMerchantStore);
-router.post('/merchantstore',                          merchantstoreController.MerchantStore);
+router.post('/createMerchantStore',                  merchantstoreController.createMerchantStore);
+router.get('/allMerchantStore',                      merchantstoreController.allMerchantStore);
+router.post('/merchantstore',                        merchantstoreController.MerchantStore);
 
 // =============Pos Merchant Wallet=========================================== //
-router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
-router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
-
+router.post('/assignPosMerchantWallet',              posTransactionPoolController.assignPosMerchantWallet);
+router.post('/shopTransList',                        posTransactionPoolController.getShopTransList);
 
 "============================ Currency Master ==============================="
-router.get('/allCurrency',                                  CurrencyController.allCurrency);
-
+router.get('/allCurrency',                                   CurrencyController.allCurrency);
+router.post('/priceConversition',                            CurrencyController.priceConversition);
 module.exports = router;

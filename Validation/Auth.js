@@ -1,5 +1,7 @@
-const client = require('../Models/clients');
+const client    = require('../Models/clients');
+const admins    = require('../Models/admin');
 const Validator = require('./index');
+const jwt       = require('jsonwebtoken');
 require("dotenv").config()
 module.exports =
 {
@@ -35,7 +37,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-    
     verfiy_The_Merchant(req, res, next) {
         try {
             const validationRule = 
@@ -67,6 +68,48 @@ module.exports =
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: error.message })
+        }
+    },
+    async is_admin(req, res, next) 
+    {
+        try {
+            let token = req.headers.token;
+            let user = await admins.findOne({ where: { token: token } });
+            if (user != null) 
+            {
+                let profile = jwt.verify(token, process.env.AUTH_KEY)
+                req.user = profile
+                next()
+            }
+            else 
+            {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+        }
+        catch (error) 
+        {
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async is_merchant(req, res, next) 
+    {
+        try {
+            let token = req.headers.token;
+            let user = await client.findOne({ where: { token: token } });
+            if (user != null) 
+            {
+                let profile = jwt.verify(token, process.env.AUTH_KEY)
+                req.user = profile
+                next()
+            }
+            else 
+            {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+        }
+        catch (error) 
+        {
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
 }
