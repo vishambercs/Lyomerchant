@@ -9,7 +9,7 @@ const hotwallettranslogsController  = require('../controllers/hotwallettranslogs
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 const CurrencyController            = require('../controllers/Masters/CurrencyController')
-const Auth = require('../Validation/Auth');
+const Auth                          = require('../Validation/Auth');
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
@@ -67,10 +67,15 @@ router.post('/merchantstore',                        merchantstoreController.Mer
 router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
 
-"============================ Currency Master ==============================="
+//============================ Currency Master ==============================//
 router.get('/allCurrency',                                   CurrencyController.allCurrency);
 router.post('/priceConversition',                            CurrencyController.priceConversition);
 
+//============================ Merchant Withdraw ==============================//
+router.get('/merchantBalance',                                   withdrawController.merchantBalance);
+router.post('/merchantWithdrawBalance',                          withdrawController.withdrawBalance);
+router.post('/getMinimumWithdraw',                               withdrawController.getMinimumWithdraw);
+router.post('/updateMinimumWitdhraw',                            withdrawController.updateMinimumWitdhraw);
 
 
 

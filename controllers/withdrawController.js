@@ -9,6 +9,7 @@ const Web3          = require('web3');
 var crypto          = require("crypto");
 const clientWallets = require('../Models/clientWallets');
 
+
 require("dotenv").config()
 
 module.exports =
@@ -329,4 +330,48 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
+    async merchantBalance (req,res){
+        try{
+            let result = await clientWallets.findOne(req.body.id)
+            console.log(result)
+            res.json({ status: 200, data: result.balance, message: "clientBalance" })
+        }
+        catch (error){ console.log(error)}
+        
+    },
+    async withdrawBalance (req,res){
+        let data = 100
+        let amount = req.body.amount
+        try{
+            let result = await clientWallets.findOne(req.body.id)
+            if (result.balance >= amount){
+                if (amount >= data){
+                    let result = await withdrawAmountTowallet(req.body.networkId,req.body.amount,req.body.fromWallwt,req.body.toWallet);
+                    res.json({ status: 200, data: result.balance, message: "withdrawBalance" })
+                }
+            
+            else res.json({status : 400, data : result.balance,message: "Amount shoud be greater than minimum Withdrawal limit" })
+            }
+            else  res.json({ status: 200, data: result.balance, message: "Amount shoud be less than or equal to balance" })
+            
+        }
+        catch (error){
+            console.log(error)
+            res.json({status:400,data:'null',mewssage:"Some error happened"})
+        }
+        
+    },
+    async getMinimumWithdraw (req,res){
+        let data = 100
+        res.json({ status: 400, data: 100, message: "getMinimumWithdraw" })
+    },
+    async updateMinimumWitdhraw (req,res){
+        res.json({ status: 400, data: {}, message: "updateMinimumWitdhraw" })
+    },
+
+    
 }
+
+
+
+

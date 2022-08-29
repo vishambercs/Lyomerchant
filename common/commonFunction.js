@@ -284,10 +284,6 @@ async function savelogs(merchant_trans_id, hot_wallet_id, trans_id, network_id, 
 }
 async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, account_balance) {
     try {
- 
-
-        
-
         let txStatus = false;
         console.log("account_balance  =",account_balance)  
         const from_wallet = await poolWallets.aggregate(
@@ -295,8 +291,6 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
 
                 { $match: { "id": poolwalletID } },
                 { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "walletNetwork" } },
- 
-
         ])
         const hotWallet = await hotWallets.findOne({ "network_id": from_wallet[0].network_id, "status": 1 })
         if (from_wallet[0].walletNetwork[0].hotwallettranscationstatus == false) {
@@ -316,12 +310,9 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 web3.eth.sendSignedTransaction(signedTx.rawTransaction, async function (error, hash) {
                     if (!error) {
                         savelogs(merchant_trans_id, hotWallet.id, hash, from_wallet[0].network_id, 1, "Done")
-
                         console.log("your transaction:", hash)
                         // const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
- 
                         const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 , status : 0}})
-
                         console.log("your transaction:", stringify(hash))
                         web3.eth.getTransaction((hash), (err, res) => {            //getTransactionReceipt
                             if (err) {
@@ -333,11 +324,7 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                           })
                         if (txStatus == true) {
                         //const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : (account_balance - from_wallet[0].balance) }})
-                        
-
- 
                         const poolWallet = await poolWallets.updateOne({ id: from_wallet[0].id }, { $set: { balance: 0, status: 0 } })
-
                         console.log("your transaction:", poolWallet)
                         return JSON.stringify({ status: 200, message: "Pool Wallet", data: hash })
                         }
@@ -358,24 +345,18 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
                 let result23 = await tronWeb.trx.getBalance(from_wallet[0].address)
                 let account_balance_in_ether = await tronWeb.trx.getBalance(from_wallet[0].address)
                 let result = await contract.balanceOf(from_wallet[0].address).call();
- 
-
                 //const { abi }        = await tronWeb.trx.getContract(from_wallet[0].walletNetwork[0].contractAddress);
                 //const sendcontract   = tronWeb.contract(abi.entrys, from_wallet[0].walletNetwork[0].contractAddress);
                 //let result345        = await contract.transfer(hotWallet.address, result).send({ feeLimit: 10000000000 })
                 // const poolWallet  = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
                 const poolWallet     = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : 0 , status : 0 }})
-
                 const { abi } = await tronWeb.trx.getContract(from_wallet[0].walletNetwork[0].contractAddress);
                 const sendcontract = tronWeb.contract(abi.entrys, from_wallet[0].walletNetwork[0].contractAddress);
                 let result345 = await contract.transfer(hotWallet.address, account_balance).send({ feeLimit: 10000000000 })
                 //const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
                 //const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : 0 }})
                 // const poolWallet  = await poolWallets.updateOne({id : from_wallet[0].id } , {$set:{ balance : ( account_balance - from_wallet[0].balance ) }})
-                
-
                 savelogs(merchant_trans_id, hotWallet.id, result345, from_wallet[0].network_id, 1, "Done")
-
                 return JSON.stringify({ status: 200, message: "Pool Wallet", data: result345 })
             }
         }
