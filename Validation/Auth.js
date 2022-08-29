@@ -88,7 +88,7 @@ module.exports =
         }
         catch (error) 
         {
-            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
     async is_merchant(req, res, next) 

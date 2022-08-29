@@ -65,7 +65,7 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 app.listen(process.env.SERVER_PORT, function () {
-    console.log('Listening to Port 5000');
+    console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });
 
 var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {
