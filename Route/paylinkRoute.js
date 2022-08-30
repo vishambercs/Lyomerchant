@@ -9,8 +9,8 @@ router.post('/getAllInvoices', Auth.paylink_have_access, payLinkController.getAl
 router.post('/verifyPaymentLink', Auth.paylink_have_access, payLinkController.verifyPaymentLink);
 router.post('/createFastCode', Auth.paylink_have_access, payLinkController.createFastCode);
 router.post('/verifyFastPayment', Auth.paylink_have_access, payLinkController.verifyFastPayment);
-router.post('/verifyFastCode', Auth.paylink_have_access, payLinkController.verifyFastCode);
+router.post('/verifyFastCode',  payLinkController.verifyFastCode);
 router.post('/deleteFastCode', Auth.paylink_have_access, payLinkController.deleteFastCode);
-router.post('/assignPaymentLinkMerchantWallet', Auth.paylink_have_access, payLinkController.assignPaymentLinkMerchantWallet)
+router.post('/assignPaymentLinkMerchantWallet', payLinkController.assignPaymentLinkMerchantWallet)
 
 module.exports = router;
