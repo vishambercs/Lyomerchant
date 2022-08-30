@@ -45,7 +45,7 @@ router.post('/clientwithdrawnetworkid',              Auth.is_merchant,withdrawCo
 router.post('/updateClientToken',                    Auth.is_merchant,clientsController.updateClientToken);
 router.post('/getTranscationData',                   Auth.is_merchant,hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             Auth.is_merchant,transcationpoolController.get_Trans_by_txId);
-router.post('/transactionFastDetails',             transcationpoolController. get_Fastlink_Trans_by_txId);
+router.post('/transactionFastDetails',               Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 
 
 router.post('/generateNewClientAddress',             Auth.is_merchant,clientsController.generateNewClientAddress);
@@ -65,8 +65,8 @@ router.get('/allMerchantStore',                      Auth.is_merchant,merchantst
 router.post('/merchantstore',                        Auth.is_merchant,merchantstoreController.MerchantStore);
 
 // =============Pos Merchant Wallet=========================================== //
-router.post('/assignPosMerchantWallet',                 posTransactionPoolController.assignPosMerchantWallet);
-router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
+router.post('/assignPosMerchantWallet',                 Auth.store_have_access,posTransactionPoolController.assignPosMerchantWallet);
+router.post('/shopTransList',                           Auth.store_have_access,posTransactionPoolController.getShopTransList);
 
 "============================ Currency Master ==============================="
 router.get('/allCurrency',                           Auth.is_merchant,CurrencyController.allCurrency);
@@ -74,7 +74,7 @@ router.post('/priceConversition',                    Auth.is_merchant,CurrencyCo
 
 
 "============================ NETWORK Master ==============================="
-router.post('/allNetworks',                            networkController.allNetworkForClient);
+router.post('/allNetworks',                             Auth.is_merchant,networkController.allNetworkForClient);
 
 module.exports = router;
 
