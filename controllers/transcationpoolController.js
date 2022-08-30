@@ -11,7 +11,7 @@ var commonFunction       = require('../common/commonFunction');
 const bcrypt             = require('bcrypt');
 const Web3               = require('web3');
 var crypto               = require("crypto");
-var poolwalletController = require('../poolwalletController');
+var poolwalletController = require('./poolwalletController');
 require("dotenv").config()
 module.exports =
 {

@@ -1,4 +1,4 @@
-const currencies = require('../../Models/Currency');
+const Currencies = require('../../Models/Currency');
 const networks = require('../../Models/network');
 
 const Utility = require('../../common/Utility');
@@ -120,7 +120,7 @@ module.exports =
 
             console.log("priceConversition============")
             let network  = await networks.findOne({ 'id': req.body.coinid })
-            let Currency = await currencies.findOne({ 'id': req.body.currenid })
+            let Currency = await Currencies.findOne({ 'id': req.body.currenid })
             console.log(Currency,network)
             let parameters = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
             let COINGECKO_URL   =  process.env.COINGECKO+parameters
@@ -136,3 +136,4 @@ module.exports =
         }
     },
 }
+
