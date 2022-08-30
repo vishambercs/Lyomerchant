@@ -16,6 +16,12 @@ const clientsSchema = new mongoose.Schema({
             isAsync: false
         }
     },
+    authtoken:
+    {
+        type: String,
+        required: false,
+        
+    },
     token:
     {
         type: String,

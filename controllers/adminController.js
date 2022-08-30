@@ -79,9 +79,10 @@ module.exports =
                 else if (password_status == true) 
                 {
                     val["admin_api_key"] = ""
-                    val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
+                    val["qrcode"]   = val["two_fa"] == false ? val["qrcode"] : ""
                     let jwttoken    = await Utility.Get_JWT_Token(val.id) 
-                    let wallet      = await admins.findOneAndUpdate({ 'email': email }, { $set: { token:jwttoken } }, { $new: true })
+                    let wallet      = await admins.findOneAndUpdate({ 'email': email }, { $set: { token: jwttoken } }, { $new: true })
+                    val["token"]    = jwttoken
                     res.json({ "status": 200, "data": val, "message": "Successfully Login" })
                 }
                 else if (password_status == false) {
