@@ -149,8 +149,8 @@ router.get('/allMerchantStore',                      merchantstoreController.all
 router.post('/merchantstore',                        merchantstoreController.MerchantStore);
 
 // =============Pos Merchant Wallet=========================================== //
-router.post('/assignPosMerchantWallet',                 Auth.store_have_access,posTransactionPoolController.assignPosMerchantWallet);
-router.post('/shopTransList',                           Auth.store_have_access,posTransactionPoolController.getShopTransList);
+router.post('/assignPosMerchantWallet',                posTransactionPoolController.assignPosMerchantWallet);
+router.post('/shopTransList',                           posTransactionPoolController.getShopTransList);
 
 "============================ Currency Master ==============================="
 router.get('/allCurrency',                           CurrencyController.allCurrency);
