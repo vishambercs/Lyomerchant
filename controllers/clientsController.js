@@ -201,18 +201,25 @@ module.exports =
     async Login(req, res) {
         try {
             let email = req.body.email;
-            clients.findOne({ 'email': email }).select('+password').then(val => {
+            clients.findOne({ 'email': email }).select('+password').then(async (val) => {
+                console.log(val)
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
-                if (val.emailstatus == false) {
+                if (val.emailstatus == false) 
+                {
                     res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
                 }
-                else if (val.loginstatus == false) {
+                else if (val.loginstatus == false) 
+                {
                     res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
                 }
-                else if (password_status == true) {
-                    val["api_key"] = ""
-                    val["hash"] = ""
-                    val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
+                else if (password_status == true) 
+                {
+                    val["api_key"]   = ""
+                    val["hash"]      = ""
+                    val["qrcode"]    = val["two_fa"] == false ? val["qrcode"] : ""
+                    var jwt_token    = jwt.sign({ id: val.id }, process.env.AUTH_KEY, { expiresIn: "1h" });
+                    let wallet       = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken:jwt_token } }, { $new: true })
+                    val["authtoken"] = jwt_token
                     res.json({ "status": 200, "data": val, "message": "Successfully Login" })
                 }
                 else if (password_status == false) {

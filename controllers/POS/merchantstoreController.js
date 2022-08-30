@@ -15,12 +15,10 @@ module.exports =
             var api_key = crypto.randomBytes(20).toString('hex');
             let qrcodedata = JSON.stringify({
 
-                "clientapikey": req.headers.authorization,
+                "merchantapikey": req.headers.authorization,
                 "storename": req.body.storename,
                 "storeapikey": api_key,
             })
-
-
             QRCode.toDataURL(qrcodedata, async function (err, url) {
                 if (!err) {
                     const merchantstore = new merchantstores({
@@ -36,7 +34,7 @@ module.exports =
                     merchantstore.save().then(async (val) => {
                         res.json({
                             status: 200, message: "Store Created Successfully", "qrcode": val.qrcode,
-                            data: { "clientapikey": val.clientapikey, "storename": val.storename, "storeapikey": val.storeapikey }
+                            data: { "merchantapikey": val.clientapikey, "storename": val.storename, "storeapikey": val.storeapikey }
                         })
                     }).catch(error => {
                         console.log(error)

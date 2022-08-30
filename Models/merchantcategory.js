@@ -48,4 +48,4 @@ const merchantcategorySchema = new mongoose.Schema({
     { timestamps: true }
 )
 merchantcategorySchema.plugin(uniqueValidator);
-module.exports = mongoose.model('merchantcategorySchema', merchantcategorySchema)
+module.exports = mongoose.model('merchantcategory', merchantcategorySchema)
