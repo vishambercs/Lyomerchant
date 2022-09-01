@@ -1,33 +1,35 @@
-const clients           = require('../Models/clients');
-const poolWallet        = require('../Models/poolWallet');
-const transactionPools  = require('../Models/transactionPool');
+const clients            = require('../Models/clients');
+const poolWallet         = require('../Models/poolWallet');
+const transactionPools   = require('../Models/transactionPool');
 const paymentlinktxpools= require('../Models/paymentLinkTransactionPool');
-const transcationLog    = require('../Models/transcationLog');
-const cornJobs          = require('../common/cornJobs');
-var CryptoJS            = require('crypto-js')
-var crypto              = require("crypto");
-var Utility             = require('../common/Utility');
-var commonFunction      = require('../common/commonFunction');
-const bcrypt            = require('bcrypt');
-const Web3              = require('web3');
-var crypto              = require("crypto");
+const transcationLog     = require('../Models/transcationLog');
+const cornJobs           = require('../common/cornJobs');
+var CryptoJS             = require('crypto-js')
+var crypto               = require("crypto");
+var Utility              = require('../common/Utility');
+var commonFunction       = require('../common/commonFunction');
+const bcrypt             = require('bcrypt');
+const Web3               = require('web3');
+var crypto               = require("crypto");
+var poolwalletController = require('./poolwalletController');
 require("dotenv").config()
 module.exports =
 {
     async assignMerchantWallet(req, res) {
         try {
-            var merchantKey  = req.headers.authorization
-            var networkType  = req.body.networkType
-            var callbackURL  = req.body.callbackURL
-            var securityHash = req.body.securityHash
-            var orderid      = req.body.orderid
+            var merchantKey   = req.headers.authorization
+            var networkType   = req.body.networkType
+            var callbackURL   = req.body.callbackURL
+            var securityHash  = req.body.securityHash
+            var orderid       = req.body.orderid
             var security_hash = (merchantKey + networkType + callbackURL + process.env.BASE_WORD_FOR_HASH)
             var hash = CryptoJS.MD5(security_hash).toString();
             if (hash == securityHash) 
             {
                 let currentDateTemp = Date.now();
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
-                let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
+                // let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
+                let account     = await poolwalletController.getPoolWalletID(networkType) 
                 const transactionPool = new transactionPools({
                     id: crypto.randomBytes(20).toString('hex'),
                     api_key         : req.headers.authorization,

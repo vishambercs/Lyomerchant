@@ -1,7 +1,8 @@
 const Currencies = require('../../Models/Currency');
-const Network = require('../../Models/network');
+const networks = require('../../Models/network');
+
 const Utility = require('../../common/Utility');
-const hotWallets = require('../../Models/hotWallets');
+
 var mongoose = require('mongoose');
 var crypto = require("crypto");
 const TronWeb = require('tronweb')
@@ -117,11 +118,16 @@ module.exports =
         try 
         {
 
-            let parameters = `ids=${req.body.coinid}&vs_currencies=${req.body.currenid}`
+            console.log("priceConversition============")
+            let network  = await networks.findOne({ 'id': req.body.coinid })
+            let Currency = await Currencies.findOne({ 'id': req.body.currenid })
+            console.log(Currency,network)
+            let parameters = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
             let COINGECKO_URL   =  process.env.COINGECKO+parameters
             let axiosGetData    =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
             var stringify_response = JSON.parse(axiosGetData.data)
             res.json({ status: 200, data: stringify_response.data, message: "kasd" })
+            // res.json({ status: 200, data: {}, message: "kasd" })
         }
         catch (error) 
         {
@@ -130,3 +136,4 @@ module.exports =
         }
     },
 }
+
