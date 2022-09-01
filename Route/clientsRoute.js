@@ -73,9 +73,21 @@ router.post('/priceConversition',                            CurrencyController.
 
 //============================ Merchant Withdraw ==============================//
 router.get('/merchantBalance',                                   withdrawController.merchantBalance);
+router.post('/setWithdrawSettings',                              withdrawController.setWithdrawSettings);
+router.get('/getWithdrawSettings',                               withdrawController.getWithdrawSettings);
+router.post('/setMerchantWitthdrawMode',                         withdrawController.setMerchantWitthdrawMode);
+router.post('/setMerchantWitthdrawLimit',                        withdrawController.setMerchantWitthdrawLimit);
+router.post('/setMerchantWitthdrawFeePercentage',                withdrawController.setMerchantWitthdrawFeePercentage);
+router.post('/setPooltoHotMode',                                 withdrawController.setPooltoHotMode);
+router.post('/setPooltoHotLimit',                                withdrawController.setPooltoHotLimit);
 router.post('/merchantWithdrawBalance',                          withdrawController.withdrawBalance);
-router.post('/getMinimumWithdraw',                               withdrawController.getMinimumWithdraw);
-router.post('/updateMinimumWitdhraw',                            withdrawController.updateMinimumWitdhraw);
+router.get('/getGasFee',                                         withdrawController.getGasFee);
+
+
+
+
+
+
 
 
 
