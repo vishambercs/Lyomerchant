@@ -330,6 +330,7 @@ module.exports =
     },
     async merchantBalance(req, res) {
         try {
+            
             let ethPrice = 0;
             let withdrawable = 0;
             let fee = 0;
@@ -339,7 +340,7 @@ module.exports =
             networkid = balance.network_id
             settings = await withdrawSettings.find();
             if (settings[0].merchantWithdrawLimit >= balance.balance) {
-                res.json({ status: 200, data: { "balance": balance.balance, "minimum required to withdraw": settings[0].merchantWithdrawLimit }, message: "clientBalance" })
+                res.json({ status: 200, data: { "balance": balance.balance,"minimumrequiredtowithdraw": settings[0].merchantWithdrawLimit }, message: "clientBalance" })
             }
             else if (settings[0].merchantWithdrawMode == "percentage") {
                 fee = ((settings[0].merchantWithdrawFeePercentage) / 100) * balance.balance
@@ -426,9 +427,9 @@ module.exports =
 
 
                 }
-                else res.json({ status: 400, data: result.balance, message: "Amount shoud be greater than minimum Withdrawal limit" })
+                else res.json({ status: 400, data: balance.balance, message: "Amount shoud be greater than minimum Withdrawal limit" })
             }
-            else res.json({ status: 200, data: result.balance, message: "Amount shoud be less than or equal to balance" })
+            else res.json({ status: 200, data: balance.balance, message: "Amount shoud be less than or equal to balance" })
         }
         catch (error) {
             console.log(error)
@@ -445,22 +446,49 @@ module.exports =
             res.json({ status: 400, data: error, message: "Not found" })
         }
     },
+    // async setWithdrawSettings1(req, res) {
+    //     let settings = req.body
+    //     let data = ''
+    //     let message = ''
+    //     let status = 200
+    //     try {
+    //         let new_record = new withdrawSettings({
+    //             id: mongoose.Types.ObjectId(),
+    //             pooltohotMode: settings.pooltohotMode,
+    //             pooltohotLimit: settings.pooltohotLimit,
+    //             merchantWithdrawMode: settings.merchantWithdrawMode,
+    //             merchantWithdrawLimit: settings.merchantWithdrawLimit,
+    //             merchantWithdrawFeePercentage: settings.merchantWithdrawFeePercentage
+    //         })
+    //         console.log(new_record)
+    //         data = await new_record.save()
+    //         message = "Withdraw Settings saved"
+    //         status = 200
+    //     }
+    //     catch (error) {
+    //         console.log("new invoice error", error)
+    //         message = error
+    //         status = 400
+    //     }
+    //     res.json({ status: status, data: data, message: message })
+    // },
+
     async setWithdrawSettings(req, res) {
         let settings = req.body
         let data = ''
         let message = ''
         let status = 200
         try {
-            let new_record = new withdrawSettings({
+            let data = await withdrawSettings.findOneAndUpdate({},{ $set: {
                 id: mongoose.Types.ObjectId(),
                 pooltohotMode: settings.pooltohotMode,
                 pooltohotLimit: settings.pooltohotLimit,
                 merchantWithdrawMode: settings.merchantWithdrawMode,
                 merchantWithdrawLimit: settings.merchantWithdrawLimit,
                 merchantWithdrawFeePercentage: settings.merchantWithdrawFeePercentage
-            })
-            console.log(new_record)
-            data = await new_record.save()
+            }})
+            
+            
             message = "Withdraw Settings saved"
             status = 200
         }
@@ -471,6 +499,7 @@ module.exports =
         }
         res.json({ status: status, data: data, message: message })
     },
+
     async setMerchantWitthdrawMode(req, res) {
         try {
             let data = await withdrawSettings.findOneAndUpdate({}, { $set: { "merchantWithdrawMode": req.body.mode } });

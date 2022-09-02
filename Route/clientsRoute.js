@@ -9,7 +9,7 @@
 // const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 // const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 // const CurrencyController            = require('../controllers/Masters/CurrencyController');
-// const networkController             = require('../controllers/networkController');
+ const networkController             = require('../controllers/networkController');
 // const Auth                          = require('../Validation/Auth');
 
 // router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -156,7 +156,7 @@ router.get('/allCurrency',                                   CurrencyController.
 router.post('/priceConversition',                            CurrencyController.priceConversition);
 
 //============================ Merchant Withdraw ==============================//
-router.get('/merchantBalance',                                   withdrawController.merchantBalance);
+router.post('/merchantBalance',                                  withdrawController.merchantBalance);
 router.post('/setWithdrawSettings',                              withdrawController.setWithdrawSettings);
 router.get('/getWithdrawSettings',                               withdrawController.getWithdrawSettings);
 router.post('/setMerchantWitthdrawMode',                         withdrawController.setMerchantWitthdrawMode);
