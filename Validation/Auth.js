@@ -29,6 +29,24 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+    async plugin_have_access(req, res, next) {
+        try {
+            let api_key = req.headers.authorization;
+            let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { categoryid: "30824fa99994057dea6102194f3cafd88de16144" }, { status: 1 }] });
+                if (user != null) {
+                    next()
+                }
+                else {
+                    res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                }
+         
+        }
+        catch (error) 
+        {
+            console.log("error", error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
     async Verfiy_Kyc_Header(req, res, next) {
         try {
             console.log("Verfiy_Kyc_Header ===========", req.body)
@@ -142,9 +160,9 @@ module.exports =
                 res.json({ status: 400, data: {}, message: "Unauthorize Access" })
             }
         }
-        catch (error) {
-
-            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        catch (error) 
+        {
+                res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
     async has_Pos_Access(req, res, next) {
@@ -220,4 +238,5 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
+    
 }

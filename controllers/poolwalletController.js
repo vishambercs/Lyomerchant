@@ -8,6 +8,8 @@ const { create } = require('lodash');
 const { GetAddress } = require('../common/Utility');
 require("dotenv").config()
 const { generateAccount } = require('tron-create-address')
+const feedWalletController    = require('../controllers/Masters/feedWalletController');
+
 module.exports =
 {
     async create_Pool_Wallet(req, res) {
@@ -197,8 +199,7 @@ module.exports =
         }
 
     },
-    async getPoolWalletID(network_id) 
-    {
+    async getPoolWalletID(network_id) {
         try {
             let network_details = await network.findOne({ 'id': network_id })
             let account = await poolWallet.findOne({ network_id: network_id, status: 0 })
@@ -216,9 +217,8 @@ module.exports =
                     return val
                 }
             }
-            else 
-            {
-                         return account
+            else {
+                return account
             }
         }
         catch (error) {
@@ -226,5 +226,72 @@ module.exports =
             return null
         }
     },
-   
+    async allwalletsWithStatus(req, res) {
+        try {
+            await poolWallet.aggregate([
+                { $match: { status:  parseInt(req.body.status) } },
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "walletNetwork"// output array field
+                    },
+
+                },
+                {
+                    "$project":
+                    {
+                        "privateKey": 0,
+
+                    }
+                }
+            ]).then(async (data) => {
+
+                res.json({ status: 200, message: "Pool Wallet", data: data })
+            }).catch(error => {
+                console.log("get_clients_data", error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+        }
+        catch (error) {
+            console.log(error)
+            return null
+            res.json({ status: 400, data: {}, message: error })
+        }
+    },
+    async GetBalanceOFAddress(req, res) {
+        try {
+
+            await poolWallet.aggregate([
+                { $match: { id:  req.body.id } },
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "walletNetwork"// output array field
+                    },
+
+                },
+                {
+                    "$project":
+                    {
+                        "privateKey": 0,
+
+                    }
+                }
+            ]).then(async (data) => {
+                res.json({ status: 200, message: "Pool Wallet", data: data })
+            }).catch(error => {
+                console.log("get_clients_data", error)
+                res.json({ status: 400, data: {}, message: error })
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: error })
+        }
+    },
+    
 }

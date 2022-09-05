@@ -166,6 +166,7 @@ module.exports =
             console.log("getTranscationData =====================================",queryvariable);
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await commonFunction.get_Transcation_Data(queryvariable.transkey)
+            console.log("getTranscationData =====================================",getTranscationData);
             if(getTranscationData.length > 0)
             {
 
@@ -342,7 +343,7 @@ module.exports =
                 response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please Wait We are checking" };
                 connection.sendUTF(JSON.stringify(response));
             }
-            Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 20000);
+            Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 10000);
             connection.on('message', function (message) {
             if(index == -1)
             {

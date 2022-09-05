@@ -11,7 +11,7 @@ const Web3 = require('web3');
 require("dotenv").config()
 var stringify = require('json-stringify-safe');
 var TronStation = require('tronstation');
-
+const emailSending = require('../../common/emailSending');
 
 async function createFeedWalletsFun(network_id, created_by) {
     try {
@@ -116,7 +116,8 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].privatekey)
             console.log("email_response", balance)
             console.log("email_response", balance.status == 200 && balance.native_balance == 0)
-            if (balance.status == 200 && balance.data.native_balance == 0) {
+            if (balance.status == 200 && balance.data.native_balance == 0) 
+            {
                 var emailTemplateName =
                 {
                     "emailTemplateName": "feedingwallet.ejs",
@@ -124,12 +125,13 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                     "subject": "Feed The Wallet",
                     "templateData": { "address": from_wallet[0].address, "network": from_wallet[0].networkDetails[0].network }
                 }
-                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+                let email_response = await emailSending.sendEmailFunc(emailTemplateName)
                 console.log("email_response", email_response)
                 response = { status: 400, message: "We have informed the admin", data: {} }
                 return response
             }
-            if (from_wallet[0].networkDetails[0].libarayType == "Web3") {
+            if (from_wallet[0].networkDetails[0].libarayType == "Web3") 
+            {
                 const web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].networkDetails[0].nodeUrl))
                 const pubkey = await web3.eth.accounts.privateKeyToAccount(from_wallet[0].privatekey).address;
                 const balance = await web3.eth.getBalance(pubkey);
@@ -196,14 +198,47 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
         return { status: 400, data: {}, message: error.message, "poolWalletDetails": from_wallet }
     }
 }
-
-
+async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount , ContractAddress = "") {
+    let gasAmount = 0
+    let gasPrice = 0
+    try {
+        console.log("Type==========calculateGasFee===========",Type)
+        if (Type == "Web3") 
+        {
+            const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
+            gasPrice = await WEB3.eth.getGasPrice();
+            if (ContractAddress != "") 
+            {
+                const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
+                gasAmount = await contract.methods.transfer(toAddress, WEB3.utils.toWei(`${amount}`)).estimateGas({ from: fromAddress });
+                console.log("ContractAddress==========calculateGasFee===========",gasPrice,gasAmount)
+                return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
+            }
+            else 
+            {
+                gasAmount = await WEB3.eth.estimateGas({ to: toAddress, from: fromAddress, value: Web3.utils.toWei(`${amount}`, 'ether'), });
+                console.log("==========calculateGasFee===========",gasPrice,gasAmount)
+                return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
+            }
+        }
+        else 
+        {
+            console.log("else==========calculateGasFee===========",gasPrice,gasAmount)
+            return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
+        }
+    }
+    catch (error) {
+        console.log(error)
+        return { status: 400, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "Error" }
+    }
+}
 
 module.exports =
 {
-    createFeedWalletsFun: createFeedWalletsFun,
-    CheckBalanceOfAddress: CheckBalanceOfAddress,
-    addressFeedingFun: addressFeedingFun,
+    createFeedWalletsFun    : createFeedWalletsFun,
+    CheckBalanceOfAddress   : CheckBalanceOfAddress,
+    addressFeedingFun       : addressFeedingFun,
+    calculateGasFee         : calculateGasFee,
     async createFeedWallets(req, res) {
         try {
             let feedwallet = await createFeedWalletsFun(req.body.network_id, req.body.created_by)
@@ -255,19 +290,16 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
-    async addressFeeding(req, res) 
-    {
-        try 
-        {
-        let addressFeedingResponse  =  await addressFeedingFun(req.body.network_id, req.body.poolwalletAddress, req.body.amount)
-        res.json(addressFeedingResponse)
-        } 
+    async addressFeeding(req, res) {
+        try {
+            let addressFeedingResponse = await addressFeedingFun(req.body.network_id, req.body.poolwalletAddress, req.body.amount)
+            res.json(addressFeedingResponse)
+        }
         catch (error) {
-                console.log("Message %s sent: %s", error);
-                res.json({ status: 400, data: {}, message: error.message, "poolWalletDetails": from_wallet })
-            }
-        
+            console.log("Message %s sent: %s", error);
+            res.json({ status: 400, data: {}, message: error.message, "poolWalletDetails": from_wallet })
+        }
+
 
         // let from_wallet = {};
         // let response = {}
