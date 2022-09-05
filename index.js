@@ -21,10 +21,6 @@ var app = express();
 // const https = require('http');
 const https             = require('https');
 const Utility = require('./common/Utility');
-
-
-
-
 require('dotenv').config()
 app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
@@ -36,7 +32,6 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,Authorization,Token");
     next();
 });
-
 app.get('/',    function (req, res) { res.send('Welcome to Lyo Merchant'); });
 app.use('/v1',           client);
 app.use('/admin/v1',     poolRoute);

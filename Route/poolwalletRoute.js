@@ -23,4 +23,6 @@ router.post('/create_Pool_Wallet_100',   poolwalletController.create_Pool_Wallet
 router.post('/getPoolWalletWithBalance', poolwalletController.getPoolWalletWithBalance);
 router.post('/getUsedPercentage',        poolwalletController.getUsedPercentage);
 router.post('/createBulkPoolWallet',     poolwalletController.create_bulk_pool_wallet);
+router.post('/allwalletsWithStatus',     poolwalletController.allwalletsWithStatus);
+
 module.exports = router;

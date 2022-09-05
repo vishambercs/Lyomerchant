@@ -1,19 +1,23 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 var uniqueValidator = require('mongoose-unique-validator');
-const merchantcategorySchema = new mongoose.Schema({
+const feedWalletsSchema = new mongoose.Schema({
     id:
     {
         type: String,
         required: true,
-        unique:true
     },
-    categoryid:
+    network_id:
     {
         type: String,
         required: true,
     },
-    clientapikey:
+    address:
+    {
+        type: String,
+        required: true,
+    },
+    privatekey:
     {
         type: String,
         required: true,
@@ -22,15 +26,6 @@ const merchantcategorySchema = new mongoose.Schema({
     {
         type: Number,
         required: true,
-    },
-    remarks: {
-        type: String,
-        required: false,
-    },
-    updated_by: {
-        type: String,
-        
-        required: false,
     },
     created_by: {
         type: String,
@@ -47,7 +42,16 @@ const merchantcategorySchema = new mongoose.Schema({
     },
 
 },
+    {
+        toJSON:
+        {
+            transform(doc, ret) {
+                delete ret.privatekey;
+                delete ret.__v;
+            },
+        },
+    },
     { timestamps: true }
 )
-merchantcategorySchema.plugin(uniqueValidator);
-module.exports = mongoose.model('merchantcategory', merchantcategorySchema)
+feedWalletsSchema.plugin(uniqueValidator);
+module.exports = mongoose.model('feedWallets', feedWalletsSchema)

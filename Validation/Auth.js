@@ -2,6 +2,7 @@ const client = require('../Models/clients');
 const admins = require('../Models/admin');
 const merchantstores = require('../Models/merchantstore');
 const merchantcategory = require('../Models/merchantcategory');
+const storeDevices = require('../Models/storeDevices');
 const Validator = require('./index');
 const jwt = require('jsonwebtoken');
 require("dotenv").config()
@@ -26,6 +27,24 @@ module.exports =
         }
         catch (error) {
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async plugin_have_access(req, res, next) {
+        try {
+            let api_key = req.headers.authorization;
+            let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { categoryid: "30824fa99994057dea6102194f3cafd88de16144" }, { status: 1 }] });
+                if (user != null) {
+                    next()
+                }
+                else {
+                    res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                }
+         
+        }
+        catch (error) 
+        {
+            console.log("error", error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
     async Verfiy_Kyc_Header(req, res, next) {
@@ -76,7 +95,44 @@ module.exports =
     async is_admin(req, res, next) {
         try {
             let token = req.headers.token;
-            let user = await admins.findOne({ where: { token: token } });
+            let authorization = req.headers.authorization;
+            let user = await admins.findOne({ admin_api_key: authorization, token: token });
+            if (user != null) {
+                let profile = jwt.verify(token, process.env.AUTH_KEY)
+                req.user = profile
+                next()
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verfiyAdminToken(req, res, next) {
+        try {
+            let token = req.headers.token;
+            let authorization = req.headers.authorization;
+            let user = await admins.findOne({ token: token });
+            if (user != null) {
+                let profile = jwt.verify(token, process.env.AUTH_KEY)
+                req.user = profile
+                next()
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verfiyClientToken(req, res, next) {
+        try {
+            let token = req.headers.token;
+            let authorization = req.headers.authorization;
+            let user = await client.findOne({ token: token });
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
@@ -93,10 +149,27 @@ module.exports =
     async is_merchant(req, res, next) {
         try {
             let token = req.headers.token;
-            let user = await client.findOne({ where: { authtoken: token } });
+            let authorization = req.headers.authorization;
+            let user = await client.findOne({ api_key: authorization, authtoken: token });
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
+                next()
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+        }
+        catch (error) 
+        {
+                res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async has_Pos_Access(req, res, next) {
+        try {
+            let token = req.headers.authorization;
+            let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "306d04e5ccf554ffcaebe1b929a6dbc27bc04a3b" }, { status: 1 }] });
+            if (user != null) {
                 next()
             }
             else {
@@ -111,11 +184,9 @@ module.exports =
     async store_have_access(req, res, next) {
         try {
             let token = req.headers.authorization;
-            // let user = await merchantcategory.findOne({ where: { clientapikey : token});
             let merchantstore = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
-
             if (merchantstore != null) {
-                let user = await merchantcategory.findOne({ $and: [{ clientapikey: merchantstore.clientapikey }, { categoryid: "306d04e5ccf554ffcaebe1b929a6dbc27bc04a3b" }, { status: 0 }] });
+                let user = await merchantcategory.findOne({ $and: [{ clientapikey: merchantstore.clientapikey }, { categoryid: "306d04e5ccf554ffcaebe1b929a6dbc27bc04a3b" }, { status: 1 }] });
 
                 if (user != null) {
                     next()
@@ -123,6 +194,24 @@ module.exports =
                 else {
                     res.json({ status: 400, data: {}, message: "Unauthorize Access" })
                 }
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async check_Store_Device_Access(req, res, next) {
+        try {
+            let token = req.headers.authorization;
+            let devicetoken = req.headers.devicetoken;
+            let merchantstore = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
+            let storeDevice = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
+            if (merchantstore != null && storeDevice != null) {
+                next()
             }
             else {
                 res.json({ status: 400, data: {}, message: "Unauthorize Access" })
@@ -149,4 +238,5 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
+    
 }

@@ -1,19 +1,25 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 var uniqueValidator = require('mongoose-unique-validator');
-const merchantcategorySchema = new mongoose.Schema({
+const merchantsites = new mongoose.Schema({
     id:
     {
         type: String,
         required: true,
         unique:true
     },
-    categoryid:
+    merchantapikey:
     {
         type: String,
         required: true,
     },
-    clientapikey:
+    siteapikey:
+    {
+        type: String,
+        required: true,
+        unique:true
+    },
+    domain:
     {
         type: String,
         required: true,
@@ -23,21 +29,12 @@ const merchantcategorySchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    remarks: {
-        type: String,
-        required: false,
-    },
-    updated_by: {
-        type: String,
-        
-        required: false,
-    },
     created_by: {
-        type: String,
+        type: Number,
         required: true,
     },
     deleted_by: {
-        type: String,
+        type: Number,
         required: false,
         default: 0
     },
@@ -49,5 +46,5 @@ const merchantcategorySchema = new mongoose.Schema({
 },
     { timestamps: true }
 )
-merchantcategorySchema.plugin(uniqueValidator);
-module.exports = mongoose.model('merchantcategory', merchantcategorySchema)
+merchantsites.plugin(uniqueValidator);
+module.exports = mongoose.model('merchantsites', merchantsites)
