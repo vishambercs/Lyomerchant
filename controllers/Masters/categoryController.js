@@ -58,8 +58,6 @@ module.exports =
             console.log(error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
-    },
-
-
- 
+    }, 
+    
 }

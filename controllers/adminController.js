@@ -239,5 +239,29 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-   
+    async getapikey(req, res) {
+        try {
+            let email = req.body.email;
+            await admins.findOne({ 'email': email }).then(async (val) => {
+               
+               if (val != null) 
+                {
+                   
+                    res.json({ "status": 200, "data": val["admin_api_key"], "message": "Success" })
+                }
+                else  
+                {
+                    res.json({ "status": 400, "data": {}, "message": "Invalid Request" })
+                }
+
+            }).catch(error => {
+                console.log("get_clients_data", error)
+                // res.json({ "error": error })
+                res.json({ status: 400, data: {}, message: "Invalid Request" })
+            })
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
 }

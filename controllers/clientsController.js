@@ -31,19 +31,19 @@ module.exports =
 {
     async create_clients(req, res) {
         try {
-            console.log("create client",req.body,req.header)
+           
             var api_key = crypto.randomBytes(20).toString('hex');
-            var email   = req.body.email
-            var hash    = CryptoJS.MD5(email + process.env.BASE_WORD_FOR_HASH).toString();
+            var email = req.body.email
+            var hash = CryptoJS.MD5(email + process.env.BASE_WORD_FOR_HASH).toString();
             if (hash == req.body.hash) {
-                const client            = new clients({ status: false, api_key: api_key, email: req.body.email, });
-                const previous_client   = await clients.findOne({ 'email': email }).then(async (val) => {
+                const client = new clients({ status: false, api_key: api_key, email: req.body.email, });
+                const previous_client = await clients.findOne({ 'email': email }).then(async (val) => {
                     if (val == null) {
-                        console.log(val)
+                       
                         res.json({ status: 200, message: "Clients Data", data: {} })
                     }
                     else {
-                        console.log(val)
+                       
                         res.json({ status: 200, message: "Clients Data", data: { id: val._id, token: val.token, api_key: val.api_key, email: val.email } })
                     }
                 }).catch(error => {
@@ -78,19 +78,18 @@ module.exports =
         }
     },
     async create_merchant(req, res) {
-        var api_key  = crypto.randomBytes(20).toString('hex');
-        var email    = req.body.email
-        var password          = req.body.password
-        var hash              = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
-        const salt            = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
-        const password_hash   = bcrypt.hashSync(password, salt);
+        var api_key = crypto.randomBytes(20).toString('hex');
+        var email = req.body.email
+        var password = req.body.password
+        var hash = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
+        const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+        const password_hash = bcrypt.hashSync(password, salt);
         let secret = authenticator.generateSecret()
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
         var token = crypto.randomBytes(20).toString('hex');
 
         if (hash == req.body.hash) {
-            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => 
-            {
+            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
                 const client = new clients({ token: token, loginstatus: false, emailtoken: otp, emailstatus: false, kycLink: " ", two_fa: false, secret: secret, qrcode: url, status: false, password: password_hash, api_key: api_key, email: req.body.email, hash: hash, });
                 client.save().then(async (val) => {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
@@ -114,7 +113,7 @@ module.exports =
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false })
         await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "emailtoken": otp, "emailstatus": false, "loginstatus": false } }, { $new: true })
             .then(async (val) => {
-                console.log("val otp", val)
+               
                 if (val != null) {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
@@ -202,23 +201,20 @@ module.exports =
         try {
             let email = req.body.email;
             clients.findOne({ 'email': email }).select('+password').then(async (val) => {
-                console.log(val)
+              
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
-                if (val.emailstatus == false) 
-                {
+                if (val.emailstatus == false) {
                     res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
                 }
-                else if (val.loginstatus == false) 
-                {
+                else if (val.loginstatus == false) {
                     res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
                 }
-                else if (password_status == true) 
-                {
-                    val["api_key"]   = ""
-                    val["hash"]      = ""
-                    val["qrcode"]    = val["two_fa"] == false ? val["qrcode"] : ""
-                    var jwt_token    = jwt.sign({ id: val.id }, process.env.AUTH_KEY, { expiresIn: "1h" });
-                    let wallet       = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken:jwt_token } }, { $new: true })
+                else if (password_status == true) {
+                    val["api_key"] = ""
+                    val["hash"] = ""
+                    val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
+                    var jwt_token = jwt.sign({ id: val.id }, process.env.AUTH_KEY, { expiresIn: "1h" });
+                    let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
                     val["authtoken"] = jwt_token
                     res.json({ "status": 200, "data": val, "message": "Successfully Login" })
                 }
@@ -479,8 +475,7 @@ module.exports =
                 // return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Done" })
                 res.json({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
             }
-            else if (addressObject.networkDetails[0].cointype == "Native") 
-            {
+            else if (addressObject.networkDetails[0].cointype == "Native") {
                 const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
                 let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
                 let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
@@ -488,10 +483,8 @@ module.exports =
                 if (amountstatus != 0) {
                     let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
                     await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
-                        then(async (val) => 
-                        {
-                            if (val != null) 
-                            {    
+                        then(async (val) => {
+                            if (val != null) {
                                 console.log("merchantbalance 2", val.balance)
                                 let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
                                 console.log("merchantbalance 3", clientdetails)
@@ -500,9 +493,9 @@ module.exports =
                             console.log("get_clients_data", error)
                             res.json({ status: 400, data: {}, message: "Verification Failed" })
                         })
-                    let new_record                  = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
-                    let new_record1                 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
-                    let get_transcation_response    = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
+                    let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
+                    let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
+                    let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
                     if (amountstatus != 0) {
                         // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
                         let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
@@ -969,15 +962,14 @@ module.exports =
     },
     async forgotPassword(req, res) {
         try {
-           
-           var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp,loginstatus : false } }, { $new: true })
-            if (val != null) 
-            {
-                var emailTemplateName   = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
-                let email_response      = await commonFunction.sendEmailFunction(emailTemplateName)
+
+            var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, loginstatus: false } }, { $new: true })
+            if (val != null) {
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
+                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
-                res.json({ status: 200, message: "We have sent token to your email.Please check your email", data: { } })
+                res.json({ status: 200, message: "We have sent token to your email.Please check your email", data: {} })
             }
             else {
                 res.json({ status: 400, message: "Invalid Email", data: null })
@@ -988,19 +980,16 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }
     },
-    async checkTheTokenAndUpdatePassword(req, res) 
-    {
-        const salt              = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
-        const password_hash     = bcrypt.hashSync(req.body.newpassword, salt);
+    async checkTheTokenAndUpdatePassword(req, res) {
+        const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+        const password_hash = bcrypt.hashSync(req.body.newpassword, salt);
         await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken }, { $set: { "password": password_hash, "loginstatus": true } })
             .then(async (val) => {
-                if (val != null) 
-                {
+                if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email })
                     res.json({ status: 200, message: "Password Updated Successfully", data: clientsdata })
                 }
-                else 
-                {
+                else {
                     res.json({ status: 400, message: "Invalid Token", data: null })
                 }
             })
@@ -1012,13 +1001,12 @@ module.exports =
     async ResetPassword(req, res) {
         try {
             let email = req.body.email;
-            const salt              = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
-            const password_hash     = bcrypt.hashSync(req.body.newpassword, salt);
+            const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+            const password_hash = bcrypt.hashSync(req.body.newpassword, salt);
             clients.findOne({ 'email': email }).select('+password').then(async (val) => {
                 var password_status = bcrypt.compareSync(req.body.password, val.password)
-                if (password_status == true) 
-                {
-                    let client = await clients.findOneAndUpdate({ email: req.body.email}, { $set: { "password": password_hash } })
+                if (password_status == true) {
+                    let client = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "password": password_hash } })
                     res.json({ "status": 200, "data": client, "message": "Password Updated" })
                 }
                 else if (password_status == false) {
@@ -1037,43 +1025,61 @@ module.exports =
     },
     async generateNewClientAddress(req, res) {
         try {
-            let clientWallet                    = await clientWallets.findOne({ 'client_api_key': req.body.client_api_key,status : 3 })
-            if(clientWallet == null)
-            {
+            let clientWallet = await clientWallets.findOne({ 'client_api_key': req.body.client_api_key, status: 3 })
+            if (clientWallet == null) {
                 return res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
-            let network_details                 = await network.findOne({ 'id': clientWallet.network_id })
-            if(network_details.libarayType      == "Web3")
-            {
-                let account                         = await Utility.GetAddress(network_details.nodeUrl)
-                let clientWallet                    = await clientWallets.findOneAndUpdate(
-                { 'network_id': req.body.network_id,status : 3 }, 
-                { $set: { "address": account.address , "privatekey" : account.privateKey  } }, { $new: true })
+            let network_details = await network.findOne({ 'id': clientWallet.network_id })
+            if (network_details.libarayType == "Web3") {
+                let account = await Utility.GetAddress(network_details.nodeUrl)
+                let clientWallet = await clientWallets.findOneAndUpdate(
+                    { 'network_id': req.body.network_id, status: 3 },
+                    { $set: { "address": account.address, "privatekey": account.privateKey } }, { $new: true })
                 res.json({ status: 200, data: clientWallet, message: "Updated" })
             }
-            else if(network_details.libarayType == "Tronweb")
-            {
-                const { address, privateKey }       = generateAccount()
-                let clientWallet                    = await clientWallets.findOneAndUpdate(
-                    { 'network_id': req.body.network_id,status : 3 }, 
-                    { $set: { "address":address , "privatekey" : privateKey  } }, { $new: true })
-                    res.json({ status: 200, data: clientWallet, message: "Updated" })
+            else if (network_details.libarayType == "Tronweb") {
+                const { address, privateKey } = generateAccount()
+                let clientWallet = await clientWallets.findOneAndUpdate(
+                    { 'network_id': req.body.network_id, status: 3 },
+                    { $set: { "address": address, "privatekey": privateKey } }, { $new: true })
+                res.json({ status: 200, data: clientWallet, message: "Updated" })
             }
         }
-        catch (error) 
-        {
+        catch (error) {
             res.json({ status: 400, data: {}, message: "Customer did not find" })
         }
     },
     async updateMerchantProfileImage(req, res) {
         try {
-            let update = await clients.findOneAndUpdate({ 'clientapikey': req.headers.authorization } , { $set: { profileimage:req.body.profileimage} }, { $new: true } )
-            res.json({ status: 200, data: {update}, message: "update profile" })
+            let update = await clients.findOneAndUpdate({ 'clientapikey': req.headers.authorization }, { $set: { profileimage: req.body.profileimage } }, { $new: true })
+            res.json({ status: 200, data: { update }, message: "update profile" })
         }
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
-        
+
+    },
+    async getapikey(req, res) {
+        try {
+            let email = req.body.email;
+            await clients.findOne({ 'email': email }).then(async (val) => {
+                if (val != null) {
+                        res.json({ "status": 200, "data": val["api_key"], "message": "Success" })
+                }
+                else {
+                    res.json({ "status": 400, "data": {}, "message": "Invalid Request" })
+                }
+
+            }).catch(error => {
+                console.log("get_clients_data", error)
+                // res.json({ "error": error })
+                res.json({ status: 400, data: {}, message: "Invalid Request" })
+            })
+        }
+        catch (error) 
+        {
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
     },
 }

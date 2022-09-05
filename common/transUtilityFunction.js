@@ -19,6 +19,7 @@ var mongoose = require('mongoose');
 const TronWeb = require('tronweb')
 const posTransactionPool = require('../Models/posTransactionPool');
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
+const feedWalletController = require('../controllers/Masters/feedWalletController');
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -104,6 +105,7 @@ async function savelogs(merchant_trans_id, hot_wallet_id, trans_id, network_id, 
     })
     return logs;
 }
+
 async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, account_balance) {
     try {
         const from_wallet = await poolWallets.aggregate([
@@ -117,8 +119,20 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
         }
         else if (hotWallet != null) 
         {
+
+            let feedWallets = await feedWalletController.CheckBalanceOfAddress(
+                from_wallet[0].walletNetwork[0].nodeUrl,
+                from_wallet[0].networkDetails[0].libarayType,
+                from_wallet[0].address,
+                from_wallet[0].networkDetails[0].contractAddress,
+                from_wallet[0].privatekey
+            )
+            console.log("feedWallets",feedWallets)    
+
+
             if (from_wallet[0].walletNetwork[0].libarayType == "Web3") 
             {
+                
                 var web3                = new Web3(new Web3.providers.HttpProvider(from_wallet[0].walletNetwork[0].nodeUrl));
                 const contract          = new web3.eth.Contract(Constant.USDT_ABI, from_wallet[0].walletNetwork[0].contractAddress, { from: from_wallet[0].address })
                 let decimals            = await contract.methods.decimals().call();
@@ -190,68 +204,94 @@ module.exports =
             const currentdate = new Date().getTime()
             var diff = currentdate - previousdate.getTime() ;
             var minutes = (diff / 60000)
-            console.log("previousdate ================", previousdate)
-            console.log("currentdate ================", currentdate)
-            console.log("minutes ================", minutes)
-            if(minutes > 10)
+            console.log("previousdate   ================", previousdate)
+            console.log("currentdate    ================", currentdate)
+            console.log("minutes        ================", minutes)
+            console.log("transdata",transdata) 
+
+            console.log("feedWallets", addressObject.networkDetails)   
+            console.log("poolWallet", addressObject.poolWallet)   
+            let feedWallets = await feedWalletController.CheckBalanceOfAddress(
+                addressObject.networkDetails[0].nodeUrl,
+                addressObject.networkDetails[0].libarayType,
+                addressObject.poolWallet[0].address,
+                addressObject.networkDetails[0].contractAddress,
+                addressObject.poolWallet[0].privateKey
+            )
+            console.log("feedWallets",feedWallets)   
+
+            if(minutes > 40)
             {
             let transactionpool = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
             let poolwallet      = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
             response            = { amountstatus: 4, status: 200, "data":  {} , message: "Your Transcation is expired." };
             return JSON.stringify(response)
             }
-            else if (addressObject.networkDetails[0].libarayType == "Web3") {
-                const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-                if (addressObject.networkDetails[0].cointype == "Token") {
-                    const contract = new WEB3.eth.Contract(Constant.USDT_ABI, addressObject.networkDetails[0].contractAddress,);
-                    token_balance = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
-                    let decimals = await contract.methods.decimals().call();
-                    format_token_balance = token_balance / (1 * 10 ** decimals)
-                    native_balance = await WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
-                    format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
-                }
-                else if (addressObject.networkDetails[0].cointype == "Native") {
-                    native_balance = await WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
-                    format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
-                    token_balance = native_balance
-                    format_token_balance = format_native_balance
 
-                }
+            else{
+                let feedWallets = await feedWalletController.CheckBalanceOfAddress(
+                    addressObject.networkDetails[0].nodeUrl,
+                    addressObject.networkDetails[0].libarayType,
+                    addressObject.poolWallet[0].address,
+                    addressObject.networkDetails[0].contractAddress,
+                    addressObject.poolWallet[0].privateKey
+                )
+                console.log("feedWallets",feedWallets)   
+            }
+         
+            // else if (addressObject.networkDetails[0].libarayType == "Web3") {
+            //     const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
+            //     if (addressObject.networkDetails[0].cointype == "Token") 
+            //     {
+            //         const contract = new WEB3.eth.Contract(Constant.USDT_ABI, addressObject.networkDetails[0].contractAddress,);
+            //         token_balance = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
+            //         let decimals = await contract.methods.decimals().call();
+            //         format_token_balance = token_balance / (1 * 10 ** decimals)
+            //         native_balance = await WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
+            //         format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
+            //     }
+            //     else if (addressObject.networkDetails[0].cointype == "Native") {
+            //         native_balance = await WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
+            //         format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
+            //         token_balance = native_balance
+            //         format_token_balance = format_native_balance
 
-                merchantbalance = format_token_balance - addressObject.poolWallet[0].balance
-                console.log("merchantbalance ================", merchantbalance)
-                console.log("Token ================", format_token_balance, token_balance)
-                amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(format_token_balance))
-                console.log("amountstatus", amountstatus)
-                console.log("poolWalletbalance ", addressObject.poolWallet[0].balance)
-                console.log("Transcation amount ", addressObject.amount)
-                console.log("Native ", format_token_balance)
-            }
-            else {
-                const HttpProvider = TronWeb.providers.HttpProvider;
-                const fullNode = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
-                const solidityNode = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
-                const eventServer = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
-                const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, addressObject.poolWallet[0].privateKey);
-                let contract = await tronWeb.contract().at(addressObject.networkDetails[0].contractAddress);
-                native_balance = await tronWeb.trx.getBalance(addressObject.poolWallet[0].address)
-                token_balance = await contract.balanceOf(addressObject.poolWallet[0].address).call();
-                format_token_balance = tronWeb.toBigNumber(token_balance)
-                format_token_balance = tronWeb.toDecimal(format_token_balance)
-                format_token_balance = tronWeb.fromSun(format_token_balance)
-                format_native_balance = tronWeb.toBigNumber(native_balance)
-                format_native_balance = tronWeb.toDecimal(format_native_balance)
-                format_native_balance = tronWeb.toDecimal(format_native_balance)
-                merchantbalance = format_token_balance - addressObject.poolWallet[0].balance
-                amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), format_token_balance)
-                console.log("TronWeb=====================", amountstatus)
-                console.log("merchantbalance", merchantbalance)
-                console.log("addressObject.poolWallet.balance", addressObject.poolWallet[0].balance)
-                console.log("addressObject.amount ", addressObject.amount)
-                console.log("account_balance_in_ether", format_token_balance)
-                console.log("poolWallet", addressObject.poolWallet)
-                console.log("account_balance", token_balance)
-            }
+            //     }
+
+            //     merchantbalance = format_token_balance - addressObject.poolWallet[0].balance
+            //     console.log("merchantbalance ================", merchantbalance)
+            //     console.log("Token ================", format_token_balance, token_balance)
+            //     amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(format_token_balance))
+            //     console.log("amountstatus", amountstatus)
+            //     console.log("poolWalletbalance ", addressObject.poolWallet[0].balance)
+            //     console.log("Transcation amount ", addressObject.amount)
+            //     console.log("Native ", format_token_balance)
+            // }
+            // else {
+            //     const HttpProvider = TronWeb.providers.HttpProvider;
+            //     const fullNode = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
+            //     const solidityNode = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
+            //     const eventServer = new HttpProvider(addressObject.networkDetails[0].nodeUrl);
+            //     const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, addressObject.poolWallet[0].privateKey);
+            //     let contract = await tronWeb.contract().at(addressObject.networkDetails[0].contractAddress);
+            //     native_balance = await tronWeb.trx.getBalance(addressObject.poolWallet[0].address)
+            //     token_balance = await contract.balanceOf(addressObject.poolWallet[0].address).call();
+            //     format_token_balance = tronWeb.toBigNumber(token_balance)
+            //     format_token_balance = tronWeb.toDecimal(format_token_balance)
+            //     format_token_balance = tronWeb.fromSun(format_token_balance)
+            //     format_native_balance = tronWeb.toBigNumber(native_balance)
+            //     format_native_balance = tronWeb.toDecimal(format_native_balance)
+            //     format_native_balance = tronWeb.toDecimal(format_native_balance)
+            //     merchantbalance = format_token_balance - addressObject.poolWallet[0].balance
+            //     amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), format_token_balance)
+            //     console.log("TronWeb=====================", amountstatus)
+            //     console.log("merchantbalance", merchantbalance)
+            //     console.log("addressObject.poolWallet.balance", addressObject.poolWallet[0].balance)
+            //     console.log("addressObject.amount ", addressObject.amount)
+            //     console.log("account_balance_in_ether", format_token_balance)
+            //     console.log("poolWallet", addressObject.poolWallet)
+            //     console.log("account_balance", token_balance)
+            // }
          
             if (amountstatus != 0) 
             {

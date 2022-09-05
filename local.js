@@ -1,14 +1,15 @@
-var express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-var client = require('./Route/clientsRoute');
-var poolRoute = require('./Route/poolRoute');
-var networkRoute = require('./Route/networkRoute');
-var walletRoute = require('./Route/poolwalletRoute');
-var payLinkRoute = require('./Route/paylinkRoute');
-var hotWalletRoute = require('./Route/hotWalletRoute');
-var withdrawRoute = require('./Route/withdrawRoute');
-var adminRoute = require('./Route/adminRoute');
+var express         = require('express');
+const mongoose      = require('mongoose');
+const bodyParser    = require('body-parser');
+var client          = require('./Route/clientsRoute');
+var poolRoute       = require('./Route/poolRoute');
+var networkRoute    = require('./Route/networkRoute');
+var walletRoute     = require('./Route/poolwalletRoute');
+var payLinkRoute    = require('./Route/paylinkRoute');
+var hotWalletRoute  = require('./Route/hotWalletRoute');
+var withdrawRoute   = require('./Route/withdrawRoute');
+var adminRoute      = require('./Route/adminRoute');
+
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
@@ -36,6 +37,7 @@ app.use((req, res, next) => {
 
 app.get('/', function (req, res) { res.send('Welcome to Lyo Merchant'); });
 app.use('/v1', client);
+
 app.use('/admin/v1', poolRoute);
 app.use('/network/v1', networkRoute);
 app.use('/paymentlink/v1', payLinkRoute);

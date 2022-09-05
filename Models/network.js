@@ -92,6 +92,14 @@ const networkSchema = new mongoose.Schema
             required: false,
             default     : "",
         },
+        gaslimit:
+        {
+            type        : String,
+            required    : false,
+            default     : "10000000000",
+        },
+
+        
         hotwallettranscationstatus:
         {
             type        : Boolean,
@@ -99,11 +107,11 @@ const networkSchema = new mongoose.Schema
             default     : true,
         },
         created_by: {
-            type: Number,
+            type: String,
             required: true,
         },
         deleted_by: {
-            type: Number,
+            type: String,
             required: false,
             default : 0
         },
@@ -111,6 +119,8 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: false,
         },
+        
+
         
     },
         { timestamps: true }

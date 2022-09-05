@@ -50,33 +50,55 @@ const merchantcategory              = require('../controllers/Masters/merchantca
 const clientsController             = require('../controllers/clientsController');
 const orphanController              = require('../controllers/orphanTranscationController');
 const CurrencyController            = require('../controllers/Masters/CurrencyController');
+const feedWalletController          = require('../controllers/Masters/feedWalletController');
 const Auth                          = require('../Validation/Auth');
+const poolwalletController = require('../controllers/poolwalletController');
 
-router.post('/signupadmin',                                   adminController.signup_admin_api);
-router.post('/adminlogin',                                    adminController.Login);
-router.post('/admingoogleauth',                               adminController.Verfiy_Google_Auth);
-router.post('/getTransForAdmin',                              transcationpoolController.getTransForAdmin);
-router.post('/get_admin_withdraw',                            withdrawController.get_admin_wihdraw);
-router.post('/allAdmin',                                      adminController.allAdmin);
-router.post('/sendemail',                                     adminController.sendEmail);
-router.post('/transcationListByNetworkID',                    transcationpoolController.get_Trans_by_Network_ID_For_Admin);
-router.post('/savecategory',                                  categoryController.savecategory);
-router.get('/allcategory',                                     categoryController.allcategory);
-router.post('/createClientCategory',                          merchantcategory.createClientCategory);
+router.post('/signupadmin',                                    adminController.signup_admin_api);
+router.post('/adminlogin',                                     adminController.Login);
+router.post('/admingoogleauth',                                adminController.Verfiy_Google_Auth);
+router.post('/getTransForAdmin',                               transcationpoolController.getTransForAdmin);
+router.post('/get_admin_withdraw',                             withdrawController.get_admin_wihdraw);
+router.post('/allAdmin',                                       adminController.allAdmin);
+router.post('/sendemail',                                      adminController.sendEmail);
+router.post('/transcationListByNetworkID',                     transcationpoolController.get_Trans_by_Network_ID_For_Admin);
 router.post('/forgetThePassword',                              adminController.forgetThePassword);
-router.post('/VerfiyTheCode',                                 adminController.VerfiyTheCode);
+router.post('/VerfiyTheCode',                                  adminController.VerfiyTheCode);
 router.post('/updatePassword',                                 adminController.updateThePassword);
-router.post('/resettwofa',                                    adminController.reset_two_fa);
-router.post('/resetMerchantTwoFa',                            clientsController.reset_merchant_two_fa);
-router.post('/changeMerchantEmail',                           clientsController.changeMerchantEmail);
-// router.post('/changeMerchantPassword',                     clientsController.changeMerchantPassword);
-router.post('/merchantImpersonation',                         clientsController.merchantImpersonation);
+router.post('/resettwofa',                                     adminController.reset_two_fa);
+router.post('/resetMerchantTwoFa',                             clientsController.reset_merchant_two_fa);
+router.post('/changeMerchantEmail',                            clientsController.changeMerchantEmail);
+router.post('/merchantImpersonation',                          clientsController.merchantImpersonation);
+router.post('/getapikey',                                      Auth.verfiyAdminToken,adminController.getapikey);
+
+
 "============================ Orphan Transcation ==============================="
 router.post('/orphanPoolWallet',                              orphanController.orphanTranscation);
+
 "============================ Currency Master ==============================="
 router.post('/createCurrency',                                CurrencyController.createCurrency);
 router.get('/allCurrency',                                    CurrencyController.allCurrency);
 router.post('/deleteCurrency',                                CurrencyController.deleteCurrency);
 router.post('/updateCurrency',                                CurrencyController.updateCurrency);
+
+"============================ Feed Wallet Controller ==============================="
+
+router.post('/createFeedWallets',                             Auth.is_admin,feedWalletController.createFeedWallets);
+router.post('/addressFeeding',                                Auth.is_admin,feedWalletController.addressFeeding);
+router.post('/allFeedWallets',                                Auth.is_admin,feedWalletController.allFeedWallets);
+router.post('/deleteWallets',                                 Auth.is_admin,feedWalletController.deleteWallets);
+
+"============================ Category ==============================="
+
+router.post('/approvecategoryRequest',                         Auth.is_admin,merchantcategory.approveClientRequest);
+router.post('/savecategory',                                   Auth.is_admin,categoryController.savecategory);
+router.get('/allcategory',                                     Auth.is_admin,categoryController.allcategory);
+router.post('/createClientCategory',                           Auth.is_admin,merchantcategory.createClientCategory);
+router.post('/getAllClientCategoryRequest',                    Auth.is_admin,merchantcategory.getAllClientCategoryRequest);
+
+
+"============================ Merchant ==============================="
+router.post('/allMerchant',                                 Auth.is_admin,clientsController.allMerchant);
+
 
 module.exports = router;
