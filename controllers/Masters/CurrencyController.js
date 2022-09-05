@@ -20,7 +20,7 @@ module.exports =
                 title  : req.body.title,
                 icon   : req.body.icon,
                 name   : req.body.name,
-                status : req.body.status,
+                status : 1,
                 remarks: await Utility.checkthevalue(req.body.remarks),
                 created_by: req.body.created_by,
             });
@@ -39,7 +39,7 @@ module.exports =
     },
     async allCurrency(req, res) {
         try {
-            Currencies.find({ 'deleted_by': 0 }).then(async (val) => {
+            Currencies.find({ 'status':1 }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {
@@ -58,6 +58,7 @@ module.exports =
             {
                 $set:
                 {
+                    'status':0,
                     deleted_by: req.body.deleted_by,
                     deleted_at: Date.now(),
 
@@ -88,7 +89,6 @@ module.exports =
                         $set:
                         {
                             title  : req.body.title,
-                            status : req.body.status,
                             icon   : req.body.icon,
                             name   : req.body.name,
                             remarks: await Utility.checkthevalue(req.body.remarks),
@@ -118,16 +118,15 @@ module.exports =
         try 
         {
 
-            console.log("priceConversition============")
+            
             let network  = await networks.findOne({ 'id': req.body.coinid })
             let Currency = await Currencies.findOne({ 'id': req.body.currenid })
-            console.log(Currency,network)
+         
             let parameters = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
             let COINGECKO_URL   =  process.env.COINGECKO+parameters
             let axiosGetData    =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
             var stringify_response = JSON.parse(axiosGetData.data)
             res.json({ status: 200, data: stringify_response.data, message: "kasd" })
-            // res.json({ status: 200, data: {}, message: "kasd" })
         }
         catch (error) 
         {

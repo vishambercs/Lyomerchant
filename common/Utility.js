@@ -16,6 +16,7 @@ const url               = require('url')
 const querystring       = require('querystring');
 const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
+const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
 
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
@@ -76,11 +77,22 @@ module.exports =
             return null
         }
     },
-    GetAddress(nodeurl) {
-        try {
-            var web3 = new Web3(new Web3.providers.HttpProvider(nodeurl));
-            var account = web3.eth.accounts.create();
-            return account
+    GetAddress(nodeurl) 
+    {
+        try 
+        {
+            if(nodeurl == "tronweb")
+            {
+                const { address, privateKey }       = generateAccount()
+                var account = { "address":address,   "privateKey":privateKey}
+                return account
+            }
+            else{
+                var web3 = new Web3(new Web3.providers.HttpProvider(nodeurl));
+                var account = web3.eth.accounts.create();
+                return account
+            }
+          
         }
         catch (error) {
             console.log("error", error);
@@ -319,12 +331,16 @@ module.exports =
             var index = Constant.posTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
             if(index == -1)
             {
-            let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+            let client_object   = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
             Constant.posTransList.push(client_object)
+            response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please Wait We are checking" };
+            connection.sendUTF(JSON.stringify(response));
             }
             else
             {
                 Constant.posTransList[index]["connection"] = connection
+                response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please Wait We are checking" };
+                connection.sendUTF(JSON.stringify(response));
             }
             Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 20000);
             connection.on('message', function (message) {

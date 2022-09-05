@@ -43,7 +43,7 @@ module.exports =
                 });
                 posTransactionPool.save().then(async (val) => {
                     await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
-                    let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
+                    let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity,"transValidity":"10m" }
                     res.json({ status: 200, message: "POS Wallet Assigned Successfully", data: data })
                 }).catch(error => {
                     res.json({ status: 400, data: {}, message: error })

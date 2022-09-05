@@ -67,6 +67,25 @@ async function savelogs(poolWalletID, hotwalletID, trans_hash, status, remarks, 
     })
     return logs;
 }
+
+async function savelogs(poolWalletID, hotwalletID, trans_hash, status, remarks, created_by) {
+    var manualLogs = new  manualHotWalletTransferLogs({
+        id              : mongoose.Types.ObjectId() , 
+        poolWalletID    : poolWalletID, 
+        hotwalletID     : hotwalletID , 
+        trans_hash      : trans_hash,
+        status          : status, 
+        remarks         : remarks, 
+        created_by      : created_by
+    });
+    let logs = await manualLogs.save().then(async (val) => {
+        return JSON.stringify({ status: 200, message: "Added", data: val })
+    }).catch(error => {
+        console.log(error)
+        return JSON.stringify({ status: 400, data: {}, message: error })
+    })
+    return logs;
+}
 module.exports =
 {
     async createHotWallets(req, res) {
@@ -282,14 +301,14 @@ module.exports =
                
                 }
                 else {
-                    const HttpProvider = TronWeb.providers.HttpProvider;
-                    const fullNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
-                    const solidityNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
-                    const eventServer = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
-                    const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, from_wallet[0].privateKey);
-                    let contract = await tronWeb.contract().at(from_wallet[0].networkDetails[0].contractAddress);
-                    let result = await contract.transfer(hotWallet.address, result).send({ feeLimit: req.body.gas })
-                    const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 }})
+                    const HttpProvider  = TronWeb.providers.HttpProvider;
+                    const fullNode      = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+                    const solidityNode  = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+                    const eventServer   = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+                    const tronWeb       = new TronWeb(fullNode, solidityNode, eventServer, from_wallet[0].privateKey);
+                    let contract        = await tronWeb.contract().at(from_wallet[0].networkDetails[0].contractAddress);
+                    let result          = await contract.transfer(hotWallet.address, result).send({ feeLimit: req.body.gas })
+                    const poolWallet    = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 }})
                     await savelogs(from_wallet[0].id, hotWallet.id,result, 200,"Done", created_by)
                     response = { status: 200, message: "success", data: result ,"poolWalletDetails" : from_wallet }
                 }

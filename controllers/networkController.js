@@ -2,6 +2,7 @@ const poolWallet = require('../Models/poolWallet');
 const Network = require('../Models/network');
 const Utility = require('../common/Utility');
 const hotWallets = require('../Models/hotWallets');
+const feedWalletController = require('../controllers/Masters/feedWalletController');
 var mongoose = require('mongoose');
 var crypto = require("crypto");
 const TronWeb = require('tronweb')
@@ -42,29 +43,35 @@ module.exports =
                     scanurl: req.body.scanurl,
                     gaspriceurl: req.body.gaspriceurl,
                 });
-                NetworkItem.save().then(async (val) => {
-                    for (let i = 0; i < 10; i++) {
-                        if (val.libarayType == "Web3") {
-                            let account = await Utility.GetAddress(val.nodeUrl)
-                            const poolWalletItem = new poolWallet({ id: crypto.randomBytes(20).toString('hex'), network_id: val.id, address: account.address, privateKey: account.privateKey, });
-                            await poolWalletItem.save()
-                        }
-                        else if (val.libarayType == "Tronweb") {
-                            const { address, privateKey } = generateAccount()
-                            const poolWalletItem = new poolWallet({ id: crypto.randomBytes(20).toString('hex'), network_id: val.id, address: address, privateKey: privateKey, });
-                            await poolWalletItem.save()
-                        }
-                        const hotWallet = new hotWallets({
-                            id: mongoose.Types.ObjectId(),
-                            network_id: val.id,
-                            address: req.body.hotwallet,
-                            status: 1,
-                            created_by: req.body.created_by,
-                        });
-                        hotWallet.save().then(async (val) => {
-                            res.json({ status: 200, message: "Successfully", data: val })
-                        }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
-                    }
+                NetworkItem.save().then(async (val) => 
+                {
+                  let feedWallet  = await feedWalletController.createFeedWalletsFun(val.id,req.body.created_by)
+                  const hotWallet = new hotWallets({
+                        id: mongoose.Types.ObjectId(),
+                        network_id: val.id,
+                        address: req.body.hotwallet,
+                        status: 1,
+                        created_by: req.body.created_by,
+                    });
+                    hotWallet.save().then(async (val) => {
+                        res.json({ status: 200, message: "Successfully", data: val })
+                    }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
+                 
+                    // for (let i=0; i<10; i++) {
+                    //     if (val.libarayType == "Web3") {
+                    //         let account = await Utility.GetAddress(val.nodeUrl)
+                    //         const poolWalletItem = new poolWallet({ id: crypto.randomBytes(20).toString('hex'), network_id: val.id, address: account.address, privateKey: account.privateKey, });
+                    //         await poolWalletItem.save()
+                    //     }
+                    //     else if (val.libarayType == "Tronweb") {
+                    //         const { address, privateKey } = generateAccount()
+                    //         const poolWalletItem = new poolWallet({ id: crypto.randomBytes(20).toString('hex'), network_id: val.id, address: address, privateKey: privateKey, });
+                    //         await poolWalletItem.save()
+                    //     }
+                        
+
+                       
+                    // }
                     res.json({ status: 200, message: "Successfully", data: val })
                 }).catch(error => {
                     console.log(error)
@@ -129,10 +136,9 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async all_network(req, res) {
         try {
-            Network.find({ 'deleted_by': 0 }).then(async (val) => {
+            Network.find({ 'status': 0 }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {
@@ -145,14 +151,17 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
+
     async delete_network(req, res) {
         try {
             await Network.updateOne({ 'id': req.body.id },
                 {
                     $set:
                     {
-                        deleted_by: req.body.deleted_by,
-                        deleted_at: Date.now(),
+                        status      : 1,
+                        deleted_by  : req.body.deleted_by,
+                        deleted_at  : Date.now(),
 
                     }
                 }).then(async (val) => {
@@ -263,9 +272,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
-
-
     async updatecurrencyid(req, res) {
         try {
 
@@ -301,10 +307,35 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
+    async updategasimit(req, res) {
+        try {
+            await Network.updateOne({ 'id': req.body.id },
+                {
+                    $set:
+                    {
+                        gaslimit: req.body.gaslimit,
+                    }
+                }).then(async (val) => {
+                    if (val != null) {
+                        const NetworkDetails = await Network.find({ 'id': req.body.id })
+                        res.json({ status: 200, message: "Successfully", data: NetworkDetails })
+                    }
+                    else {
+                        res.json({ status: 200, message: "Not Found the Data", data: null })
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
     async allNetworkForClient(req, res) {
         try {
-            Network.find({ 'deleted_by': 0 }, { id: 1, coin: 1, cointype: 1, libarayType: 1, icon: 1, network: 1 }).then(async (val) => {
+            Network.find({ 'status': 0 }, { id: 1, coin: 1, cointype: 1, libarayType: 1, icon: 1, network: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {

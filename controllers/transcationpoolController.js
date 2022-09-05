@@ -40,7 +40,8 @@ module.exports =
                     orderid         : req.body.orderid,
                     clientToken     : req.body.token,
                     status          : 0,
-                    walletValidity  : currentDate
+                    walletValidity  : currentDate,
+                    timestamps      : new Date().getTime()
                 });
                 transactionPool.save().then(async (val) => {
                     console.log(val)
