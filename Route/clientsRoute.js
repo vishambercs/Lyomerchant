@@ -200,6 +200,11 @@ router.post('/pluginallCurrency',                            Auth.Verfiy_Merchan
 router.post('/pluginpriceConversition',                      Auth.Verfiy_Merchant,Auth.plugin_have_access,CurrencyController.priceConversition);
 
 
+"============================ Withdraw  ==============================="
+
+router.post('/setWithdrawSettings',                         withdrawController.setWithdrawSettings);
+
+
 module.exports = router;
 
 
