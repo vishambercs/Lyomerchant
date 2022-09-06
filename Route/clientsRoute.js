@@ -203,7 +203,7 @@ router.post('/pluginpriceConversition',                      Auth.Verfiy_Merchan
 "============================ Withdraw  ==============================="
 
 router.post('/setWithdrawSettings',                         withdrawController.setWithdrawSettings);
-
+router.get('/getWithdrawSettings',                          withdrawController.getWithdrawSettings);
 
 module.exports = router;
 
