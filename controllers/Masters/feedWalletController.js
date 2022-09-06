@@ -11,15 +11,16 @@ const Web3 = require('web3');
 require("dotenv").config()
 var stringify = require('json-stringify-safe');
 var TronStation = require('tronstation');
+const { GetAddress } = require('../../common/Utility');
 
 
 async function createFeedWalletsFun(network_id, created_by) {
     try {
-
+        
         let network = await networks.findOne({ id: network_id })
         let feedWallet = await feedWallets.findOne({ network_id: network_id, status: 1 })
         let nodeurl = network.libarayType == "Web3" ? network.nodeUrl : "tronweb"
-        let account = await Utility.GetAddress(nodeurl)
+        let account = await GetAddress(nodeurl)
         if (feedWallet == null) {
             const feedWallet = new feedWallets({
                 id: mongoose.Types.ObjectId(),

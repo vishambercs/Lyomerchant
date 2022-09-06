@@ -14,6 +14,7 @@ module.exports =
 {
     async create_Network(req, res) {
         try {
+            console.log(req.body)
             if (req.body.hotwallet == "" || req.body.hotwallet == undefined) {
                 res.json({ status: 400, message: "Please Provide Hot Wallet Address", data: null })
             }
@@ -115,7 +116,6 @@ module.exports =
                             gaspriceurl: req.body.gaspriceurl,
                             icon: req.body.icon,
                             currencyid: req.body.currencyid,
-                            coinId: req.body.coinId
                         }
                     }).then(async (val) => {
                         if (val != null) {
@@ -137,8 +137,12 @@ module.exports =
         }
     },
     async all_network(req, res) {
+        
         try {
-            Network.find({ 'status': 0 }).then(async (val) => {
+            
+            Network.find({  $or: [ { status:0 }, { status: 1 } ] 
+
+        }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {
@@ -159,7 +163,7 @@ module.exports =
                 {
                     $set:
                     {
-                        status      : 1,
+                        status      : 2,
                         deleted_by  : req.body.deleted_by,
                         deleted_at  : Date.now(),
 
