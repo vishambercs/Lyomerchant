@@ -37,14 +37,14 @@ module.exports =
                     next()
                 }
                 else {
-                    res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                    res.json({ status: 400, data: {}, message: "You have not plugin access. Please create a request for this service." })
                 }
          
         }
         catch (error) 
         {
             console.log("error", error)
-            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+            res.json({ status: 401, data: {}, message: "You have not plugin access. Please create a request for this service." })
         }
     },
     async Verfiy_Kyc_Header(req, res, next) {
@@ -173,12 +173,12 @@ module.exports =
                 next()
             }
             else {
-                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                res.json({ status: 400, data: {}, message: "You have not pos access. Please create the service request." })
             }
         }
         catch (error) {
 
-            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+            res.json({ status: 401, data: {}, message: "You have not pos access. Please create the service request." })
         }
     },
     async store_have_access(req, res, next) {
@@ -192,11 +192,11 @@ module.exports =
                     next()
                 }
                 else {
-                    res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                    res.json({ status: 400, data: {}, message: "This Store has not access." })
                 }
             }
             else {
-                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                res.json({ status: 400, data: {}, message: "This Store has not access." })
             }
         }
         catch (error) {
@@ -214,12 +214,12 @@ module.exports =
                 next()
             }
             else {
-                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                res.json({ status: 400, data: {}, message: "This device could not identify. Please regsiter this device" })
             }
         }
         catch (error) {
             console.log("error", error)
-            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+            res.json({ status: 401, data: {}, message: "This device could not identify. Please regsiter this device" })
         }
     },
     async paylink_have_access(req, res, next) {
@@ -230,12 +230,12 @@ module.exports =
                 next()
             }
             else {
-                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
             }
         }
         catch (error) {
             console.log("error", error)
-            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+            res.json({ status: 401, data: {}, message: "You have not access to this service. Please apply for this service" })
         }
     },
     
