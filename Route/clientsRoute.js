@@ -9,7 +9,7 @@
 // const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 // const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 // const CurrencyController            = require('../controllers/Masters/CurrencyController');
-// const networkController             = require('../controllers/networkController');
+ const networkController             = require('../controllers/networkController');
 // const Auth                          = require('../Validation/Auth');
 
 // router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -95,7 +95,7 @@ const posTransactionPoolController  = require('../controllers/POS/posTransaction
 const merchantStoreDeviceController = require('../controllers/POS/merchantStoreDeviceController');
 const CurrencyController            = require('../controllers/Masters/CurrencyController');
 const merchantSitesController       = require('../controllers/Website/merchantSitesController');
-const networkController             = require('../controllers/networkController');
+//const networkController             = require('../controllers/networkController');
 const Auth                          = require('../Validation/Auth');
 const categoryController            = require('../controllers/Masters/categoryController');
 const merchantcategory              = require('../controllers/Masters/merchantcategoryController');

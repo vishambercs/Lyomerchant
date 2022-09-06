@@ -15,11 +15,11 @@ const emailSending = require('../../common/emailSending');
 
 async function createFeedWalletsFun(network_id, created_by) {
     try {
-
+        
         let network = await networks.findOne({ id: network_id })
         let feedWallet = await feedWallets.findOne({ network_id: network_id, status: 1 })
         let nodeurl = network.libarayType == "Web3" ? network.nodeUrl : "tronweb"
-        let account = await Utility.GetAddress(nodeurl)
+        let account = await GetAddress(nodeurl)
         if (feedWallet == null) {
             const feedWallet = new feedWallets({
                 id: mongoose.Types.ObjectId(),

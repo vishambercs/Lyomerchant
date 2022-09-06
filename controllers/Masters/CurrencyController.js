@@ -39,7 +39,7 @@ module.exports =
     },
     async allCurrency(req, res) {
         try {
-            Currencies.find({ 'status':1 }).then(async (val) => {
+            Currencies.find({  }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {
@@ -84,14 +84,17 @@ module.exports =
     },
     async updateCurrency(req, res) {
         try {
+            console.log(req.body)
              await Currencies.findOneAndUpdate({ 'id': req.body.id },
                     {
+                        
                         $set:
                         {
                             title  : req.body.title,
                             icon   : req.body.icon,
                             name   : req.body.name,
                             remarks: await Utility.checkthevalue(req.body.remarks),
+                            status : req.body.status
                         }
                     }).then(async (val) => {
                         if (val != null) 
