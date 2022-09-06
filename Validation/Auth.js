@@ -238,5 +238,24 @@ module.exports =
             res.json({ status: 401, data: {}, message: "You have not access to this service. Please apply for this service" })
         }
     },
-    
+
+    async fastpayAuth(req, res, next) 
+    {
+        try {
+            let token = req.headers.token;
+             
+                let profile = jwt.verify(token, process.env.AUTH_KEY)
+                req.user = profile
+                next()    
+            
+                
+            
+        }
+        catch (error) {
+        
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
 }
+
+

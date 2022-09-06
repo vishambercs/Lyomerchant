@@ -9,7 +9,7 @@
 // const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 // const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 // const CurrencyController            = require('../controllers/Masters/CurrencyController');
-// const networkController             = require('../controllers/networkController');
+ const networkController             = require('../controllers/networkController');
 // const Auth                          = require('../Validation/Auth');
 
 // router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -95,7 +95,7 @@ const posTransactionPoolController  = require('../controllers/POS/posTransaction
 const merchantStoreDeviceController = require('../controllers/POS/merchantStoreDeviceController');
 const CurrencyController            = require('../controllers/Masters/CurrencyController');
 const merchantSitesController       = require('../controllers/Website/merchantSitesController');
-const networkController             = require('../controllers/networkController');
+//const networkController             = require('../controllers/networkController');
 const Auth                          = require('../Validation/Auth');
 const categoryController            = require('../controllers/Masters/categoryController');
 const merchantcategory              = require('../controllers/Masters/merchantcategoryController');
@@ -133,7 +133,7 @@ router.post('/getapikey',                            Auth.verfiyClientToken,clie
 
 router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             transcationpoolController.get_Trans_by_txId);
-router.post('/transactionFastDetails',               Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
+router.post('/transactionFastDetails',               transcationpoolController.get_Fastlink_Trans_by_txId);
 
 
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
@@ -173,7 +173,7 @@ router.post('/disableordeletedevices',                      Auth.store_have_acce
 // =============Pos Merchant Wallet=========================================== //
 // router.post('/assignPosMerchantWallet',                     Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
 
-router.post('/assignPosMerchantWallet',                     posTransactionPoolController.assignPosMerchantWallet);
+router.post('/assignPosMerchantWallet',                     Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                               Auth.check_Store_Device_Access,posTransactionPoolController.getShopTransList);
 router.get('/posallCurrency',                               Auth.check_Store_Device_Access,CurrencyController.allCurrency);
 router.post('/pospriceConversition',                        Auth.check_Store_Device_Access,CurrencyController.priceConversition);

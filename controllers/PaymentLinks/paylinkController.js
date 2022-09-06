@@ -11,6 +11,7 @@ var CryptoJS            = require('crypto-js')
 var poolwalletController = require('../poolwalletController');
 let message = ''
 let status = ''
+const jwt = require('jsonwebtoken');
 module.exports =
 {
     async storeInvoice(req, res) {
@@ -329,6 +330,7 @@ module.exports =
     },
 
     async verifyFastCode(req, res) {
+        var token =''
         let storeProfile = ''
         console.log("fastCode", req.body.fastCode)
         let findResult = ''
@@ -337,8 +339,11 @@ module.exports =
         try {
             findResult = await fastPaymentCode.find({
                 "fastCodes.fastCode": req.body.fastCode
+
+                
             })
-            
+            let id = findResult.id
+            token = jwt.sign({ id: id }, process.env.AUTH_KEY, { expiresIn: '5m' });
             try{
                 console.log(req.headers.authorization,findResult[0].fastCodes[0].businessName)
                 storeProfile = await merchantStore.findOne({
@@ -358,7 +363,7 @@ module.exports =
         }
         if (response == 0) status = 400
         //res.json({ status: status, data: {"data":response,"storeProfile":storeProfile}, message: "verify fast code" })
-        res.json({ status: status, data: response,storeProfile, message: "verify fast code" })
+        res.json({ status: status, data: response,storeProfile,token, message: "verify fast code" })
     },
 
     async createFastCode(req, res) {

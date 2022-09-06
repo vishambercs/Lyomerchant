@@ -69,7 +69,9 @@ module.exports =
     async Login(req, res) {
         try {
             let email = req.body.email;
+            console.log(req.body)
             await admins.findOne({ 'email': email }).select('+password').then(async (val) => {
+                console.log(val)
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
 
                 if (val.status == false) 

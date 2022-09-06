@@ -111,7 +111,7 @@ module.exports =
                         }
                     }
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet1", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
@@ -131,7 +131,7 @@ module.exports =
                     { $lookup: { from: "networks", localField: "poolWallet.network_id", foreignField: "id", as: "networkDetails" } },
                     { $group: { _id: "$networkDetails.id", total: { $sum: '$amount' }, }, },
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet2", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
@@ -250,7 +250,7 @@ module.exports =
                         }
                     }
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet3", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
@@ -330,7 +330,7 @@ module.exports =
                             }
                         }
                     ]).then(async (data) => {
-                        res.json({ status: 200, message: "Pool Wallet", data: data })
+                        res.json({ status: 200, message: "Pool Wallet4", data: data })
                     }).catch(error => {
                         console.log("get_clients_data", error)
                         res.json({ status: 400, data: {}, message: error })
@@ -401,7 +401,7 @@ module.exports =
                             }
                         }
                     ]).then(async (data) => {
-                        res.json({ status: 200, message: "Pool Wallet", data: data })
+                        res.json({ status: 200, message: "Pool Wallet5", data: data })
                     }).catch(error => {
                         console.log("get_clients_data", error)
                         res.json({ status: 400, data: {}, message: error })
@@ -459,7 +459,7 @@ module.exports =
                         }
                     }
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet6", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
