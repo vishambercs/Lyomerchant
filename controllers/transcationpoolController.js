@@ -552,7 +552,6 @@ module.exports =
 
     async get_Fastlink_Trans_by_txId(req, res) {
         try {
-            console.log(req.body.id)
             await paymentlinktxpools.aggregate(
                 [
                     { $match: { "id": req.body.id } },

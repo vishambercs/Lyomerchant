@@ -631,23 +631,25 @@ module.exports =
     },
     async kyc_approved(req, res) {
         try {
-
-            clients.findOneAndUpdate({ api_key: req.headers.authorization }, { $set: { status: true } }, { $new: true }).then(async (val) => {
+             clients.findOneAndUpdate(
+                { api_key: req.headers.authorization }, 
+                { $set: { status: true } }, 
+                { $new: true }).then(async (val) => {
                 let networks = await network.find()
                 if (val != null) {
-                    networks.forEach(async function (item) {
-                        var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
-                        var accountAddress = web3.eth.accounts.create();
-                        const clientWallet = new clientWallets({
-                            id: mongoose.Types.ObjectId(),
-                            client_api_key: val.api_key,
-                            address: accountAddress.address,
-                            privatekey: accountAddress.privateKey,
-                            status: 1,
-                            network_id: item.id
-                        });
-                        let client_Wallet = await clientWallet.save()
-                    });
+                    // networks.forEach(async function (item) {
+                    //     var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
+                    //     var accountAddress = web3.eth.accounts.create();
+                    //     const clientWallet = new clientWallets({
+                    //         id: mongoose.Types.ObjectId(),
+                    //         client_api_key: val.api_key,
+                    //         address: accountAddress.address,
+                    //         privatekey: accountAddress.privateKey,
+                    //         status: 1,
+                    //         network_id: item.id
+                    //     });
+                    //     let client_Wallet = await clientWallet.save()
+                    // });
                     res.json({ status: 200, message: "Client Added Successfully", data: val })
                 }
                 else {
@@ -1025,23 +1027,33 @@ module.exports =
     },
     async generateNewClientAddress(req, res) {
         try {
-            let clientWallet = await clientWallets.findOne({ 'client_api_key': req.body.client_api_key, status: 3 })
-            if (clientWallet == null) {
-                return res.json({ status: 400, data: {}, message: "Invalid Request" })
+           
+            let clientWallet    = await clientWallets.findOne({ 
+            'client_api_key'    : req.body.client_api_key, 
+            'network_id'        : req.body.network_id,
+            status: 3 })
+            let network_id      = clientWallet == null ? req.body.network_id : clientWallet.network_id
+            let network_details = await network.findOne({ 'id': network_id })
+            let nodeURL         = network_details.libarayType == "Web3" ? network_details.nodeUrl : "tronweb"
+            let account         = await Utility.GetAddress(nodeURL)
+            if (clientWallet == null)
+            {
+                const clientWallet = new clientWallets({
+                    id : mongoose.Types.ObjectId(),
+                    client_api_key: req.body.client_api_key,
+                    address: account.address,
+                    privatekey: account.privateKey,
+                    status: 1,
+                    network_id:  req.body.network_id
+                });
+                let client_Wallet = await clientWallet.save()
+                res.json({ status: 200, data: client_Wallet, message: "Updated" })
             }
-            let network_details = await network.findOne({ 'id': clientWallet.network_id })
-            if (network_details.libarayType == "Web3") {
-                let account = await Utility.GetAddress(network_details.nodeUrl)
+            else
+            {
                 let clientWallet = await clientWallets.findOneAndUpdate(
                     { 'network_id': req.body.network_id, status: 3 },
                     { $set: { "address": account.address, "privatekey": account.privateKey } }, { $new: true })
-                res.json({ status: 200, data: clientWallet, message: "Updated" })
-            }
-            else if (network_details.libarayType == "Tronweb") {
-                const { address, privateKey } = generateAccount()
-                let clientWallet = await clientWallets.findOneAndUpdate(
-                    { 'network_id': req.body.network_id, status: 3 },
-                    { $set: { "address": address, "privatekey": privateKey } }, { $new: true })
                 res.json({ status: 200, data: clientWallet, message: "Updated" })
             }
         }

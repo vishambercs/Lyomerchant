@@ -53,7 +53,7 @@ const CurrencyController            = require('../controllers/Masters/CurrencyCo
 const feedWalletController          = require('../controllers/Masters/feedWalletController');
 const Auth                          = require('../Validation/Auth');
 const poolwalletController = require('../controllers/poolwalletController');
-
+const hotwallettranslogsController  = require('../controllers/hotwallettranslogsController');
 router.post('/signupadmin',                                    adminController.signup_admin_api);
 router.post('/adminlogin',                                     adminController.Login);
 router.post('/admingoogleauth',                                adminController.Verfiy_Google_Auth);
@@ -96,9 +96,13 @@ router.get('/allcategory',                                     Auth.is_admin,cat
 router.post('/createClientCategory',                           Auth.is_admin,merchantcategory.createClientCategory);
 router.post('/getAllClientCategoryRequest',                    Auth.is_admin,merchantcategory.getAllClientCategoryRequest);
 
-
 "============================ Merchant ==============================="
 router.post('/allMerchant',                                 Auth.is_admin,clientsController.allMerchant);
+
+"============================ Admin Hot wallets ==============================="
+router.post('/get_All_Hot_Wallet_Transcations',                   Auth.is_admin,hotwallettranslogsController.get_All_Hot_Wallet_Transcation);
+router.post('/Get_Feeding_Transfer_Status',                       Auth.is_admin,hotwallettranslogsController.Get_Feeding_Transfer_Status);
+router.post('/trans_from_pw_to_hw',                               Auth.is_admin,hotwallettranslogsController.trans_from_pw_to_hw);
 
 
 module.exports = router;

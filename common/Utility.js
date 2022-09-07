@@ -83,7 +83,7 @@ module.exports =
         {
             if(nodeurl == "tronweb")
             {
-                const { address, privateKey }       = generateAccount()
+                const { address, privateKey } = generateAccount()
                 var account = { "address":address,   "privateKey":privateKey}
                 return account
             }
@@ -334,13 +334,13 @@ module.exports =
             {
             let client_object   = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
             Constant.posTransList.push(client_object)
-            response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please Wait We are checking" };
+            response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please wait we are checking" };
             connection.sendUTF(JSON.stringify(response));
             }
             else
             {
                 Constant.posTransList[index]["connection"] = connection
-                response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please Wait We are checking" };
+                response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please wait we are checking" };
                 connection.sendUTF(JSON.stringify(response));
             }
             Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 10000);
@@ -360,7 +360,7 @@ module.exports =
             console.log(error)
             
             return null
-        }
+        }         
     },
     async paymentLinkTranscationWebScokect(request) {
         try {
@@ -370,6 +370,7 @@ module.exports =
             console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
+            
             if(getTranscationData.length > 0)
             {
             const connection   = request.accept(null, request.origin);

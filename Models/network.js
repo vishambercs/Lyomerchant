@@ -95,8 +95,18 @@ const networkSchema = new mongoose.Schema
             required    : false,
             default     : "10000000000",
         },
-
-        
+        feedinglimit:
+        {
+            type        : String,
+            required    : false,
+            default     : "10000000",
+        },
+        feedinglimitPerce:
+        {
+            type        : Number,
+            required    : false,
+            default     : 0.1,
+        },
         hotwallettranscationstatus:
         {
             type        : Boolean,

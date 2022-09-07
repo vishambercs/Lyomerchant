@@ -332,7 +332,6 @@ module.exports =
     async verifyFastCode(req, res) {
         var token =''
         let storeProfile = ''
-        console.log("fastCode", req.body.fastCode)
         let findResult = ''
         let response = []
         let status = 200;
@@ -354,7 +353,7 @@ module.exports =
 
         }
             response = (findResult)
-            console.log("result",storeProfile)
+           
         }
         catch (error) {
             response = "someting went wrong"

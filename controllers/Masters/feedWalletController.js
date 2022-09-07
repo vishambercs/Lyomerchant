@@ -15,7 +15,7 @@ const emailSending = require('../../common/emailSending');
 
 async function createFeedWalletsFun(network_id, created_by) {
     try {
-        
+
         let network = await networks.findOne({ id: network_id })
         let feedWallet = await feedWallets.findOne({ network_id: network_id, status: 1 })
         let nodeurl = network.libarayType == "Web3" ? network.nodeUrl : "tronweb"
@@ -84,7 +84,7 @@ async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "
             format_token_balance = tronWeb.fromSun(format_token_balance)
             format_native_balance = tronWeb.toBigNumber(native_balance)
             format_native_balance = tronWeb.toDecimal(format_native_balance)
-            format_native_balance = tronWeb.toDecimal(format_native_balance)
+            format_native_balance = tronWeb.fromSun(format_native_balance)
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
@@ -105,8 +105,6 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
             { $match: { "network_id": network_id, status: 1, } },
             { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "networkDetails" } },
         ])
-
-        console.log("from_wallet", from_wallet)
         if (from_wallet != null) {
             let balance = await CheckBalanceOfAddress(
                 from_wallet[0].networkDetails[0].nodeUrl,
@@ -115,9 +113,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
             console.log("email_response", balance)
-            console.log("email_response", balance.status == 200 && balance.native_balance == 0)
-            if (balance.status == 200 && balance.data.native_balance == 0) 
-            {
+            if (balance.status == 200 && balance.data.native_balance == 0) {
                 var emailTemplateName =
                 {
                     "emailTemplateName": "feedingwallet.ejs",
@@ -127,11 +123,11 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 }
                 let email_response = await emailSending.sendEmailFunc(emailTemplateName)
                 console.log("email_response", email_response)
-                response = { status: 400, message: "We have informed the admin", data: {} }
+                let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": "0", "feeding_wallet_id": "0" }
+                response = { status: 400, message: "We have informed the admin", data: datavalues }
                 return response
             }
-            if (from_wallet[0].networkDetails[0].libarayType == "Web3") 
-            {
+            if (from_wallet[0].networkDetails[0].libarayType == "Web3") {
                 const web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].networkDetails[0].nodeUrl))
                 const pubkey = await web3.eth.accounts.privateKeyToAccount(from_wallet[0].privatekey).address;
                 const balance = await web3.eth.getBalance(pubkey);
@@ -156,75 +152,79 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) {
                     if (!error) {
                         console.log("🎉 The hash of your transaction is: ", hash);
-                        response = { status: 200, message: "success", data: hash, address: poolwalletAddress, "poolWalletDetails": from_wallet }
+                        let datavalues = { "address": poolwalletAddress, "trans_id": hash, "transoutput": {}, "feeding_wallet_id": "0" }
+                        response = { status: 200, message: "success", data: datavalues }
                         // res.json(response)
                         return response
 
                     } else {
                         console.log("❗ Something went wrong while submitting your transaction: ", error)
                         // response = { status: 200, message: "success", data: hash, "poolWalletDetails": from_wallet }
-                        response = { status: 400, message: "❗ Something went wrong while submitting your transaction: " + error, data: hash, address: poolwalletAddress, "poolWalletDetails": from_wallet }
+                        let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
+                        response = 
+                        {
+                            status: 400,
+                            message: "❗ Something went wrong while submitting your transaction: " + error,
+                            data: datavalues
+                         }
                         // res.json(response)
                         return response
                     }
                 });
 
+
             }
             else {
-                console.log("poolwalletAddress===============", poolwalletAddress)
-                console.log("poolwalletAddress===============", from_wallet)
-                console.log("poolwalletAddress===============", from_wallet[0].privatekey)
-                const HttpProvider = TronWeb.providers.HttpProvider;
-                const fullNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+                const HttpProvider  = TronWeb.providers.HttpProvider;
+                const fullNode      = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
                 const solidityNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
                 const eventServer = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
                 const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, from_wallet[0].privatekey);
-                let contract = await tronWeb.contract().at(from_wallet[0].networkDetails[0].contractAddress);
-                let result = await contract.transfer(poolwalletAddress, amount).send({ feeLimit: from_wallet[0].networkDetails[0].gaslimit })
-                response = { status: 200, message: "success", data: result, "poolWalletDetails": from_wallet }
-                // res.json(response)
+                const tradeobj = await tronWeb.transactionBuilder.sendTrx(poolwalletAddress, amount, from_wallet[0].address);
+                const signedtxn = await tronWeb.trx.sign(tradeobj, from_wallet[0].privatekey);
+                const receipt = await tronWeb.trx.sendRawTransaction(signedtxn).then(async (output) => {
+                   let datavalues  = { "address": poolwalletAddress, "trans_id": output.txid, "transoutput": output, "feeding_wallet_id": from_wallet[0].id }
+                    response        = { status: 200, message: "success", data: datavalues }
+                });
                 return response
             }
-
         }
         else {
-
-            return { status: 400, message: "Network is not supported", data: null }
+            let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
+            return { status: 400, message: "Network is not supported", data: datavalues }
         }
 
     }
     catch (error) {
         console.log("Message %s sent: %s", error);
-        return { status: 400, data: {}, message: error.message, "poolWalletDetails": from_wallet }
+        let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
+        return { status: 400, data: datavalues, message: error.message, }
     }
 }
-async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount , ContractAddress = "") {
+async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, ContractAddress = "") {
     let gasAmount = 0
     let gasPrice = 0
     try {
-        console.log("Type==========calculateGasFee===========",Type)
-        if (Type == "Web3") 
-        {
+        console.log("Type==========calculateGasFee===========", Type)
+        if (Type == "Web3") {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             gasPrice = await WEB3.eth.getGasPrice();
-            if (ContractAddress != "") 
-            {
+            if (ContractAddress != "") {
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
                 gasAmount = await contract.methods.transfer(toAddress, WEB3.utils.toWei(`${amount}`)).estimateGas({ from: fromAddress });
-                console.log("ContractAddress==========calculateGasFee===========",gasPrice,gasAmount)
+                console.log("ContractAddress==========calculateGasFee===========", gasPrice, gasAmount)
                 return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
             }
-            else 
-            {
+            else {
                 gasAmount = await WEB3.eth.estimateGas({ to: toAddress, from: fromAddress, value: Web3.utils.toWei(`${amount}`, 'ether'), });
-                console.log("==========calculateGasFee===========",gasPrice,gasAmount)
+                console.log("==========calculateGasFee===========", gasPrice, gasAmount)
                 return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
             }
         }
-        else 
-        {
-            console.log("else==========calculateGasFee===========",gasPrice,gasAmount)
-            return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
+        else {
+            console.log("else==========calculateGasFee===========", gasPrice, gasAmount)
+
+            return { status: 200, data: { "fee": "2000000", "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
         }
     }
     catch (error) {
@@ -235,10 +235,10 @@ async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount , C
 
 module.exports =
 {
-    createFeedWalletsFun    : createFeedWalletsFun,
-    CheckBalanceOfAddress   : CheckBalanceOfAddress,
-    addressFeedingFun       : addressFeedingFun,
-    calculateGasFee         : calculateGasFee,
+    createFeedWalletsFun: createFeedWalletsFun,
+    CheckBalanceOfAddress: CheckBalanceOfAddress,
+    addressFeedingFun: addressFeedingFun,
+    calculateGasFee: calculateGasFee,
     async createFeedWallets(req, res) {
         try {
             let feedwallet = await createFeedWalletsFun(req.body.network_id, req.body.created_by)

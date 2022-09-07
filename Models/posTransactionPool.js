@@ -23,6 +23,10 @@ const posTransactionPoolSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    deviceid: {
+        type: String,
+        required: true,
+    },
     balance: {
         type: Number,
         required: true,

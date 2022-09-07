@@ -136,13 +136,13 @@ module.exports =
     },
     async disableordelete(req, res) {
         try {
-            let storeDevices = await storeDevices.findOneAndUpdate({ 'id': req.body.id }, { $set: { "status": req.body.status } }, { $new: true })
-            if(storeDevices == null)
+            let storeDevice = await storeDevices.findOneAndUpdate({ 'id': req.body.id }, { $set: { "status": req.body.status } }, { $new: true })
+            if(storeDevice == null)
             {
                 res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
             else{
-                res.json({ status: 200, data: storeDevices, message: "Update Successfully" })
+                res.json({ status: 200, data: storeDevice, message: "Update Successfully" })
             }
             
         }
