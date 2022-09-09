@@ -96,13 +96,14 @@ module.exports =
     },
     async cancelClientRequest(req, res) {
         try {
+            var dateTime = new Date();
             await merchantcategories.findOneAndUpdate({ 'id': req.body.id },
                 {
                     $set:
                     {
                         status: 4,
                         updated_by: req.headers.authorization,
-                        remarks: "Cancel By Merchant"+ DATE.now(),
+                        remarks: "Cancel By Merchant"+ dateTime.toString(),
                     }
                 }).then(async (val) => {
                     if (val != null) {
