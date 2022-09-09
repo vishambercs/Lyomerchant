@@ -21,6 +21,8 @@ require("dotenv").config()
 
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 var CryptoJS            = require('crypto-js')
+
+
 module.exports =
 {
     async generateKey() {
@@ -184,7 +186,7 @@ module.exports =
                 Constant.translists[index]["connection"] = connection
                 // request.reject(null, request.origin);
             }
-            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 20000);
+            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 10000);
             connection.on('message', function (message) {
             if(index == -1)
             {

@@ -27,11 +27,12 @@ module.exports =
             let devicetoken   = req.headers.devicetoken;
             let storeDevice   = await storeDevices.findOne({ $and: [ { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
    
-            // if(storeDevice == null)
-            // {
-            //     return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-            // }
+            if(storeDevice == null)
+            {
+                return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
             let account       = await poolwalletController.getPoolWalletID(networkType) 
+            console.log("account",account)
             if (hash == securityHash) 
             {
                 let currentDateTemp = Date.now();
@@ -46,8 +47,8 @@ module.exports =
                     orderid: req.body.orderid,
                     clientToken: req.body.token,
                     status: 0,
-                    // deviceid : storeDevice.deviceid,
-                    deviceid :"asdasd",
+                    deviceid : storeDevice.deviceid,
+                    // deviceid :"asdasd",
                     walletValidity: currentDate,
                     timestamps : new Date().getTime()
                 });

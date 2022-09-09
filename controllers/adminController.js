@@ -69,9 +69,9 @@ module.exports =
     async Login(req, res) {
         try {
             let email = req.body.email;
-            console.log(req.body)
+           
             await admins.findOne({ 'email': email }).select('+password').then(async (val) => {
-                console.log(val)
+              
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
 
                 if (val.status == false) 
@@ -92,7 +92,7 @@ module.exports =
                 }
 
             }).catch(error => {
-                console.log("get_clients_data", error)
+                
                 // res.json({ "error": error })
                 res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
             })

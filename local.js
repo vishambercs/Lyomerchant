@@ -22,7 +22,7 @@ var app = express();
 const https = require('http');
 // const https             = require('https');
 const Utility = require('./common/Utility');
-
+var os = require('os');
 require('dotenv').config()
 app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
@@ -46,6 +46,10 @@ app.use('/hotWallet/v1', hotWalletRoute);
 app.use('/withdraw/v1', withdrawRoute);
 app.use('/admin/v1', adminRoute);
 
+
+var networkInterfaces = os.networkInterfaces();
+
+console.log(networkInterfaces);
 // cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
 
 // cron.schedule('* * * * * *', () => {

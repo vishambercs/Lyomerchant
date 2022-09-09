@@ -105,6 +105,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
             { $match: { "network_id": network_id, status: 1, } },
             { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "networkDetails" } },
         ])
+
         if (from_wallet != null) {
             let balance = await CheckBalanceOfAddress(
                 from_wallet[0].networkDetails[0].nodeUrl,
@@ -112,8 +113,9 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].address,
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
-            console.log("email_response", balance)
-            if (balance.status == 200 && balance.data.native_balance == 0) {
+            console.log("balance", balance)
+            console.log("amount", amount)
+            if (balance.status == 200 && balance.data.native_balance < amount) {
                 var emailTemplateName =
                 {
                     "emailTemplateName": "feedingwallet.ejs",
@@ -123,7 +125,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 }
                 let email_response = await emailSending.sendEmailFunc(emailTemplateName)
                 console.log("email_response", email_response)
-                let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": "0", "feeding_wallet_id": "0" }
+                let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": "0", "feeding_wallet_id": from_wallet[0].id }
                 response = { status: 400, message: "We have informed the admin", data: datavalues }
                 return response
             }
@@ -174,7 +176,8 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
 
 
             }
-            else {
+            else 
+            {
                 const HttpProvider  = TronWeb.providers.HttpProvider;
                 const fullNode      = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
                 const solidityNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
@@ -190,14 +193,14 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
             }
         }
         else {
-            let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
+            let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": from_wallet[0].id }
             return { status: 400, message: "Network is not supported", data: datavalues }
         }
 
     }
     catch (error) {
         console.log("Message %s sent: %s", error);
-        let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
+        let datavalues = { "message" : error ,"address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
         return { status: 400, data: datavalues, message: error.message, }
     }
 }

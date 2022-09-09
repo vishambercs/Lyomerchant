@@ -44,6 +44,12 @@ const hotwallettranslogs = new mongoose.Schema
             type: String,
             required: false,
         },
+        feelimit:
+        {
+            type: Number,
+            required: false,
+        },
+        
         status:
         {
             type: String,

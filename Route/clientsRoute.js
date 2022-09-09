@@ -172,9 +172,9 @@ router.post('/posGetTransByStorekey',                       Auth.store_have_acce
 "=============Pos Merchant Wallet==========================================="
 
 
-//router.post('/assignPosMerchantWallet',                     Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
+router.post('/assignPosMerchantWallet',                     Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
 
-router.post('/assignPosMerchantWallet',                     posTransactionPoolController.assignPosMerchantWallet);
+// router.post('/assignPosMerchantWallet',                     posTransactionPoolController.assignPosMerchantWallet);
 
 router.post('/shopTransList',                               Auth.check_Store_Device_Access,posTransactionPoolController.getShopTransList);
 router.get('/posallCurrency',                               Auth.check_Store_Device_Access,CurrencyController.allCurrency);
