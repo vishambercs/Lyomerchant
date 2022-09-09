@@ -517,10 +517,10 @@ module.exports =
             console.log("previousdate   ================", previousdate)
             console.log("currentdate    ================", currentdate)
             console.log("minutes        ================", minutes)
-            if (minutes > 10) {
+            if (minutes > 1) {
                 let transactionpool = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
                 let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
-                response = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
+                response = { amountstatus: 2, status: 200, "data": {}, message: "Your Transcation is expired." };
                 return JSON.stringify(response)
             }
             let BalanceOfAddress = await CheckAddress(
