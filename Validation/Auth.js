@@ -31,17 +31,17 @@ module.exports =
     },
     async plugin_have_access(req, res, next) {
         try {
-            next()
-            // let api_key = req.headers.authorization;
-            // console.log("plugin_have_access",api_key)
-            // let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { categoryid: "30824fa99994057dea6102194f3cafd88de16144" }, { status: 1 }] });
-            // console.log("plugin_have_access",user)
-            // if (user != null) {
-            //     next()
-            // }
-            // else {
-            //     res.json({ status: 400, data: {}, message: "You have not plugin access. Please create a request for this service." })
-            // }
+            
+            let api_key = req.headers.authorization;
+            console.log("plugin_have_access",api_key)
+            let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { categoryid: "30824fa99994057dea6102194f3cafd88de16144" }, { status: 1 }] });
+            console.log("plugin_have_access",user)
+            if (user != null) {
+                next()
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "You have not plugin access. Please create a request for this service." })
+            }
 
         }
         catch (error) {
