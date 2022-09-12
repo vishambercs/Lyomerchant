@@ -131,10 +131,11 @@ router.post('/clientwithdrawnetworkid',              withdrawController.get_clie
 router.post('/updateClientToken',                    clientsController.updateClientToken);
 router.post('/getapikey',                            Auth.verfiyClientToken,clientsController.getapikey);
 
-router.post('/getTranscationData',                               hotwallettranslogsController.getTranscationData);
+
+router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             transcationpoolController.get_Trans_by_txId);
 router.post('/transactionFastDetails',               Auth.fastpay_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
-
+router.post('/transactionPaylinkDetails',            Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
 router.post('/forgotPassword',                       clientsController.forgotPassword);

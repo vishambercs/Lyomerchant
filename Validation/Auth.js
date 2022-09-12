@@ -223,8 +223,12 @@ module.exports =
     },
     async paylink_have_access(req, res, next) {
         try {
+
             let token = req.headers.authorization;
-            let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9" }, { status: 1 }] });
+            console.log("token",token)
+
+            let user = await merchantcategory.findOne({ clientapikey: token , categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9" ,status: 1  });
+           
             if (user != null) {
                 next()
             }
@@ -241,7 +245,7 @@ module.exports =
         try {
 
             let token = req.headers.authorization;
-            console.log("token", token)
+           
             let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8" }, { status: 1 }] });
             if (user != null) {
                 next()

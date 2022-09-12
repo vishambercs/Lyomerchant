@@ -46,28 +46,8 @@ app.use('/hotWallet/v1', hotWalletRoute);
 app.use('/withdraw/v1', withdrawRoute);
 app.use('/admin/v1', adminRoute);
 
-
-var networkInterfaces = os.networkInterfaces();
-
-console.log(networkInterfaces);
-// cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
-
-// cron.schedule('* * * * * *', () => {
-//     timer++
-//     if(timer == 60)    
-//     {
-//         console.log("balance check")
-//     }
-//     if(timer == 120)    
-//     {
-//         console.log("balance check")
-//         timer = 0
-//     }
-// });
-
-
-
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
+
 mongoose.connection.once('open', function () {
     console.log('Database connected Successfully');
 }).on('error', function (err) {
@@ -100,7 +80,7 @@ posTranscation.on('request', Utility.posTranscationWebScokect)
 
 var paymentLinkTranscationserver = https.createServer({
 }).listen(process.env.PAYMENT_LINK_PORT, () => {
-console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}   `);
+console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}`);
 })
 const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
 paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)

@@ -133,6 +133,7 @@ router.post('/transactionDetailsClient',             transcationpoolController.g
 router.post('/transactionFastDetails',               Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 
 
+
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
 router.post('/forgotPassword',                       clientsController.forgotPassword);
 router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);

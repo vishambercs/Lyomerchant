@@ -371,8 +371,8 @@ module.exports =
             let queryvariable  = querystring.parse(url_paremeters.query)
             console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
-            let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
-            
+            let getTranscationData = await commonFunction.get_Transcation_Paylink_Data(queryvariable.transkey)
+            console.log("paymentLinkTranscationWebScokect =====================================",getTranscationData);
             if(getTranscationData.length > 0)
             {
             const connection   = request.accept(null, request.origin);
@@ -386,7 +386,7 @@ module.exports =
             {
                 Constant.paymenlinkTransList[index]["connection"] = connection
             }
-            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 20000);
+            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 10000);
             connection.on('message', function (message) {
             if(index == -1)
             {
