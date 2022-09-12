@@ -8,7 +8,9 @@ var walletRoute = require('./Route/poolwalletRoute');
 var hotWalletRoute = require('./Route/hotWalletRoute');
 var withdrawRoute = require('./Route/withdrawRoute');
 var adminRoute = require('./Route/adminRoute');
+var payLinkRoute = require('./Route/paylinkRoute');
 var cornJobs = require('./common/cornJobs');
+const fileUpload = require('express-fileupload');
 const fs                = require('fs');
 var path = require('path');
 const Web3 = require('web3');
@@ -19,9 +21,8 @@ var app = express();
 // const https = require('http');
 const https             = require('https');
 const Utility = require('./common/Utility');
-
 require('dotenv').config()
-
+app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.json());
@@ -31,7 +32,6 @@ app.use((req, res, next) => {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept,Authorization,Token");
     next();
 });
-
 app.get('/',    function (req, res) { res.send('Welcome to Lyo Merchant'); });
 app.use('/v1',           client);
 app.use('/admin/v1',     poolRoute);
@@ -41,13 +41,13 @@ app.use('/hotWallet/v1', hotWalletRoute);
 app.use('/withdraw/v1',  withdrawRoute);
 app.use('/admin/v1',     adminRoute);
 
-
+app.use('/paymentlink/v1', payLinkRoute);
 //  cron.schedule('* * * * *', cornJobs.Balance_Cron_Job);
 //  Database
 
-const privateKey   = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/privkey.pem',  'utf8');
-const certificate  = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/cert.pem',     'utf8');
-const ca           = fs.readFileSync('/etc/letsencrypt/live/staging.portal.adv.lyomerchant.com/chain.pem',    'utf8');
+const privateKey   = fs.readFileSync('/etc/letsencrypt/live/staging.api.lyomerchant.com/privkey.pem',  'utf8');
+const certificate  = fs.readFileSync('/etc/letsencrypt/live/staging.api.lyomerchant.com/cert.pem',     'utf8');
+const ca           = fs.readFileSync('/etc/letsencrypt/live/staging.api.lyomerchant.com/fullchain.pem',    'utf8');
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
@@ -56,7 +56,7 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 app.listen(process.env.SERVER_PORT, function () {
-    console.log('Listening to Port 5000');
+    console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });
 
 var server = https.createServer({
@@ -88,39 +88,29 @@ kyc.on('request', Utility.approvekyc)
 
 
 
+var posTranscationserver = https.createServer({
+    key                 :  privateKey,
+    cert                :  certificate,  
+    ca                  :  ca, 
+    requestCert         :  false, 
+    rejectUnauthorized  :  false
+    }).listen(process.env.POS_TRANSCATION, () => {
+    console.log(`Example app listening at ${process.env.POS_TRANSCATION}   `);
+})
+const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
+
+posTranscation.on('request', Utility.posTranscationWebScokect)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+var paymentLinkTranscationserver = https.createServer({
+    key                 :  privateKey,
+    cert                :  certificate,  
+    ca                  :  ca, 
+    requestCert         :  false, 
+    rejectUnauthorized  :  false
+}).listen(process.env.PAYMENT_LINK_PORT, () => {
+console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}   `);
+})
+const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
+paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)

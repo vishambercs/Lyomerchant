@@ -6,6 +6,7 @@ const merchantcategorySchema = new mongoose.Schema({
     {
         type: String,
         required: true,
+        unique:true
     },
     categoryid:
     {
@@ -22,12 +23,21 @@ const merchantcategorySchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    remarks: {
+        type: String,
+        required: false,
+    },
+    updated_by: {
+        type: String,
+        
+        required: false,
+    },
     created_by: {
-        type: Number,
+        type: String,
         required: true,
     },
     deleted_by: {
-        type: Number,
+        type: String,
         required: false,
         default: 0
     },
@@ -37,15 +47,7 @@ const merchantcategorySchema = new mongoose.Schema({
     },
 
 },
-    {
-        toJSON: {
-            transform(doc, ret) {
-                delete ret.password;
-                delete ret.__v;
-            },
-        },
-    },
     { timestamps: true }
 )
 merchantcategorySchema.plugin(uniqueValidator);
-module.exports = mongoose.model('merchantcategorySchema', merchantcategorySchema)
+module.exports = mongoose.model('merchantcategory', merchantcategorySchema)

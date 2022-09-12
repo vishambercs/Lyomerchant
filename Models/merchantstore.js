@@ -6,6 +6,7 @@ const merchantstoreSchema = new mongoose.Schema({
     {
         type: String,
         required: true,
+        unique:true
     },
     clientapikey:
     {
@@ -21,23 +22,31 @@ const merchantstoreSchema = new mongoose.Schema({
     {
         type: String,
         required: true,
+        unique:true
     },
-    storeqrcode:
+    qrcode:
     {
         type: String,
-        required: true,
+        required: false,
+       
+    },
+    storeprofile:
+    {
+        type: String,
+        required: false,
+       
     },
     status:
     {
-        type: String,
+        type: Number,
         required: true,
     },
     created_by: {
-        type: Number,
+        type: String,
         required: true,
     },
     deleted_by: {
-        type: Number,
+        type: String,
         required: false,
         default: 0
     },
@@ -47,15 +56,7 @@ const merchantstoreSchema = new mongoose.Schema({
     },
 
 },
-    {
-        toJSON: {
-            transform(doc, ret) {
-                delete ret.password;
-                delete ret.__v;
-            },
-        },
-    },
     { timestamps: true }
 )
 merchantstoreSchema.plugin(uniqueValidator);
-module.exports = mongoose.model('merchantstoreSchema', merchantstoreSchema)
+module.exports = mongoose.model('merchantstore', merchantstoreSchema)

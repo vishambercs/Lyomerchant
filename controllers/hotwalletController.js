@@ -67,6 +67,25 @@ async function savelogs(poolWalletID, hotwalletID, trans_hash, status, remarks, 
     })
     return logs;
 }
+
+async function savelogs(poolWalletID, hotwalletID, trans_hash, status, remarks, created_by) {
+    var manualLogs = new  manualHotWalletTransferLogs({
+        id              : mongoose.Types.ObjectId() , 
+        poolWalletID    : poolWalletID, 
+        hotwalletID     : hotwalletID , 
+        trans_hash      : trans_hash,
+        status          : status, 
+        remarks         : remarks, 
+        created_by      : created_by
+    });
+    let logs = await manualLogs.save().then(async (val) => {
+        return JSON.stringify({ status: 200, message: "Added", data: val })
+    }).catch(error => {
+        console.log(error)
+        return JSON.stringify({ status: 400, data: {}, message: error })
+    })
+    return logs;
+}
 module.exports =
 {
     async createHotWallets(req, res) {
@@ -97,8 +116,7 @@ module.exports =
             });
             hotWallet.save().then(async (val) => {
                 res.json({ status: 200, message: "Successfully", data: val })
-            }).
-                catch(error => { res.json({ status: 400, data: {}, message: error }) })
+            }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
 
         }
         catch (error) {
@@ -247,7 +265,8 @@ module.exports =
             ])
             hotWallet = await hotWallets.findOne({ "network_id": from_wallet[0].network_id, "status": 1 })
             let balanceAddress = await get_Balance_of_Address(from_wallet)
-            if (hotWallet != null && balanceAddress.status == 200) {
+            if (hotWallet != null && balanceAddress.status == 200) 
+            {
                 if (from_wallet[0].networkDetails[0].libarayType == "Web3") {
                     var web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].networkDetails[0].nodeUrl));
                     const contract = new web3.eth.Contract(Constant.USDT_ABI, from_wallet[0].networkDetails[0].contractAddress, { from: from_wallet[0].address })
@@ -258,7 +277,8 @@ module.exports =
                     const nonce = await web3.eth.getTransactionCount(from_wallet[0].address, 'latest');
                     const transaction = { gas: web3.utils.toHex(req.body.gas), "to": from_wallet[0].networkDetails[0].contractAddress, "value": "0x00", "data": accounttransfer, "from": from_wallet[0].address }
                     const signedTx = await web3.eth.accounts.signTransaction(transaction, from_wallet[0].privateKey);
-                    await web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('transactionHash', async function (hash) {
+                    await web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('transactionHash', async function (hash) 
+                    {
                         await savelogs(from_wallet[0].id, hotWallet.id, hash, 200, "done", created_by) 
                         const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 }})
                         response = { status: 200, message: "Success","poolWalletDetails" : from_wallet ,data: { "receipt": hash } }
@@ -266,11 +286,8 @@ module.exports =
                             console.log(receipt)
                             const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 }})
                             await savelogs(from_wallet[0].id, hotWallet.id, receipt, 200, "done", created_by) 
-                            
                             response = { status: 200, message: "Success", "poolWalletDetails" : from_wallet , data: { "receipt": receipt } }
-                           
-                        })
-                        .on('confirmation', async function (confirmationNumber, receipt) {
+                        }).on('confirmation', async function (confirmationNumber, receipt) {
                             console.log(confirmationNumber, receipt)
                             await savelogs(from_wallet[0].id, hotWallet.id, receipt, 200, "done", created_by) 
                             const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 }})
@@ -284,14 +301,14 @@ module.exports =
                
                 }
                 else {
-                    const HttpProvider = TronWeb.providers.HttpProvider;
-                    const fullNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
-                    const solidityNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
-                    const eventServer = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
-                    const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, from_wallet[0].privateKey);
-                    let contract = await tronWeb.contract().at(from_wallet[0].networkDetails[0].contractAddress);
-                    let result = await contract.transfer(hotWallet.address, result).send({ feeLimit: req.body.gas })
-                    const poolWallet = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 }})
+                    const HttpProvider  = TronWeb.providers.HttpProvider;
+                    const fullNode      = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+                    const solidityNode  = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+                    const eventServer   = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+                    const tronWeb       = new TronWeb(fullNode, solidityNode, eventServer, from_wallet[0].privateKey);
+                    let contract        = await tronWeb.contract().at(from_wallet[0].networkDetails[0].contractAddress);
+                    let result          = await contract.transfer(hotWallet.address, result).send({ feeLimit: req.body.gas })
+                    const poolWallet    = await poolWallets.updateOne({id : from_wallet[0].id } , { $set:{ balance : 0 }})
                     await savelogs(from_wallet[0].id, hotWallet.id,result, 200,"Done", created_by)
                     response = { status: 200, message: "success", data: result ,"poolWalletDetails" : from_wallet }
                 }

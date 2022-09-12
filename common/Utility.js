@@ -11,23 +11,34 @@ const clients           = require('../Models/clients');
 var clientsController   = require('../controllers/clientsController');
 const { constant }      = require('./Constant');
 var crypto              = require("crypto");
-
+const jwt               = require('jsonwebtoken');
 const url               = require('url')
 const querystring       = require('querystring');
 const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
+const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
 
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 var CryptoJS            = require('crypto-js')
+
+
 module.exports =
 {
-     async generateKey() 
-
-    {
+    async generateKey() {
        let key =  await crypto.randomBytes(20).toString('hex')
-        return key ;
+       return key ;
     },
+    async checkthevalue(title) {
+        let key =  (title == "" || title == undefined) ? " " : title
+        return key ;
+     },
+
+    async Get_JWT_Token(userid,expiretime='1h') 
+    {
+        var token = jwt.sign({ id: userid }, process.env.AUTH_KEY, { expiresIn: expiretime });
+        return token ;
+    }, 
     Send_Email_Function(parameters) {
         // try {
         //     let respone = {} 
@@ -57,7 +68,6 @@ module.exports =
         return JSON.stringify(respone)
 
     },
- 
     Get_New_Address() {
         try {
             var web3 = new Web3(new Web3.providers.HttpProvider(process.env.ETHEREUM_LOCAL_RPC));
@@ -69,11 +79,22 @@ module.exports =
             return null
         }
     },
-    GetAddress(nodeurl) {
-        try {
-            var web3 = new Web3(new Web3.providers.HttpProvider(nodeurl));
-            var account = web3.eth.accounts.create();
-            return account
+    GetAddress(nodeurl) 
+    {
+        try 
+        {
+            if(nodeurl == "tronweb")
+            {
+                const { address, privateKey } = generateAccount()
+                var account = { "address":address,   "privateKey":privateKey}
+                return account
+            }
+            else{
+                var web3 = new Web3(new Web3.providers.HttpProvider(nodeurl));
+                var account = web3.eth.accounts.create();
+                return account
+            }
+          
         }
         catch (error) {
             console.log("error", error);
@@ -82,7 +103,7 @@ module.exports =
     },
     async Get_Request_By_Axios(URL, parameters, headers) {
         response = {}
-        axios.get(URL, {
+        await axios.get(URL, {
             params: parameters,
             headers: headers
         }).then(res => {
@@ -147,6 +168,7 @@ module.exports =
             console.log("getTranscationData =====================================",queryvariable);
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await commonFunction.get_Transcation_Data(queryvariable.transkey)
+            console.log("getTranscationData =====================================",getTranscationData);
             if(getTranscationData.length > 0)
             {
 
@@ -164,7 +186,7 @@ module.exports =
                 Constant.translists[index]["connection"] = connection
                 // request.reject(null, request.origin);
             }
-            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 20000);
+            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 10000);
             connection.on('message', function (message) {
             if(index == -1)
             {
@@ -297,5 +319,90 @@ module.exports =
         //     console.log(error)
         //     return null
         // }
+    },
+    async posTranscationWebScokect(request) {
+        try {
+            let uniqueKey      =  crypto.randomBytes(20).toString('hex')
+            let url_paremeters = url.parse(request.httpRequest.url);
+            let queryvariable  = querystring.parse(url_paremeters.query)
+            console.log("posTranscationWebScokect =====================================",queryvariable);
+            var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
+            if(getTranscationData.length > 0)
+            {
+            const connection   = request.accept(null, request.origin);
+            var index = Constant.posTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            if(index == -1)
+            {
+            let client_object   = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+            Constant.posTransList.push(client_object)
+            response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please wait we are checking" };
+            connection.sendUTF(JSON.stringify(response));
+            }
+            else
+            {
+                Constant.posTransList[index]["connection"] = connection
+                response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please wait we are checking" };
+                connection.sendUTF(JSON.stringify(response));
+            }
+            Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 10000);
+            connection.on('message', function (message) {
+            if(index == -1)
+            {
+                connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            }
+            })
+        }
+        else
+        {
+            return request.reject(null, request.origin);
+        }
+        }
+        catch (error) {
+            console.log(error)
+            
+            return null
+        }         
+    },
+    async paymentLinkTranscationWebScokect(request) {
+        try {
+            let uniqueKey      =  crypto.randomBytes(20).toString('hex')
+            let url_paremeters = url.parse(request.httpRequest.url);
+            let queryvariable  = querystring.parse(url_paremeters.query)
+            console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
+            var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
+            
+            if(getTranscationData.length > 0)
+            {
+            const connection   = request.accept(null, request.origin);
+            var index = Constant.paymenlinkTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            if(index == -1)
+            {
+            let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+            Constant.paymenlinkTransList.push(client_object)
+            }
+            else
+            {
+                Constant.paymenlinkTransList[index]["connection"] = connection
+            }
+            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 20000);
+            connection.on('message', function (message) {
+            if(index == -1)
+            {
+                connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            }
+            })
+        }
+        else
+        {
+            return request.reject(null, request.origin);
+        }
+        }
+        catch (error) {
+            console.log(error)
+            
+            return null
+        }
     },
 }

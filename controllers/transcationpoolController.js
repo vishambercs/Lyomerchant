@@ -1,43 +1,47 @@
-const clients = require('../Models/clients');
-const poolWallet = require('../Models/poolWallet');
-const transactionPools = require('../Models/transactionPool');
-const transcationLog = require('../Models/transcationLog');
-const cornJobs = require('../common/cornJobs');
-var CryptoJS = require('crypto-js')
-var crypto = require("crypto");
-var Utility = require('../common/Utility');
-var commonFunction = require('../common/commonFunction');
-const bcrypt = require('bcrypt');
-const Web3 = require('web3');
-var crypto = require("crypto");
+const clients            = require('../Models/clients');
+const poolWallet         = require('../Models/poolWallet');
+const transactionPools   = require('../Models/transactionPool');
+const paymentlinktxpools= require('../Models/paymentLinkTransactionPool');
+const transcationLog     = require('../Models/transcationLog');
+const cornJobs           = require('../common/cornJobs');
+var CryptoJS             = require('crypto-js')
+var crypto               = require("crypto");
+var Utility              = require('../common/Utility');
+var commonFunction       = require('../common/commonFunction');
+const bcrypt             = require('bcrypt');
+const Web3               = require('web3');
+var crypto               = require("crypto");
+var poolwalletController = require('./poolwalletController');
 require("dotenv").config()
 module.exports =
 {
     async assignMerchantWallet(req, res) {
         try {
-            var merchantKey  = req.headers.authorization
-            var networkType  = req.body.networkType
-            var callbackURL  = req.body.callbackURL
-            var securityHash = req.body.securityHash
-            var orderid      = req.body.orderid
+            var merchantKey   = req.headers.authorization
+            var networkType   = req.body.networkType
+            var callbackURL   = req.body.callbackURL
+            var securityHash  = req.body.securityHash
+            var orderid       = req.body.orderid
             var security_hash = (merchantKey + networkType + callbackURL + process.env.BASE_WORD_FOR_HASH)
             var hash = CryptoJS.MD5(security_hash).toString();
             if (hash == securityHash) 
             {
                 let currentDateTemp = Date.now();
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
-                let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
+                // let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
+                let account     = await poolwalletController.getPoolWalletID(networkType) 
                 const transactionPool = new transactionPools({
                     id: crypto.randomBytes(20).toString('hex'),
-                    api_key: req.headers.authorization,
-                    poolwalletID: account.id,
-                    amount: req.body.amount,
-                    currency: req.body.currency,
-                    callbackURL: req.body.callbackURL,
-                    orderid: req.body.orderid,
-                    clientToken: req.body.token,
-                    status: 0,
-                    walletValidity: currentDate
+                    api_key         : req.headers.authorization,
+                    poolwalletID    : account.id,
+                    amount          : req.body.amount,
+                    currency        : req.body.currency,
+                    callbackURL     : req.body.callbackURL,
+                    orderid         : req.body.orderid,
+                    clientToken     : req.body.token,
+                    status          : 0,
+                    walletValidity  : currentDate,
+                    timestamps      : new Date().getTime()
                 });
                 transactionPool.save().then(async (val) => {
                     console.log(val)
@@ -57,6 +61,8 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+
+    
     async getTrans(req, res) {
         try {
 
@@ -105,7 +111,7 @@ module.exports =
                         }
                     }
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet1", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
@@ -125,7 +131,7 @@ module.exports =
                     { $lookup: { from: "networks", localField: "poolWallet.network_id", foreignField: "id", as: "networkDetails" } },
                     { $group: { _id: "$networkDetails.id", total: { $sum: '$amount' }, }, },
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet2", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
@@ -244,7 +250,7 @@ module.exports =
                         }
                     }
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet3", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
@@ -324,7 +330,7 @@ module.exports =
                             }
                         }
                     ]).then(async (data) => {
-                        res.json({ status: 200, message: "Pool Wallet", data: data })
+                        res.json({ status: 200, message: "Pool Wallet4", data: data })
                     }).catch(error => {
                         console.log("get_clients_data", error)
                         res.json({ status: 400, data: {}, message: error })
@@ -395,7 +401,7 @@ module.exports =
                             }
                         }
                     ]).then(async (data) => {
-                        res.json({ status: 200, message: "Pool Wallet", data: data })
+                        res.json({ status: 200, message: "Pool Wallet5", data: data })
                     }).catch(error => {
                         console.log("get_clients_data", error)
                         res.json({ status: 400, data: {}, message: error })
@@ -453,7 +459,164 @@ module.exports =
                         }
                     }
                 ]).then(async (data) => {
-                    res.json({ status: 200, message: "Pool Wallet", data: data })
+                    res.json({ status: 200, message: "Pool Wallet6", data: data })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
+    async get_Trans_by_txId(req, res) {
+        try {
+            console.log(req.body.id)
+            await transactionPools.aggregate(
+                [
+                    { $match: { "id": req.body.id } },
+                    {
+                        $lookup: {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "poolWallet"// output array field
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "transactionpools", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "walletValidity",//field from the documents of the "from" collection
+                            as: "walletValidity"// output array field
+                        }
+                    },
+
+                     {
+                        $lookup: {
+                            from: "networks", // collection to join
+                            localField: "poolWallet.network_id",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "networkDetails"// output array field
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "transcationlogs", // collection to join
+                            localField: "id",//field from the input documents
+                            foreignField: "trans_pool_id",//field from the documents of the "from" collection
+                            as: "transactionDetails"// output array field
+                        }
+                    },
+                    
+                    
+                    {
+                        "$project": {
+                            "poolWallet.api_key":0,
+                            "poolWallet.privateKey": 0,
+                            "poolWallet.poolwalletID": 0,
+                            "poolWallet.orderid": 0,
+                            "poolWallet.clientToken": 0,
+                            "poolWallet.currency": 0,
+                            "poolWallet.callbackURL": 0,
+                            "poolWallet.createdAt": 0,
+                            "poolWallet.updatedAt": 0,
+                            "poolWallet.__v": 0,
+                            "poolWallet.transactionDetails": 0,
+                            "poolWallet.balance": 0,
+                            "poolWallet.id": 0,
+                            "poolWallet._id": 0,
+                            "poolWallet.status": 0,                            
+                            "networkDetails.__v": 0,
+                            "networkDetails.nodeUrl": 0,
+                            "networkDetails.created_by": 0,
+                            "networkDetails.createdAt": 0,
+                            "networkDetails.updatedAt": 0,
+                            "networkDetails._id": 0
+                        }
+                    }
+                ]).then(async (data) => {
+                    res.json({ status: 200, message: "transaction details", data: data })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
+    async get_Fastlink_Trans_by_txId(req, res) {
+        try {
+            await paymentlinktxpools.aggregate(
+                [
+                    { $match: { "id": req.body.id } },
+                    {
+                        $lookup: {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "poolWallet"// output array field
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "transactionpools", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "walletValidity",//field from the documents of the "from" collection
+                            as: "walletValidity"// output array field
+                        }
+                    },
+
+                     {
+                        $lookup: {
+                            from: "networks", // collection to join
+                            localField: "poolWallet.network_id",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "networkDetails"// output array field
+                        }
+                    },
+                    {
+                        $lookup: {
+                            from: "transcationlogs", // collection to join
+                            localField: "id",//field from the input documents
+                            foreignField: "trans_pool_id",//field from the documents of the "from" collection
+                            as: "transactionDetails"// output array field
+                        }
+                    },
+                    
+                    
+                    {
+                        "$project": {
+                            "poolWallet.api_key":0,
+                            "poolWallet.privateKey": 0,
+                            "poolWallet.poolwalletID": 0,
+                            "poolWallet.orderid": 0,
+                            "poolWallet.clientToken": 0,
+                            "poolWallet.currency": 0,
+                            "poolWallet.callbackURL": 0,
+                            "poolWallet.createdAt": 0,
+                            "poolWallet.updatedAt": 0,
+                            "poolWallet.__v": 0,
+                            "poolWallet.transactionDetails": 0,
+                            "poolWallet.balance": 0,
+                            "poolWallet.id": 0,
+                            "poolWallet._id": 0,
+                            "poolWallet.status": 0,                            
+                            "networkDetails.__v": 0,
+                            "networkDetails.nodeUrl": 0,
+                            "networkDetails.created_by": 0,
+                            "networkDetails.createdAt": 0,
+                            "networkDetails.updatedAt": 0,
+                            "networkDetails._id": 0
+                        }
+                    }
+                ]).then(async (data) => {
+                    res.json({ status: 200, message: "transaction details", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })

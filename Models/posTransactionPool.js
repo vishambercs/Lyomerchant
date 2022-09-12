@@ -23,6 +23,10 @@ const posTransactionPoolSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    deviceid: {
+        type: String,
+        required: true,
+    },
     balance: {
         type: Number,
         required: true,
@@ -53,8 +57,12 @@ const posTransactionPoolSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    
+    timestamps : 
+    {
+        type: String,
+        required: true,
+    },
   },
     { timestamps: true }
 )
-module.exports = mongoose.model('posTransactionPoolSchema', posTransactionPoolSchema)
+module.exports = mongoose.model('posTransactionPool', posTransactionPoolSchema)

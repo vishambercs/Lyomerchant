@@ -13,6 +13,21 @@ const hotwallettranslogs = new mongoose.Schema
             type: String,
             required: true,
         },
+        feeding_wallet_id: 
+        {
+            type: String,
+            required: false,
+        },
+        feeding_trans_id: 
+        {
+            type: String,
+            required: false,
+        },
+        pool_wallet_id: 
+        {
+            type: String,
+            required: false,
+        },
         hot_wallet_id: 
         {
             type: String,
@@ -22,22 +37,28 @@ const hotwallettranslogs = new mongoose.Schema
         trans_id: 
         {
             type: String,
-            required: true,
+            required: false,
         },
         network_id:
         {
             type: String,
-            required: true,
+            required: false,
         },
+        feelimit:
+        {
+            type: Number,
+            required: false,
+        },
+        
         status:
         {
             type: String,
-            required: true,
+            required: false,
         },
         remarks:
         {
             type: String,
-            required: true,
+            required: false,
         },
     },
         { timestamps: true }

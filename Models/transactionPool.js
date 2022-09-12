@@ -53,7 +53,11 @@ const transactionPoolSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    
+    timestamps : 
+    {
+        type: String,
+        required: true,
+    },
   },
     { timestamps: true }
 )

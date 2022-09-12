@@ -16,6 +16,11 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
+        currencyid: 
+        {
+            type: String,
+            required: true,
+        },
         coin: {
             type: String,
             required: true,
@@ -25,6 +30,7 @@ const networkSchema = new mongoose.Schema
             enum : ['Native','Token'],
             required: true,
          },
+       
         contractAddress: {
             type: String,
             required: true,
@@ -71,6 +77,36 @@ const networkSchema = new mongoose.Schema
             type: Number,
             required: true,
         },
+        prefix:
+        {
+            type        : String,
+            required    : false,
+            default     : "",
+        },
+        icon:
+        {
+            type: String,
+            required: false,
+            default     : "",
+        },
+        gaslimit:
+        {
+            type        : String,
+            required    : false,
+            default     : "10000000000",
+        },
+        feedinglimit:
+        {
+            type        : String,
+            required    : false,
+            default     : "10000000",
+        },
+        feedinglimitPerce:
+        {
+            type        : Number,
+            required    : false,
+            default     : 0.1,
+        },
         hotwallettranscationstatus:
         {
             type        : Boolean,
@@ -78,11 +114,11 @@ const networkSchema = new mongoose.Schema
             default     : true,
         },
         created_by: {
-            type: Number,
+            type: String,
             required: true,
         },
         deleted_by: {
-            type: Number,
+            type: String,
             required: false,
             default : 0
         },
@@ -90,6 +126,8 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: false,
         },
+        
+
         
     },
         { timestamps: true }

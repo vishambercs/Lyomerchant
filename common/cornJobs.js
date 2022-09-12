@@ -16,8 +16,7 @@ module.exports =
             constant.address = await Utility.get_Pending_Transcation()
             if (constant.index < constant.address.length) {
                 clientsController.get_Balance(constant.address[index])
-                constant.index = constant.index + 1
-              
+                constant.index = constant.index + 1 
             }
             else 
             {
