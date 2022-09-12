@@ -7,6 +7,8 @@ const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool
 const payLink = require('../Models/payLink');
 const Validator = require('./index');
 const jwt = require('jsonwebtoken');
+const fastPaymentCode   = require('../Models/fastPaymentCode');
+const merchantstore     = require('../Models/merchantstore');
 require("dotenv").config()
 module.exports =
 {
@@ -250,12 +252,37 @@ module.exports =
     async public_paylink_access(req, res, next) {
         try {
             let paymentId       = req.body.paymentId;
-           
             let pylinktranslog  = await payLink.findOne({ id: paymentId });
             if (pylinktranslog == null) {
                 return res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
             let user = await merchantcategory.findOne({ clientapikey: pylinktranslog.apiKey,categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
+            if (user != null) {
+                next()
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
+            }
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 401, data: {}, message: "You have not access to this service. Please apply for this service" })
+        }
+    },
+    async public_fastpay_access(req, res, next) {
+        try {
+            let paymentId       = req.body.fastCode;
+            let pylinktranslog  = await fastPaymentCode.findOne({ fastcodes: paymentId });
+
+            if (pylinktranslog == null) {
+                return res.json({ status: 400, data: {}, message: "Invalid Request" })
+            }
+            let mercstore       = await merchantstore.findOne({ id: pylinktranslog.storeid });
+            if (mercstore == null) {
+                return res.json({ status: 400, data: {}, message: "Invalid Request" })
+            }
+
+            let user = await merchantcategory.findOne({ clientapikey: mercstore.clientapikey,categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8", status: 1 });
             if (user != null) {
                 next()
             }

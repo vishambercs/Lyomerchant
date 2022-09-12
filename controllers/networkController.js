@@ -155,8 +155,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
-
     async delete_network(req, res) {
         try {
             await Network.updateOne({ 'id': req.body.id },
