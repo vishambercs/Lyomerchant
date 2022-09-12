@@ -18,15 +18,14 @@ const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
 const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
-
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 var CryptoJS            = require('crypto-js')
 
 
 module.exports =
 {
-    async generateKey() {
-       let key =  await crypto.randomBytes(20).toString('hex')
+    generateKey() {
+       let key =  crypto.randomBytes(20).toString('hex')
        return key ;
     },
     async checkthevalue(title) {

@@ -7,7 +7,7 @@ const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionP
 const poolWallet = require('../../Models/poolWallet');
 var crypto = require("crypto");
 var mongoose = require('mongoose');
-var CryptoJS            = require('crypto-js')
+var CryptoJS = require('crypto-js')
 var poolwalletController = require('../poolwalletController');
 let message = ''
 let status = ''
@@ -42,14 +42,14 @@ module.exports =
             invoiceid = newrecord.id
             message = "Invoice created"
             status = 200
-            
+
         }
         catch (error) {
             console.log("new invoice error", error)
             invoiceid = ''
             message = error
             status = 400
-           
+
         }
 
         res.json({ status: status, data: { "invoiceid": invoiceid }, message: message })
@@ -153,34 +153,34 @@ module.exports =
 
     async assignPaymentLinkMerchantWallet(req, res) {
         try {
-            var networkType   = req.body.networkType         
-            let account       = await poolwalletController.getPoolWalletID(networkType)            
-                let currentDateTemp = Date.now();
-                let currentDate = parseInt((currentDateTemp / 1000).toFixed());
-                const newRecord = new paymentLinkTransactionPool({
-                    id: mongoose.Types.ObjectId(), // crypto.randomBytes(20).toString('hex'),
-                    api_key: req.headers.authorization,
-                    poolwalletID: account.id,
-                    amount: req.body.amount,
-                    currency: req.body.currency,
-                    callbackURL: req.body.callbackURL,
-                    payLinkId: req.body.payLinkId,
-                    orderType : req.body.orderType,
-                    clientToken: req.body.token,
-                    status: 0,
-                    walletValidity: currentDate,
-                    timestamps : new Date().getTime()
-                });
-                newRecord.save().then(async (val) => {
-                    console.log("new record save",val)
-                    await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
-                    let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
-                    res.json({ status: 200, message: "Payment Link Wallet Assigned Successfully", data: data })
-                }).catch(error => {
-                    console.log("errorr",error)
-                    res.json({ status: 401, data: {}, message: error })
-                })
-            }
+            var networkType = req.body.networkType
+            let account = await poolwalletController.getPoolWalletID(networkType)
+            let currentDateTemp = Date.now();
+            let currentDate = parseInt((currentDateTemp / 1000).toFixed());
+            const newRecord = new paymentLinkTransactionPool({
+                id: mongoose.Types.ObjectId(), // crypto.randomBytes(20).toString('hex'),
+                api_key: req.headers.authorization,
+                poolwalletID: account.id,
+                amount: req.body.amount,
+                currency: req.body.currency,
+                callbackURL: req.body.callbackURL,
+                payLinkId: req.body.payLinkId,
+                orderType: req.body.orderType,
+                clientToken: req.body.token,
+                status: 0,
+                walletValidity: currentDate,
+                timestamps: new Date().getTime()
+            });
+            newRecord.save().then(async (val) => {
+                console.log("new record save", val)
+                await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
+                let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
+                res.json({ status: 200, message: "Payment Link Wallet Assigned Successfully", data: data })
+            }).catch(error => {
+                console.log("errorr", error)
+                res.json({ status: 401, data: {}, message: error })
+            })
+        }
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
@@ -188,21 +188,18 @@ module.exports =
     },
     async getPaymentLinkTransList(req, res) {
         try {
-          
-           let searchParameters = { "api_key": req.headers.authorization}
-           
-           if( (req.body.networkid  != "" && req.body.networkid  != undefined) && (req.body.status  != "" && req.body.status  != undefined))
-           {
-            searchParameters    = { "api_key": req.headers.authorization, "poolWallet.network_id": req.body.networkid, "status": parseInt(req.body.status) }
-           }   
-           else if(req.body.networkid  != "" && req.body.networkid  != undefined )
-           {
-            searchParameters    = { "api_key": req.headers.authorization, "poolWallet.network_id": req.body.networkid }
-           }   
-           else if(req.body.status  != "" && req.body.status  != undefined )
-           {
-            searchParameters    = { "api_key": req.headers.authorization,"status": parseInt(req.body.status) }
-           }
+
+            let searchParameters = { "api_key": req.headers.authorization }
+
+            if ((req.body.networkid != "" && req.body.networkid != undefined) && (req.body.status != "" && req.body.status != undefined)) {
+                searchParameters = { "api_key": req.headers.authorization, "poolWallet.network_id": req.body.networkid, "status": parseInt(req.body.status) }
+            }
+            else if (req.body.networkid != "" && req.body.networkid != undefined) {
+                searchParameters = { "api_key": req.headers.authorization, "poolWallet.network_id": req.body.networkid }
+            }
+            else if (req.body.status != "" && req.body.status != undefined) {
+                searchParameters = { "api_key": req.headers.authorization, "status": parseInt(req.body.status) }
+            }
             await paymentLinkTransactionPool.aggregate(
                 [
                     {
@@ -238,7 +235,7 @@ module.exports =
                         }
                     },
                     {
-                        $lookup: 
+                        $lookup:
                         {
                             from: "clients", // collection to join
                             localField: "storeDetails.clientapikey",//field from the input documents
@@ -248,8 +245,8 @@ module.exports =
                     },
                     { $match: serachParameters },
                     {
-                        "$project": 
-                    {
+                        "$project":
+                        {
                             "poolWallet.privateKey": 0,
                             "poolWallet.balance": 0,
                             "poolWallet.id": 0,
@@ -297,27 +294,24 @@ module.exports =
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
                 })
-                             
-            
+
+
         }
-        catch (error) 
-        {
+        catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
 
     async verifyFastPayment(req, res) {
-        console.log("verify", req.headers.authorization, req.body.businessName)
         let findResult = ''
         let response = []
         let status = 200;
         try {
-            findResult = await fastPaymentCode.find({
-                "fastCodes.businessName": req.body.businessName,
-                "merchantId": req.headers.authorization
+            findResult = await fastPaymentCode.findOne({
+                "storeid": req.body.businessName,
             })
-            //console.log("fastCode number",findResult)
+            console.log("fastCode number", findResult)
             response = findResult
         }
         catch (error) {
@@ -325,44 +319,65 @@ module.exports =
             status = 400
             response = error
         }
-
         res.json({ status: status, data: response, message: "verify fast code" })
     },
 
     async verifyFastCode(req, res) {
-        var token =''
-        let storeProfile = ''
-        let findResult = ''
-        let response = []
-        let status = 200;
+        // var token = ''
+        // let storeProfile = ''
+        // let findResult = ''
+        // let response = []
+        // let status = 200;
         try {
-            findResult = await fastPaymentCode.find({
-                "fastCodes.fastCode": req.body.fastCode
+            // let findResult = await fastPaymentCode.find({ "fastcodes": req.body.fastCode })
+            // let findResult = await fastPaymentCode.find({ "fastcodes": req.body.fastCode })
+            let findResult = await fastPaymentCode.aggregate(
+                [
+                    { $match: { "fastcodes": req.body.fastCode } },
+                    {
+                        $lookup: {
+                            from: "merchantstores", // collection to join
+                            localField: "storeid",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "storesDetails"// output array field
+                        },
+                    },
+                ])
+            res.json({ status: 200, data: findResult, message: "Success" })
+        }
+        catch (error) 
+        {
+            console.log("error", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+        // try {
+        //     findResult = await fastPaymentCode.find({
+        //         "fastcodes": req.body.fastCode
+        //     })
 
-                
-            })
-            let id = findResult.id
-            token = jwt.sign({ id: id }, process.env.AUTH_KEY, { expiresIn: '5m' });
-            try{
-                console.log(req.headers.authorization,findResult[0].fastCodes[0].businessName)
-                storeProfile = await merchantStore.findOne({
-                storename:findResult[0].fastCodes[0].businessName
-            });
-        }
-        catch (error){
+        //     let id = findResult.id
+        //     token = jwt.sign({ id: id }, process.env.AUTH_KEY, { expiresIn: '5m' });
+        //     try{
+        //         console.log(req.headers.authorization,findResult[0].fastCodes[0].businessName)
+        //         storeProfile = await merchantStore.findOne({
+        //         storename:findResult[0].fastCodes[0].businessName
+        //     });
+        // }
+        // catch (error){
 
-        }
-            response = (findResult)
-           
-        }
-        catch (error) {
-            response = "someting went wrong"
-            status = 400
-            response = error
-        }
-        if (response == 0) status = 400
-        //res.json({ status: status, data: {"data":response,"storeProfile":storeProfile}, message: "verify fast code" })
-        res.json({ status: status, data: response,storeProfile,token, message: "verify fast code" })
+        // }
+        //     response = (findResult)
+
+        // }
+        // catch (error) {
+        //     response = "someting went wrong"
+        //     status = 400
+        //     response = error
+        // }
+        // if (response == 0) status = 400
+        // //res.json({ status: status, data: {"data":response,"storeProfile":storeProfile}, message: "verify fast code" })
+        // res.json({ status: status, data: response,storeProfile,token, message: "verify fast code" })
+
     },
 
     async createFastCode(req, res) {
@@ -372,85 +387,94 @@ module.exports =
         var merchantKey = req.headers.authorization
         let dataResponse = ''
         let fastCodeObject = []
-        if(!req.body.businessName||req.body.businessName==''){
-            console.log("no name")
-            message = "Business name is missing"
-            status = 400
-            res.json({ status: status, data: dataResponse, message: message })
-            return
-        }
+        // if(!req.body.businessName||req.body.businessName==''){
+        //     console.log("no name")
+        //     message = "Business name is missing"
+        //     status = 400
+        //     res.json({ status: status, data: dataResponse, message: message })
+        //     return
+        // }
         try {
-            await merchantStore.findOne({ "storename": req.body.businessName }).then(async (val) => {
-            console.log("valueeeeeeeeee",val)
-            if(val.clientapikey == req.headers.authorization ){          
-            await fastPaymentCode.findOne({ "merchantId": merchantKey }).then(async (val) => {
-                if (val) {
-                    fastCodeObject = val
-                    console.log("data........", fastCodeObject)
-                    for (i = 0; i < fastCodeObject.fastCodes.length; i++) {
-                        if (fastCodeObject.fastCodes[i].businessName == req.body.businessName) {
-                            dataResponse = fastCodeObject.fastCodes[i]
-                            console.log("data........", dataResponse)
-                        }
-                    }
-                    if (dataResponse == 0) {
-                        let code = parseInt(Math.random() * (1000000 - 100000));
-                        fastCodeObject.fastCodes.push({ "businessName": req.body.businessName, "fastCode": code, "status": "active" })
-                        console.log("Object is", fastCodeObject.fastCodes)
-                        await fastPaymentCode.updateOne({ 'id': fastCodeObject.id },
-                            {
-                                $set:
-                                {
-                                    "fastCodes": fastCodeObject.fastCodes
-                                }
-                            })
-                            .then(async (val) => {
-                                dataResponse = { "businessName": req.body.businessName, "fastCode": code, "status": "active" }
-                                message = 'success'
-                                console.log(val)
-                            })
-                    }
-                }
+            // await merchantStore.findOne({ "storename": req.body.businessName }).then(async (val) => {
+            // console.log("valueeeeeeeeee",val)
+            // if(val.clientapikey == req.headers.authorization ){          
+            // await fastPaymentCode.findOne({ "merchantId": merchantKey }).then(async (val) => {
+            //     if (val) {
+            //         fastCodeObject = val
+            //         console.log("data........", fastCodeObject)
+            //         for (i = 0; i < fastCodeObject.fastCodes.length; i++) {
+            //             if (fastCodeObject.fastCodes[i].businessName == req.body.businessName) {
+            //                 dataResponse = fastCodeObject.fastCodes[i]
+            //                 console.log("data........", dataResponse)
+            //             }
+            //         }
+            //         if (dataResponse == 0) {
+            //             let code = parseInt(Math.random() * (1000000 - 100000));
+            //             fastCodeObject.fastCodes.push({ "businessName": req.body.businessName, "fastCode": code, "status": "active" })
+            //             console.log("Object is", fastCodeObject.fastCodes)
+            //             await fastPaymentCode.updateOne({ 'id': fastCodeObject.id },
+            //                 {
+            //                     $set:
+            //                     {
+            //                         "fastCodes": fastCodeObject.fastCodes
+            //                     }
+            //                 })
+            //                 .then(async (val) => {
+            //                     dataResponse = { "businessName": req.body.businessName, "fastCode": code, "status": "active" }
+            //                     message = 'success'
+            //                     console.log(val)
+            //                 })
+            //         }
+            //     }
 
-                else {
-                    console.log(req.body.businessName)
-                    let businessName = req.body.businessName
-                    let code = parseInt(Math.random() * (1000000 - 100000));
-                    let fastCodeObject = { "businessName": businessName, "fastCode": code, "status": "active" }
-                    //console.log("------------",req.body.businessName)            
-                    try {
-                        let new_record = new fastPaymentCode({
-                            id: mongoose.Types.ObjectId(),
-                            businessName: req.body.businessName,
-                            merchantId: merchantKey,
-                            fastCodes: fastCodeObject,
-                        })
-                        console.log(new_record)
-                        response = await new_record.save()
-                        message = "fast code created"
-                        status = 200
+            //     else {
+            //         console.log(req.body.businessName)
+            //         let businessName = req.body.businessName
+            //         let code = parseInt(Math.random() * (1000000 - 100000));
+            //         let fastCodeObject = { "businessName": businessName, "fastCode": code, "status": "active" }
+            //         //console.log("------------",req.body.businessName)            
+            //         try {
+            //             let new_record = new fastPaymentCode({
+            //                 id: mongoose.Types.ObjectId(),
+            //                 businessName: req.body.businessName,
+            //                 merchantId: merchantKey,
+            //                 fastCodes: fastCodeObject,
+            //             })
+            //             console.log(new_record)
+            //             response = await new_record.save()
+            //             message = "fast code created"
+            //             status = 200
 
-                    }
-                    catch (error) {
-                        message = error
-                        status = 400
-                        dataResponse = 'null'
-                    }
-                }
-            })}
-        
-        else {message = "Store does not exist"
-            status = 400
-            dataResponse = 'null'}
-        })
+            //         }
+            //         catch (error) {
+            //             message = error
+            //             status = 400
+            //             dataResponse = 'null'
+            //         }
+            //     }
+            // })}
+            // else {message = "Store does not exist"
+            //     status = 400
+            //     dataResponse = 'null'}
+            // })
+            console.log("Math", Math.floor(Math.random() * 100000))
+            const fastPayCode = new fastPaymentCode({
+                id: mongoose.Types.ObjectId(),
+                storeid: req.body.storeid,
+                fastcodes: Math.floor(Math.random() * 100000),
+                status: 1,
+            })
+            let val = await fastPayCode.save()
+            message = "Fast Code Created Successfully"
+            status = 200
+            dataResponse = val
         }
         catch (error) {
+            console.log("error", error)
             message = "Store does not exist"
             status = 400
             dataResponse = 'null'
         }
-
-        
         res.json({ status: status, data: dataResponse, message: message })
     },
 

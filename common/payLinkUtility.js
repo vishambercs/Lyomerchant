@@ -199,7 +199,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
 
 async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, account_balance, native_balance,feeLimit) {
     try {
-        console.log(poolwalletID, merchant_trans_id, account_balance, native_balance,feeLimit)
+        
         const from_wallet = await poolWallets.aggregate([
             { $match: { "id": poolwalletID } },
             { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "walletNetwork" } },
