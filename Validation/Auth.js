@@ -31,14 +31,17 @@ module.exports =
     },
     async plugin_have_access(req, res, next) {
         try {
-            let api_key = req.headers.authorization;
-            let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { categoryid: "30824fa99994057dea6102194f3cafd88de16144" }, { status: 1 }] });
-            if (user != null) {
-                next()
-            }
-            else {
-                res.json({ status: 400, data: {}, message: "You have not plugin access. Please create a request for this service." })
-            }
+            next()
+            // let api_key = req.headers.authorization;
+            // console.log("plugin_have_access",api_key)
+            // let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { categoryid: "30824fa99994057dea6102194f3cafd88de16144" }, { status: 1 }] });
+            // console.log("plugin_have_access",user)
+            // if (user != null) {
+            //     next()
+            // }
+            // else {
+            //     res.json({ status: 400, data: {}, message: "You have not plugin access. Please create a request for this service." })
+            // }
 
         }
         catch (error) {
@@ -95,7 +98,9 @@ module.exports =
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await admins.findOne({ admin_api_key: authorization, token: token });
+            console.log(authorization)
+            let user = await admins.findOne({ admin_api_key: authorization });
+            console.log(user)
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
@@ -156,7 +161,7 @@ module.exports =
                 next()
             }
             else {
-                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+                res.json({ status: 400, data: {}, message: "you are not merchant" })
             }
         }
         catch (error) {
