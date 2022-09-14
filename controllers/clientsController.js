@@ -1062,8 +1062,16 @@ module.exports =
     },
     async updateMerchantProfileImage(req, res) {
         try {
-            let update = await clients.findOneAndUpdate({ 'clientapikey': req.headers.authorization }, { $set: { profileimage: req.body.profileimage } }, { $new: true })
-            res.json({ status: 200, data: { update }, message: "update profile" })
+            console.log()
+            let update = await clients.findOneAndUpdate({ 'api_key': req.headers.authorization }, 
+            { $set: { 
+                profileimage: req.body.profileimage, 
+                companyname: req.body.companyname
+            } }, { $new: true })
+            let newupdate = await clients.findOne({ 'api_key': req.headers.authorization })
+
+            res.json({ status: 200, data: { newupdate }, message: "update profile" })
+        
         }
         catch (error) {
             console.log(error)
@@ -1093,7 +1101,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-
     async changeClientLoginStatus(req, res) {
         try {
             let email = req.body.email;
@@ -1122,4 +1129,5 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
+    
 }

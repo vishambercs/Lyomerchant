@@ -2,10 +2,12 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 var uniqueValidator = require('mongoose-unique-validator');
 const clientsSchema = new mongoose.Schema({
-    api_key: {
+    api_key: 
+    {
         type: String,
         required: true,
     },
+
     email: {
         type: String,
         required: true,
@@ -70,18 +72,22 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
     kycLink: {
         type: String,
         required: true,
     },
+    companyname: {
+        type: String,
+        required: false,
+    },
+    
     deleted_by: {
         type: String,
-        required: true,
+        required: false,
     },
     deleted_at: {
         type: String,
-        required: true,
+        required: false,
     },
 },
     {
