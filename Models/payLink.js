@@ -9,58 +9,14 @@ const payLinkSchema = new mongoose.Schema({
         required: true,
         unique:true,
     },
-    apiKey:
+    invoice_id:
     {
         type: String,
-        required: true,
-    },
-    merchantId:
-    {
-        type: String,
-        required: true,
-    },
-    customerName : 
-    {
-        type: String,
-        required: true,
-    },
-    invoiceNumber :
-    {
-        type: String,
-        required: true,
-    },
-    email: 
-    {
-        type: String,
-        required: true,
-    },
-    mobileNumber:
-    {
-        type: String,
-        required: true,
-    },
-    duedate: 
-    {
-        type: String,
-        
-    },
-    additionalNotes: 
-    {
-        type: String,
-        
-    },
-    currency:
-    {
-        type: String,
-        required: true,
-    },
-    totalAmount: 
-    {
-        type: Number,
         required: true,
     },   
-    status: {
-        type: String,
+    status: 
+    {
+        type: Number,
         required: true,
     },   
   },

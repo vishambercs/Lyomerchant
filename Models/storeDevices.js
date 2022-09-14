@@ -41,7 +41,7 @@ const storeDevices = new mongoose.Schema({
     },
     deleted_by:
     {
-        type: Number,
+        type: String,
         required: false,
         default : 0
     },

@@ -115,8 +115,92 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-    
+    async createMerchantStoreByAdmin(req, res) {
+        try {
+            var api_key = crypto.randomBytes(20).toString('hex');
+            let qrcodedata = JSON.stringify({
 
+                "merchantapikey": req.body.clientapikey,
+                "storename": req.body.storename,
+                "storeapikey": api_key,
+            })
+            QRCode.toDataURL(qrcodedata, async function (err, url) {
+                if (!err) {
+                    const merchantstore = new merchantstores({
+                        id: mongoose.Types.ObjectId(),
+                        clientapikey: req.body.clientapikey,
+                        storename: req.body.storename,
+                        storeapikey: api_key,
+                        status: 0,
+                        created_by: req.headers.authorization,
+                        qrcode: url,
+                        storeprofile:req.body.storeprofile
+                    });
+                    merchantstore.save().then(async (val) => {
+                        res.json({
+                            status: 200, message: "Store Created Successfully", "qrcode": val.qrcode,
+                            data: { "merchantapikey": val.clientapikey, "storename": val.storename, "storeapikey": val.storeapikey }
+                        })
+                    }).catch(error => {
+                        console.log(error)
+                        res.json({ status: 400, data: {}, message: error })
+                    })
+                }
+                else {
+                    res.json({ status: 400, data: {}, message: err })
+                }
+            })
+
+
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async createMerchantStoreByAdmin(req, res) {
+        try {
+            var api_key = crypto.randomBytes(20).toString('hex');
+            let qrcodedata = JSON.stringify({
+
+                "merchantapikey": req.body.clientapikey,
+                "storename": req.body.storename,
+                "storeapikey": api_key,
+            })
+            QRCode.toDataURL(qrcodedata, async function (err, url) {
+                if (!err) {
+                    const merchantstore = new merchantstores({
+                        id: mongoose.Types.ObjectId(),
+                        clientapikey: req.body.clientapikey,
+                        storename: req.body.storename,
+                        storeapikey: api_key,
+                        status: 0,
+                        created_by: req.headers.authorization,
+                        qrcode: url,
+                        storeprofile:req.body.storeprofile
+                    });
+                    merchantstore.save().then(async (val) => {
+                        res.json({
+                            status: 200, message: "Store Created Successfully", "qrcode": val.qrcode,
+                            data: { "merchantapikey": val.clientapikey, "storename": val.storename, "storeapikey": val.storeapikey }
+                        })
+                    }).catch(error => {
+                        console.log(error)
+                        res.json({ status: 400, data: {}, message: error })
+                    })
+                }
+                else {
+                    res.json({ status: 400, data: {}, message: err })
+                }
+            })
+
+
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 
 
 }

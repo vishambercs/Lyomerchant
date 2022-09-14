@@ -28,7 +28,12 @@ router.post('/createFastCode',                      Auth.fastpay_have_access,pay
 router.post('/verifyFastPayment',                   Auth.fastpay_have_access, payLinkController.verifyFastPayment);
 router.post('/verifyFastCode',                      Auth.public_fastpay_access,payLinkController.verifyFastCode);
 router.post('/deleteFastCode',                      Auth.paylink_have_access,payLinkController.deleteFastCode);
-router.post('/assignPaymentLinkMerchantWallet',     Auth.paylink_have_access,payLinkController.assignPaymentLinkMerchantWallet)
+router.post('/deleteInvoice',                       Auth.paylink_have_access,payLinkController.deleteInvoice);
+
+router.post('/assignPaymentLinkMerchantWallet',     Auth.public_paylink_access,payLinkController.assignPaymentLinkMerchantWallet)
 router.post('/assignFastCodeMerchantWallet',        Auth.fastpay_have_access,payLinkController.assignPaymentLinkMerchantWallet)
+
+
+
 
 module.exports = router;

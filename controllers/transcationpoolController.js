@@ -184,7 +184,7 @@ module.exports =
                     }
                 ])
             const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject[0].networkDetails[0].nodeUrl))
-            console.log("amountstatus", addressObject[0])
+           
             let account_balance = await BSC_WEB3.eth.getBalance(addressObject[0].poolWallet[0].address)
             let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
             var amountstatus = commonFunction.amount_check(parseFloat(addressObject[0].poolWallet[0].balance), parseFloat(addressObject[0].amount), parseFloat(account_balance_in_ether))

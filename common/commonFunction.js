@@ -139,9 +139,7 @@ async function getBalance(transdata, transData) {
             addressObject.poolWallet[0].privateKey
         )
         amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
-        console.log("feedWallets",BalanceOfAddress)   
-        console.log("amountstatus",amountstatus)  
-        console.log("amountstatus",BalanceOfAddress.data.format_token_balance)  
+        
         const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
         let GasFee                      =  await feedWalletController.calculateGasFee
         (
@@ -424,7 +422,7 @@ module.exports =
             headers: {}
         }).then(async (res) => {
             var stringify_response = stringify(res)
-            console.log("res.data.result   ", res.data.result)
+           
             if (res.data.result.length > 0) {
                 res.data.result.forEach(async (element) => {
                     element["amount"] = await Web3.utils.fromWei(element["value"], 'ether')
@@ -488,7 +486,7 @@ module.exports =
         await axios.get(URL, { headers: headers })
             .then(res => {
                 var stringify_response = stringify(res)
-                console.log("res", res.data)
+                
                 response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
             })
             .catch(error => {
@@ -508,7 +506,7 @@ module.exports =
             { headers: headers })
             .then(res => {
                 var stringify_response = stringify(res)
-                console.log("res", res.data)
+            
                 response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
             })
             .catch(error => {
