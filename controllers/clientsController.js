@@ -150,7 +150,8 @@ module.exports =
                 if (val != null) {
                     let kycurl = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path2
                     let kyc_link = null
-                    let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LMT_basic_level" }, { "Authorization": process.env.KYC_URL_TOKEN })
+
+                    let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LyoMerchant_Client" }, { "Authorization": process.env.KYC_URL_TOKEN })
                     let json_response = JSON.parse(postRequests.data)
                     console.log("json_response", json_response)
                     if (json_response.status == 200) {
