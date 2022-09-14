@@ -39,15 +39,12 @@
 // router.post('/verfiyemail',                          Auth.is_merchant,clientsController.verfiyemail);
 // // router.post('/allMerchant',                          clientsController.allMerchant);
 // router.post('/customerstatus',                       Auth.is_merchant,clientsController.customerstatus);
-
 // router.post('/resetMerchantTwoFa',                   Auth.is_merchant,clientsController.reset_merchant_two_fa);
 // router.post('/clientwithdrawnetworkid',              Auth.is_merchant,withdrawController.get_client_withdraw_with_network_id);
 // router.post('/updateClientToken',                    Auth.is_merchant,clientsController.updateClientToken);
 // router.post('/getTranscationData',                   Auth.is_merchant,hotwallettranslogsController.getTranscationData);
 // router.post('/transactionDetailsClient',             Auth.is_merchant,transcationpoolController.get_Trans_by_txId);
 // router.post('/transactionFastDetails',               Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
-
-
 // router.post('/generateNewClientAddress',             Auth.is_merchant,clientsController.generateNewClientAddress);
 // router.post('/forgotPassword',                       clientsController.forgotPassword);
 // router.post('/tokenAndUpdatePassword',               Auth.is_merchant,clientsController.checkTheTokenAndUpdatePassword);
@@ -131,10 +128,11 @@ router.post('/clientwithdrawnetworkid',              withdrawController.get_clie
 router.post('/updateClientToken',                    clientsController.updateClientToken);
 router.post('/getapikey',                            Auth.verfiyClientToken,clientsController.getapikey);
 
-router.post('/getTranscationData',                               hotwallettranslogsController.getTranscationData);
+
+router.post('/getTranscationData',                   hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             transcationpoolController.get_Trans_by_txId);
 router.post('/transactionFastDetails',               Auth.fastpay_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
-
+router.post('/transactionPaylinkDetails',            Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 
 router.post('/generateNewClientAddress',             clientsController.generateNewClientAddress);
 router.post('/forgotPassword',                       clientsController.forgotPassword);
@@ -156,7 +154,7 @@ router.post('/updateMerchantSite',                       merchantSitesController
 // router.post('/getTranscationData',                hotwallettranslogsController.getTranscationData);
 
 "=============MerchantStore==========================================="
-router.post('/createMerchantStore',                         Auth.is_merchant, Auth.has_Pos_Access,merchantstoreController.createMerchantStore);
+router.post('/createMerchantStore',                         Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                             merchantstoreController.allMerchantStore);
 router.post('/merchantstore',                               Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.MerchantStore);
 router.post('/merchantStoreProfileUpdate',                  Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.updateMerchantStoreProfile);

@@ -114,7 +114,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
             console.log("balance", balance)
-            console.log("amount", amount)
+           
             if (balance.status == 200 && balance.data.native_balance < amount) {
                 var emailTemplateName =
                 {

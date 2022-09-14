@@ -762,10 +762,9 @@ module.exports =
             headers: {}
         }).then(async (res) => {
             var stringify_response = stringify(res)
-            console.log("res.data.result=====================", res.data.result)
             if (res.data.result.length > 0) {
                 let total_payment = 0
-                console.log("element", res.data.result.length)
+                
                 res.data.result.forEach(async (element) => {
                     element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
                     element["scanurl"] = network_details.scanurl + element["hash"]
@@ -808,7 +807,7 @@ module.exports =
             headers: {}
         }).then(async (res) => {
             var stringify_response = stringify(res)
-            console.log("res.data.result=====================", res.data.result)
+          
             if (res.data.result.length > 0) {
                 let total_payment = 0
                 console.log("element", res.data.result.length)
@@ -1077,7 +1076,7 @@ module.exports =
             let email = req.body.email;
             await clients.findOne({ 'email': email }).then(async (val) => {
                 if (val != null) {
-                        res.json({ "status": 200, "data": val["api_key"], "message": "Success" })
+                        res.json({ "status": 200, "data": val["api_key"], "status": val["loginstatus"],"message": "Success" })
                 }
                 else {
                     res.json({ "status": 400, "data": {}, "message": "Invalid Request" })
@@ -1087,6 +1086,35 @@ module.exports =
                 console.log("get_clients_data", error)
                 // res.json({ "error": error })
                 res.json({ status: 400, data: {}, message: "Invalid Request" })
+            })
+        }
+        catch (error) 
+        {
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+
+    async changeClientLoginStatus(req, res) {
+        try {
+            let email = req.body.email;
+            await clients.updateOne({ 'email': email },
+            {
+                $set:
+                {
+                    loginstatus: req.body.status,
+                    deleted_by: req.headers.authorization,
+                    deleted_at: new Date().toString(),
+                }
+            }).then(async (val) => {
+                if (val != null) {
+                    res.json({ status: 200, message: "Successfully", data: req.body.email })
+                }
+                else {
+                    res.json({ status: 200, message: "Not Found the Data", data: null })
+                }
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: error })
             })
         }
         catch (error) 

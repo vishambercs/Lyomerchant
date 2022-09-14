@@ -33,6 +33,36 @@ module.exports =
     },
     async getAllClientCategoryRequest(req, res) {
         try {
+
+            if(req.body.status == undefined || req.body.status == ""){
+                let allmerchantcategories = await merchantcategories.aggregate([
+                    {
+                        $lookup: 
+                        {
+                            from: "categories", // collection to join
+                            localField: "categoryid",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "categoriesDetails"// output array field
+                        }
+                    },
+                    {
+                        $lookup: 
+                        {
+                            from: "clients", // collection to join
+                            localField: "clientapikey",//field from the input documents
+                            foreignField: "api_key",//field from the documents of the "from" collection
+                            as: "clientdetails"// output array field
+                        }
+                    },
+                ]).then(async (data) => 
+                {
+                    res.json({ status: 200, message: "All Merchant Categories", data: data })
+                }).catch(error => {
+                    console.log("get_clients_data", error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+            }
+            else{
             let allmerchantcategories = await merchantcategories.aggregate([
                 { $match: { "status": parseInt(req.body.status) } },
                 {
@@ -60,6 +90,7 @@ module.exports =
                 console.log("get_clients_data", error)
                 res.json({ status: 400, data: {}, message: error })
             })
+        }
 
         }
         catch (error) {

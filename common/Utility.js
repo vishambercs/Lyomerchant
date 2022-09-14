@@ -18,15 +18,14 @@ const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
 const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
-
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 var CryptoJS            = require('crypto-js')
 
 
 module.exports =
 {
-    async generateKey() {
-       let key =  await crypto.randomBytes(20).toString('hex')
+    generateKey() {
+       let key =  crypto.randomBytes(20).toString('hex')
        return key ;
     },
     async checkthevalue(title) {
@@ -371,8 +370,8 @@ module.exports =
             let queryvariable  = querystring.parse(url_paremeters.query)
             console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
-            let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
-            
+            let getTranscationData = await commonFunction.get_Transcation_Paylink_Data(queryvariable.transkey)
+            console.log("paymentLinkTranscationWebScokect =====================================",getTranscationData);
             if(getTranscationData.length > 0)
             {
             const connection   = request.accept(null, request.origin);
@@ -386,7 +385,7 @@ module.exports =
             {
                 Constant.paymenlinkTransList[index]["connection"] = connection
             }
-            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 20000);
+            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 10000);
             connection.on('message', function (message) {
             if(index == -1)
             {

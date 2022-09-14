@@ -14,7 +14,7 @@ const invoiceSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    merchantId :
+    merchantapikey :
     {
         type: String,
         required: true,
@@ -71,11 +71,13 @@ const invoiceSchema = new mongoose.Schema({
     duedate: 
     {
         type: String,
+        required: false,
         
     },
     additionalNotes: 
     {
         type: String,
+        required: false,
         
     },
     currency:
@@ -88,10 +90,17 @@ const invoiceSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-   
     status: {
-        type: String,
+        type: Number,
         required: true,
+    },
+    deleted_by: {
+        type: String,
+        required: false,
+    },
+    deleted_at: {
+        type     : String,
+        required : false,
     },
 },
 

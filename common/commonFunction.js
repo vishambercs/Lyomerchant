@@ -12,6 +12,7 @@ const Utility = require('./Utility');
 const clientWallets = require('../Models/clientWallets');
 const poolWallets = require('../Models/poolWallet');
 const transactionPools = require('../Models/transactionPool');
+const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool');
 const clients = require('../Models/clients');
 const hotWallets = require('../Models/hotWallets');
 const hot_wallet_trans_logs = require('../Models/hot_wallet_trans_logs');
@@ -22,7 +23,9 @@ const TronWeb = require('tronweb')
 const posTransactionPool = require('../Models/posTransactionPool');
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
 const transUtility = require('./transUtilityFunction');
+const payLinkUtility = require('./payLinkUtility');
 const feedWalletController = require('../controllers/Masters/feedWalletController');
+
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -39,6 +42,7 @@ async function amountCheck(previous, need, current) {
         return 0
     }
 }
+
 async function getTranscationData(transkey) {
 
     let pooldata = await transactionPools.aggregate(
@@ -84,6 +88,7 @@ async function getTranscationData(transkey) {
         ])
     return pooldata
 }
+
 async function getTranscationDataForClient(transkey) {
 
     let pooldata = await transactionPools.aggregate(
@@ -101,6 +106,7 @@ async function getTranscationDataForClient(transkey) {
         ])
     return pooldata
 }
+
 async function getBalance(transdata, transData) {
     try {
         let addressObject = transdata[0]
@@ -133,9 +139,7 @@ async function getBalance(transdata, transData) {
             addressObject.poolWallet[0].privateKey
         )
         amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
-        console.log("feedWallets",BalanceOfAddress)   
-        console.log("amountstatus",amountstatus)  
-        console.log("amountstatus",BalanceOfAddress.data.format_token_balance)  
+        
         const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
         let GasFee                      =  await feedWalletController.calculateGasFee
         (
@@ -418,7 +422,7 @@ module.exports =
             headers: {}
         }).then(async (res) => {
             var stringify_response = stringify(res)
-            console.log("res.data.result   ", res.data.result)
+           
             if (res.data.result.length > 0) {
                 res.data.result.forEach(async (element) => {
                     element["amount"] = await Web3.utils.fromWei(element["value"], 'ether')
@@ -482,7 +486,7 @@ module.exports =
         await axios.get(URL, { headers: headers })
             .then(res => {
                 var stringify_response = stringify(res)
-                console.log("res", res.data)
+                
                 response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
             })
             .catch(error => {
@@ -502,7 +506,7 @@ module.exports =
             { headers: headers })
             .then(res => {
                 var stringify_response = stringify(res)
-                console.log("res", res.data)
+            
                 response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
             })
             .catch(error => {
@@ -697,14 +701,58 @@ module.exports =
             Constant.postransindex = 0;
         }
     },
+    async get_Transcation_Paylink_Data(transkey) {
 
+        let pooldata = await paymentLinkTransactionPool.aggregate(
+            [
+                { $match: { id: transkey, $or: [{ status: 0 }, { status: 2 }] } },
+                {
+                    $lookup: {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "poolWallet"// output array field
+                    },
+                }, {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "poolWallet.network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "networkDetails"// output array field
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "transcationlogs", // collection to join
+                        localField: "id",//field from the input documents
+                        foreignField: "trans_pool_id",//field from the documents of the "from" collection
+                        as: "transcationlogsDetails"// output array field
+                    }
+                },
+                {
+                    "$project":
+                    {
+                        "poolWallet.privateKey": 0,
+                        "poolWallet.id": 0,
+                        "poolWallet._id": 0,
+                        "poolWallet.status": 0,
+                        "poolWallet.__v": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.createdAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                    }
+                }
+            ])
+        return pooldata
+    },
     async get_data_of_Paymentlink_transcation() {
         if (Constant.paymenlinkIndex < Constant.paymenlinkTransList.length) {
             let transData = Constant.paymenlinkTransList[Constant.paymenlinkIndex]
-            let transcationData = await transUtility.getPosTranscationData(transData.transkey)
-            let balance_data = await transUtility.getTrasnsBalance(transcationData)
+            let transcationData = await payLinkUtility.get_Transcation_Paylink_Data(transData.transkey)
+            let balance_data    = await payLinkUtility.getTrasnsBalance(transcationData)
             let balanceResponse = JSON.parse(balance_data)
-            console.log("get_data_of_payment link transcation==", balanceResponse);
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
                 transData.connection.close(1000)

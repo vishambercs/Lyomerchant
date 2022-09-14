@@ -95,6 +95,7 @@ module.exports =
 
     async getAllStoreDevice(req, res) {
         try {
+
             let allstoreDevices = await storeDevices.aggregate([
                 { $match: { storekey: req.headers.authorization, status: 1, } },
                 {
@@ -116,18 +117,36 @@ module.exports =
 
     async getAllStoreDeviceForAdmin(req, res) {
         try {
-            let allstoreDevices = await storeDevices.aggregate([
-                { $match: { storekey: req.headers.authorization } },
-                {
-                    $lookup: {
-                        from: "merchantstores", // collection to join
-                        localField: "storekey",//field from the input documents
-                        foreignField: "storeapikey",//field from the documents of the "from" collection
-                        as: "storedetails"// output array field
+            // let status = await Utility.checkthevalue(req.body.status)
+            if(req.body.status == undefined || req.body.status == ""){
+                let allstoreDevices = await storeDevices.aggregate([
+                    { $match: { storekey: req.headers.authorization ,status: 1, } },
+                    {
+                        $lookup: {
+                            from: "merchantstores", // collection to join
+                            localField: "storekey",//field from the input documents
+                            foreignField: "storeapikey",//field from the documents of the "from" collection
+                            as: "storedetails"// output array field
+                        },
                     },
-                },
-            ])
-            res.json({ status: 200, data: allstoreDevices, message: "All Store Devices" })
+                ])
+                res.json({ status: 200, data: allstoreDevices, message: "All Store Devices" })
+            } 
+            else{
+                let allstoreDevices = await storeDevices.aggregate([
+                    { $match: { storekey: req.headers.authorization,status: req.body.status, } },
+                    {
+                        $lookup: {
+                            from: "merchantstores", // collection to join
+                            localField: "storekey",//field from the input documents
+                            foreignField: "storeapikey",//field from the documents of the "from" collection
+                            as: "storedetails"// output array field
+                        },
+                    },
+                ])
+                res.json({ status: 200, data: allstoreDevices, message: "All Store Devices" })
+            }
+            
         }
         catch (error) {
             console.log("400", error)
@@ -136,15 +155,23 @@ module.exports =
     },
     async disableordelete(req, res) {
         try {
-            let storeDevice = await storeDevices.findOneAndUpdate({ 'id': req.body.id }, { $set: { "status": req.body.status } }, { $new: true })
-            if(storeDevice == null)
-            {
+            console.log(req.body)
+            let storeDevice = await storeDevices.findOneAndUpdate({ 'id': req.body.id },
+                {
+                    $set: 
+                    {
+                        "status": req.body.status,
+                        "deleted_by": req.headers.authorization,
+                        "deleted_at": new Date().toString()
+                    }
+                }, { $new: true })
+            if (storeDevice == null) {
                 res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
-            else{
+            else {
                 res.json({ status: 200, data: storeDevice, message: "Update Successfully" })
             }
-            
+
         }
         catch (error) {
             console.log("400", error)

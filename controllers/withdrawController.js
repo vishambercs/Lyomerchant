@@ -23,10 +23,6 @@ module.exports =
             const network = await networks.findOne({ id: req.body.network_id })
             const withdrawLog = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
             const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
-            console.log(network, " ", withdrawLog, " ", clientWallet)
-            console.log("network        =======================", network)
-            console.log("withdrawLog    =======================", withdrawLog)
-            console.log("clientWallet   =======================", clientWallet)
             if (withdrawLog != null) {
                 res.json({ status: 200, data: {}, message: "You have already a request in pending" })
             }

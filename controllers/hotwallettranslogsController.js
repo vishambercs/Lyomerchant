@@ -34,6 +34,14 @@ try{
             },
             {
                 $lookup: {
+                    from: "paymentlinktransactionpools",    // collection to join
+                    localField: "merchant_trans_id",        //field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "paymentlinkDetails"// output array field
+                },
+            },
+            {
+                $lookup: {
                     from: "feedwallets", // collection to join
                     localField: "feeding_wallet_id",//field from the input documents
                     foreignField: "id",//field from the documents of the "from" collection
@@ -99,6 +107,14 @@ try{
                         localField: "merchant_trans_id",//field from the input documents
                         foreignField: "id",//field from the documents of the "from" collection
                         as: "postransactionpoolsDetails"// output array field
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "paymentlinktransactionpools",    // collection to join
+                        localField: "merchant_trans_id",        //field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "paymentlinkDetails"// output array field
                     },
                 },
                 {
@@ -233,7 +249,7 @@ module.exports =
     async get_All_Hot_Wallet_Transcation(req, res) {
         try {
             let  pooldata = await get_All_Hot_Wallet_Transcation(0)
-            console.log(pooldata)
+            
             res.json({ status: 200, message: "Successfully", data: pooldata })
         }
         catch (error) {

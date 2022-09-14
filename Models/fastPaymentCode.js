@@ -8,28 +8,23 @@ const fastCodeSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-     merchantId :
+    storeid :
     {
         type: String,
         required: true,
     },
-    fastCodes:[{
-        businessName : 
+    fastcodes :
     {
         type: String,
-        
+        required: true,
+        unique: true,
     },
-    fastCode : 
+    status: 
     {
         type: Number,
-        
-    },
-    status: {
-        type: String,
-        
+        required: true,
     },
 
-    }]
 },
 
 { timestamps: true }

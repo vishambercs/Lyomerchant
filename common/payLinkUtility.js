@@ -19,10 +19,14 @@ var nodemailer = require('nodemailer');
 var mongoose = require('mongoose');
 const TronWeb = require('tronweb')
 const posTransactionPool = require('../Models/posTransactionPool');
+const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool');
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
 const feedWalletController = require('../controllers/Masters/feedWalletController');
 const transactionPools = require('../Models/transactionPool');
 const feedWallets = require('../Models/feedWallets');
+const payLink = require('../Models/payLink');
+const invoice = require('../Models/invoice');
+
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -43,7 +47,7 @@ async function amountCheck(previous, need, current) {
 async function getTranscationDataForClient(transkey, type) {
     let pooldata = []
     if (type == "POS") {
-        pooldata = await posTransactionPool.aggregate(
+        pooldata = await paymentLinkTransactionPool.aggregate(
             [
                 { $match: { id: transkey } },
                 {
@@ -104,7 +108,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].address,
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
- 
+           
             if (balance.status == 200 && balance.data.native_balance < amount) {
                 var emailTemplateName =
                 {
@@ -197,6 +201,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
 
 async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, account_balance, native_balance,feeLimit) {
     try {
+        
         const from_wallet = await poolWallets.aggregate([
             { $match: { "id": poolwalletID } },
             { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "walletNetwork" } },
@@ -373,8 +378,9 @@ async function getTranscationList(address, trans_id, network_id) {
         headers: {}
     }).then(async (res) => {
         var stringify_response = stringify(res)
+     
         if (res.data.result.length > 0) {
-       
+            console.log("Inside IF", res.data.result.length)
             res.data.result.forEach(async (element) => {
                 let transcationLogData = await transcationLog.findOne({ hash: element['hash'] })
                 if (transcationLogData == null) {
@@ -445,6 +451,7 @@ async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, Co
     }
 }
 async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
+    console.log(Nodeurl, Type, Address, ContractAddress  ,privateKey )
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
@@ -495,8 +502,56 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
         return { status: 400, data: balanceData, message: "Error" }
     }
 }
+
+async function get_Transcation_Paylink_Data(transkey) {
+
+    let pooldata = await paymentLinkTransactionPool.aggregate(
+        [
+            { $match: { id: transkey, $or: [{ status: 0 }, { status: 2 }] } },
+            {
+                $lookup: {
+                    from: "poolwallets", // collection to join
+                    localField: "poolwalletID",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "poolWallet"// output array field
+                },
+            }, {
+                $lookup: {
+                    from: "networks", // collection to join
+                    localField: "poolWallet.network_id",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "networkDetails"// output array field
+                }
+            },
+            {
+                $lookup: {
+                    from: "transcationlogs", // collection to join
+                    localField: "id",//field from the input documents
+                    foreignField: "trans_pool_id",//field from the documents of the "from" collection
+                    as: "transcationlogsDetails"// output array field
+                }
+            },
+            {
+                "$project":
+                {
+                  
+                   
+                    "poolWallet._id": 0,
+                    "poolWallet.status": 0,
+                    "poolWallet.__v": 0,
+                    "networkDetails.__v": 0,
+                    "networkDetails.created_by": 0,
+                    "networkDetails.createdAt": 0,
+                    "networkDetails.updatedAt": 0,
+                    "networkDetails._id": 0
+                }
+            }
+        ])
+    return pooldata
+}
 module.exports =
 {
+    get_Transcation_Paylink_Data : get_Transcation_Paylink_Data,
     async getTrasnsBalance(transdata) {
         try {
             let addressObject = transdata[0]
@@ -515,12 +570,13 @@ module.exports =
             console.log("previousdate   ================", previousdate)
             console.log("currentdate    ================", currentdate)
             console.log("minutes        ================", minutes)
-            if (minutes > 10) {
-                let transactionpool = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
-                let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
-                response = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
+            if (minutes > 180) {
+                let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
+                let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
+                response                = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
                 return JSON.stringify(response)
             }
+           
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
@@ -529,8 +585,8 @@ module.exports =
                 addressObject.poolWallet[0].privateKey
             )
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
-   
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
+           
             let GasFee = await calculateGasFee
                 (
                     addressObject.networkDetails[0].nodeUrl, 
@@ -539,27 +595,36 @@ module.exports =
                     hotWallet.address,
                     addressObject.amount,
                     addressObject.networkDetails[0].contractAddress)
-
+           
+                   
             if (amountstatus != 0) 
             {
                 let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
+               
                 let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
-                let transactionpool = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
+               
+                let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
+               
                 let previouspoolwallet = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+                
                 if(previouspoolwallet != null)
                 {
                     let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
                     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { balance: totalBalnce } })
+                  
                 }     
                 // let get_transcation_response    = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
                 // let trans_data                  = await getTranscationDataForClient(addressObject.id)
                 let logData = { "transcationDetails": [] }
-              
+             
                 if (amountstatus == 1 || amountstatus == 3) 
                 {
+                   
+                    let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
+                    let invoiceData = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
                     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, BalanceOfAddress.data.token_balance, BalanceOfAddress.data.native_balance,GasFee.data.fee)
-                    console.log("hot_wallet_transcation",hot_wallet_transcation)
+                    
                 }
                 response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
@@ -578,49 +643,5 @@ module.exports =
             return JSON.stringify(respone)
         }
     },
-    async getPosTranscationData(transkey) {
-
-        let pooldata = await posTransactionPool.aggregate(
-            [
-                { $match: { id: transkey } },
-                {
-                    $lookup: {
-                        from: "poolwallets", // collection to join
-                        localField: "poolwalletID",//field from the input documents
-                        foreignField: "id",//field from the documents of the "from" collection
-                        as: "poolWallet"// output array field
-                    },
-                }, {
-                    $lookup: {
-                        from: "networks", // collection to join
-                        localField: "poolWallet.network_id",//field from the input documents
-                        foreignField: "id",//field from the documents of the "from" collection
-                        as: "networkDetails"// output array field
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "transcationlogs", // collection to join
-                        localField: "id",//field from the input documents
-                        foreignField: "trans_pool_id",//field from the documents of the "from" collection
-                        as: "transcationlogsDetails"// output array field
-                    }
-                },
-                {
-                    "$project":
-                    {
-
-                        "poolWallet._id": 0,
-                        "poolWallet.status": 0,
-                        "poolWallet.__v": 0,
-                        "networkDetails.__v": 0,
-                        "networkDetails.created_by": 0,
-                        "networkDetails.createdAt": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails._id": 0
-                    }
-                }
-            ])
-        return pooldata
-    }
+    
 }

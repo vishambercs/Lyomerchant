@@ -50,6 +50,14 @@ const adminSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    deleted_by: {
+        type: String,
+        required: true,
+    },
+    deleted_at: {
+        type: String,
+        required: true,
+    },
 },
     {
         toJSON: {
