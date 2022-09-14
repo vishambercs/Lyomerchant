@@ -15,19 +15,21 @@ const jwt = require('jsonwebtoken');
 module.exports =
 {
     async storeInvoice(req, res) {
-
         let invoiceObject = req.body
         let invoiceid = ''
         var merchantKey = req.headers.authorization
+        const duedate = new Date(req.body.duedate);
+        const currentdate = new Date();
+        if (duedate <= currentdate) {
+            return res.json({ status: 400, data: {}, message: "Invalid Date" })
+        }
         try {
             let new_record = new invoice({
                 id: mongoose.Types.ObjectId(),
                 invoiceNumber: invoiceObject.invoiceNumber,
-                merchantId: merchantKey,
+                merchantapikey: merchantKey,
                 Items: invoiceObject.Items,
-                apiKey: merchantKey,
                 customerName: req.body.customerName,
-                invoiceNumber: req.body.invoiceNumber,
                 email: req.body.email,
                 mobileNumber: req.body.mobileNumber,
                 duedate: req.body.duedate,
@@ -35,53 +37,64 @@ module.exports =
                 currency: req.body.currency,
                 totalAmount: req.body.totalAmount,
                 orderId: req.body.orderId,
-                status: 'pending'
+                status: 0
             })
-            console.log(new_record)
             let newrecord = await new_record.save()
             invoiceid = newrecord.id
             message = "Invoice created"
             status = 200
-
         }
         catch (error) {
             console.log("new invoice error", error)
             invoiceid = ''
             message = error
             status = 400
-
         }
-
         res.json({ status: status, data: { "invoiceid": invoiceid }, message: message })
     },
 
+    async deleteInvoice(req, res) {
+        try {
+            await invoice.updateOne({ 'id': req.body.id },
+                {
+                    $set:
+                    {
+                        status: 5,
+                        deleted_by: req.body.deleted_by,
+                        deleted_at: new Date().toString(),
+                    }
+                }).then(async (val) => {
+                    if (val != null) {
+                        res.json({ status: 200, message: "Successfully", data: req.body.id })
+                    }
+                    else {
+                        res.json({ status: 200, message: "Not Found the Data", data: null })
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
     async getPaymentLink(req, res) {
-        console.log("generate the payment link", req.headers.authorization)
         let responseObj = ''
         try {
             var merchantKey = req.headers.authorization
             let new_record = new paylinkPayment({
                 id: mongoose.Types.ObjectId(),
-                invoiceNumber: req.body.invoiceId,
-                merchantId: merchantKey,
-                apiKey: merchantKey,
-                customerName: req.body.customerName,
-                invoiceNumber: req.body.invoiceNumber,
-                email: req.body.email,
-                mobileNumber: req.body.mobileNumber,
-                duedate: req.body.duedate,
-                additionalNotes: req.body.additionalNotes,
-                currency: req.body.currency,
-                totalAmount: req.body.totalAmount,
-                orderId: req.body.orderId,
-                status: "pending"
+                invoice_id: req.body.invoiceid,
+                status: 0
             })
             console.log(new_record)
             let response = await new_record.save()
             responseObj = response.id
             message = "payment initiated"
             status = 200
-            //transaction.assignMerchantWallet(req)
         }
         catch (error) {
             console.log("new invoice error", error)
@@ -89,7 +102,6 @@ module.exports =
             status = 400
         }
         res.json({ status: status, data: { "paymentId": responseObj }, message: message })
-
     },
 
 
@@ -99,10 +111,7 @@ module.exports =
         let invoiceNumber = ''
         let status = 200;
         try {
-            let findResult = await invoice.find({
-                merchantId: merchantKey,
-
-            });
+            let findResult = await invoice.find({ merchantapikey: merchantKey, status: { $ne: 5 }, });
             response = findResult
         }
         catch (error) {
@@ -111,46 +120,61 @@ module.exports =
         }
 
         res.json({ status: status, data: response, message: "get all invoices" })
-
     },
 
     async verifyPaymentLink(req, res) {
-        console.log("payment id", req.body.paymentId)
-        let findResult = ''
-        let response = []
+        // console.log("payment id", req.body.paymentId)
+        // let findResult = ''
+        // let response = []
 
-        let status = 200;
+        // let status = 200;
+        // try {
+        //     findResult = await paylinkPayment.find({
+        //         id: req.body.paymentId,
+        //     });
+        //     console.log("invoice number", findResult)
+        //     response.push(findResult)
+        //     console.log(response)
+        //     invoiceNumber = findResult[0].invoiceNumber
+        //     console.log("invoice number", invoiceNumber)
+
+        // }
+        // catch (error) {
+        //     response = "something went wrong"
+        //     status = 400
+        //     response = error
+        // }
+        // try {
+        //     if (invoiceNumber) {
+        //         response = await invoice.find({
+        //             invoiceNumber: invoiceNumber
+        //         });
+        //         console.log("invoice", response)
+        //     }
+        // }
+        // catch (error) {
+
+        // }
         try {
-            findResult = await paylinkPayment.find({
-                id: req.body.paymentId,
-            });
-            console.log("invoice number", findResult)
-            response.push(findResult)
-            console.log(response)
-            invoiceNumber = findResult[0].invoiceNumber
-            console.log("invoice number", invoiceNumber)
-
+            let paylinksData = await paylinkPayment.aggregate([
+                { $match: { id: req.body.paymentId } },
+                {
+                    $lookup: {
+                        from: "invoices", // collection to join
+                        localField: "invoice_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "invoicesDetails"// output array field
+                    }
+                },
+            ])
+            res.json({ status: 200, data: paylinksData, message: "Successfully Done" })
         }
         catch (error) {
-            response = "something went wrong"
-            status = 400
-            response = error
+            console.log("error", error)
+            res.json({ status: 400, data: {}, message: "Error" })
         }
-        try {
-            if (invoiceNumber) {
-                response = await invoice.find({
-                    invoiceNumber: invoiceNumber
-                });
-                console.log("invoice", response)
-            }
-        }
-        catch (error) {
 
-        }
-        res.json({ status: status, data: response, message: "verify invoice" })
     },
-
-
     async assignPaymentLinkMerchantWallet(req, res) {
         try {
             var networkType = req.body.networkType
@@ -302,7 +326,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verifyFastPayment(req, res) {
         let findResult = ''
         let response = []
@@ -321,7 +344,6 @@ module.exports =
         }
         res.json({ status: status, data: response, message: "verify fast code" })
     },
-
     async verifyFastCode(req, res) {
         // var token = ''
         // let storeProfile = ''
@@ -345,8 +367,7 @@ module.exports =
                 ])
             res.json({ status: 200, data: findResult, message: "Success" })
         }
-        catch (error) 
-        {
+        catch (error) {
             console.log("error", error)
             res.json({ status: 400, data: {}, message: "Error" })
         }

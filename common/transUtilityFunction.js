@@ -104,8 +104,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].address,
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
-            console.log("balance", balance)
-            console.log("amount", amount)
+ 
             if (balance.status == 200 && balance.data.native_balance < amount) {
                 var emailTemplateName =
                 {
@@ -374,9 +373,8 @@ async function getTranscationList(address, trans_id, network_id) {
         headers: {}
     }).then(async (res) => {
         var stringify_response = stringify(res)
-        console.log("res.data.result   ", res.data.result)
         if (res.data.result.length > 0) {
-            console.log("Inside IF", res.data.result.length)
+       
             res.data.result.forEach(async (element) => {
                 let transcationLogData = await transcationLog.findOne({ hash: element['hash'] })
                 if (transcationLogData == null) {
@@ -531,9 +529,7 @@ module.exports =
                 addressObject.poolWallet[0].privateKey
             )
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
-            console.log("feedWallets", BalanceOfAddress)
-            console.log("amountstatus", amountstatus)
-            console.log("amountstatus", BalanceOfAddress.data.format_token_balance)
+   
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
             let GasFee = await calculateGasFee
                 (
@@ -558,7 +554,7 @@ module.exports =
                 // let get_transcation_response    = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
                 // let trans_data                  = await getTranscationDataForClient(addressObject.id)
                 let logData = { "transcationDetails": [] }
-                console.log("amountstatus", amountstatus)
+              
                 if (amountstatus == 1 || amountstatus == 3) 
                 {
                     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })

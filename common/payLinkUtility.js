@@ -24,6 +24,9 @@ const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", po
 const feedWalletController = require('../controllers/Masters/feedWalletController');
 const transactionPools = require('../Models/transactionPool');
 const feedWallets = require('../Models/feedWallets');
+const payLink = require('../Models/payLink');
+const invoice = require('../Models/invoice');
+
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -105,8 +108,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].address,
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
-            console.log("balance", balance)
-            console.log("amount", amount)
+           
             if (balance.status == 200 && balance.data.native_balance < amount) {
                 var emailTemplateName =
                 {
@@ -376,7 +378,7 @@ async function getTranscationList(address, trans_id, network_id) {
         headers: {}
     }).then(async (res) => {
         var stringify_response = stringify(res)
-        console.log("res.data.result   ", res.data.result)
+     
         if (res.data.result.length > 0) {
             console.log("Inside IF", res.data.result.length)
             res.data.result.forEach(async (element) => {
@@ -617,11 +619,12 @@ module.exports =
              
                 if (amountstatus == 1 || amountstatus == 3) 
                 {
+                   
+                    let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
+                    let invoiceData = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
                     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
-                  
-                    
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, BalanceOfAddress.data.token_balance, BalanceOfAddress.data.native_balance,GasFee.data.fee)
-                    console.log("hot_wallet_transcation",hot_wallet_transcation)
+                    
                 }
                 response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)

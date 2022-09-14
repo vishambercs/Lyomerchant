@@ -5,6 +5,7 @@ const merchantcategory = require('../Models/merchantcategory');
 const storeDevices = require('../Models/storeDevices');
 const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool');
 const payLink = require('../Models/payLink');
+const invoice = require('../Models/invoice');
 const Validator = require('./index');
 const jwt = require('jsonwebtoken');
 const fastPaymentCode   = require('../Models/fastPaymentCode');
@@ -37,9 +38,7 @@ module.exports =
         try {
 
             let api_key = req.headers.authorization;
-            console.log("plugin_have_access", api_key)
             let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { categoryid: "30824fa99994057dea6102194f3cafd88de16144" }, { status: 1 }] });
-            console.log("plugin_have_access", user)
             if (user != null) {
                 next()
             }
@@ -102,9 +101,7 @@ module.exports =
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            console.log(authorization)
             let user = await admins.findOne({ admin_api_key: authorization });
-            console.log(user)
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
@@ -133,7 +130,7 @@ module.exports =
             }
         }
         catch (error) {
-            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
     async verfiyClientToken(req, res, next) {
@@ -231,13 +228,10 @@ module.exports =
     },
     async paylink_have_access(req, res, next) {
         try {
-
             let token = req.headers.authorization;
-            console.log("token", token)
-
             let user = await merchantcategory.findOne({ clientapikey: token, categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
-
-            if (user != null) {
+            if (user != null) 
+            {
                 next()
             }
             else {
@@ -256,7 +250,21 @@ module.exports =
             if (pylinktranslog == null) {
                 return res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
-            let user = await merchantcategory.findOne({ clientapikey: pylinktranslog.apiKey,categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
+            
+            let invoiceData  = await invoice.findOne({ id: pylinktranslog.invoice_id });
+            
+            if (invoiceData == null) {
+                return res.json({ status: 400, data: {}, message: "Invalid Request " })
+            }
+           
+            const duedate       = new Date(invoiceData.duedate);
+            const currentdate   = new Date();
+            if(duedate <= currentdate )
+            {
+              return  res.json({ status: 400, data: {}, message: "Payment link is expired." }) 
+            }
+            let user = await merchantcategory.findOne({ clientapikey: invoiceData.merchantapikey,categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
+          
             if (user != null) {
                 next()
             }
