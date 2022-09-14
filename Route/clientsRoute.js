@@ -209,7 +209,7 @@ router.post('/pluginpriceConversition',                      Auth.Verfiy_Merchan
 
 router.post('/setWithdrawSettings',                         withdrawController.setWithdrawSettings);
 router.get('/getWithdrawSettings',                          withdrawController.getWithdrawSettings);
-router.post('/merchantBalance',                          withdrawController.merchantBalance);
+router.post('/merchantBalance',                                  withdrawController.merchantBalance);
 router.post('/merchantWithdrawBalance',                          withdrawController.withdrawBalance);
 
 
