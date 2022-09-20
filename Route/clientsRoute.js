@@ -9,7 +9,7 @@
 // const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 // const posTransactionPoolController  = require('../controllers/POS/posTransactionPoolController');
 // const CurrencyController            = require('../controllers/Masters/CurrencyController');
- const networkController             = require('../controllers/networkController');
+
 // const Auth                          = require('../Validation/Auth');
 
 // router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,transcationpoolController.assignMerchantWallet);
@@ -81,6 +81,7 @@
 
 var express                         = require('express');
 var router                          = express.Router();
+const networkController             = require('../controllers/networkController');
 const transcationpoolController     = require('../controllers/transcationpoolController');
 const clientsController             = require('../controllers/clientsController');
 const poolController                = require('../controllers/poolController');
@@ -92,11 +93,10 @@ const posTransactionPoolController  = require('../controllers/POS/posTransaction
 const merchantStoreDeviceController = require('../controllers/POS/merchantStoreDeviceController');
 const CurrencyController            = require('../controllers/Masters/CurrencyController');
 const merchantSitesController       = require('../controllers/Website/merchantSitesController');
-//const networkController           = require('../controllers/networkController');
 const Auth                          = require('../Validation/Auth');
 const categoryController            = require('../controllers/Masters/categoryController');
 const merchantcategory              = require('../controllers/Masters/merchantcategoryController');
-
+const perferedNetworkController     = require('../controllers/Masters/perferedNetworkController');
 
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
@@ -180,9 +180,6 @@ router.post('/pospriceConversition',                        Auth.check_Store_Dev
 router.post('/posallNetworks',                              Auth.check_Store_Device_Access,networkController.allNetworkForClient);
 router.post('/posGetTransByDeviceID',                       Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
 
-
-
-
 "============================ Currency Master ==============================="
 router.get('/allCurrency',                                      CurrencyController.allCurrency);
 router.post('/priceConversition',                               CurrencyController.priceConversition);
@@ -204,13 +201,17 @@ router.post('/pluginpriceConversition',                      Auth.Verfiy_Merchan
 
 
 "============================ Withdraw  ==============================="
+router.post('/setWithdrawSettings',                                 withdrawController.setWithdrawSettings);
+router.get('/getWithdrawSettings',                                  withdrawController.getWithdrawSettings);
+router.post('/merchantBalance',                                     withdrawController.merchantBalance);
+router.post('/merchantWithdrawBalance',                             withdrawController.withdrawBalance);
 
-router.post('/setWithdrawSettings',                         withdrawController.setWithdrawSettings);
-router.get('/getWithdrawSettings',                          withdrawController.getWithdrawSettings);
-router.post('/merchantBalance',                          withdrawController.merchantBalance);
-router.post('/merchantWithdrawBalance',                          withdrawController.withdrawBalance);
 
 
+
+"============================ perfered Network Controller  ==============================="
+router.post('/createPerferedNetwork',                               Auth.is_merchant,perferedNetworkController.create_perfered_Network);
+router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
 
 module.exports = router;
 

@@ -10,6 +10,7 @@ var hotWalletRoute  = require('./Route/hotWalletRoute');
 var withdrawRoute   = require('./Route/withdrawRoute');
 var adminRoute      = require('./Route/adminRoute');
 
+
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
@@ -53,6 +54,13 @@ mongoose.connection.once('open', function () {
 }).on('error', function (err) {
     console.log('Error', err);
 })
+
+// cron.schedule('* * * * * *',  await cornJobs.Balance_Cron_Job());
+cron.schedule('1 * * * * *', async() => {
+    let response = await cornJobs.Balance_Cron_Job()
+    console.log('running a task every minute',response);
+  });
+
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });

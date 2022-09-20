@@ -148,9 +148,11 @@ module.exports =
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
                 if (val != null) {
-                    let kycurl = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path2
+                    let kycurl       = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path2
+                    let kyclevelurl    = process.env.KYC_URL + Constant.KYC_URL_LEVEL 
+                    let kyc_level = await commonFunction.Get_Request(kyclevelurl, { "Authorization": process.env.KYC_URL_TOKEN })
                     let kyc_link = null
-                    let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LMT_basic_level" }, { "Authorization": process.env.KYC_URL_TOKEN })
+                    let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LyoMerchant_Client" }, { "Authorization": process.env.KYC_URL_TOKEN })
                     let json_response = JSON.parse(postRequests.data)
                     console.log("json_response", json_response)
                     if (json_response.status == 200) {
@@ -675,20 +677,20 @@ module.exports =
                     let json_response = JSON.parse(getRequestData.data)
                     console.log(json_response.data)
                     if (json_response.data.body.review_answer == "GREEN") {
-                        let networks = await network.find()
-                        networks.forEach(async function (item) {
-                            var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
-                            var accountAddress = web3.eth.accounts.create();
-                            const clientWallet = new clientWallets({
-                                id: mongoose.Types.ObjectId(),
-                                client_api_key: val.api_key,
-                                address: accountAddress.address,
-                                privatekey: accountAddress.privateKey,
-                                status: 1,
-                                network_id: item.id
-                            });
-                            let client_Wallet = await clientWallet.save()
-                        });
+                        // let networks = await network.find()
+                        // networks.forEach(async function (item) {
+                        //     var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
+                        //     var accountAddress = web3.eth.accounts.create();
+                        //     const clientWallet = new clientWallets({
+                        //         id: mongoose.Types.ObjectId(),
+                        //         client_api_key: val.api_key,
+                        //         address: accountAddress.address,
+                        //         privatekey: accountAddress.privateKey,
+                        //         status: 1,
+                        //         network_id: item.id
+                        //     });
+                        //     let client_Wallet = await clientWallet.save()
+                        // });
                         let clientskyc = await clients.findOneAndUpdate({ api_key: req.headers.authorization }, { $set: { status: true } }, { $new: true })
                         res.json({ status: 200, message: "", data: { "status": clientskyc.status } })
 
@@ -1062,8 +1064,16 @@ module.exports =
     },
     async updateMerchantProfileImage(req, res) {
         try {
-            let update = await clients.findOneAndUpdate({ 'clientapikey': req.headers.authorization }, { $set: { profileimage: req.body.profileimage } }, { $new: true })
-            res.json({ status: 200, data: { update }, message: "update profile" })
+            console.log()
+            let update = await clients.findOneAndUpdate({ 'api_key': req.headers.authorization }, 
+            { $set: { 
+                profileimage: req.body.profileimage, 
+                companyname: req.body.companyname
+            } }, { $new: true })
+            let newupdate = await clients.findOne({ 'api_key': req.headers.authorization })
+
+            res.json({ status: 200, data: { newupdate }, message: "update profile" })
+        
         }
         catch (error) {
             console.log(error)
@@ -1093,7 +1103,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-
     async changeClientLoginStatus(req, res) {
         try {
             let email = req.body.email;
@@ -1122,4 +1131,5 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
+    
 }

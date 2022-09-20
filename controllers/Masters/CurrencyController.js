@@ -61,7 +61,6 @@ module.exports =
                     'status':0,
                     deleted_by: req.body.deleted_by,
                     deleted_at: Date.now(),
-
                 }
             }).then(async (val) => {
                 if (val != null) 

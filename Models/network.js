@@ -9,7 +9,7 @@ const networkSchema = new mongoose.Schema
         },
         libarayType: {
             type: String,
-            enum : ['Web3','Tronweb'],
+            enum : ['Web3','Tronweb','btcnetwork'],
             required: true,
         },
         network: {

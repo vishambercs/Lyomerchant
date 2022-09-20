@@ -376,6 +376,7 @@ module.exports =
             {
             const connection   = request.accept(null, request.origin);
             var index = Constant.paymenlinkTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            
             if(index == -1)
             {
             let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}

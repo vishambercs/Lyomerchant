@@ -22,11 +22,11 @@ const perferedNetwork = new mongoose.Schema({
     },
     deleted_by: {
         type: String,
-        required: true,
+        required: false,
     },
     deleted_at: {
         type: String,
-        required: true,
+        required: false,
     },
 },
     { timestamps: true }

@@ -78,28 +78,46 @@ router.post('/createMerchantStoreByAdmin',                     Auth.is_admin,Aut
 router.post('/getapikey',                                      Auth.verfiyAdminToken,adminController.getapikey);
 
 "============================ Orphan Transcation ==============================="
+
 router.post('/orphanPoolWallet',                              orphanController.orphanTranscation);
+
 "============================ Currency Master ==============================="
+
 router.post('/createCurrency',                                CurrencyController.createCurrency);
 router.get('/allCurrency',                                    CurrencyController.allCurrency);
 router.post('/deleteCurrency',                                CurrencyController.deleteCurrency);
 router.post('/updateCurrency',                                CurrencyController.updateCurrency);
+
 "============================ Feed Wallet Controller ==============================="
+
 router.post('/createFeedWallets',                             Auth.is_admin,feedWalletController.createFeedWallets);
 router.post('/addressFeeding',                                Auth.is_admin,feedWalletController.addressFeeding);
 router.post('/allFeedWallets',                                Auth.is_admin,feedWalletController.allFeedWallets);
 router.post('/deleteWallets',                                 Auth.is_admin,feedWalletController.deleteWallets);
+router.post('/createfw',                                      Auth.is_admin,feedWalletController.createFeedingwalletby);
+
 "============================ Category ==============================="
 router.post('/approvecategoryRequest',                         Auth.is_admin,merchantcategory.approveClientRequest);
 router.post('/savecategory',                                   Auth.is_admin,categoryController.savecategory);
 router.get('/allcategory',                                     Auth.is_admin,categoryController.allcategory);
 router.post('/createClientCategory',                           Auth.is_admin,merchantcategory.createClientCategory);
 router.post('/getAllClientCategoryRequest',                    Auth.is_admin,merchantcategory.getAllClientCategoryRequest);
+
 "============================ Merchant ==============================="
 router.post('/allMerchant',                                    Auth.is_admin,clientsController.allMerchant);
+
 "============================ Admin Hot wallets ==============================="
 router.post('/get_All_Hot_Wallet_Transcations',                Auth.is_admin,hotwallettranslogsController.get_All_Hot_Wallet_Transcation);
 router.post('/Get_Feeding_Transfer_Status',                    Auth.is_admin,hotwallettranslogsController.Get_Feeding_Transfer_Status);
 router.post('/trans_from_pw_to_hw',                            Auth.is_admin,hotwallettranslogsController.trans_from_pw_to_hw);
 router.post('/trans_from_fw_pw_to_hw',                         Auth.is_admin,hotwallettranslogsController.trans_from_fw_pw_to_hw);
+router.post('/trans_fm_FDW_To_PW',                             Auth.is_admin,hotwallettranslogsController.trans_from_feeding_Wallet_to_pool_wallet);
+router.post('/pool_wallet_balance',                            Auth.is_admin,hotwallettranslogsController.Check_of_pool_wallet_address);
+router.post('/confirm_the_pw_to_hw',                           Auth.is_admin,hotwallettranslogsController.confirm_the_pw_to_hw);
+
+
+
+
+
+
 module.exports = router;
