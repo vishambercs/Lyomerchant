@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-
+var uniqueValidator = require('mongoose-unique-validator');
 
 const invoiceSchema = new mongoose.Schema({
     id: {
@@ -106,4 +106,5 @@ const invoiceSchema = new mongoose.Schema({
 
 { timestamps: true }
 )
+invoiceSchema.plugin(uniqueValidator);
 module.exports = mongoose.model('invoices', invoiceSchema)

@@ -49,7 +49,16 @@ const hotwallettranslogs = new mongoose.Schema
             type: Number,
             required: false,
         },
-        
+        verified_by: 
+        {
+            type: String,
+            required: false,
+        },
+        verified_at: 
+        {
+            type: String,
+            required: false,
+        },
         status:
         {
             type: String,

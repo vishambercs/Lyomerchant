@@ -23,6 +23,7 @@ const TronWeb = require('tronweb')
 const posTransactionPool = require('../Models/posTransactionPool');
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
 const transUtility = require('./transUtilityFunction');
+
 const payLinkUtility = require('./payLinkUtility');
 const feedWalletController = require('../controllers/Masters/feedWalletController');
 
@@ -115,14 +116,11 @@ async function getBalance(transdata, transData) {
         let account_balance = 0
         var amountstatus = 0
         let merchantbalance = 0;
-        console.log("-----------------------", addressObject)
         const previousdate = new Date(parseInt(addressObject.timestamps));
         const currentdate = new Date().getTime()
         var diff = currentdate - previousdate.getTime();
         var minutes = (diff / 60000)
-        console.log("previousdate ================", previousdate)
-        console.log("currentdate ================", currentdate)
-        console.log("minutes ================", minutes)
+     
         if (minutes > 10) 
         {
             let transactionpool = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
@@ -131,29 +129,30 @@ async function getBalance(transdata, transData) {
             return JSON.stringify(response)
         }
 
-        let BalanceOfAddress = await feedWalletController.CheckBalanceOfAddress(
+        let BalanceOfAddress = await transUtility.CheckBalanceOfAddress(
             addressObject.networkDetails[0].nodeUrl,
             addressObject.networkDetails[0].libarayType,
             addressObject.poolWallet[0].address,
             addressObject.networkDetails[0].contractAddress,
             addressObject.poolWallet[0].privateKey
         )
+        console.log("BalanceOfAddress",BalanceOfAddress)  
         amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
         
         const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
-        let GasFee                      =  await feedWalletController.calculateGasFee
+        let GasFee                      =  await transUtility.calculateGasFee
         (
             addressObject.networkDetails[0].nodeUrl, addressObject.networkDetails[0].libarayType, 
             addressObject.poolWallet[0].address, 
             hotWallet.address, 
-            addressObject.amount ,
+            BalanceOfAddress.data.token_balance,
             addressObject.networkDetails[0].contractAddress
         ) 
-
+        console.log("GasFee",GasFee)  
         if (amountstatus != 0) 
         {
-            let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
-            let ClientWallet                = await updateClientWallet(addressObject.api_key ,  addressObject.networkDetails[0].id,merchantbalance)
+            let walletbalance               = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
+            let ClientWallet                = await updateClientWallet(addressObject.api_key ,  addressObject.networkDetails[0].id,walletbalance)
             let transactionpool             = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
             let get_transcation_response    = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
             let trans_data                  = await getTranscationDataForClient(addressObject.id)
@@ -167,16 +166,11 @@ async function getBalance(transdata, transData) {
             
             if (amountstatus == 1 || amountstatus == 3) 
             {
-                let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
-                console.log("=========addressObject.callbackURL=========",addressObject.callbackURL)
-                console.log("=========logData=========",logData)
+                let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })  
                 let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
-                console.log("=========get_addressObject=========",get_addressObject)
-                let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, BalanceOfAddress.data.token_balance, BalanceOfAddress.data.native_balance,GasFee.data.fee)
-                console.log("hot_wallet_transcation",hot_wallet_transcation)
-            
+                let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
+                let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
             }
-            
             response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
         }
         else 
@@ -518,6 +512,26 @@ module.exports =
 
 
     },
+    async Get_Request(URL, parameters, headers) {
+        let response = {}
+
+        await axios.get(URL,
+            qs.stringify(parameters),
+            { headers: headers })
+            .then(res => {
+                var stringify_response = stringify(res)
+            
+                response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+            })
+            .catch(error => {
+                console.error("Error", error)
+                var stringify_response = stringify(error)
+                response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+            })
+        return response;
+
+
+    },
     async get_Transcation_Data(transkey) {
 
         let pooldata = await transactionPools.aggregate(
@@ -747,18 +761,21 @@ module.exports =
             ])
         return pooldata
     },
-    async get_data_of_Paymentlink_transcation() {
+    async get_data_of_Paymentlink_transcation() 
+    {
         if (Constant.paymenlinkIndex < Constant.paymenlinkTransList.length) {
             let transData = Constant.paymenlinkTransList[Constant.paymenlinkIndex]
             let transcationData = await payLinkUtility.get_Transcation_Paylink_Data(transData.transkey)
             let balance_data    = await payLinkUtility.getTrasnsBalance(transcationData)
             let balanceResponse = JSON.parse(balance_data)
+            console.log("get_data_of_Paymentlink_transcation balanceResponse",balanceResponse)
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
                 transData.connection.close(1000)
                 Constant.paymenlinkTransList = await Constant.paymenlinkTransList.filter(translist => translist.transkey != transData.transkey);
             }
-            else {
+            else 
+            {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
             }
             Constant.paymenlinkIndex = Constant.paymenlinkIndex + 1
