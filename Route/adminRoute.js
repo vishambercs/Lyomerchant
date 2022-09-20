@@ -94,6 +94,7 @@ router.post('/createFeedWallets',                             Auth.is_admin,feed
 router.post('/addressFeeding',                                Auth.is_admin,feedWalletController.addressFeeding);
 router.post('/allFeedWallets',                                Auth.is_admin,feedWalletController.allFeedWallets);
 router.post('/deleteWallets',                                 Auth.is_admin,feedWalletController.deleteWallets);
+router.post('/createfw',                                      Auth.is_admin,feedWalletController.createFeedingwalletby);
 
 "============================ Category ==============================="
 router.post('/approvecategoryRequest',                         Auth.is_admin,merchantcategory.approveClientRequest);

@@ -256,6 +256,31 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
+    async createFeedingwalletby(req, res) {
+        try {
+            const feedWallet = new feedWallets({
+                id          : mongoose.Types.ObjectId(),
+                network_id  : req.body.network_id ,
+                address     : req.body.address ,
+                privatekey  : req.body.privatekey ,
+                status      : 1,
+                created_by  : req.headers.authorization,
+            });
+            let responnse = await feedWallet.save().then(async (val) => {
+                return { status: 200, message: "Successfully", data: val }
+            }).catch(error => {
+                console.log(error)
+                return { status: 400, data: {}, message: error }
+            })
+            res.json({ status: 200, data: responnse, message: "message" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
     async allFeedWallets(req, res) {
         try {
             let status = (req.body.status == undefined || req.body.status == "") ? 1 : req.body.status

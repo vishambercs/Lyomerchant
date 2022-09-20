@@ -118,6 +118,41 @@ async function saved_Trans(id, status, remarks,poolwalletid,pooldata,address_bal
      
 }
 
+async function update_orphane(id, status, remarks,pooldata) {
+    let hotWalletTransLog = await hotWalletTransLogs.updateOne({ id: id },
+        {
+            $set:
+            {
+                status: status,
+                remarks: remarks,
+            }
+        },
+        { $new: true }
+    )
+    // let type = pooldata[0].transactionPoolsDetails.length > 0  ? "WEB" : ""
+    // type = pooldata[0].postransactionpoolsDetails.length > 0  ? "POS" : "" 
+    // type = pooldata[0].paymentlinkDetails.length > 0  ? "PAY-LINK" : "" 
+    // let transdetails = " Live :"+pooldata[0].merchant_trans_id
+    // var emailTemplateName =
+    // {
+    //     "emailTemplateName": "transcationpwtohw.ejs",
+    //     "to": process.env.FEEDING_EMAIL_REMINDER,
+    //     "subject": "Confirmation of Transcation From Pool Wallet To Hot Wallet",
+    //     "templateData": 
+    //     { 
+    //     "transdetails"  :  transdetails ,
+    //     "pooladdress"   :  "Please Do Manually because old transcation",
+    //     "hotaddress"    :   "Please Do Manually because old transcation",
+    //     "network"       :  "Please Do Manually because old transcation",
+    //     "amount"        :   "Please Do Manually because old transcation" 
+    //    }
+    // }
+    //     constant.transid = ""
+    //     constant.addressBalance = [];
+    //   let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+     
+}
+
 async function Balance_Cron_Job() {
     try {
         let transid = ""
@@ -132,7 +167,8 @@ async function Balance_Cron_Job() {
             ]
         })
         const statusArray = [6, 1, 5, 12, 11, 14]
-        if (constant.transid == "" && hot_wallet_trans_log == null) {
+        if (constant.transid == "" && hot_wallet_trans_log == null) 
+        {
             return JSON.stringify({ status: 400, data: {}, message: "No Any Transcation For transfering" })
         }
         if (hot_wallet_trans_log == null) {
@@ -142,6 +178,17 @@ async function Balance_Cron_Job() {
         constant.transid = (constant.transid == "") ? hot_wallet_trans_log.id : constant.transid
         transid = constant.transid
         let pooldata = await hw_trans_logs.get_HW_Translogs_byID(hot_wallet_trans_log.id)
+       
+
+        if (pooldata[0].poolwalletsDetails[0] == undefined) {
+            let remarks = pooldata[0].remarks;
+            
+            let remarksData = await transferUtility.push_The_Remarks(remarks, "Please Do manually", "Balance_Cron_Job")
+            await update_orphane(pooldata[0].id, 4, remarksData.data,pooldata)
+            return JSON.stringify({ status: 400, data: transid, message: "Invalid Trans" })
+        }
+        
+        
         let address_balance = await feedWalletController.CheckBalanceOfAddress(
             pooldata[0].networkDetails[0].nodeUrl,
             pooldata[0].networkDetails[0].libarayType,
@@ -149,8 +196,12 @@ async function Balance_Cron_Job() {
             pooldata[0].networkDetails[0].contractAddress,
             pooldata[0].poolwalletsDetails[0].privateKey
         )
+
+
         constant.addressBalance = constant.addressBalance.length == 0 ? address_balance : constant.addressBalance
         let trans_status = parseInt(pooldata[0].status)
+       
+
         if (address_balance.status == 200 &&  parseFloat(address_balance.data.format_token_balance) == 0) {
             let remarks = pooldata[0].remarks;
             let remarksData = await transferUtility.push_The_Remarks(remarks, "Previous Trans", "Balance_Cron_Job")
@@ -311,7 +362,5 @@ module.exports =
     address: address,
     block: block,
     index: index,
-
     Balance_Cron_Job: Balance_Cron_Job,
-
 }

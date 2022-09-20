@@ -108,11 +108,11 @@ module.exports =
     async createHotWalletsAPI(req, res) {
         try {
             const hotWallet = new hotWallets({
-                id: mongoose.Types.ObjectId(),
-                network_id: req.body.network_id,
-                address: req.body.address,
-                status: req.body.status,
-                created_by: req.body.created_by,
+                id          : mongoose.Types.ObjectId(),
+                network_id  : req.body.network_id,
+                address     : req.body.address,
+                status      : req.body.status,
+                created_by  : req.body.created_by,
             });
             hotWallet.save().then(async (val) => {
                 res.json({ status: 200, message: "Successfully", data: val })
@@ -126,7 +126,9 @@ module.exports =
     },
     async allHotWallets(req, res) {
         try {
-            await hotWallets.aggregate([{
+            await hotWallets.aggregate([
+                {$match : {status : 1}},
+                {
                 $lookup: {
                     from: "networks", // collection to join
                     localField: "network_id",//field from the input documents
@@ -135,7 +137,6 @@ module.exports =
                 }
             },
             ]).then(async (data) => {
-
                 res.json({ status: 200, message: "Hot Wallets", data: data })
             }).catch(error => {
                 console.log("get_clients_data", error)
