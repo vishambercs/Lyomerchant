@@ -16,8 +16,7 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
-        currencyid: 
-        {
+        currencyid: {
             type: String,
             required: true,
         },
@@ -30,7 +29,6 @@ const networkSchema = new mongoose.Schema
             enum : ['Native','Token'],
             required: true,
          },
-       
         contractAddress: {
             type: String,
             required: true,
@@ -39,11 +37,11 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
-        nodeUrl:{
+        nodeUrl: {
             type: String,
             required: true,
         },
-        apiKey:{
+        apiKey: {
             type: String,
             required: true,
         },
@@ -51,21 +49,20 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
-        scanurl:{
+        scanurl: {
             type: String,
             required: true,
         },
-        status:
-        {
+        status: {
             type: Number,
             required: true,
             default: 0,
         },
-        gaspriceurl:{
+        gaspriceurl: {
             type: String,
             required: true,
         },
-        latest_block_number:{
+        latest_block_number: {
             type: String,
             required: true,
         },
@@ -77,41 +74,39 @@ const networkSchema = new mongoose.Schema
             type: Number,
             required: true,
         },
-        prefix:
-        {
+        prefix: {
             type        : String,
             required    : false,
             default     : "",
         },
-        icon:
-        {
+        icon: {
             type: String,
             required: false,
             default     : "",
         },
-        gaslimit:
-        {
+        gaslimit:{
             type        : String,
             required    : false,
             default     : "10000000000",
         },
-        feedinglimit:
-        {
+        feedinglimit:{
             type        : String,
             required    : false,
             default     : "10000000",
         },
-        feedinglimitPerce:
-        {
+        feedinglimitPerce:{
             type        : Number,
             required    : false,
             default     : 0.1,
         },
-        hotwallettranscationstatus:
-        {
+        hotwallettranscationstatus:{
             type        : Boolean,
             required    : true,
             default     : true,
+        },
+        kyt_network_id  : {
+            type        : String,
+            required    : true,
         },
         created_by: {
             type: String,
@@ -126,9 +121,6 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: false,
         },
-        
-
-        
     },
         { timestamps: true }
     )

@@ -94,7 +94,9 @@ router.post('/createFeedWallets',                             Auth.is_admin,feed
 router.post('/addressFeeding',                                Auth.is_admin,feedWalletController.addressFeeding);
 router.post('/allFeedWallets',                                Auth.is_admin,feedWalletController.allFeedWallets);
 router.post('/deleteWallets',                                 Auth.is_admin,feedWalletController.deleteWallets);
-
+router.post('/checkbtcbalance',                               feedWalletController.checkbtcbalance);
+router.post('/transferbtcoin',                               feedWalletController.transferbtcoin);
+router.post('/checktransstatus',                               feedWalletController.checktransstatus);
 "============================ Category ==============================="
 router.post('/approvecategoryRequest',                         Auth.is_admin,merchantcategory.approveClientRequest);
 router.post('/savecategory',                                   Auth.is_admin,categoryController.savecategory);
@@ -112,7 +114,7 @@ router.post('/trans_from_pw_to_hw',                            Auth.is_admin,hot
 router.post('/trans_from_fw_pw_to_hw',                         Auth.is_admin,hotwallettranslogsController.trans_from_fw_pw_to_hw);
 router.post('/trans_fm_FDW_To_PW',                             Auth.is_admin,hotwallettranslogsController.trans_from_feeding_Wallet_to_pool_wallet);
 router.post('/pool_wallet_balance',                            Auth.is_admin,hotwallettranslogsController.Check_of_pool_wallet_address);
-router.post('/confirm_the_pw_to_hw',                           Auth.is_admin,hotwallettranslogsController.confirm_the_pw_to_hw);
+router.post('/confirm_the_pw_to_hw',                            Auth.is_admin,hotwallettranslogsController.confirm_the_pw_to_hw);
 
 
 

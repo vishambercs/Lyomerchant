@@ -22,6 +22,7 @@ const Auth = require('../Validation/Auth');
 
 router.post('/storeInvoice',                        Auth.paylink_have_access,payLinkController.storeInvoice);
 router.post('/paymentLink',                         Auth.paylink_have_access,payLinkController.getPaymentLink);
+
 router.post('/getAllInvoices',                      Auth.paylink_have_access,payLinkController.getAllInvoices);
 router.post('/verifyPaymentLink',                   Auth.public_paylink_access,payLinkController.verifyPaymentLink);
 router.post('/createFastCode',                      Auth.fastpay_have_access,payLinkController.createFastCode);

@@ -90,7 +90,31 @@ module.exports =
 
         if (hash == req.body.hash) {
             QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
-                const client = new clients({ token: token, loginstatus: false, emailtoken: otp, emailstatus: false, kycLink: " ", two_fa: false, secret: secret, qrcode: url, status: false, password: password_hash, api_key: api_key, email: req.body.email, hash: hash, });
+               
+                 if(req.body.type == "Company" && (req.body.companyname == "" || req.body.companyname == undefined ))
+                 {
+                  return  res.json({ status: 400, message: "Please Enter The Company Name", data: {} })
+                 }
+
+                const client = new clients({ 
+                    token: token, 
+                    loginstatus: false, 
+                    emailtoken: otp, 
+                    emailstatus: false, 
+                    kycLink: " ", 
+                    two_fa: false, 
+                    secret: secret, 
+                    qrcode: url, 
+                    status: false, 
+                    password: password_hash, 
+                    api_key: api_key, 
+                    email: req.body.email, 
+                    hash: hash, 
+                    first_name      : req.body.first_name, 
+                    last_name       : req.body.last_name, 
+                    type            : req.body.type, 
+                    companyname     : (req.body.companyname == "" || req.body.companyname == undefined) ?  "" : req.body.companyname , 
+                });
                 client.save().then(async (val) => {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
@@ -124,7 +148,7 @@ module.exports =
                 }
             })
             .catch(error => {
-                console.log('create_merchant ', error);
+                console.log('resendingemail ', error);
                 res.json({ status: 400, data: {}, message: error.message })
             });
     },
@@ -140,7 +164,7 @@ module.exports =
                 }
             })
             .catch(error => {
-                console.log('create_merchant ', error);
+                console.log('verfiyemail ', error);
                 res.json({ status: 400, data: {}, message: error.message })
             });
     },
@@ -248,7 +272,7 @@ module.exports =
                     }
                 })
                 .catch(error => {
-                    console.log('create_merchant ', error);
+                    console.log('reset_merchant_two_fa ', error);
                     res.json({ status: 400, data: {}, message: error.message })
                 });
 
@@ -911,7 +935,7 @@ module.exports =
                     }
                 })
                 .catch(error => {
-                    console.log('create_merchant ', error);
+                    console.log('customerstatus ', error);
                     res.json({ status: 400, data: {}, message: error.message })
                 });
         }
@@ -955,7 +979,7 @@ module.exports =
                     }
                 })
                 .catch(error => {
-                    console.log('create_merchant ', error);
+                    console.log('customerstatus ', error);
                     res.json({ status: 400, data: {}, message: error.message })
                 });
         }
@@ -997,7 +1021,7 @@ module.exports =
                 }
             })
             .catch(error => {
-                console.log('create_merchant ', error);
+                console.log('checkTheTokenAndUpdatePassword ', error);
                 res.json({ status: 400, data: {}, message: error.message })
             });
     },

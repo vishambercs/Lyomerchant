@@ -7,14 +7,47 @@ var Utility = require('../common/Utility');
 const bcrypt = require('bcrypt');
 const Web3 = require('web3');
 const axios = require('axios')
-
 const clientWallets = require('../Models/clientWallets');
 const withdrawSettings = require('../Models/withdrawSettings')
 const network = require('../Models/network')
+const kytlogs = require('../Models/kytlogs')
 var mongoose = require('mongoose');
-
-
+var qs = require('qs');
+var FormData = require('form-data');
 require("dotenv").config()
+
+
+async function postRequest(id, asset, address_to, cryptoamount, cryptousdamount, createdAt) {
+    try {
+
+        let kycurl = process.env.KYC_URL + process.env.KYT_URL_APPROVE.replace("id", id)
+        let params =
+        {
+            "asset": asset,
+            "address": address_to,
+            "attemptIdentifier": id,
+            "assetAmount": cryptoamount,
+            "assetPrice": cryptousdamount,
+            "assetDenomination": "USD",
+            "attemptTimestamp": createdAt,
+        }
+        let response = await axios({
+            method: 'post',
+            url: kycurl,
+            data: params,
+            headers: {
+                'Authorization': process.env.KYC_URL_TOKEN,
+
+            }
+        })
+        return { status: 200, data: response, message: "Please" }
+
+    }
+    catch (error) {
+        return { status: 400, data: error.body, message: error.message }
+    }
+}
+
 
 module.exports =
 {
@@ -43,6 +76,14 @@ module.exports =
                     status: 0
                 });
                 withdrawLog.save().then(async (val) => {
+                    let kytdata = await postRequest(val.id, network.kyt_network_id, val.address_to, val.amount, val.amount, val.createdAt)
+                    let external_response = kytdata.status == 200 ? kytdata.data.data.externalId : ""
+                    let withdrawlog = await withdrawLogs.findOneAndUpdate({ id: val.id }, { $set: { external_id: external_response, queue_type: 0 } })
+                    let kytlog = await kytlogs.insertMany([{
+                        id: mongoose.Types.ObjectId(),
+                        logs: JSON.stringify(kytdata.data.data),
+                        withdraw_id: val.id
+                    }])
                     res.json({ status: 200, message: "Successfully", data: val })
                 }).catch(
                     error => {
@@ -61,7 +102,7 @@ module.exports =
     async update_withdraw_request(req, res) {
         try {
             await withdrawLogs.findOneAndUpdate(
-                { id: req.body.id },
+                { id: req.body.id, status: 1 },
                 {
                     $set:
                     {
@@ -71,10 +112,12 @@ module.exports =
                         transcation_hash: req.body.transcation_hash
                     }
                 }, { $new: true }).then(async (withdraw) => {
-                    if (req.body.status == 1) {
+                    if (withdraw == null) {
+                        return res.json({ status: 400, message: "KYT has not finished", data: {} })
+                    }
+                    else if (req.body.status == 1) {
                         let val = await clientWallets.findOne({ api_key: withdraw.api_key, network_id: withdraw.network_id })
                         let clientWallet = await clientWallets.updateOne({ api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance - withdraw.amount) } })
-
                     }
                     let withdrawLog = await withdrawLogs.findOne({ id: req.body.id })
                     res.json({ status: 200, message: "Successfully", data: withdrawLog })
@@ -326,7 +369,7 @@ module.exports =
     },
     async merchantBalance(req, res) {
         try {
-            
+
             let ethPrice = 0;
             let withdrawable = 0;
             let fee = 0;
@@ -336,7 +379,7 @@ module.exports =
             networkid = balance.network_id
             settings = await withdrawSettings.find();
             if (settings[0].merchantWithdrawLimit >= balance.balance) {
-                res.json({ status: 200, data: { "balance": balance.balance,"minimumrequiredtowithdraw": settings[0].merchantWithdrawLimit }, message: "clientBalance" })
+                res.json({ status: 200, data: { "balance": balance.balance, "minimumrequiredtowithdraw": settings[0].merchantWithdrawLimit }, message: "clientBalance" })
             }
             else if (settings[0].merchantWithdrawMode == "percentage") {
                 fee = ((settings[0].merchantWithdrawFeePercentage) / 100) * balance.balance
@@ -468,23 +511,24 @@ module.exports =
     //     }
     //     res.json({ status: status, data: data, message: message })
     // },
-
     async setWithdrawSettings(req, res) {
         let settings = req.body
         let data = ''
         let message = ''
         let status = 200
         try {
-            let data = await withdrawSettings.findOneAndUpdate({},{ $set: {
-                id: mongoose.Types.ObjectId(),
-                pooltohotMode: settings.pooltohotMode,
-                pooltohotLimit: settings.pooltohotLimit,
-                merchantWithdrawMode: settings.merchantWithdrawMode,
-                merchantWithdrawLimit: settings.merchantWithdrawLimit,
-                merchantWithdrawFeePercentage: settings.merchantWithdrawFeePercentage
-            }})
-            
-            
+            let data = await withdrawSettings.findOneAndUpdate({}, {
+                $set: {
+                    id: mongoose.Types.ObjectId(),
+                    pooltohotMode: settings.pooltohotMode,
+                    pooltohotLimit: settings.pooltohotLimit,
+                    merchantWithdrawMode: settings.merchantWithdrawMode,
+                    merchantWithdrawLimit: settings.merchantWithdrawLimit,
+                    merchantWithdrawFeePercentage: settings.merchantWithdrawFeePercentage
+                }
+            })
+
+
             message = "Withdraw Settings saved"
             status = 200
         }
@@ -495,7 +539,6 @@ module.exports =
         }
         res.json({ status: status, data: data, message: message })
     },
-
     async setMerchantWitthdrawMode(req, res) {
         try {
             let data = await withdrawSettings.findOneAndUpdate({}, { $set: { "merchantWithdrawMode": req.body.mode } });
@@ -546,7 +589,6 @@ module.exports =
             res.json({ status: 400, data: error, message: "Error" })
         }
     },
-
     async getGasFee(req, res) {
         console.log("netwok", req.body.id)
         let nwfee = 0;
@@ -575,6 +617,7 @@ module.exports =
             res.json({ status: 400, data: error, message: "Error" })
         }
     },
+
 
 
 }

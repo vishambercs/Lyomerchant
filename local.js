@@ -55,11 +55,16 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 
-// cron.schedule('* * * * * *',  await cornJobs.Balance_Cron_Job());
 cron.schedule('1 * * * * *', async() => {
     let response = await cornJobs.Balance_Cron_Job()
     console.log('running a task every minute',response);
-  });
+});
+
+cron.schedule('5 * * * * *', async() => {
+    let response = await cornJobs.Check_KYT_Address()
+    console.log('running a task every minute',response);
+});
+
 
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
@@ -78,11 +83,11 @@ var kycserver = https.createServer().listen(process.env.KYC_PORT, () => {
 const kyc = new webSocketServer({ httpServer: kycserver });
 kyc.on('request', Utility.approvekyc)
 
-
 var posTranscationserver = https.createServer({
     }).listen(process.env.POS_TRANSCATION, () => {
     console.log(`Example app listening at ${process.env.POS_TRANSCATION}   `);
 })
+
 const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 posTranscation.on('request', Utility.posTranscationWebScokect)
 
@@ -90,5 +95,6 @@ var paymentLinkTranscationserver = https.createServer({
 }).listen(process.env.PAYMENT_LINK_PORT, () => {
 console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}`);
 })
+
 const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
 paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)

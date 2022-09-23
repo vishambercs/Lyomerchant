@@ -1,18 +1,23 @@
 const address = []
 const block = 0
 const index = 0
-const Utility = require("./Utility")
-const constant = require("./Constant")
-const axios = require('axios')
-const clientsController = require("../controllers/clientsController")
-const hw_trans_logs = require("../controllers/hotwallettranslogsController")
-const feedWalletController = require("../controllers/Masters/feedWalletController")
-const hotWalletTransLogs = require('../Models/hot_wallet_trans_logs');
-const poolWallets = require('../Models/poolWallet');
-const HotTransLogs = require('../Models/HotTransLogs');
+const commonFunction            = require("./commonFunction")
+const constant                  = require("./Constant")
+const axios                     = require('axios')
+const clientsController         = require("../controllers/clientsController")
+const hw_trans_logs             = require("../controllers/hotwallettranslogsController")
+const feedWalletController      = require("../controllers/Masters/feedWalletController")
+const hotWalletTransLogs        = require('../Models/hot_wallet_trans_logs');
+const poolWallets               = require('../Models/poolWallet');
+const HotTransLogs              = require('../Models/HotTransLogs');
+const withDrawLog               = require('../Models/withdrawLog');
+const network                   = require('../Models/network');
+const kytlogs                   = require('../Models/kytlogs');
 const transferUtility = require('../common/transferUtility');
 const emailSending = require('../common/emailSending');
 var mongoose = require('mongoose');
+var qs = require('qs');
+
 require("dotenv").config()
 
 async function transfer_from_pw_to_hw(nodeUrl, libarayType, fromaddress, toaddress, contractAddress, privateKey, balance) {
@@ -120,6 +125,7 @@ async function saved_Trans(id, status, remarks,poolwalletid,pooldata,address_bal
 
 async function Balance_Cron_Job() {
     try {
+        
         let transid = ""
         let hot_wallet_trans_log = await hotWalletTransLogs.findOne({
             $or: [
@@ -132,11 +138,14 @@ async function Balance_Cron_Job() {
             ]
         })
         const statusArray = [6, 1, 5, 12, 11, 14]
+
+       
+
         if (constant.transid == "" && hot_wallet_trans_log == null) {
             return JSON.stringify({ status: 400, data: {}, message: "No Any Transcation For transfering" })
         }
-        if (hot_wallet_trans_log == null) {
-
+        if (hot_wallet_trans_log == null) 
+        {
             return JSON.stringify({ status: 400, data: {}, message: "Please Check For The Transcation" })
         }
         constant.transid = (constant.transid == "") ? hot_wallet_trans_log.id : constant.transid
@@ -160,7 +169,7 @@ async function Balance_Cron_Job() {
         if (statusArray.indexOf(trans_status) == -1) {
             return JSON.stringify({ status: 400, data: transid, message: "Invalid Trans" })
         }
-        else if (trans_status == 5 || trans_status == 1) {
+        else if (trans_status == 5 || trans_status == 1 || trans_status == 6) {
 
 
             let transfer_from_pw_to_hw_data = await transfer_from_pw_to_hw(
@@ -306,12 +315,48 @@ async function Balance_Cron_Job() {
         return JSON.stringify({ status: 400, data: {}, message: error.message })
     }
 }
+
+async function Check_KYT_Address() 
+{
+    try 
+    {
+        let withdraw_data = await withDrawLog.findOne({ queue_type : 0 })
+        if(withdraw_data == null)
+        {
+            let withdrawdata = await withDrawLog.updateMany({ queue_type : 1 }, { $set: { queue_type  :  0 }})
+            return JSON.stringify({ status: 200, data: "No KYT Remaining", message: ""})
+        }
+        let kycurl = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", withdraw_data.external_id)
+        let response = await axios({
+            method: 'get',
+            url: kycurl,
+            headers: 
+            {
+               'Authorization': process.env.KYC_URL_TOKEN ,
+            }
+        })
+        let withdraw = await withDrawLog.updateMany({ id : withdraw_data.id }, { $set: { queue_type  :  1 }})
+        let kytlog = await kytlogs.insertMany([{
+            id: mongoose.Types.ObjectId(),
+            logs: JSON.stringify(response.data.body),
+            withdraw_id: withdraw_data.id,
+            type : "alerts"
+        }])
+         return JSON.stringify({ status: 400, data: response.data.body, message: ""})
+    }
+    catch (error) 
+    {
+        console.log(error)
+        return JSON.stringify({ status: 400, data: error.body, message: error.message  })
+    }
+}
+
 module.exports =
 {
     address: address,
     block: block,
     index: index,
-
-    Balance_Cron_Job: Balance_Cron_Job,
+    Balance_Cron_Job    :   Balance_Cron_Job,
+    Check_KYT_Address   :   Check_KYT_Address,
 
 }

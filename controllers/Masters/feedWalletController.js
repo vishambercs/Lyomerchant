@@ -12,7 +12,8 @@ require("dotenv").config()
 var stringify = require('json-stringify-safe');
 var TronStation = require('tronstation');
 const emailSending = require('../../common/emailSending');
-
+const axios = require('axios')
+const CryptoAccount     = require("send-crypto");
 async function createFeedWalletsFun(network_id, created_by) {
     try {
 
@@ -47,7 +48,9 @@ async function createFeedWalletsFun(network_id, created_by) {
         return { status: 400, data: {}, message: "Error" }
     }
 }
+
 async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
+    console.log(Nodeurl, Type, Address)
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
@@ -69,7 +72,7 @@ async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
-        else {
+        else if(Type == "Tronweb"){
             const HttpProvider = TronWeb.providers.HttpProvider;
             const fullNode = new HttpProvider(Nodeurl);
             const solidityNode = new HttpProvider(Nodeurl);
@@ -85,6 +88,17 @@ async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "
             format_native_balance = tronWeb.toDecimal(format_native_balance)
             format_native_balance = tronWeb.fromSun(format_native_balance)
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
+            return { status: 200, data: balanceData, message: "sucess" }
+        }
+        else if (Type == "btcnetwork") 
+        {
+            const account = new CryptoAccount(privateKey);
+            console.log("===========CryptoAccount account===============",account)
+            const address = await account.address("BTC")
+            console.log("===========CryptoAccount address===============",address)
+            const balance = await account.getBalance("BTC");
+            console.log("===========CryptoAccount balance===============",balance)
+            let balanceData = { "token_balance": balance, "format_token_balance": balance, "native_balance": balance, "format_native_balance": balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
     }
@@ -111,7 +125,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 from_wallet[0].address,
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
-                
+
             if (balance.status == 200 && balance.data.native_balance < amount) {
                 var emailTemplateName =
                 {
@@ -126,9 +140,8 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 response = { status: 400, message: "We have informed the admin", data: datavalues }
                 return response
             }
-            if (from_wallet[0].networkDetails[0].libarayType == "Web3") 
-            {
-                
+            if (from_wallet[0].networkDetails[0].libarayType == "Web3") {
+
                 const web3 = new Web3(new Web3.providers.HttpProvider(from_wallet[0].networkDetails[0].nodeUrl))
                 const pubkey = await web3.eth.accounts.privateKeyToAccount(from_wallet[0].privatekey).address;
                 const balance = await web3.eth.getBalance(pubkey);
@@ -141,7 +154,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                 const gas = currentGas * requiredGasPrice;
                 console.log("❗ gas ", gas)
                 console.log("❗ amount ", amount)
-                console.log("❗ amount ",  web3.utils.toWei(amount.toString(), 'ether'))
+                console.log("❗ amount ", web3.utils.toWei(amount.toString(), 'ether'))
                 const nonce = await web3.eth.getTransactionCount(pubkey, 'latest');
                 const transaction =
                 {
@@ -164,38 +177,36 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
                         console.log("❗ Something went wrong while submitting your transaction: ", error)
                         // response = { status: 200, message: "success", data: hash, "poolWalletDetails": from_wallet }
                         let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
-                        response = 
+                        response =
                         {
                             status: 400,
                             message: "❗ Something went wrong while submitting your transaction: " + error,
                             data: datavalues
-                         }
+                        }
                         return response
                     }
                 });
-                let datavalues  = { "address": poolwalletAddress, "trans_id": responseData.transactionHash, "transoutput": responseData, "feeding_wallet_id": from_wallet[0].id }
-                response        = { status: 200, message: "success", data: datavalues }
+                let datavalues = { "address": poolwalletAddress, "trans_id": responseData.transactionHash, "transoutput": responseData, "feeding_wallet_id": from_wallet[0].id }
+                response = { status: 200, message: "success", data: datavalues }
                 return response
 
             }
-            else 
-            {
-                const HttpProvider  = TronWeb.providers.HttpProvider;
-                const fullNode      = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
+            else {
+                const HttpProvider = TronWeb.providers.HttpProvider;
+                const fullNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
                 const solidityNode = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
                 const eventServer = new HttpProvider(from_wallet[0].networkDetails[0].nodeUrl);
                 const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, from_wallet[0].privatekey);
                 const tradeobj = await tronWeb.transactionBuilder.sendTrx(poolwalletAddress, tronWeb.toSun(amount), from_wallet[0].address);
                 const signedtxn = await tronWeb.trx.sign(tradeobj, from_wallet[0].privatekey);
                 const receipt = await tronWeb.trx.sendRawTransaction(signedtxn).then(async (output) => {
-                   let datavalues  = { "address": poolwalletAddress, "trans_id": output.txid, "transoutput": output, "feeding_wallet_id": from_wallet[0].id }
-                    response        = { status: 200, message: "success", data: datavalues }
+                    let datavalues = { "address": poolwalletAddress, "trans_id": output.txid, "transoutput": output, "feeding_wallet_id": from_wallet[0].id }
+                    response = { status: 200, message: "success", data: datavalues }
                 });
                 return response
             }
         }
-        else 
-        {
+        else {
             let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": from_wallet[0].id }
             return { status: 400, message: "Network is not supported", data: datavalues }
         }
@@ -203,7 +214,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
     }
     catch (error) {
         console.log("feed wallet Controller addressFeedingFun", error);
-        let datavalues = { "message" : error ,"address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
+        let datavalues = { "message": error, "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
         return { status: 400, data: datavalues, message: error.message, }
     }
 }
@@ -211,25 +222,24 @@ async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, Co
     let gasAmount = 0
     let gasPrice = 0
     try {
-       
-        if (Type == "Web3") 
-        {
+
+        if (Type == "Web3") {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             gasPrice = await WEB3.eth.getGasPrice();
             if (ContractAddress != "") {
                 const contract = new WEB3.eth.Contract(Constant.GAS_ABI, ContractAddress);
                 gasAmount = await contract.methods.transfer(toAddress, WEB3.utils.toWei(amount.toString())).estimateGas({ from: fromAddress });
-              
+
                 return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
             }
             else {
                 gasAmount = await WEB3.eth.estimateGas({ to: toAddress, from: fromAddress, value: Web3.utils.toWei(amount.toString(), 'ether'), });
-              
+
                 return { status: 200, data: { "fee": (gasPrice * gasAmount), "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
             }
         }
         else {
-          
+
 
             return { status: 200, data: { "fee": "2000000", "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
         }
@@ -309,6 +319,116 @@ module.exports =
 
 
     },
+    async checkbtcbalance(req, res) {
+        try {
+            let COINGECKO_URL = "http://blockchain.info/q/addressbalance/" + req.body.address
+            response = {}
+            await axios.get(COINGECKO_URL, {
+                params: {},
+                headers: {}
+            }).then(res => {
+                var stringify_response = stringify(res)
+                response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+            })
+                .catch(error => {
+                    console.error("Error", error)
+                    var stringify_response = stringify(error)
+                    response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+                })
+            var stringify_response = JSON.parse(response.data)
+            let balance_format = parseFloat(stringify_response.data) / 100000000
+            res.json({ status: 200, data: stringify_response.data, "balance_format": balance_format, message: "Currency API Balance" })
+        }
+        catch (error) {
+            console.log("Message %s sent: %s", error);
+            res.json({ status: 400, data: {}, message: error.message, })
+        }
 
+
+    },
+    async checktransstatus(req, res) {
+        try {
+            let COINGECKO_URL = "https://www.blockchain.com/btc/tx/" + req.body.address
+            response = {}
+            await axios.get(COINGECKO_URL, {
+                params: {},
+                headers: {}
+            }).then(res => {
+                var stringify_response = stringify(res)
+                response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+            })
+                .catch(error => {
+                    console.error("Error", error)
+                    var stringify_response = stringify(error)
+                    response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+                })
+            var stringify_response = JSON.parse(response.data)
+            let balance_format = parseFloat(stringify_response.data) / 100000000
+            res.json({ status: 200, data: stringify_response.data, "balance_format": balance_format, message: "Currency API Balance" })
+        }
+        catch (error) {
+            console.log("Message %s sent: %s", error);
+            res.json({ status: 400, data: {}, message: error.message, })
+        }
+
+
+    },
+    async transferbtcoin(req, res) {
+        try {
+            const CryptoAccount = require("send-crypto");
+
+
+            const privateKey = "4def9f252b3f261dd5d281d830bf560b1a3c733d0c59c4f9d8e565fd13efe3b8" || CryptoAccount.newPrivateKey();
+
+            // "1P4c1K3U6YHbTP52xQsdtkgWDXLzJHJkDQ"
+            const account = new CryptoAccount(privateKey);
+            const address = await account.address("BTC")
+            console.log(await account.address("BTC"));
+            console.log(await account.getBalance("BTC"));
+
+            const txHash = await account
+            .send("13nrd6a4duP5rVUqcpPpUfHvbKHm83TdEd", 0.0001, "BTC")
+            .on("transactionHash", console.log)
+            .on("confirmation", console.log);
+
+            res.json({ status: 200, data: { "myAddress": address, "privateKey": privateKey }, message: "Currency API Balance" })
+
+            
+        }
+        catch (error) {
+            console.log("Message %s sent: %s", error);
+            res.json({ status: 400, data: {}, message: error.message, })
+        }
+
+
+    },
+    async transferbtcore(req, res) {
+        try {
+            // const CryptoAccount = require("send-crypto");
+            // const privateKey = "4def9f252b3f261dd5d281d830bf560b1a3c733d0c59c4f9d8e565fd13efe3b8" || CryptoAccount.newPrivateKey();
+            // // "1P4c1K3U6YHbTP52xQsdtkgWDXLzJHJkDQ"
+            // const account = new CryptoAccount(privateKey);
+            // const address = await account.address("BTC")
+            // console.log(await account.address("BTC"));
+            // console.log(await account.getBalance("BTC"));
+
+            // const txHash = await account
+            // .send("13nrd6a4duP5rVUqcpPpUfHvbKHm83TdEd", 0.0001, "BTC")
+            // .on("transactionHash", console.log)
+            // .on("confirmation", console.log);
+            const Client = require('bitcoin-core');
+            const client = new Client({ network: 'regtest' });
+
+            res.json({ status: 200, data: { "myAddress": address, "privateKey": privateKey }, message: "Currency API Balance" })
+
+            
+        }
+        catch (error) {
+            console.log("Message %s sent: %s", error);
+            res.json({ status: 400, data: {}, message: error.message, })
+        }
+
+
+    },
 }
 

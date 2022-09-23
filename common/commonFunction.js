@@ -1,11 +1,12 @@
 const ejs = require('ejs');
 const fs = require('fs');
 const Web3 = require('web3');
-const axios = require('axios')
+
 var stringify = require('json-stringify-safe');
 const transcationLog = require('../Models/transcationLog');
 const network = require('../Models/network');
 var qs = require('qs');
+const axios = require('axios')
 const Constant = require('./Constant');
 const transferUtility = require('./transferUtility');
 const Utility = require('./Utility');
@@ -148,7 +149,7 @@ async function getBalance(transdata, transData) {
             BalanceOfAddress.data.token_balance,
             addressObject.networkDetails[0].contractAddress
         ) 
-        console.log("GasFee",GasFee)  
+       
         if (amountstatus != 0) 
         {
             let walletbalance               = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
@@ -506,6 +507,7 @@ module.exports =
             .catch(error => {
                 console.error("Error", error)
                 var stringify_response = stringify(error)
+            console.log(error.config)
                 response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
             })
         return response;
@@ -784,5 +786,5 @@ module.exports =
             Constant.paymenlinkIndex = 0;
         }
     },
-
+    
 }

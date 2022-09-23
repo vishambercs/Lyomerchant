@@ -12,9 +12,36 @@ var poolwalletController = require('../poolwalletController');
 let message = ''
 let status = ''
 const jwt = require('jsonwebtoken');
+
+async function storeInvoice(invoiceNumber,merchantKey,Items,customerName,email,mobileNumber,duedate,additionalNotes,currency,totalAmount,orderId,itemlist){
+   try{
+    let new_record = new invoice({
+                id: mongoose.Types.ObjectId(),
+                invoiceNumber: invoiceNumber,
+                merchantapikey: merchantKey,
+                Items: Items,
+                customerName: customerName,
+                email: email,
+                mobileNumber:mobileNumber,
+                duedate: duedate,
+                additionalNotes: additionalNotes,
+                currency: currency,
+                totalAmount:totalAmount,
+                orderId: orderId,
+                itemlist : itemlist,
+                status: 0
+            })
+            let newrecord = await new_record.save()
+          return {status  : 200 , data : newrecord, message : "Successfully Data", }
+        }
+    catch(error){
+        console.log(error)
+        return {status  : 400 , data : {}, message : error }
+    }            
+}
 module.exports =
 {
-    async storeInvoice(req, res) {
+    async createHostePayment(req, res) {
         let invoiceObject = req.body
         let invoiceid = ''
         var merchantKey = req.headers.authorization
@@ -23,35 +50,35 @@ module.exports =
         if (duedate <= currentdate) {
             return res.json({ status: 400, data: {}, message: "Invalid Date" })
         }
-        try {
-            let new_record = new invoice({
-                id: mongoose.Types.ObjectId(),
-                invoiceNumber: invoiceObject.invoiceNumber,
-                merchantapikey: merchantKey,
-                Items: invoiceObject.Items,
-                customerName: req.body.customerName,
-                email: req.body.email,
-                mobileNumber: req.body.mobileNumber,
-                duedate: req.body.duedate,
-                additionalNotes: req.body.additionalNotes,
-                currency: req.body.currency,
-                totalAmount: req.body.totalAmount,
-                orderId: req.body.orderId,
-                status: 0
-            })
-            let newrecord = await new_record.save()
-            invoiceid = newrecord.id
-            message = "Invoice created"
-            status = 200
+
+       let store_invoice  = await storeInvoice(
+            invoiceObject.invoiceNumber,
+            merchantKey,
+            invoiceObject.Items,
+            req.body.customerName,
+            req.body.email,
+            req.body.mobileNumber,
+            req.body.duedate,
+            req.body.additionalNotes,
+            req.body.currency,
+            req.body.totalAmount,
+            req.body.orderId,
+            req.body.itemlist
+            )
+
+        if(store_invoice.status != 200){
+           return res.json(store_invoice)
         }
+
+        console.log(store_invoice)
+        let new_record = new paylinkPayment({
+            id: mongoose.Types.ObjectId(),
+            invoice_id: store_invoice.data.id,
+            status: 0
+        })
+        let response = await new_record.save()
         
-        catch (error) {
-            console.log("new invoice error", error)
-            invoiceid = ''
-            message = error
-            status = 400
-        }
-        res.json({ status: status, data: { "invoiceid": invoiceid }, message: message })
+        res.json({ status: status, data: response, message: "" })
     },
 
     async deleteInvoice(req, res) {

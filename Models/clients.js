@@ -7,7 +7,27 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
+    first_name: 
+    {
+        type: String,
+        required: true,
+    },
+    last_name: 
+    {
+        type: String,
+        required: true,
+    },
+    type: 
+    {
+        type: String,
+        enum : ['Individual','Company'],
+        required: true,
+    },
+    companyname: 
+    {
+        type: String,
+        required: false,
+    },
     email: {
         type: String,
         required: true,
