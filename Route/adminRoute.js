@@ -94,9 +94,14 @@ router.post('/createFeedWallets',                             Auth.is_admin,feed
 router.post('/addressFeeding',                                Auth.is_admin,feedWalletController.addressFeeding);
 router.post('/allFeedWallets',                                Auth.is_admin,feedWalletController.allFeedWallets);
 router.post('/deleteWallets',                                 Auth.is_admin,feedWalletController.deleteWallets);
+<<<<<<< HEAD
 router.post('/checkbtcbalance',                               feedWalletController.checkbtcbalance);
 router.post('/transferbtcoin',                               feedWalletController.transferbtcoin);
 router.post('/checktransstatus',                               feedWalletController.checktransstatus);
+=======
+router.post('/createfw',                                      Auth.is_admin,feedWalletController.createFeedingwalletby);
+
+>>>>>>> 6ae9e8d1fd207816770f88cc17980ffb525bd75b
 "============================ Category ==============================="
 router.post('/approvecategoryRequest',                         Auth.is_admin,merchantcategory.approveClientRequest);
 router.post('/savecategory',                                   Auth.is_admin,categoryController.savecategory);

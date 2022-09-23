@@ -26,13 +26,13 @@ const hotwalletsSchema = new mongoose.Schema
         },
         created_by:
         {
-            type: Number,
+            type: String,
             required: true,
            
         },
         deleted_by:
         {
-            type: Number,
+            type: String,
             required: false,
             default : 0
         },

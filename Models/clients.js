@@ -7,6 +7,7 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+<<<<<<< HEAD
     first_name: 
     {
         type: String,
@@ -28,6 +29,8 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+=======
+>>>>>>> 6ae9e8d1fd207816770f88cc17980ffb525bd75b
     email: {
         type: String,
         required: true,
@@ -62,7 +65,6 @@ const clientsSchema = new mongoose.Schema({
     {
         type: String,
         required: false,
-       
     },
     hash: {
         type: String,
@@ -100,7 +102,6 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    
     deleted_by: {
         type: String,
         required: false,
@@ -109,7 +110,9 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-},
+    
+    },
+    { timestamps: true },
     {
         toJSON: {
             transform(doc, ret) {
@@ -118,7 +121,7 @@ const clientsSchema = new mongoose.Schema({
             },
         },
     },
-    { timestamps: true }
+   
 )
 clientsSchema.plugin(uniqueValidator);
 module.exports = mongoose.model('clients', clientsSchema)
