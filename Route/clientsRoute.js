@@ -97,6 +97,7 @@ const Auth                          = require('../Validation/Auth');
 const categoryController            = require('../controllers/Masters/categoryController');
 const merchantcategory              = require('../controllers/Masters/merchantcategoryController');
 const perferedNetworkController     = require('../controllers/Masters/perferedNetworkController');
+const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
 
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
@@ -212,6 +213,10 @@ router.post('/merchantWithdrawBalance',                             withdrawCont
 "============================ perfered Network Controller  ==============================="
 router.post('/createPerferedNetwork',                               Auth.is_merchant,perferedNetworkController.create_perfered_Network);
 router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
+
+
+"============================ clientapikey  ==============================="
+router.post('/getapistatus',                                  clientapicontroller.getapikey);
 
 module.exports = router;
 
