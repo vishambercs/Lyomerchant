@@ -95,7 +95,7 @@ router.post('/addressFeeding',                                Auth.is_admin,feed
 router.post('/allFeedWallets',                                Auth.is_admin,feedWalletController.allFeedWallets);
 router.post('/deleteWallets',                                 Auth.is_admin,feedWalletController.deleteWallets);
 router.post('/createfw',                                      Auth.is_admin,feedWalletController.createFeedingwalletby);
-
+router.post('/transferbtcoin',                                feedWalletController.transferbtcoin);
 "============================ Category ==============================="
 router.post('/approvecategoryRequest',                         Auth.is_admin,merchantcategory.approveClientRequest);
 router.post('/savecategory',                                   Auth.is_admin,categoryController.savecategory);

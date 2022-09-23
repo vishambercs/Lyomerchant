@@ -43,7 +43,11 @@ app.use('/admin/v1',     adminRoute);
 
 app.use('/paymentlink/v1', payLinkRoute);
 
-cron.schedule('1 * * * * *', cornJobs.Balance_Cron_Job);
+cron.schedule('1 * * * * *', async() => {
+    let response = await cornJobs.Balance_Cron_Job()
+    console.log('running a task every minute',response);
+  });
+
 //  Database
 
 const privateKey   = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/privkey.pem',  'utf8');
