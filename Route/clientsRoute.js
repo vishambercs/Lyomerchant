@@ -97,11 +97,8 @@ const Auth                          = require('../Validation/Auth');
 const categoryController            = require('../controllers/Masters/categoryController');
 const merchantcategory              = require('../controllers/Masters/merchantcategoryController');
 const perferedNetworkController     = require('../controllers/Masters/perferedNetworkController');
-<<<<<<< HEAD
 const PaymentHostedController       = require('../controllers/hostedpayment/PaymentHostedController');
-=======
 const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
->>>>>>> 6ae9e8d1fd207816770f88cc17980ffb525bd75b
 
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
@@ -221,13 +218,10 @@ router.post('/createPerferedNetwork',                               Auth.is_merc
 router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
 
 
-<<<<<<< HEAD
 "============================ HOSTRED PAYMENT  ==============================="
 router.post('/createHostePayment',                                  PaymentHostedController.createHostePayment);
-=======
 "============================ clientapikey  ==============================="
 router.post('/getapistatus',                                  clientapicontroller.getapikey);
->>>>>>> 6ae9e8d1fd207816770f88cc17980ffb525bd75b
 
 module.exports = router;
 
