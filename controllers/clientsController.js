@@ -228,6 +228,7 @@ module.exports =
             let email = req.body.email;
             clients.findOne({ 'email': email }).select('+password').then(async (val) => {
               
+                console.log(val.password,req.body.password)
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
                 if (val.emailstatus == false) {
                     res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
@@ -255,6 +256,7 @@ module.exports =
             })
         }
         catch (error) {
+            console.log("error", error)
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }
     },

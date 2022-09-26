@@ -100,6 +100,7 @@ router.post('/setWithdrawSettings',                                 withdrawCont
 router.get('/getWithdrawSettings',                                  withdrawController.getWithdrawSettings);
 router.post('/merchantBalance',                                     withdrawController.merchantBalance);
 router.post('/merchantWithdrawBalance',                             withdrawController.withdrawBalance);
+
 "============================ perfered Network Controller  ==============================="
 router.post('/createPerferedNetwork',                               Auth.is_merchant,perferedNetworkController.create_perfered_Network);
 router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
