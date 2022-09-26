@@ -53,6 +53,24 @@ const withdrawSchema = new mongoose.Schema
             type: String,
             required: false,
         },
+        queue_type: 
+        {
+            type: Number,
+            required: false,
+            deafult: 0,
+        },
+        verified_type: 
+        {
+            type: String,
+            required: false,
+            deafult: 0,
+        },
+        external_id: 
+        {
+            type: String,
+            required: false,
+            deafult: 0,
+        },
     },
         { timestamps: true }
     )

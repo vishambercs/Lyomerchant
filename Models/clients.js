@@ -7,7 +7,27 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
+    first_name: 
+    {
+        type: String,
+        required: true,
+    },
+    last_name: 
+    {
+        type: String,
+        required: true,
+    },
+    type: 
+    {
+        type: String,
+        enum : ['Individual','Company'],
+        required: true,
+    },
+    companyname: 
+    {
+        type: String,
+        required: false,
+    },
     email: {
         type: String,
         required: true,
@@ -42,7 +62,6 @@ const clientsSchema = new mongoose.Schema({
     {
         type: String,
         required: false,
-       
     },
     hash: {
         type: String,
@@ -80,7 +99,6 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    
     deleted_by: {
         type: String,
         required: false,
@@ -89,7 +107,9 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-},
+    
+    },
+    { timestamps: true },
     {
         toJSON: {
             transform(doc, ret) {
@@ -98,7 +118,7 @@ const clientsSchema = new mongoose.Schema({
             },
         },
     },
-    { timestamps: true }
+   
 )
 clientsSchema.plugin(uniqueValidator);
 module.exports = mongoose.model('clients', clientsSchema)

@@ -18,14 +18,13 @@ const Constant          = require('./Constant');
 const commonFunction    = require('./commonFunction');
 const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
+
 const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
 var CryptoJS            = require('crypto-js')
-
-
 module.exports =
 {
-    generateKey() {
-       let key =  crypto.randomBytes(20).toString('hex')
+    async generateKey() {
+       let key =  await crypto.randomBytes(20).toString('hex')
        return key ;
     },
     async checkthevalue(title) {
@@ -84,7 +83,7 @@ module.exports =
         {
             if(nodeurl == "tronweb")
             {
-                const { address, privateKey } = generateAccount()
+                const { address, privateKey }       = generateAccount()
                 var account = { "address":address,   "privateKey":privateKey}
                 return account
             }
@@ -185,7 +184,7 @@ module.exports =
                 Constant.translists[index]["connection"] = connection
                 // request.reject(null, request.origin);
             }
-            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 10000);
+            Constant.interval = setInterval(commonFunction.get_data_of_transcation, 20000);
             connection.on('message', function (message) {
             if(index == -1)
             {
@@ -335,13 +334,13 @@ module.exports =
             {
             let client_object   = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
             Constant.posTransList.push(client_object)
-            response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please wait we are checking" };
+            response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please Wait We are checking" };
             connection.sendUTF(JSON.stringify(response));
             }
             else
             {
                 Constant.posTransList[index]["connection"] = connection
-                response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please wait we are checking" };
+                response            = { amountstatus: 0, status: 200, "data":  {} , message: "Please Wait We are checking" };
                 connection.sendUTF(JSON.stringify(response));
             }
             Constant.interval  = setInterval(commonFunction.get_data_of_Pos_transcation, 10000);
@@ -361,7 +360,7 @@ module.exports =
             console.log(error)
             
             return null
-        }         
+        }
     },
     async paymentLinkTranscationWebScokect(request) {
         try {
@@ -370,13 +369,11 @@ module.exports =
             let queryvariable  = querystring.parse(url_paremeters.query)
             console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
-            let getTranscationData = await commonFunction.get_Transcation_Paylink_Data(queryvariable.transkey)
-            console.log("paymentLinkTranscationWebScokect =====================================",getTranscationData);
+            let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
             if(getTranscationData.length > 0)
             {
             const connection   = request.accept(null, request.origin);
             var index = Constant.paymenlinkTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
-            
             if(index == -1)
             {
             let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
@@ -386,7 +383,7 @@ module.exports =
             {
                 Constant.paymenlinkTransList[index]["connection"] = connection
             }
-            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 10000);
+            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 20000);
             connection.on('message', function (message) {
             if(index == -1)
             {
@@ -401,7 +398,6 @@ module.exports =
         }
         catch (error) {
             console.log(error)
-            
             return null
         }
     },

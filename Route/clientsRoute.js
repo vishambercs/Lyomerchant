@@ -97,6 +97,8 @@ const Auth                          = require('../Validation/Auth');
 const categoryController            = require('../controllers/Masters/categoryController');
 const merchantcategory              = require('../controllers/Masters/merchantcategoryController');
 const perferedNetworkController     = require('../controllers/Masters/perferedNetworkController');
+const PaymentHostedController       = require('../controllers/hostedpayment/PaymentHostedController');
+const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
 
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
@@ -147,6 +149,8 @@ router.post('/allMerchantSites',                         merchantSitesController
 router.post('/deleteMerchantSite',                       merchantSitesController.deleteMerchantSite);
 router.post('/savemerchantsite',                         merchantSitesController.savemerchantsite);
 router.post('/updateMerchantSite',                       merchantSitesController.updateMerchantSite);
+
+
 
 // router.post('/resetMerchantTwoFa',                clientsController.reset_merchant_two_fa);
 // router.post('/clientwithdrawnetworkid',           withdrawController.get_client_withdraw_with_network_id);
@@ -206,12 +210,15 @@ router.get('/getWithdrawSettings',                                  withdrawCont
 router.post('/merchantBalance',                                     withdrawController.merchantBalance);
 router.post('/merchantWithdrawBalance',                             withdrawController.withdrawBalance);
 
-
-
-
 "============================ perfered Network Controller  ==============================="
 router.post('/createPerferedNetwork',                               Auth.is_merchant,perferedNetworkController.create_perfered_Network);
 router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
+
+
+"============================ HOSTRED PAYMENT  ==============================="
+router.post('/createHostePayment',                                  PaymentHostedController.createHostePayment);
+"============================ clientapikey  ==============================="
+router.post('/getapistatus',                                  clientapicontroller.getapikey);
 
 module.exports = router;
 

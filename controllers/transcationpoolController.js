@@ -30,6 +30,7 @@ module.exports =
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
                 // let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
                 let account     = await poolwalletController.getPoolWalletID(networkType) 
+                console.log("account",account)
                 const transactionPool = new transactionPools({
                     id: crypto.randomBytes(20).toString('hex'),
                     api_key         : req.headers.authorization,

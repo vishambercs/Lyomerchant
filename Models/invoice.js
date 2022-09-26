@@ -19,7 +19,6 @@ const invoiceSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
     Items: [{
             number: {
                 type: Number,
@@ -89,6 +88,11 @@ const invoiceSchema = new mongoose.Schema({
     {
         type: Number,
         required: true,
+    },
+    itemlist: 
+    {
+        type: String,
+        required: false,
     },
     status: {
         type: Number,
