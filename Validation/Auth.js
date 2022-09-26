@@ -8,8 +8,9 @@ const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
 const Validator = require('./index');
 const jwt = require('jsonwebtoken');
-const fastPaymentCode   = require('../Models/fastPaymentCode');
-const merchantstore     = require('../Models/merchantstore');
+const fastPaymentCode = require('../Models/fastPaymentCode');
+const merchantstore = require('../Models/merchantstore');
+
 require("dotenv").config()
 module.exports =
 {
@@ -34,6 +35,26 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+
+    async checkaccess(req, res, next) {
+        try {
+
+            let api_key = req.headers.authorization;
+            let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { status: 1 }] });
+            if (user != null) {
+                next()
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "You have not  access. Please create a request for this service." })
+            }
+
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 401, data: {}, message: "You have not  access. Please create a request for this service." })
+        }
+    },
+
     async plugin_have_access(req, res, next) {
         try {
 
@@ -52,6 +73,7 @@ module.exports =
             res.json({ status: 401, data: {}, message: "You have not plugin access. Please create a request for this service." })
         }
     },
+
     async Verfiy_Kyc_Header(req, res, next) {
         try {
             console.log("Verfiy_Kyc_Header ===========", req.body)
@@ -230,8 +252,7 @@ module.exports =
         try {
             let token = req.headers.authorization;
             let user = await merchantcategory.findOne({ clientapikey: token, categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
-            if (user != null) 
-            {
+            if (user != null) {
                 next()
             }
             else {
@@ -245,26 +266,25 @@ module.exports =
     },
     async public_paylink_access(req, res, next) {
         try {
-            let paymentId       = req.body.paymentId;
-            let pylinktranslog  = await payLink.findOne({ id: paymentId });
+            let paymentId = req.body.paymentId;
+            let pylinktranslog = await payLink.findOne({ id: paymentId });
             if (pylinktranslog == null) {
                 return res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
-            
-            let invoiceData  = await invoice.findOne({ id: pylinktranslog.invoice_id });
-            
+
+            let invoiceData = await invoice.findOne({ id: pylinktranslog.invoice_id });
+
             if (invoiceData == null) {
                 return res.json({ status: 400, data: {}, message: "Invalid Request " })
             }
-           
-            const duedate       = new Date(invoiceData.duedate);
-            const currentdate   = new Date();
-            if(duedate <= currentdate )
-            {
-              return  res.json({ status: 400, data: {}, message: "Payment link is expired." }) 
+
+            const duedate = new Date(invoiceData.duedate);
+            const currentdate = new Date();
+            if (duedate <= currentdate) {
+                return res.json({ status: 400, data: {}, message: "Payment link is expired." })
             }
-            let user = await merchantcategory.findOne({ clientapikey: invoiceData.merchantapikey,categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
-          
+            let user = await merchantcategory.findOne({ clientapikey: invoiceData.merchantapikey, categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
+
             if (user != null) {
                 next()
             }
@@ -279,18 +299,18 @@ module.exports =
     },
     async public_fastpay_access(req, res, next) {
         try {
-            let paymentId       = req.body.fastCode;
-            let pylinktranslog  = await fastPaymentCode.findOne({ fastcodes: paymentId });
+            let paymentId = req.body.fastCode;
+            let pylinktranslog = await fastPaymentCode.findOne({ fastcodes: paymentId });
 
             if (pylinktranslog == null) {
                 return res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
-            let mercstore       = await merchantstore.findOne({ id: pylinktranslog.storeid });
+            let mercstore = await merchantstore.findOne({ id: pylinktranslog.storeid });
             if (mercstore == null) {
                 return res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
 
-            let user = await merchantcategory.findOne({ clientapikey: mercstore.clientapikey,categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8", status: 1 });
+            let user = await merchantcategory.findOne({ clientapikey: mercstore.clientapikey, categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8", status: 1 });
             if (user != null) {
                 next()
             }
@@ -333,6 +353,43 @@ module.exports =
         }
     },
 
+
+    async verify_variables(req, res, next) {
+        try {
+            const validationRule = {
+                "invoiceNumber": "required|string",
+                "customerName": "required|string",
+                "email": "email",
+                "mobileNumber": "required|string",
+                "duedate": "date",
+                "additionalNotes": "string",
+                "payment_reason": "required|string",
+                "currency": "required|string",
+                "totalAmount": "required|numeric",
+                "orderId": "required|string",
+                "callbackURL": "required|string",
+                "errorURL": "required|string",
+                // "networkType": "required|string|exist:network,id",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
 }
 
 

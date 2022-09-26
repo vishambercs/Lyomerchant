@@ -203,43 +203,36 @@ module.exports =
     
     async getPoolWalletID(network_id) {
         try {
-            console.log("btcnetwork",network_id)
+        
             let network_details = await network.findOne({ 'id': network_id })
-            console.log("btcnetwork",network_details)
+          
             let account = await poolWallet.findOne({ network_id: network_id, status: 0 })
-            console.log("btcnetwork",account)
+          
           
             if (account == null) {
-                console.log("inside if",account)
-                console.log("network_details",network_details.libarayType)
                 if (network_details.libarayType == "Web3") {
                     let account = await Utility.GetAddress(network_details.nodeUrl)
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date()).toLocaleDateString(), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
+                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
                     let val = await poolWalletItem.save()
                     return val
                 }
                 else if (network_details.libarayType == "Tronweb") {
                     const { address, privateKey } = generateAccount()
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date()).toLocaleDateString(), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
+                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
                     let val = await poolWalletItem.save()
                     return val
                 }
                 else if (network_details.libarayType == "btcnetwork") {
-                    console.log("btcnetwork libarayType")
                     const privateKey =  CryptoAccount.newPrivateKey();
-                    console.log("btcnetwork libarayType",privateKey)
                     const account = new CryptoAccount(privateKey);
                     const address = await account.address("BTC")
-                    console.log("btcnetwork libarayType",address)
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date()).toLocaleDateString(), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
+                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
                     let val = await poolWalletItem.save()
-                    console.log("btcnetwork libarayType",val)
                     return val
-
-                    
                 }
             }
-            else {
+            else 
+            {
                 return account
             }
         }
@@ -251,14 +244,11 @@ module.exports =
     async generateThePoolWalletAddress(req, res) {
         try {
             let network_id = req.body.network_id;
-            
             let network_details = await network.findOne({ 'id': req.body.network_id })
-            console.log(network_details.libarayType)
             let account = await poolWallet.findOne({ network_id: req.body.network_id, status: 0 })
-            console.log(account == null)
             if (account == null) {
-                
-                if (network_details.libarayType == "Web3") {
+                if (network_details.libarayType == "Web3") 
+                {
                     let account = await Utility.GetAddress(network_details.nodeUrl)
                     const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + new Date().toString(), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
                     let val = await poolWalletItem.save()
@@ -275,7 +265,7 @@ module.exports =
                     console.log(network_details.libarayType)
                     const privateKey =  CryptoAccount.newPrivateKey();
                     const address = await account.address("BTC")
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date()).toLocaleDateString(), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
+                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date()).toString(), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
                     let val = await poolWalletItem.save()
                     res.json({ status: 200, data: val, message: "" })
                 }

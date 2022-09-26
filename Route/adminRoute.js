@@ -59,34 +59,36 @@ const merchantstoreController       = require('../controllers/POS/merchantstoreC
 router.post('/signupadmin',                                    adminController.signup_admin_api);
 router.post('/adminlogin',                                     adminController.Login);
 router.post('/admingoogleauth',                                adminController.Verfiy_Google_Auth);
-router.post('/getTransForAdmin',                               transcationpoolController.getTransForAdmin);
-router.post('/get_admin_withdraw',                             withdrawController.get_admin_wihdraw);
-router.post('/allAdmin',                                       adminController.allAdmin);
-router.post('/sendemail',                                      adminController.sendEmail);
-router.post('/transcationListByNetworkID',                     transcationpoolController.get_Trans_by_Network_ID_For_Admin);
+router.post('/getTransForAdmin',                               Auth.is_admin,transcationpoolController.getTransForAdmin);
+router.post('/get_admin_withdraw',                             Auth.is_admin, withdrawController.get_admin_wihdraw);
+router.post('/allAdmin',                                       Auth.is_admin,adminController.allAdmin);
+router.post('/sendemail',                                      Auth.is_admin,adminController.sendEmail);
+router.post('/transcationListByNetworkID',                     Auth.is_admin,transcationpoolController.get_Trans_by_Network_ID_For_Admin);
 router.post('/forgetThePassword',                              adminController.forgetThePassword);
-router.post('/VerfiyTheCode',                                  adminController.VerfiyTheCode);
-router.post('/updatePassword',                                 adminController.updateThePassword);
-router.post('/resettwofa',                                     adminController.reset_two_fa);
-router.post('/resetMerchantTwoFa',                             clientsController.reset_merchant_two_fa);
-router.post('/changeMerchantEmail',                            clientsController.changeMerchantEmail);
-router.post('/merchantImpersonation',                          clientsController.merchantImpersonation);
+router.post('/VerfiyTheCode',                                  Auth.is_admin,adminController.VerfiyTheCode);
+router.post('/updatePassword',                                 Auth.is_admin,adminController.updateThePassword);
+router.post('/resettwofa',                                     Auth.is_admin,adminController.reset_two_fa);
+router.post('/resetMerchantTwoFa',                             Auth.is_admin,clientsController.reset_merchant_two_fa);
+router.post('/changeMerchantEmail',                            Auth.is_admin,clientsController.changeMerchantEmail);
+router.post('/merchantImpersonation',                          Auth.is_admin,clientsController.merchantImpersonation);
 router.post('/changeClientLoginStatus',                        Auth.is_admin,Auth.verfiyAdminToken,clientsController.changeClientLoginStatus);
 router.post('/changeAdminsLoginStatus',                        Auth.is_admin,Auth.verfiyAdminToken,adminController.changeAdminsLoginStatus);
 router.post('/createMerchantStoreByAdmin',                     Auth.is_admin,Auth.verfiyAdminToken,merchantstoreController.createMerchantStoreByAdmin);
 router.post('/createMerchantStoreByAdmin',                     Auth.is_admin,Auth.verfiyAdminToken,merchantstoreController.createMerchantStoreByAdmin);
 router.post('/getapikey',                                      Auth.verfiyAdminToken,adminController.getapikey);
+router.post('/approvekyc',                                     Auth.is_admin,Auth.verfiyAdminToken, clientsController.kyc_approved);
+
 
 "============================ Orphan Transcation ==============================="
 
-router.post('/orphanPoolWallet',                              orphanController.orphanTranscation);
+router.post('/orphanPoolWallet',                              Auth.is_admin,orphanController.orphanTranscation);
 
 "============================ Currency Master ==============================="
 
-router.post('/createCurrency',                                CurrencyController.createCurrency);
-router.get('/allCurrency',                                    CurrencyController.allCurrency);
-router.post('/deleteCurrency',                                CurrencyController.deleteCurrency);
-router.post('/updateCurrency',                                CurrencyController.updateCurrency);
+router.post('/createCurrency',                                Auth.is_admin,CurrencyController.createCurrency);
+router.get('/allCurrency',                                    Auth.is_admin,CurrencyController.allCurrency);
+router.post('/deleteCurrency',                                Auth.is_admin,CurrencyController.deleteCurrency);
+router.post('/updateCurrency',                                Auth.is_admin,CurrencyController.updateCurrency);
 
 "============================ Feed Wallet Controller ==============================="
 
@@ -116,7 +118,7 @@ router.post('/trans_from_pw_to_hw',                            Auth.is_admin,hot
 router.post('/trans_from_fw_pw_to_hw',                         Auth.is_admin,hotwallettranslogsController.trans_from_fw_pw_to_hw);
 router.post('/trans_fm_FDW_To_PW',                             Auth.is_admin,hotwallettranslogsController.trans_from_feeding_Wallet_to_pool_wallet);
 router.post('/pool_wallet_balance',                            Auth.is_admin,hotwallettranslogsController.Check_of_pool_wallet_address);
-router.post('/confirm_the_pw_to_hw',                            Auth.is_admin,hotwallettranslogsController.confirm_the_pw_to_hw);
+router.post('/confirm_the_pw_to_hw',                           Auth.is_admin,hotwallettranslogsController.confirm_the_pw_to_hw);
 
 
 

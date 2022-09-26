@@ -365,18 +365,17 @@ module.exports =
     },
     async paymentLinkTranscationWebScokect(request) {
         try {
-            let uniqueKey      =  crypto.randomBytes(20).toString('hex')
-            let url_paremeters = url.parse(request.httpRequest.url);
-            let queryvariable  = querystring.parse(url_paremeters.query)
+            let uniqueKey           =  crypto.randomBytes(20).toString('hex')
+            let url_paremeters      = url.parse(request.httpRequest.url);
+            let queryvariable       = querystring.parse(url_paremeters.query)
             console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
-            var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
-            let getTranscationData = await commonFunction.get_Transcation_Paylink_Data(queryvariable.transkey)
+            var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            let getTranscationData  = await commonFunction.get_Transcation_Paylink_Data(queryvariable.transkey)
             console.log("paymentLinkTranscationWebScokect =====================================",getTranscationData);
             if(getTranscationData.length > 0)
             {
-            const connection   = request.accept(null, request.origin);
+            const connection        = request.accept(null, request.origin);
             var index = Constant.paymenlinkTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
-            
             if(index == -1)
             {
             let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}

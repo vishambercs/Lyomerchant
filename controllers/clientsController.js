@@ -658,25 +658,17 @@ module.exports =
     async kyc_approved(req, res) {
         try {
              clients.findOneAndUpdate(
-                { api_key: req.headers.authorization }, 
-                { $set: { status: true } }, 
+                { email: req.body.email }, 
+                { $set: { 
+                    status              :   true,
+                    loginstatus         :   true,
+                    emailstatus         :   true, 
+                    manual_approved_by  :   req.headers.authorization,
+                    manual_approved_at  :   new Date().toString(),
+                }}, 
                 { $new: true }).then(async (val) => {
-                let networks = await network.find()
                 if (val != null) {
-                    // networks.forEach(async function (item) {
-                    //     var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
-                    //     var accountAddress = web3.eth.accounts.create();
-                    //     const clientWallet = new clientWallets({
-                    //         id: mongoose.Types.ObjectId(),
-                    //         client_api_key: val.api_key,
-                    //         address: accountAddress.address,
-                    //         privatekey: accountAddress.privateKey,
-                    //         status: 1,
-                    //         network_id: item.id
-                    //     });
-                    //     let client_Wallet = await clientWallet.save()
-                    // });
-                    res.json({ status: 200, message: "Client Added Successfully", data: val })
+                    res.json({ status: 200, message: "KYC Approved", data: req.body.email })
                 }
                 else {
                     res.json({ status: 400, message: "Invalid Request", data: val })

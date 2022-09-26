@@ -177,24 +177,26 @@ module.exports =
 
     },
     async assignPaymentLinkMerchantWallet(req, res) {
-        try {
+        try 
+        {
             var networkType = req.body.networkType
             let account = await poolwalletController.getPoolWalletID(networkType)
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             const newRecord = new paymentLinkTransactionPool({
-                id: mongoose.Types.ObjectId(), // crypto.randomBytes(20).toString('hex'),
-                api_key: req.headers.authorization,
-                poolwalletID: account.id,
-                amount: req.body.amount,
-                currency: req.body.currency,
-                callbackURL: req.body.callbackURL,
-                payLinkId: req.body.payLinkId,
-                orderType: req.body.orderType,
-                clientToken: req.body.token,
-                status: 0,
-                walletValidity: currentDate,
-                timestamps: new Date().getTime()
+                id              : mongoose.Types.ObjectId(), 
+                api_key         : req.headers.authorization,
+                poolwalletID    : account.id,
+                amount          : req.body.amount,
+                currency        : req.body.currency,
+                callbackURL     : req.body.callbackURL,
+                errorURL     : req.body.errorURL,
+                payLinkId       : req.body.payLinkId,
+                orderType       : req.body.orderType,
+                clientToken     : req.body.token,
+                status          : 0,
+                walletValidity  : currentDate,
+                timestamps      : new Date().getTime()
             });
             newRecord.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })

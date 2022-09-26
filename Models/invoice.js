@@ -12,14 +12,14 @@ const invoiceSchema = new mongoose.Schema({
     {
         type: String,
         required: true,
-        unique: true,
     },
     merchantapikey :
     {
         type: String,
         required: true,
     },
-    Items: [{
+    Items:
+     [{
             number: {
                 type: Number,
                 
@@ -56,16 +56,20 @@ const invoiceSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    
-    email: 
+    payment_reason : 
     {
         type: String,
         required: true,
     },
+    email: 
+    {
+        type: String,
+        required: false,
+    },
     mobileNumber:
     {
         type: String,
-        required: true,
+        required: false,
     },
     duedate: 
     {
@@ -93,6 +97,18 @@ const invoiceSchema = new mongoose.Schema({
     {
         type: String,
         required: false,
+    },
+    callbackURL: 
+    {
+        type: String,
+        required: false,
+        default: null
+    },
+    errorURL: 
+    {
+        type: String,
+        required: false,
+        default: null
     },
     status: {
         type: Number,

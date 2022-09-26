@@ -48,6 +48,7 @@ const paymentLinkTransactionPoolSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    
     status: {
         type: Number,
         required: true,

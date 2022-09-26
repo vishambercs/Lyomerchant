@@ -574,6 +574,24 @@ async function get_Transcation_Paylink_Data(transkey) {
                 }
             },
             {
+                $lookup: 
+                {
+                    from: "paylinkpayments", // collection to join
+                    localField: "payLinkId",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "paylinkdetails"// output array field
+                }
+            },
+            {
+                $lookup: 
+                {
+                    from: "invoices", // collection to join
+                    localField: "paylinkdetails.invoice_id",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "invoicedetails"// output array field
+                }
+            },
+            {
                 "$project":
                 {
                   
@@ -615,6 +633,8 @@ module.exports =
             if (minutes > 10) {
                 let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
                 let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
+                console.log("=========invoicedetails=========",addressObject.invoicedetails)
+                // let geturl              = await Utility.Get_Request_By_Axios(addressObject.invoicedetails[0].errorURL, {},{})
                 response                = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
                 return JSON.stringify(response)
             }
@@ -625,7 +645,7 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
-          
+            console.log("=========invoicedetails=========",addressObject.invoicedetails)
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
            
@@ -660,6 +680,7 @@ module.exports =
                     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
                     let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
+                    // let geturl                  = await Utility.Get_Request_By_Axios(addressObject.invoicedetails[0].callbackURL, {},{})
                     response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
                     return JSON.stringify(response)
                 }

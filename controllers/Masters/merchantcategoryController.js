@@ -14,16 +14,44 @@ module.exports =
 {
     async createClientCategory(req, res) {
         try {
-            const merchantcategory = new merchantcategories({
-                id: mongoose.Types.ObjectId(),
-                categoryid: req.body.categoryid,
-                clientapikey: req.headers.authorization,
-                status: 0,
-                created_by: req.headers.authorization,
-            });
-            merchantcategory.save().then(async (val) => {
-                res.json({ status: 200, message: "Successfully", data: val })
-            }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
+            if(req.body.id == 0){
+                const merchantcategory = new merchantcategories({
+                    id: mongoose.Types.ObjectId(),
+                    categoryid: req.body.categoryid,
+                    clientapikey: req.headers.authorization,
+                    status:  req.body.status,
+                    created_by: req.headers.authorization,
+                });
+                merchantcategory.save().then(async (val) => {
+                    res.json({ status: 200, message: "Successfully", data: val })
+                }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
+            }
+            else
+            {
+               const merchantcategory = await merchantcategories.findOne({ id : req.body.id,  clientapikey: req.headers.authorization } )
+               if(merchantcategory == null)
+               {
+                res.json({ status: 400, message: "Invalid Request", data: {} })
+               }
+               else if(merchantcategory.status == 2){
+                res.json({ status: 400, message: "Please Contact Admin", data: {} })
+               }
+               else 
+               {
+                const merchantcategory = await merchantcategories.findOneAndUpdate
+                ({ 
+                    id : req.body.id,  
+                    clientapikey: req.headers.authorization },{
+                        $set:{
+                        status      :  req.body.status,
+                        updated_at  : new Date().toString(),
+                        updated_by  : req.headers.authorization,
+                    }
+                },{ returnDocument: 'after' } )
+                res.json({ status: 200, message: "Updated Successfully", data: merchantcategory })
+               }
+            }
+            
 
         }
         catch (error) {
@@ -31,6 +59,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    
     async getAllClientCategoryRequest(req, res) {
         try {
 
@@ -109,7 +138,8 @@ module.exports =
                         remarks: await Utility.checkthevalue(req.body.remarks),
                     }
                 }).then(async (val) => {
-                    if (val != null) {
+                    if (val != null) 
+                    {
                         const merchantcategory = await merchantcategories.findOne({ 'id': req.body.id })
                         res.json({ status: 200, message: "Successfully", data: merchantcategory })
                     }

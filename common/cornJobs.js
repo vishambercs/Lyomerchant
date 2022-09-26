@@ -406,11 +406,7 @@ module.exports =
     address: address,
     block: block,
     index: index,
-<<<<<<< HEAD
     Balance_Cron_Job    :   Balance_Cron_Job,
     Check_KYT_Address   :   Check_KYT_Address,
-
-=======
-    Balance_Cron_Job: Balance_Cron_Job,
->>>>>>> 6ae9e8d1fd207816770f88cc17980ffb525bd75b
+  
 }

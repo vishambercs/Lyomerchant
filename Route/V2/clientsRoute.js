@@ -110,7 +110,7 @@ router.post('/withdraw',                             withdrawController.save_wit
 router.post('/clientWihdrawLogs',                    withdrawController.get_client_wihdraw);
 router.post('/clientTotalWihdraw',                   withdrawController.get_client_wihdraw_total);
 router.post('/getBalanceAddress',                    clientsController.get_BalancebyAddress);
-router.post('/approvekyc',                           clientsController.kyc_approved);
+
 router.post('/getmerchantWallets',                   clientsController.getClientWallets);
 router.post('/update_cron_job',                      clientsController.update_cron_job);
 router.post('/merchantNetworkTranscation',           transcationpoolController.get_Trans_by_Network_ID);

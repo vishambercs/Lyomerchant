@@ -7,7 +7,6 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-<<<<<<< HEAD
     first_name: 
     {
         type: String,
@@ -29,8 +28,6 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-=======
->>>>>>> 6ae9e8d1fd207816770f88cc17980ffb525bd75b
     email: {
         type: String,
         required: true,
@@ -97,6 +94,14 @@ const clientsSchema = new mongoose.Schema({
     kycLink: {
         type: String,
         required: true,
+    },
+    manual_approved_by: {
+        type: String,
+        required: false,
+    },
+    manual_approved_at: {
+        type: String,
+        required: false,
     },
     companyname: {
         type: String,

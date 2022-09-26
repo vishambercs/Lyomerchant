@@ -29,7 +29,10 @@ const merchantcategorySchema = new mongoose.Schema({
     },
     updated_by: {
         type: String,
-        
+        required: false,
+    },
+    updated_at: {
+        type: String,
         required: false,
     },
     created_by: {

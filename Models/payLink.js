@@ -13,7 +13,7 @@ const payLinkSchema = new mongoose.Schema({
     {
         type: String,
         required: true,
-    },   
+    },
     status: 
     {
         type: Number,
