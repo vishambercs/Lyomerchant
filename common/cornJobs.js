@@ -408,5 +408,4 @@ module.exports =
     index: index,
     Balance_Cron_Job    :   Balance_Cron_Job,
     Check_KYT_Address   :   Check_KYT_Address,
-  
 }

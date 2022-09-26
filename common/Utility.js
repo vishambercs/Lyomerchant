@@ -368,14 +368,9 @@ module.exports =
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
             console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
-<<<<<<< HEAD
             var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData  = await commonFunction.get_Transcation_Paylink_Data(queryvariable.transkey)
             console.log("paymentLinkTranscationWebScokect =====================================",getTranscationData);
-=======
-            var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
-            let getTranscationData = await commonFunction.get_Transcation_Pos_Data(queryvariable.transkey)
->>>>>>> 8df8bff881dc338720031a2e6ca0fc32acf8baae
             if(getTranscationData.length > 0)
             {
             const connection        = request.accept(null, request.origin);
