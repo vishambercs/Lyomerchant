@@ -89,6 +89,7 @@ module.exports =
             let new_record = new paylinkPayment({
                 id: mongoose.Types.ObjectId(),
                 invoice_id: req.body.invoiceid,
+                timestamps  : new Date().getTime(),
                 status: 0
             })
             console.log(new_record)

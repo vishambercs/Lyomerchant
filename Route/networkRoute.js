@@ -28,7 +28,7 @@ router.post('/changeHotWalletStatusLimit',      Auth.is_admin,  networkControlle
 router.post('/updateprefixandimage',            Auth.is_admin,  networkController.updateprefixandimage);
 router.post('/updatecurrencyid',                Auth.is_admin,  networkController.updatecurrencyid);
 router.post('/updategasimit',                   Auth.is_admin,  networkController.updategasimit);
-router.post('/update_kytnetworkid',             networkController.update_kytnetworkid);
+router.post('/update_kytnetworkid',              Auth.is_admin, networkController.update_kytnetworkid);
 
 
 module.exports = router;
