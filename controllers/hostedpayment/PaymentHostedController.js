@@ -15,12 +15,12 @@ const jwt = require('jsonwebtoken');
 
 async function storeInvoice(invoiceNumber,merchantKey,Items,customerName,email,mobileNumber,duedate,additionalNotes,payment_reason,currency,totalAmount,orderId,callbackURL,errorURL){
    try{
-    console.log(Items.length > 0)
+   
     let new_record = new invoice({
                 id: mongoose.Types.ObjectId(),
                 invoiceNumber: invoiceNumber,
                 merchantapikey: merchantKey,
-                Items: Items.length > 0 ? Items : [{}] ,
+                Items:  (Items != null && Items != "")  ? Items : [{}] ,
                 customerName: customerName,
                 email: email,
                 mobileNumber:mobileNumber,
@@ -49,6 +49,7 @@ async function storepaylinkPayment(invoice_id)
         let new_record = new paylinkPayment({
             id          : mongoose.Types.ObjectId(),
             invoice_id  : invoice_id,
+            timestamps  : new Date().getTime(),
             status      : 0
         })
         let response = await new_record.save()
@@ -107,7 +108,17 @@ module.exports =
         {
             return res.json({ status: 400, data: {}, message: "Invalid Date" })
         }
-       let store_invoice  = await storeInvoice(
+        console.log(req.body.items) 
+        const sum =  (req.body.items != null && req.body.items != "")   ? req.body.items.reduce((accumulator, object) => {
+            return accumulator + object.amount;
+          }, 0) : req.body.totalAmount ;
+      
+        if(req.body.totalAmount != sum)
+        {
+            return res.json({ status: 400, data: {}, message: "Invalid Total Amount" })
+        }
+
+        let store_invoice  = await storeInvoice(
             invoiceObject.invoiceNumber,
             merchantKey,
             invoiceObject.items,
@@ -123,9 +134,10 @@ module.exports =
             req.body.callbackURL,
             req.body.errorURL,
             )
-       if(store_invoice.status != 200){
+        if(store_invoice.status != 200){
            return res.json(store_invoice)
         }
+       
         let storepaylink  = await storepaylinkPayment(store_invoice.data.id)
         if(storepaylink.status != 200)
         {

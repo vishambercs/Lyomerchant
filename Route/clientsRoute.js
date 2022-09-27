@@ -19,6 +19,9 @@ const perferedNetworkController     = require('../controllers/Masters/perferedNe
 const PaymentHostedController       = require('../controllers/hostedpayment/PaymentHostedController');
 const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
 
+
+
+
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
 router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
@@ -106,8 +109,14 @@ router.post('/createPerferedNetwork',                               Auth.is_merc
 router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
 "============================ HOSTRED PAYMENT  ==============================="
 router.post('/createHostePayment',                                  Auth.verify_variables,PaymentHostedController.createHostePayment);
+
 "============================ clientapikey  ==============================="
 router.post('/getapistatus',                                        clientapicontroller.getapikey);
+
+
+
+
+
 
 module.exports = router;
 

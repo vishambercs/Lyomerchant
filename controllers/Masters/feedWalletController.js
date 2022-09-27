@@ -48,14 +48,15 @@ async function createFeedWalletsFun(network_id, created_by) {
     }
 }
 
-async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
-    console.log(Nodeurl, Type, Address)
+async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") 
+{
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
     let format_native_balance = 0
     try {
-        if (Type == "Web3") {
+        if (Type == "Web3") 
+        {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             if (ContractAddress != "") {
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
@@ -67,11 +68,11 @@ async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
             native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
-
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
-        else if(Type == "Tronweb"){
+        else if(Type == "Tronweb")
+        {
             const HttpProvider = TronWeb.providers.HttpProvider;
             const fullNode = new HttpProvider(Nodeurl);
             const solidityNode = new HttpProvider(Nodeurl);
@@ -101,7 +102,8 @@ async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "
             return { status: 200, data: balanceData, message: "sucess" }
         }
     }
-    catch (error) {
+    catch (error) 
+    {
         console.log(error)
         let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
         return { status: 400, data: balanceData, message: "Error" }
@@ -304,6 +306,27 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
+    async checkbalance(req, res) {
+        try {
+          
+            let fromWallets = await feedWallets.aggregate([
+                { $match: { id: req.body.id } },
+                { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "networkDetails" } },
+            ])
+            if(fromWallets.length == 0)
+            {
+                res.json({ status: 400, data: {}, message: "Invalid id" })
+            }
+            let balance = await CheckBalanceOfAddress(fromWallets[0].networkDetails[0].nodeUrl, fromWallets[0].networkDetails[0].libarayType, fromWallets[0].address, fromWallets[0].networkDetails[0].contractAddress, fromWallets[0].privatekey) 
+          
+            res.json(balance)
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
     async deleteWallets(req, res) {
         try {
             await feedWallets.findOneAndUpdate({ 'id': req.body.id },
@@ -343,6 +366,7 @@ module.exports =
 
 
     },
+
     async checkbtcbalance(req, res) {
         try {
             let COINGECKO_URL = "http://blockchain.info/q/addressbalance/" + req.body.address

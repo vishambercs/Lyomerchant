@@ -19,6 +19,11 @@ const payLinkSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },   
+    timestamps : 
+    {
+        type: String,
+        required: true,
+    },
   },
     { timestamps: true }
 )

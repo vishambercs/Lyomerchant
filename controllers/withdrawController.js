@@ -485,32 +485,6 @@ module.exports =
             res.json({ status: 400, data: error, message: "Not found" })
         }
     },
-    // async setWithdrawSettings1(req, res) {
-    //     let settings = req.body
-    //     let data = ''
-    //     let message = ''
-    //     let status = 200
-    //     try {
-    //         let new_record = new withdrawSettings({
-    //             id: mongoose.Types.ObjectId(),
-    //             pooltohotMode: settings.pooltohotMode,
-    //             pooltohotLimit: settings.pooltohotLimit,
-    //             merchantWithdrawMode: settings.merchantWithdrawMode,
-    //             merchantWithdrawLimit: settings.merchantWithdrawLimit,
-    //             merchantWithdrawFeePercentage: settings.merchantWithdrawFeePercentage
-    //         })
-    //         console.log(new_record)
-    //         data = await new_record.save()
-    //         message = "Withdraw Settings saved"
-    //         status = 200
-    //     }
-    //     catch (error) {
-    //         console.log("new invoice error", error)
-    //         message = error
-    //         status = 400
-    //     }
-    //     res.json({ status: status, data: data, message: message })
-    // },
     async setWithdrawSettings(req, res) {
         let settings = req.body
         let data = ''

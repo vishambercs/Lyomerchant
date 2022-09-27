@@ -124,41 +124,9 @@ module.exports =
     },
 
     async verifyPaymentLink(req, res) {
-        // console.log("payment id", req.body.paymentId)
-        // let findResult = ''
-        // let response = []
-
-        // let status = 200;
-        // try {
-        //     findResult = await paylinkPayment.find({
-        //         id: req.body.paymentId,
-        //     });
-        //     console.log("invoice number", findResult)
-        //     response.push(findResult)
-        //     console.log(response)
-        //     invoiceNumber = findResult[0].invoiceNumber
-        //     console.log("invoice number", invoiceNumber)
-
-        // }
-        // catch (error) {
-        //     response = "something went wrong"
-        //     status = 400
-        //     response = error
-        // }
-        // try {
-        //     if (invoiceNumber) {
-        //         response = await invoice.find({
-        //             invoiceNumber: invoiceNumber
-        //         });
-        //         console.log("invoice", response)
-        //     }
-        // }
-        // catch (error) {
-
-        // }
         try {
             let paylinksData = await paylinkPayment.aggregate([
-                { $match: { id: req.body.paymentId } },
+                { $match: { id: req.body.paymentId , status : 0 } },
                 {
                     $lookup: {
                         from: "invoices", // collection to join
@@ -166,9 +134,71 @@ module.exports =
                         foreignField: "id",//field from the documents of the "from" collection
                         as: "invoicesDetails"// output array field
                     }
+                    
                 },
+                {
+                    $lookup: {
+                        from: "clients", // collection to join
+                        localField: "invoicesDetails.merchantapikey",//field from the input documents
+                        foreignField: "api_key",//field from the documents of the "from" collection
+                        as: "clientsdetails"// output array field
+                    }
+                    
+                },
+                {   
+                    "$project":
+                    {
+                        "clientsdetails.api_key": 0,
+                        "clientsdetails.authtoken": 0,
+                        "clientsdetails.token": 0,
+                        "clientsdetails.secret": 0,
+                        "clientsdetails.qrcode": 0,
+                        "clientsdetails.hash": 0,
+                        "clientsdetails.emailstatus": 0,
+                        "clientsdetails.loginstatus": 0,
+                        "clientsdetails.emailtoken": 0,
+                        "clientsdetails.status": 0,
+                        "clientsdetails.two_fa": 0,
+                        "clientsdetails.password": 0,
+                        "clientsdetails.kycLink": 0,
+                        "clientsdetails.manual_approved_by": 0,
+                        "clientsdetails.manual_approved_at": 0,
+                        "clientsdetails.deleted_by": 0,
+                        "clientsdetails.deleted_at": 0,
+                       
+                    }
+                }
+
             ])
+         
+           
+            if (paylinksData[0].timestamps == undefined) 
+            {
+               return res.json({ status: 400, data: [], message: "This Link is expired." })
+            }
+
+            const previousdate = new Date(parseInt(paylinksData[0].timestamps));
+            const currentdate = new Date().getTime()
+            var diff = currentdate - previousdate.getTime();
+            var minutes = (diff / 60000)
+            if (minutes > 10) 
+            {
+               return res.json({ status: 400, data: [], message: "This Link is expired." })
+            }
             res.json({ status: 200, data: paylinksData, message: "Successfully Done" })
+        }
+        catch (error) {
+            console.log("error", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+
+    },
+
+    async cancelpaymentLink(req, res) {
+        try 
+        { 
+            let paylinks = await paylinkPayment.findOneAndUpdate({ 'id':req.body.paymentId  }, { $set: { status : 1 } } ,{ returnDocument: 'after' })
+            res.json({ status: 200, data: paylinks, message: "Successfully Done" })
         }
         catch (error) {
             console.log("error", error)
@@ -373,34 +403,6 @@ module.exports =
             console.log("error", error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
-        // try {
-        //     findResult = await fastPaymentCode.find({
-        //         "fastcodes": req.body.fastCode
-        //     })
-
-        //     let id = findResult.id
-        //     token = jwt.sign({ id: id }, process.env.AUTH_KEY, { expiresIn: '5m' });
-        //     try{
-        //         console.log(req.headers.authorization,findResult[0].fastCodes[0].businessName)
-        //         storeProfile = await merchantStore.findOne({
-        //         storename:findResult[0].fastCodes[0].businessName
-        //     });
-        // }
-        // catch (error){
-
-        // }
-        //     response = (findResult)
-
-        // }
-        // catch (error) {
-        //     response = "someting went wrong"
-        //     status = 400
-        //     response = error
-        // }
-        // if (response == 0) status = 400
-        // //res.json({ status: status, data: {"data":response,"storeProfile":storeProfile}, message: "verify fast code" })
-        // res.json({ status: status, data: response,storeProfile,token, message: "verify fast code" })
-
     },
 
     async createFastCode(req, res) {
@@ -410,76 +412,9 @@ module.exports =
         var merchantKey = req.headers.authorization
         let dataResponse = ''
         let fastCodeObject = []
-        // if(!req.body.businessName||req.body.businessName==''){
-        //     console.log("no name")
-        //     message = "Business name is missing"
-        //     status = 400
-        //     res.json({ status: status, data: dataResponse, message: message })
-        //     return
-        // }
+       
         try {
-            // await merchantStore.findOne({ "storename": req.body.businessName }).then(async (val) => {
-            // console.log("valueeeeeeeeee",val)
-            // if(val.clientapikey == req.headers.authorization ){          
-            // await fastPaymentCode.findOne({ "merchantId": merchantKey }).then(async (val) => {
-            //     if (val) {
-            //         fastCodeObject = val
-            //         console.log("data........", fastCodeObject)
-            //         for (i = 0; i < fastCodeObject.fastCodes.length; i++) {
-            //             if (fastCodeObject.fastCodes[i].businessName == req.body.businessName) {
-            //                 dataResponse = fastCodeObject.fastCodes[i]
-            //                 console.log("data........", dataResponse)
-            //             }
-            //         }
-            //         if (dataResponse == 0) {
-            //             let code = parseInt(Math.random() * (1000000 - 100000));
-            //             fastCodeObject.fastCodes.push({ "businessName": req.body.businessName, "fastCode": code, "status": "active" })
-            //             console.log("Object is", fastCodeObject.fastCodes)
-            //             await fastPaymentCode.updateOne({ 'id': fastCodeObject.id },
-            //                 {
-            //                     $set:
-            //                     {
-            //                         "fastCodes": fastCodeObject.fastCodes
-            //                     }
-            //                 })
-            //                 .then(async (val) => {
-            //                     dataResponse = { "businessName": req.body.businessName, "fastCode": code, "status": "active" }
-            //                     message = 'success'
-            //                     console.log(val)
-            //                 })
-            //         }
-            //     }
-
-            //     else {
-            //         console.log(req.body.businessName)
-            //         let businessName = req.body.businessName
-            //         let code = parseInt(Math.random() * (1000000 - 100000));
-            //         let fastCodeObject = { "businessName": businessName, "fastCode": code, "status": "active" }
-            //         //console.log("------------",req.body.businessName)            
-            //         try {
-            //             let new_record = new fastPaymentCode({
-            //                 id: mongoose.Types.ObjectId(),
-            //                 businessName: req.body.businessName,
-            //                 merchantId: merchantKey,
-            //                 fastCodes: fastCodeObject,
-            //             })
-            //             console.log(new_record)
-            //             response = await new_record.save()
-            //             message = "fast code created"
-            //             status = 200
-
-            //         }
-            //         catch (error) {
-            //             message = error
-            //             status = 400
-            //             dataResponse = 'null'
-            //         }
-            //     }
-            // })}
-            // else {message = "Store does not exist"
-            //     status = 400
-            //     dataResponse = 'null'}
-            // })
+           
             console.log("Math", Math.floor(Math.random() * 100000))
             const fastPayCode = new fastPaymentCode({
                 id: mongoose.Types.ObjectId(),

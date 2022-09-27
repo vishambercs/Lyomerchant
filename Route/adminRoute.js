@@ -92,14 +92,15 @@ router.post('/updateCurrency',                                Auth.is_admin,Curr
 
 "============================ Feed Wallet Controller ==============================="
 
-router.post('/createFeedWallets',                             Auth.is_admin,feedWalletController.createFeedWallets);
-router.post('/addressFeeding',                                Auth.is_admin,feedWalletController.addressFeeding);
-router.post('/allFeedWallets',                                Auth.is_admin,feedWalletController.allFeedWallets);
-router.post('/deleteWallets',                                 Auth.is_admin,feedWalletController.deleteWallets);
-router.post('/checkbtcbalance',                               feedWalletController.checkbtcbalance);
-router.post('/transferbtcoin',                               feedWalletController.transferbtcoin);
-router.post('/checktransstatus',                               feedWalletController.checktransstatus);
-router.post('/createfw',                                      Auth.is_admin,feedWalletController.createFeedingwalletby);
+router.post('/createFeedWallets',                               Auth.is_admin,feedWalletController.createFeedWallets);
+router.post('/addressFeeding',                                  Auth.is_admin,feedWalletController.addressFeeding);
+router.post('/allFeedWallets',                                  Auth.is_admin,feedWalletController.allFeedWallets);
+router.post('/deleteWallets',                                   Auth.is_admin,feedWalletController.deleteWallets);
+router.post('/checkbtcbalance',                                 Auth.is_admin, feedWalletController.checkbtcbalance);
+router.post('/transferbtcoin',                                  Auth.is_admin,  feedWalletController.transferbtcoin);
+router.post('/checktransstatus',                                Auth.is_admin,  feedWalletController.checktransstatus);
+router.post('/createfw',                                        Auth.is_admin,feedWalletController.createFeedingwalletby);
+router.post('/checkbalance',                                     Auth.is_admin,feedWalletController.checkbalance);
 
 router.post('/transferbtcoin',                                feedWalletController.transferbtcoin);
 "============================ Category ==============================="

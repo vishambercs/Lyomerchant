@@ -152,8 +152,8 @@ async function update_orphane(id, status, remarks,pooldata) {
     //     "amount"        :   "Please Do Manually because old transcation" 
     //    }
     // }
-    //     constant.transid = ""
-    //     constant.addressBalance = [];
+    //   constant.transid = ""
+    //   constant.addressBalance = [];
     //   let email_response = await emailSending.sendEmailFunc(emailTemplateName)
      
 }
@@ -164,9 +164,9 @@ async function Balance_Cron_Job() {
         let transid = ""
         let hot_wallet_trans_log = await hotWalletTransLogs.findOne({
             $or: [
-                { status: 1 },
-                { status: 5 },
-                { status: 6 },
+                { status: 1  },
+                { status: 5  },
+                { status: 6  },
                 { status: 12 },
                 { status: 11 },
                 { status: 14 },
@@ -377,22 +377,10 @@ async function Check_KYT_Address()
             return JSON.stringify({ status: 200, data: "No KYT Remaining", message: ""})
         }
         let kycurl = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", withdraw_data.external_id)
-        let response = await axios({
-            method: 'get',
-            url: kycurl,
-            headers: 
-            {
-               'Authorization': process.env.KYC_URL_TOKEN ,
-            }
-        })
+        let response = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
         let withdraw = await withDrawLog.updateMany({ id : withdraw_data.id }, { $set: { queue_type  :  1 }})
-        let kytlog = await kytlogs.insertMany([{
-            id: mongoose.Types.ObjectId(),
-            logs: JSON.stringify(response.data.body),
-            withdraw_id: withdraw_data.id,
-            type : "alerts"
-        }])
-         return JSON.stringify({ status: 400, data: response.data.body, message: ""})
+        let kytlog = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(response.data.body), withdraw_id: withdraw_data.id,type : "alerts"}])
+        return JSON.stringify({ status: 200, data: response.data.body, message: ""})
     }
     catch (error) 
     {
