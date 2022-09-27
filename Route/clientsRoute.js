@@ -108,7 +108,7 @@ router.post('/merchantWithdrawBalance',                             withdrawCont
 router.post('/createPerferedNetwork',                               Auth.is_merchant,perferedNetworkController.create_perfered_Network);
 router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
 "============================ HOSTRED PAYMENT  ==============================="
-router.post('/createHostePayment',                                  Auth.verify_variables,PaymentHostedController.createHostePayment);
+router.post('/createHostePayment',                                    Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
 
 "============================ clientapikey  ==============================="
 router.post('/getapistatus',                                        clientapicontroller.getapikey);
