@@ -19,9 +19,6 @@ const perferedNetworkController     = require('../controllers/Masters/perferedNe
 const PaymentHostedController       = require('../controllers/hostedpayment/PaymentHostedController');
 const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
 
-
-
-
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
 router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
@@ -61,11 +58,14 @@ router.post('/tokenAndUpdatePassword',               clientsController.checkTheT
 router.post('/resetPassword',                        clientsController.ResetPassword);
 router.post('/updateMerchantProfileImage',           clientsController.updateMerchantProfileImage);
 "=============Merchant-Sites==========================================="
+
 router.post('/allMerchantSites',                         merchantSitesController.allMerchantSites);
 router.post('/deleteMerchantSite',                       merchantSitesController.deleteMerchantSite);
 router.post('/savemerchantsite',                         merchantSitesController.savemerchantsite);
 router.post('/updateMerchantSite',                       merchantSitesController.updateMerchantSite);
+
 "=============MerchantStore==========================================="
+
 router.post('/createMerchantStore',                         Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.createMerchantStore);
 router.get('/allMerchantStore',                             merchantstoreController.allMerchantStore);
 router.post('/merchantstore',                               Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.MerchantStore);
@@ -77,46 +77,57 @@ router.post('/getAllStoreDeviceForMerchantAdmin',           Auth.store_have_acce
 router.post('/disableordeletedevices',                      Auth.store_have_access,merchantStoreDeviceController.disableordelete);
 router.post('/posGetTransByStorekey',                       Auth.store_have_access,posTransactionPoolController.getTranscationDetailsByStoreID);
 "=============Pos Merchant Wallet==========================================="
+
 router.post('/assignPosMerchantWallet',                     Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                               Auth.check_Store_Device_Access,posTransactionPoolController.getShopTransList);
 router.get('/posallCurrency',                               Auth.check_Store_Device_Access,CurrencyController.allCurrency);
 router.post('/pospriceConversition',                        Auth.check_Store_Device_Access,CurrencyController.priceConversition);
 router.post('/posallNetworks',                              Auth.check_Store_Device_Access,networkController.allNetworkForClient);
 router.post('/posGetTransByDeviceID',                       Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
+
 "============================ Currency Master ==============================="
+
 router.get('/allCurrency',                                      CurrencyController.allCurrency);
 router.post('/priceConversition',                               CurrencyController.priceConversition);
+
 "============================ NETWORK Master ==============================="
+
 router.post('/allNetworks',                                     Auth.is_merchant,networkController.allNetworkForClient);
+
 "============================ Category Master ==============================="
+
 router.post('/createClientCategory',                            Auth.is_merchant,merchantcategory.createClientCategory);
 router.get('/allcategory',                                      Auth.is_merchant,categoryController.allcategory);
 router.get('/getClientCategory',                                Auth.is_merchant,merchantcategory.getClientCategory);
 router.post('/cancelClientRequest',                             Auth.is_merchant,merchantcategory.cancelClientRequest);
+
 "============================ WEB PLUGIN ==============================="
+
 router.post('/assignMerchantWallet',                         Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
 router.post('/pluginallNetworks',                            Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allNetworkForClient);
 router.post('/pluginallCurrency',                            Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
 router.post('/pluginpriceConversition',                      Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversition);
+
 "============================ Withdraw  ==============================="
+
 router.post('/setWithdrawSettings',                                 withdrawController.setWithdrawSettings);
 router.get('/getWithdrawSettings',                                  withdrawController.getWithdrawSettings);
 router.post('/merchantBalance',                                     withdrawController.merchantBalance);
 router.post('/merchantWithdrawBalance',                             withdrawController.withdrawBalance);
 
+
 "============================ perfered Network Controller  ==============================="
+
 router.post('/createPerferedNetwork',                               Auth.is_merchant,perferedNetworkController.create_perfered_Network);
 router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
+
 "============================ HOSTRED PAYMENT  ==============================="
-router.post('/createHostePayment',                                    Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
+
+router.post('/createHostePayment',                                  Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
 
 "============================ clientapikey  ==============================="
+
 router.post('/getapistatus',                                        clientapicontroller.getapikey);
-
-
-
-
-
 
 module.exports = router;
 

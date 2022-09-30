@@ -24,6 +24,12 @@ const kytlogsSchema = new mongoose.Schema({
         required: true,
         default : "withdrawal-attempts"
     },
+    status :
+    {
+        type        : Number,
+        required    : false,
+        default     : "0"
+    },
   
 },
 { timestamps: true }

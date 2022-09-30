@@ -56,7 +56,8 @@ module.exports =
             const network = await networks.findOne({ id: req.body.network_id })
             const withdrawLog = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
             const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
-            if (withdrawLog != null) {
+            if (withdrawLog != null) 
+            {
                 res.json({ status: 200, data: {}, message: "You have already a request in pending" })
             }
             else if (req.body.amount > clientWallet.balance) {
@@ -64,6 +65,7 @@ module.exports =
             }
             else if (network != null) {
                 let transfer_fee = ((parseFloat(req.body.amount) / 10000) + network.processingfee) * 0.03
+                let currentDateTemp = Date.now();
                 const withdrawLog = new withdrawLogs({
                     id: crypto.randomBytes(20).toString('hex'),
                     api_key: req.headers.authorization,
@@ -73,6 +75,7 @@ module.exports =
                     address_to: req.body.address_to,
                     address_from: " ",
                     transcation_hash: " ",
+                    timestamps : new Date().getTime(),
                     status: 0
                 });
                 withdrawLog.save().then(async (val) => {
@@ -102,7 +105,7 @@ module.exports =
     async update_withdraw_request(req, res) {
         try {
             await withdrawLogs.findOneAndUpdate(
-                { id: req.body.id, status: 1 },
+                { id: req.body.id, status: 3 },
                 {
                     $set:
                     {
@@ -131,6 +134,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
+    
     async get_client_wihdraw(req, res) {
         try {
             await withdrawLogs.aggregate(

@@ -105,9 +105,9 @@ async function saved_Trans(id, status, remarks,poolwalletid,pooldata,address_bal
 
     var emailTemplateName =
     {
-        "emailTemplateName": "transcationpwtohw.ejs",
-        "to": process.env.FEEDING_EMAIL_REMINDER,
-        "subject": "Confirmation of Transcation From Pool Wallet To Hot Wallet",
+        "emailTemplateName" :   "transcationpwtohw.ejs",
+        "to"                :   process.env.FEEDING_EMAIL_REMINDER,
+        "subject"           :   "Confirmation of Transcation From Pool Wallet To Hot Wallet",
         "templateData": 
         { 
         "transdetails"  :  transdetails ,
@@ -371,15 +371,39 @@ async function Check_KYT_Address()
     try 
     {
         let withdraw_data = await withDrawLog.findOne({ queue_type : 0 })
+       
         if(withdraw_data == null)
         {
+            
             let withdrawdata = await withDrawLog.updateMany({ queue_type : 1 }, { $set: { queue_type  :  0 }})
             return JSON.stringify({ status: 200, data: "No KYT Remaining", message: ""})
         }
-        let kycurl = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", withdraw_data.external_id)
-        let response = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
-        let withdraw = await withDrawLog.updateMany({ id : withdraw_data.id }, { $set: { queue_type  :  1 }})
-        let kytlog = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(response.data.body), withdraw_id: withdraw_data.id,type : "alerts"}])
+        console.log(withdraw_data.timestamps ,withdraw_data.id)
+        if(withdraw_data.timestamps == undefined)
+        {
+            let withdrawdata = await withDrawLog.findOneAndUpdate({ id : withdraw_data.id }, { $set: { timestamps  :  new Date().getTime() }},{ returnDocument: 'after' })
+        }
+       
+        let kycurl    = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", withdraw_data.external_id)
+        let response  = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
+        let status    = Object.keys(response.data.body).length > 0 ? 2 : 1
+        let kytlog    = await kytlogs.insertMany([{
+            status      : status,
+            id          : mongoose.Types.ObjectId(), 
+            logs        : JSON.stringify(response.data.body), 
+            withdraw_id : withdraw_data.id,
+            type        : "alerts"
+        }])
+        const previousdate = new Date(parseInt(withdraw_data.timestamps));
+        const currentdate = new Date().getTime()
+        var diff = currentdate - previousdate.getTime();
+        var minutes = (diff / 60000)
+        if(minutes >= 3600 && status == 1)
+        {
+            status = 3
+        }
+            
+        let withdrawdata = await withDrawLog.findOneAndUpdate({ id : withdraw_data.id }, { $set: { status : status , queue_type  :  status }},{ returnDocument: 'after' })
         return JSON.stringify({ status: 200, data: response.data.body, message: ""})
     }
     catch (error) 

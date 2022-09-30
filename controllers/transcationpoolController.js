@@ -30,7 +30,7 @@ module.exports =
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
                 // let account = await poolWallet.findOne({ network_id: networkType, status: 0 })
                 let account     = await poolwalletController.getPoolWalletID(networkType) 
-                console.log("account",account)
+                
                 const transactionPool = new transactionPools({
                     id: crypto.randomBytes(20).toString('hex'),
                     api_key         : req.headers.authorization,
@@ -45,7 +45,7 @@ module.exports =
                     timestamps      : new Date().getTime()
                 });
                 transactionPool.save().then(async (val) => {
-                    console.log(val)
+                    
                     await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
                     let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
                     res.json({ status: 200, message: "Assigned Merchant Wallet Successfully", data: data })
