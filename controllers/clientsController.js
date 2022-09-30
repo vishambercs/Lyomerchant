@@ -302,7 +302,7 @@ module.exports =
         try {
 
             const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
-            var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+            var otp = otpGenerator.generate(6, { digits: true ,specialChars :false,lowerCaseAlphabets :false,upperCaseAlphabets :false,});
             const password_hash = bcrypt.hashSync(otp, salt);
             let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { password: password_hash } }, { $new: true })
             if (val != null) {

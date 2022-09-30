@@ -127,9 +127,10 @@ module.exports =
     async forgetThePassword(req, res) {
         try {
             let email = req.body.email
-            var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+            var otp = otpGenerator.generate(6, { digits: true ,specialChars :false,lowerCaseAlphabets :false,upperCaseAlphabets :false,});
             let admin = await admins.findOneAndUpdate({ 'email': email }, { $set: { otptoken: otp, status: false } }, { $new: true })
-            if (admin == null) {
+            if (admin == null) 
+            {
                 res.json({ status: 200, data: {}, message: "Admin did not find." })
             }
             else {
