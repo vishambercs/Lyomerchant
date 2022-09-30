@@ -9,8 +9,6 @@ var payLinkRoute    = require('./Route/paylinkRoute');
 var hotWalletRoute  = require('./Route/hotWalletRoute');
 var withdrawRoute   = require('./Route/withdrawRoute');
 var adminRoute      = require('./Route/adminRoute');
-
-
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');

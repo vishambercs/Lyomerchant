@@ -66,7 +66,7 @@ router.post('/sendemail',                                      Auth.is_admin,adm
 router.post('/transcationListByNetworkID',                     Auth.is_admin,transcationpoolController.get_Trans_by_Network_ID_For_Admin);
 router.post('/forgetThePassword',                              adminController.forgetThePassword);
 router.post('/VerfiyTheCode',                                  Auth.is_admin,adminController.VerfiyTheCode);
-router.post('/updatePassword',                                 Auth.is_admin,adminController.updateThePassword);
+router.post('/updatePassword',                                 adminController.updateThePassword);
 router.post('/resettwofa',                                     Auth.is_admin,adminController.reset_two_fa);
 router.post('/resetMerchantTwoFa',                             Auth.is_admin,clientsController.reset_merchant_two_fa);
 router.post('/changeMerchantEmail',                            Auth.is_admin,clientsController.changeMerchantEmail);
