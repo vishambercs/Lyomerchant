@@ -98,10 +98,10 @@ async function saved_Trans(id, status, remarks,poolwalletid,pooldata,address_bal
     )
    
     let poolwallet = await poolWallets.findOneAndUpdate({ id: poolwalletid }, { $set: { status: 0, balance: 0 } })
-    let type = pooldata[0].transactionPoolsDetails.length > 0  ? "WEB" : ""
-    type = pooldata[0].postransactionpoolsDetails.length > 0  ? "POS" : "" 
-    type = pooldata[0].paymentlinkDetails.length > 0  ? "PAY-LINK" : "" 
-    let transdetails = type+":"+pooldata[0].merchant_trans_id
+    let WEB = pooldata[0].transactionPoolsDetails.length > 0  ? "WEB" : ""
+    let POS = pooldata[0].postransactionpoolsDetails.length > 0  ? "POS" : "" 
+    let PAY_LINK = pooldata[0].paymentlinkDetails.length > 0  ? "PAY-LINK" : "" 
+    let transdetails = process.env.EMAIL_TYPE + (WEB+""+ POS +""+PAY_LINK) +" : "+pooldata[0].merchant_trans_id
 
     var emailTemplateName =
     {
