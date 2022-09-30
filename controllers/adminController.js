@@ -134,7 +134,9 @@ module.exports =
                 res.json({ status: 200, data: {}, message: "Admin did not find." })
             }
             else {
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
+                let url = process.env.FORGOTPASSWORD.replace("email", email);
+                url = url.replace("otpcode", otp);
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp,   "url":url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
                 res.json({ status: 200, data: email, message: "We send a code to your email." })
