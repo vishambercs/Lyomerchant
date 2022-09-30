@@ -306,8 +306,8 @@ module.exports =
             const password_hash = bcrypt.hashSync(otp, salt);
             let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { password: password_hash } }, { $new: true })
             if (val != null) {
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
-                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+                var emailTemplateName   = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
+                let email_response      = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
                 res.json({ status: 200, message: "We have changed the password . Please Check your email", data: { "email": req.body.email } })
             }
