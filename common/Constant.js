@@ -17,6 +17,13 @@ const posTransList        = []
 const paymenlinkTransList = []
 const paymenlinkIndex     = 0
 const addressBalance      = []
+const transstatus      = [{
+  "id":0, "title" : "Pending",
+  "id":1, "title" : "Completed",
+  "id":2, "title" : "Partial",
+  "id":3, "title" : "Completed",
+  "id":4, "title" : "Expired",
+}]
 const abi = 
 [
     {
@@ -78,6 +85,7 @@ module.exports =
     posTransList        : posTransList,
     postransindex       : postransindex,
     paymenlinkTransList : paymenlinkTransList,
-    paymenlinkIndex     : paymenlinkIndex
+    paymenlinkIndex     : paymenlinkIndex,
+    transstatus:transstatus
           
 }

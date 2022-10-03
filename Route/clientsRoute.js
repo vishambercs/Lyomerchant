@@ -18,6 +18,7 @@ const merchantcategory              = require('../controllers/Masters/merchantca
 const perferedNetworkController     = require('../controllers/Masters/perferedNetworkController');
 const PaymentHostedController       = require('../controllers/hostedpayment/PaymentHostedController');
 const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
+const commonController              = require('../controllers/Logs/commonController');
 
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
@@ -128,6 +129,13 @@ router.post('/createHostePayment',                                  Auth.paylink
 "============================ clientapikey  ==============================="
 
 router.post('/getapistatus',                                        clientapicontroller.getapikey);
+
+
+"============================ Common Controller  ==============================="
+
+router.post('/getTransStatus',                                        Auth.checkaccess,commonController.getTransStatus);
+
+
 
 module.exports = router;
 
