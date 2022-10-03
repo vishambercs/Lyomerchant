@@ -16,9 +16,8 @@ module.exports =
             let posTranPool = await posTransactionPool.findOne({"id":id, "api_key" : req.headers.authorization})
             let TranPool    = await transactionPool.findOne({"id":id, "api_key" : req.headers.authorization})
             let status      = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
-            status          = (status == "" && posTranPool != null) ? Constant.transstatus.filter(index => index.id == posTranPool.status) : status
-            status          = (status == "" && TranPool != null) ? Constant.transstatus.filter(index => index.id == TranPool.status) : status
-            
+            status          = (status.length > 0 && posTranPool != null) ? Constant.transstatus.filter(index => index.id == posTranPool.status) : status
+            status          = (status.length > 0 && TranPool != null) ? Constant.transstatus.filter(index => index.id == TranPool.status) : status
             let datarray = {"transaction_status" : (status.length > 0 ? status[0].title : "") , "transaction_id": req.body.transid ,   }
             
             
