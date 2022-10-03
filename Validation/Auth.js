@@ -45,13 +45,13 @@ module.exports =
                 next()
             }
             else {
-                res.json({ status: 400, data: {}, message: "You have not  access. Please create a request for this service." })
+                res.json({ status: 400, data: {}, message: "Invalid Request" })
             }
 
         }
         catch (error) {
             console.log("error", error)
-            res.json({ status: 401, data: {}, message: "You have not  access. Please create a request for this service." })
+            res.json({ status: 401, data: {}, message: "Invalid Request" })
         }
     },
 
