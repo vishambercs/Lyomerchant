@@ -594,9 +594,7 @@ async function get_Transcation_Paylink_Data(transkey) {
             {
                 "$project":
                 {
-                  
-                   
-                    "poolWallet._id": 0,
+                   "poolWallet._id": 0,
                     "poolWallet.status": 0,
                     "poolWallet.__v": 0,
                     "networkDetails.__v": 0,
@@ -609,6 +607,8 @@ async function get_Transcation_Paylink_Data(transkey) {
         ])
     return pooldata
 }
+
+
 module.exports =
 {
     get_Transcation_Paylink_Data : get_Transcation_Paylink_Data,
