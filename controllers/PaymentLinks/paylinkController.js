@@ -126,8 +126,9 @@ module.exports =
 
     async verifyPaymentLink(req, res) {
         try {
+            console.log("=======paymentId===========",req.body.paymentId)
             let paylinksData = await paylinkPayment.aggregate([
-                { $match: { id: req.body.paymentId , status : 0 } },
+                { $match: { id: req.body.paymentId  } },
                 {
                     $lookup: {
                         from: "invoices", // collection to join
@@ -171,7 +172,11 @@ module.exports =
                 }
 
             ])
-         
+            if (paylinksData[0].status != 0 ) 
+            {
+               return res.json({ status: 200, data: paylinksData, message: "Success" })
+            }
+
            
             if (paylinksData[0].timestamps == undefined) 
             {
