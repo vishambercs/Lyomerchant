@@ -1,27 +1,26 @@
-
-
 <div style="background-color:#ebecf0;padding:2rem 0">
     <div
         style="margin:0 auto;max-width:600px;text-align:center;padding:0rem 0 3rem 0;background-color:#ffffff;border-radius:33px">
         <img src="https://www.lyomerchant.com/img/logo.png"
             class="CToWUd" style="width: 100%; height: 200px; object-fit: contain;">
-        <h2> <small style="font-size: 14px;">Lyo-Merchant</small></small></h2>
-        <h3>Trans-ID : <%= data.transdetails%> </h3>
+        <h2>LYOMERCHANT <br/><small style="font-size: 14px;">Lyo-Merchant Payment Confirmation</small></small></h2>
+        <h3>Trans-ID : <%=  data.transid%> </h3>
+        <h3>Store Name : <%= data.storename%> </h3>
         <div>
                     <p style="padding:2rem 1rem 0  1rem">Following are the Details </p>
 
                     <table style=" font-family: arial, sans-serif; border-collapse: collapse; width: 100%;">
                         <tr>
-                          <th style = "border: 1px solid #dddddd; text-align: left;padding: 8px;">Pool Wallet Address</th>
-                          <th style = "border: 1px solid #dddddd; text-align: left;padding: 8px;">Hot Wallet Address</th>
+                          <th style = "border: 1px solid #dddddd; text-align: left;padding: 8px;">Network</th>
+                          <th style = "border: 1px solid #dddddd; text-align: left;padding: 8px;">Coin/Token</th>
                           <th style = "border: 1px solid #dddddd; text-align: left;padding: 8px;">Amount</th>
-                          <th style = "border: 1px solid #dddddd; text-align: left;padding: 8px;">Network Details</th>
+                          <th style = "border: 1px solid #dddddd; text-align: left;padding: 8px;">Status</th>
                         </tr>
                         <tr>
-                          <td style = "border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.pooladdress%></td>
-                          <td style = "border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.hotaddress%></td>
-                          <td style = "border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.amount%></td>
                           <td style = "border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.network%></td>
+                          <td style = "border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.coin%></td>
+                          <td style = "border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.amount%></td>
+                          <td style = "border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.status%></td>
                         </tr>
                      
                     </table>        

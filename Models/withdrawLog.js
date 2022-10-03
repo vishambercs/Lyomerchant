@@ -71,6 +71,12 @@ const withdrawSchema = new mongoose.Schema
             required: false,
             deafult: 0,
         },
+        timestamps: 
+        {
+            type: String,
+            required: true,
+            deafult: 0,
+        },
     },
         { timestamps: true }
     )

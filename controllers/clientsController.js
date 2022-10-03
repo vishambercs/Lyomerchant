@@ -116,7 +116,7 @@ module.exports =
                     companyname     : (req.body.companyname == "" || req.body.companyname == undefined) ?  "" : req.body.companyname , 
                 });
                 client.save().then(async (val) => {
-                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
+                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp,"url":"" } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                     res.json({ status: 200, message: "We sent token to your Email", data: val })
                 }).catch(error => {
@@ -139,7 +139,7 @@ module.exports =
             .then(async (val) => {
                
                 if (val != null) {
-                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
+                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp,"url":""  } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                     res.json({ status: 200, message: "Verification Email Sent", data: val.email })
                 }
@@ -302,12 +302,12 @@ module.exports =
         try {
 
             const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
-            var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+            var otp = otpGenerator.generate(6, { digits: true ,specialChars :false,lowerCaseAlphabets :false,upperCaseAlphabets :false,});
             const password_hash = bcrypt.hashSync(otp, salt);
             let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { password: password_hash } }, { $new: true })
             if (val != null) {
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
-                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+                var emailTemplateName   = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp,"url":"" } }
+                let email_response      = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
                 res.json({ status: 200, message: "We have changed the password . Please Check your email", data: { "email": req.body.email } })
             }
@@ -987,7 +987,7 @@ module.exports =
             var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
             let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, loginstatus: false } }, { $new: true })
             if (val != null) {
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp } }
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp,"url":"" } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
                 res.json({ status: 200, message: "We have sent token to your email.Please check your email", data: {} })

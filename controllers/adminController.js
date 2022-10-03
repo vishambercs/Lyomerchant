@@ -127,13 +127,16 @@ module.exports =
     async forgetThePassword(req, res) {
         try {
             let email = req.body.email
-            var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+            var otp = otpGenerator.generate(6, { digits: true ,specialChars :false,lowerCaseAlphabets :false,upperCaseAlphabets :false,});
             let admin = await admins.findOneAndUpdate({ 'email': email }, { $set: { otptoken: otp, status: false } }, { $new: true })
-            if (admin == null) {
+            if (admin == null) 
+            {
                 res.json({ status: 200, data: {}, message: "Admin did not find." })
             }
             else {
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp } }
+                let url = process.env.FORGOTPASSWORD.replace("email", email);
+                url = url.replace("otpcode", otp);
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp,   "url":url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
                 res.json({ status: 200, data: email, message: "We send a code to your email." })
