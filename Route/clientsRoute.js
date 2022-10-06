@@ -19,6 +19,8 @@ const perferedNetworkController     = require('../controllers/Masters/perferedNe
 const PaymentHostedController       = require('../controllers/hostedpayment/PaymentHostedController');
 const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
 const commonController              = require('../controllers/Logs/commonController');
+const ipnController                 = require('../controllers/Masters/ipnController');
+
 
 router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
 router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
@@ -135,7 +137,9 @@ router.post('/getapistatus',                                        clientapicon
 
 router.post('/getTransStatus',                                        Auth.checkaccess,commonController.getTransStatus);
 
-
+"============================IPN Controller==============================="
+router.post('/createIPNLink',Auth.is_merchant,ipnController.create_IPN_Link);
+router.post('/getIPNLink',Auth.is_merchant,ipnController.get_IPN_Link);
 
 module.exports = router;
 
