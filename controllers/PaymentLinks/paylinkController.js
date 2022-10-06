@@ -126,8 +126,9 @@ module.exports =
 
     async verifyPaymentLink(req, res) {
         try {
+            
             let paylinksData = await paylinkPayment.aggregate([
-                { $match: { id: req.body.paymentId , status : 0 } },
+                { $match: { id: req.body.paymentId  } },
                 {
                     $lookup: {
                         from: "invoices", // collection to join
@@ -171,7 +172,22 @@ module.exports =
                 }
 
             ])
-         
+
+            if (paylinksData[0].status == 1 ) 
+            {
+               return res.json({ status: 400, data: {}, message: "Paylink is expired" })
+            }
+
+            if (paylinksData[0].status != 0 ) 
+            {
+               return res.json({ status: 200, data: paylinksData, message: "Success" })
+            }
+
+            if (paylinksData[0].status != 0 ) 
+            {
+               return res.json({ status: 200, data: paylinksData, message: "Success" })
+            }
+
            
             if (paylinksData[0].timestamps == undefined) 
             {
@@ -221,7 +237,7 @@ module.exports =
                 amount          : req.body.amount,
                 currency        : req.body.currency,
                 callbackURL     : req.body.callbackURL,
-                errorURL     : req.body.errorURL,
+                errorURL        : req.body.errorURL,
                 payLinkId       : req.body.payLinkId,
                 orderType       : req.body.orderType,
                 clientToken     : req.body.token,
@@ -405,7 +421,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async createFastCode(req, res) {
         let message = ''
         let status = 200
@@ -436,7 +451,6 @@ module.exports =
         }
         res.json({ status: status, data: dataResponse, message: message })
     },
-
     async deleteFastCode(req, res) {
         let message = ''
         let status = 200
