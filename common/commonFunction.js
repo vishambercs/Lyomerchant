@@ -137,11 +137,11 @@ async function getBalance(transdata, transData) {
             addressObject.networkDetails[0].contractAddress,
             addressObject.poolWallet[0].privateKey
         )
-        console.log("BalanceOfAddress",BalanceOfAddress)  
+       
         amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
         
         const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
-        let GasFee                      =  await transUtility.calculateGasFee
+        let GasFee      =  await transUtility.calculateGasFee
         (
             addressObject.networkDetails[0].nodeUrl, addressObject.networkDetails[0].libarayType, 
             addressObject.poolWallet[0].address, 
@@ -158,7 +158,7 @@ async function getBalance(transdata, transData) {
             let get_transcation_response    = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
             let trans_data                  = await getTranscationDataForClient(addressObject.id)
             let logData                     = { "transcationDetails": trans_data[0] }
-            let previouspoolwallet = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+            let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
             if(previouspoolwallet != null)
             {
                 let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
@@ -171,6 +171,7 @@ async function getBalance(transdata, transData) {
                 let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
                 let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
                 let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
+                 
             }
             response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
         }
@@ -213,6 +214,7 @@ async function updateClientWallet(client_api_key, networkid, merchantbalance, pr
 }
 async function getTranscationList(address, trans_id, network_id) {
     response = {}
+    
     // let network_details = await network.findOne({ id: network_id })
     // var URL = network_details.transcationurl
     // if (network_details.cointype == "Token") {
@@ -387,8 +389,6 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
     }
 
 }
-
-
 
 module.exports =
 {

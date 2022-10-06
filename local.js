@@ -17,12 +17,11 @@ const Web3 = require('web3');
 var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
 var app = express();
-// const https              = require('https');
 const https = require('http');
-// const https             = require('https');
 const Utility = require('./common/Utility');
 var os = require('os');
 require('dotenv').config()
+
 app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
@@ -63,6 +62,10 @@ cron.schedule('5 * * * * *', async() => {
     console.log('running a task every minute',response);
 });
 
+cron.schedule('1 * * * * *', async() => {
+    let response = await cornJobs.Check_KYT_Address()
+    console.log('running a task every minute',response);
+});
 
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);

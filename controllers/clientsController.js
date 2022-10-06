@@ -237,11 +237,11 @@ module.exports =
                     res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
                 }
                 else if (password_status == true) {
-                    val["api_key"] = ""
-                    val["hash"] = ""
-                    val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
-                    var jwt_token = jwt.sign({ id: val.id }, process.env.AUTH_KEY, { expiresIn: "1h" });
-                    let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
+                    val["api_key"]   = ""
+                    val["hash"]      = ""
+                    val["qrcode"]    = val["two_fa"] == false ? val["qrcode"] : ""
+                    var jwt_token    = jwt.sign({ id: val.id }, process.env.AUTH_KEY, { expiresIn: "1h" });
+                    let wallet       = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
                     val["authtoken"] = jwt_token
                     res.json({ "status": 200, "data": val, "message": "Successfully Login" })
                 }
@@ -251,11 +251,11 @@ module.exports =
 
             }).catch(error => {
                 console.log("get_clients_data", error)
-                // res.json({ "error": error })
                 res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
             })
         }
-        catch (error) {
+        catch (error) 
+        {
             console.log("error", error)
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }

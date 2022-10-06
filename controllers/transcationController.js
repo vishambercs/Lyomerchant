@@ -16,7 +16,6 @@ module.exports =
 
     async get_transcation_balance_according_to_status(req, res) {
         try {
-          
             poolWallet.aggregate(
                 [
                     {
