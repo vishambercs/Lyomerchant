@@ -2,6 +2,9 @@ const ejs = require('ejs');
 const fs = require('fs');
 const Web3 = require('web3');
 const axios = require('axios')
+var axios = require('axios');
+
+
 var stringify = require('json-stringify-safe');
 const transcationLog = require('../Models/transcationLog');
 const network = require('../Models/network');
@@ -26,6 +29,7 @@ const transactionPools = require('../Models/transactionPool');
 const feedWallets = require('../Models/feedWallets');
 const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
+const IPNS = require('../../Models/IPN');
 const emailSending = require('../common/emailSending');
 
 async function amountCheck(previous, need, current) {
@@ -609,6 +613,82 @@ async function get_Transcation_Paylink_Data(transkey) {
 }
 
 
+async function callIPN(transkey) {
+    let id = transkey;
+    let pyTranPool   = await paymentLinkTransactionPool.findOne({ "id": id,  })
+    let posTranPool = await paymentLinkTransactionPool.findOne({ "id": id, })
+    let TranPool = await paymentLinkTransactionPool.findOne({ "id": id})
+    
+    let poolwallet = pyTranPool != null ? await poolWallets.findOne({ id: pyTranPool.poolwalletID }) : null
+    poolwallet = (poolwallet == null && posTranPool != null) ? await poolWallets.findOne({ id: posTranPool.poolwalletID }) : poolwallet
+    poolwallet = (poolwallet == null && TranPool != null) ? await poolWallets.findOne({ id: TranPool.poolwalletID }) : poolwallet
+
+    let payLink_data = pyTranPool != null ? await payLink.findOne({ id: pyTranPool.payLinkId}) : null
+    let invoice_data = payLink_data != null ? await invoice.findOne({ id: payLink_data.invoice_id}) : null
+
+    let networkDetails = poolwallet != null ? await network.findOne({ id: poolwallet.network_id}) : null
+    let status = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
+    status = (status.length > 0 && posTranPool != null) ? Constant.transstatus.filter(index => index.id == posTranPool.status) : status
+    status = (status.length > 0 && TranPool != null) ? Constant.transstatus.filter(index => index.id == TranPool.status) : status
+    
+    
+    let amount = pyTranPool != null                   ? pyTranPool.amount : 0
+    amount     = (amount == 0 && posTranPool != null) ?  posTranPool.amount : amount
+    amount     = (amount == 0 && TranPool != null)    ? TranPool.amount : amount
+    
+    let currency = pyTranPool != null                   ? pyTranPool.currency : 0
+    currency     = (amount == 0 && posTranPool != null) ?  posTranPool.currency : currency
+    currency     = (amount == 0 && TranPool != null)    ? TranPool.currency : currency
+
+    let apikey = pyTranPool != null                   ? pyTranPool.apikey : null
+    apikey     = (amount == 0 && posTranPool != null) ?  posTranPool.apikey : apikey
+    apikey     = (amount == 0 && TranPool != null)    ? TranPool.apikey : apikey
+
+  
+
+    let datarray = 
+    {
+        "transaction_status"    : (status.length > 0 ? status[0].title : ""),
+        "transaction_id"        : req.body.transid,
+        "address"               : (poolwallet != null ? poolwallet.address : ""),
+        "coin"                  : (networkDetails != null ? networkDetails.coin : ""),
+        "network"               : (networkDetails != null ? networkDetails.network : ""),
+        "crypto_amount"         :  amount,
+        "invoicenumber"         :  (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
+        "fiat_amount"           :  (invoice_data != null ) ? invoice_data.totalAmount : "" ,
+        "currency"              : currency   
+        
+    }
+    let IPN = await IPNS.findOne({ client_api_key: apikey,status: 1 } )
+    console.log("IPN IPN================",IPN);
+    if(IPN != null){
+        var data = qs.stringify( datarray);
+            var config = {
+              method: 'post',
+              url: IPN.ipn_url,
+              headers: { 
+                'Authorization': IPN.client_api_token, 
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              data : data
+            };
+            
+            await axios(config) .then(function (response) {
+              console.log("Success IPN================",JSON.stringify(response.data));
+            })
+            .catch(function (error) {
+              console.log("Error IPN================",error);
+            });
+          return   { status: 200, message: "Success" }
+            
+    }
+    else{
+        return   { status: 400, message: "Not Found" }
+    }
+
+ 
+}
+
 module.exports =
 {
     get_Transcation_Paylink_Data : get_Transcation_Paylink_Data,
@@ -685,9 +765,13 @@ module.exports =
                     let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
                     // let geturl                  = await Utility.Get_Request_By_Axios(addressObject.invoicedetails[0].callbackURL, {},{})
+                    
                     response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                     return JSON.stringify(response)
                 }
+                console.log("callIPN=======",addressObject.id)
+                let IPNData =  await callIPN(addressObject.id) 
+                console.log("IPNData=======",IPNData)
                 response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
             }
