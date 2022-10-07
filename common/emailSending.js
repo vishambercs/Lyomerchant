@@ -1,27 +1,11 @@
-
 const ejs = require('ejs');
 const fs = require('fs');
-const Web3 = require('web3');
-const axios = require('axios')
-var stringify = require('json-stringify-safe');
-const transcationLog = require('../Models/transcationLog');
-const network = require('../Models/network');
-var qs = require('qs');
-const Constant = require('./Constant');
-const Utility = require('./Utility');
-const clientWallets = require('../Models/clientWallets');
-const poolWallets = require('../Models/poolWallet');
-const transactionPools = require('../Models/transactionPool');
-const clients = require('../Models/clients');
-const hotWallets = require('../Models/hotWallets');
-const hot_wallet_trans_logs = require('../Models/hot_wallet_trans_logs');
 require("dotenv").config()
 var nodemailer = require('nodemailer');
-var mongoose = require('mongoose');
-const TronWeb = require('tronweb')
-const posTransactionPool = require('../Models/posTransactionPool');
+
+
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
-const transUtility = require('./transUtilityFunction');
+
 
 async function sendEmailFunc(paramters) {
     try {
