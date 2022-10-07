@@ -144,7 +144,6 @@ async function getBalance(transdata, transData) {
         if (minutes > 10) 
         {
             let transactionpool             = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4  } })
-
             let walletbalance               = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
             let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
             let totalBalnce                 = parseFloat(previouspoolwallet.balance) + walletbalance

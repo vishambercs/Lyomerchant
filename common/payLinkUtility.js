@@ -26,7 +26,7 @@ const transactionPools = require('../Models/transactionPool');
 const feedWallets = require('../Models/feedWallets');
 const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
-
+const emailSending = require('../common/emailSending');
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -630,14 +630,7 @@ module.exports =
             console.log("previousdate   ================", previousdate)
             console.log("currentdate    ================", currentdate)
             console.log("minutes        ================", minutes)
-            if (minutes > 10) {
-                let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
-                let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
-                console.log("=========invoicedetails=========",addressObject.invoicedetails)
-                // let geturl              = await Utility.Get_Request_By_Axios(addressObject.invoicedetails[0].errorURL, {},{})
-                response                = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
-                return JSON.stringify(response)
-            }
+            
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
@@ -645,7 +638,18 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
-            console.log("=========invoicedetails=========",addressObject.invoicedetails)
+            let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+            let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
+
+            if (minutes > 10) {
+                let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
+                let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
+                response                = { amountstatus: 4,"paymentdata":paymentData,status: 200, "data": {}, message: "Your Transcation is expired." };
+
+                return JSON.stringify(response)
+            }
+            
+         
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
            
@@ -681,17 +685,17 @@ module.exports =
                     let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
                     // let geturl                  = await Utility.Get_Request_By_Axios(addressObject.invoicedetails[0].callbackURL, {},{})
-                    response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
+                    response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                     return JSON.stringify(response)
                 }
-                response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
+                response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
             }
             else 
             {
                 let trans_data = await getTranscationDataForClient(addressObject.id, "POS")
                 let logData = { "transcationDetails": trans_data.length > 0 ? trans_data[0] : {} }
-                response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
+                response = { amountstatus: amountstatus,"paymentdata":paymentData, status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
             }
         }

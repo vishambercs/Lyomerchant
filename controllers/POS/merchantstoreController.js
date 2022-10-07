@@ -25,6 +25,8 @@ module.exports =
                         id: mongoose.Types.ObjectId(),
                         clientapikey: req.headers.authorization,
                         storename: req.body.storename,
+                        storeaddress: req.body.storeaddress,
+                        storephone: req.body.storephone,
                         storeapikey: api_key,
                         status: 0,
                         created_by: req.headers.authorization,
@@ -107,7 +109,16 @@ module.exports =
     },
     async updateMerchantStoreProfile(req, res) {
         try {
-            let update = await merchantstores.findOneAndUpdate({ 'clientapikey': req.headers.authorization } , { $set: { storeprofile:req.body.storeprofile} }, { $new: true } )
+
+
+            let update = await merchantstores.findOneAndUpdate({ 'id': req.body.id,'clientapikey': req.headers.authorization } , { $set: { 
+                
+                storeprofile    : req.body.storeprofile,
+                storename       : req.body.storename,
+                storeaddress    : req.body.storeaddress,
+                storephone      : req.body.storephone,
+
+            } }, { $new: true } )
             res.json({ status: 200, data: {update}, message: "update profile" })
         }
         catch (error) {
@@ -173,6 +184,8 @@ module.exports =
                         id: mongoose.Types.ObjectId(),
                         clientapikey: req.body.clientapikey,
                         storename: req.body.storename,
+                        storeaddress: req.body.storeaddress,
+                        storephone: req.body.storephone,
                         storeapikey: api_key,
                         status: 0,
                         created_by: req.headers.authorization,
