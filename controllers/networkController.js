@@ -229,13 +229,7 @@ module.exports =
     async updateprefixandimage(req, res) {
         try {
 
-            // // simpleImage = req.files.simpleImage;
-            // if (!req.files || Object.keys(req.files).length === 0) {
-            //     return res.status(400).send('No files were uploaded.');
-            // }
-            // else{
-            //     return res.status(400).send(req.files.simpleImage);
-            // }
+
 
             await Network.updateOne({ 'id': req.body.id },
                 {
@@ -340,7 +334,7 @@ module.exports =
 
     async update_kytnetworkid(req, res) {
         try {
-           await Network.findOneAndUpdate({ 'id': req.body.id },
+            await Network.findOneAndUpdate({ 'id': req.body.id },
                 {
                     kyt_network_id: req.body.kyt_network_id,
 
