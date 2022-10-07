@@ -14,7 +14,7 @@ module.exports =
                 id: mongoose.Types.ObjectId(),
                 client_api_key: req.headers.authorization,
                 ipn_url: req.body.ipn_url,
-                client_api_token : req.body.client_api_token,
+                client_api_token : req.body.ipn_secret_key,
                 status: 1,
                 created_by: req.headers.authorization,
                 created_at: new Date().toString(),
@@ -39,7 +39,7 @@ module.exports =
             let dataArray = {}
            
          if(IPN != null){
-                dataArray = {"client_api_token" : IPN.client_api_token ,"ipn_url" :IPN.ipn_url  }
+                dataArray = {"ipn_url" :IPN.ipn_url  }
             }
             res.json({ status: 200, data: dataArray, message: "message" })
         }

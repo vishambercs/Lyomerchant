@@ -138,8 +138,8 @@ router.post('/getapistatus',                                        clientapicon
 router.post('/getTransStatus',                                        Auth.checkaccess,commonController.getTransStatus);
 
 "============================IPN Controller==============================="
-router.post('/createIPNLink',Auth.is_merchant,ipnController.create_IPN_Link);
-router.post('/getIPNLink',Auth.is_merchant,ipnController.get_IPN_Link);
+router.post('/createIPNLink',ipnController.create_IPN_Link);
+router.post('/getIPNLink',ipnController.get_IPN_Link);
 
 module.exports = router;
 
