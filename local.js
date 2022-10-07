@@ -62,10 +62,10 @@ cron.schedule('5 * * * * *', async() => {
     console.log('running a task every minute',response);
 });
 
-cron.schedule('1 * * * * *', async() => {
-    let response = await cornJobs.Check_KYT_Address()
-    console.log('running a task every minute',response);
-});
+// cron.schedule('1 * * * * *', async() => {
+//     let response = await cornJobs.Check_KYT_Address()
+//     console.log('running a task every minute',response);
+// });
 
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);

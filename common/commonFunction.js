@@ -24,7 +24,7 @@ const TronWeb = require('tronweb')
 const posTransactionPool = require('../Models/posTransactionPool');
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
 const transUtility = require('./transUtilityFunction');
-
+const emailSending = require('../common/emailSending');
 const payLinkUtility = require('./payLinkUtility');
 const feedWalletController = require('../controllers/Masters/feedWalletController');
 
@@ -74,6 +74,14 @@ async function getTranscationData(transkey) {
                 }
             },
             {
+                $lookup: {
+                    from: "clients", // collection to join
+                    localField: "api_key",//field from the input documents
+                    foreignField: "api_key",//field from the documents of the "from" collection
+                    as: "clientsDetails"// output array field
+                }
+            },
+            {
                 "$project":
                 {
 
@@ -112,6 +120,7 @@ async function getTranscationDataForClient(transkey) {
 async function getBalance(transdata, transData) {
     try {
         let addressObject = transdata[0]
+        console.log("addressObject",addressObject.clientsDetails[0].email)
         let response = {}
         let account_balance_in_ether = 0
         let account_balance = 0
@@ -121,15 +130,6 @@ async function getBalance(transdata, transData) {
         const currentdate = new Date().getTime()
         var diff = currentdate - previousdate.getTime();
         var minutes = (diff / 60000)
-     
-        if (minutes > 10) 
-        {
-            let transactionpool = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
-            let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
-            response = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
-            return JSON.stringify(response)
-        }
-
         let BalanceOfAddress = await transUtility.CheckBalanceOfAddress(
             addressObject.networkDetails[0].nodeUrl,
             addressObject.networkDetails[0].libarayType,
@@ -137,11 +137,34 @@ async function getBalance(transdata, transData) {
             addressObject.networkDetails[0].contractAddress,
             addressObject.poolWallet[0].privateKey
         )
-       
-        amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
-        
-        const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
-        let GasFee      =  await transUtility.calculateGasFee
+
+        let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+        let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
+
+        if (minutes > 10) 
+        {
+            let transactionpool             = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4  } })
+
+            let walletbalance               = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
+            let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+            let totalBalnce                 = parseFloat(previouspoolwallet.balance) + walletbalance
+            let poolwallet                  = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 ,"balance": totalBalnce } })
+            response                        = { amountstatus: 4,"paymentdata":paymentData ,status: 200, "data": {}, message: "Your Transcation is expired." };
+            var emailTemplateName = 
+            { 
+                "emailTemplateName": "successtrans.ejs", 
+                "to": addressObject.clientsdetails[0].email, 
+                "subject": "Lyo-Merchant Expire Notification", 
+                "templateData": {"status": "Expired" ,"paymentdata":paymentData ,"transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+            }}
+            let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+            console.log("email_response exipred",email_response)
+            return JSON.stringify(response)
+        }
+        amountstatus     = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
+
+        const hotWallet  = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
+        let GasFee       =  await transUtility.calculateGasFee
         (
             addressObject.networkDetails[0].nodeUrl, addressObject.networkDetails[0].libarayType, 
             addressObject.poolWallet[0].address, 
@@ -158,28 +181,32 @@ async function getBalance(transdata, transData) {
             let get_transcation_response    = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
             let trans_data                  = await getTranscationDataForClient(addressObject.id)
             let logData                     = { "transcationDetails": trans_data[0] }
-            let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
-            if(previouspoolwallet != null)
-            {
-                let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
-                let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { balance: totalBalnce } })
-            }
             
             if (amountstatus == 1 || amountstatus == 3) 
             {
-                let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })  
+                let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+                let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
+                let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4,balance: totalBalnce } })
                 let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
                 let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
                 let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
-                 
+                var emailTemplateName = 
+                { 
+                "emailTemplateName": "successtrans.ejs", 
+                "to": addressObject.clientsDetails[0].email, 
+                "subject": "Lyo-Merchant Confirmation", 
+                "templateData": {"status": "Success" ,"transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                }}
+                let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+                console.log("email_response success",email_response)
             }
-            response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
+            response = { amountstatus: amountstatus,"paymentdata":paymentData ,status: 200, "data": logData, message: "Success" };
         }
         else 
         {
             let trans_data = await getTranscationDataForClient(addressObject.id)
             let logData = { "transcationDetails": trans_data.length  > 0 ? trans_data[0] : {} }
-            response = { amountstatus: amountstatus, status: 200, "data": {"logData":logData,"token_balance" : 0 ,"format_native_balance" : 0 ,"format_token_balance" : 0 , "native_balance" : 0} , message: "Success" };
+            response = { amountstatus: amountstatus,"paymentdata": paymentData , status: 200, "data": {"logData":logData,"token_balance" : 0 ,"format_native_balance" : 0 ,"format_token_balance" : 0 , "native_balance" : 0} , message: "Success" };
         }
         return JSON.stringify(response)
     }
@@ -191,7 +218,6 @@ async function getBalance(transdata, transData) {
 }
 
 async function updateClientWallet(client_api_key, networkid, merchantbalance, processingfee = 0.01) {
-    console.log("==============updateClientWallet============", client_api_key, networkid, merchantbalance)
     let val = await clientWallets.findOne({ api_key: client_api_key, network_id: networkid })
     if (val != null) {
         let clientWallet = await clientWallets.updateOne({ api_key: client_api_key, network_id: networkid }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * processingfee))) } })
