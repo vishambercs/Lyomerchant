@@ -25,6 +25,7 @@ const transactionPools = require('../Models/transactionPool');
 const feedWallets = require('../Models/feedWallets');
 const CryptoAccount     = require("send-crypto");
 var commonFunction = require('./commonFunction');
+const emailSending = require('../common/emailSending');
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
     if (net_amount > 0 && net_amount == need) {
@@ -456,7 +457,6 @@ module.exports =
     async getTrasnsBalance(transdata) {
         try {
             let addressObject = transdata[0]
-            // console.log("======addressObject======",addressObject)
             let response                 = {}
             let account_balance_in_ether = 0
             let token_balance            = 0
@@ -472,12 +472,6 @@ module.exports =
             console.log("previousdate    ================", previousdate)
             console.log("currentdate     ================", currentdate)
             console.log("minutes         ================", minutes)
-            if (minutes > 10) {
-                let transactionpool = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
-                let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
-                response = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
-                return JSON.stringify(response)
-            }
 
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
@@ -486,6 +480,28 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
+            
+            let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+            let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
+
+            if (minutes > 10) {
+                let transactionpool             = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
+                let walletbalance               = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
+                let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+                let totalBalnce                 = parseFloat(previouspoolwallet.balance) + walletbalance
+                let poolwallet                  = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 ,"balance": totalBalnce } })
+                response                        = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
+                var emailTemplateName = 
+                { 
+                    "emailTemplateName": "successtrans.ejs", 
+                    "to": addressObject.clientsdetails[0].email, 
+                    "subject": "Lyo-Merchant Expire Notification", 
+                    "templateData": {"status": "Expired" ,"paymentdata":paymentData ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                }}
+                let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+                console.log("email_response exipred",email_response)
+                return JSON.stringify(response)
+            }
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             console.log("BalanceOfAddress",BalanceOfAddress)  
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
@@ -502,36 +518,33 @@ module.exports =
                 let walletbalance       = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
                 let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
                 let transactionpool     = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
-                // let previouspoolwallet  = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
-                // if (previouspoolwallet != null) {
-                //     let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
-                //     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { balance: totalBalnce } })
-                // }
                 let logData = { "transcationDetails": [] }
                 if (amountstatus == 1 || amountstatus == 3) 
                 {
-                    let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
                     let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance, GasFee.data.fee)
-                    
-                    // var emailTemplateName = 
-                    // { 
-                    // "emailTemplateName": "successtrans.ejs", 
-                    // "to": addressObject.clientsdetails[0].email, 
-                    // "subject": "Lyo-Merchant Confirmation", 
-                    // "templateData": { "status": "Success" ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
-                    // } }
-                    // let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
-                    // console.log("email_response",email_response)
+                    let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+                    let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
+                    let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4, balance: totalBalnce } })
+                   
+                    var emailTemplateName = 
+                    { 
+                        "emailTemplateName": "successtrans.ejs", 
+                        "to": addressObject.clientsdetails[0].email, 
+                        "subject": "Lyo-Merchant Expire Notification", 
+                        "templateData": {"status": "Success" ,"paymentdata":paymentData ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                    }}
+                    let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+                    console.log("email_response Success",email_response)
                    
                 }
-                response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
+                response = { amountstatus: amountstatus, "paymentdata":paymentData ,status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
             }
             else {
                 let trans_data = await getTranscationDataForClient(addressObject.id, "POS")
                 let logData = { "transcationDetails": trans_data.length > 0 ? trans_data[0] : {} }
-                response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
+                response = { amountstatus: amountstatus, "paymentdata":paymentData ,status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
             }
         }

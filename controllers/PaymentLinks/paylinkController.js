@@ -211,7 +211,8 @@ module.exports =
 
     },
 
-    async cancelpaymentLink(req, res) {
+    async cancelpaymentLink(req, res) 
+    {
         try 
         { 
             let paylinks = await paylinkPayment.findOneAndUpdate({ 'id':req.body.paymentId  }, { $set: { status : 1 } } ,{ returnDocument: 'after' })
@@ -221,7 +222,6 @@ module.exports =
             console.log("error", error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
-
     },
     async assignPaymentLinkMerchantWallet(req, res) {
         try 

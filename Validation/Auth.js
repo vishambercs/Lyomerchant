@@ -188,6 +188,7 @@ module.exports =
             }
         }
         catch (error) {
+            console.log("error",error)
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
