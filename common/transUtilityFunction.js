@@ -476,15 +476,15 @@ module.exports =
                 let transactionpool = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
                 let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
                 response = { amountstatus: 4, status: 200, "data": {}, message: "Your Transcation is expired." };
-                var emailTemplateName = 
-                { 
-                "emailTemplateName": "successtrans.ejs", 
-                "to": addressObject.clientsdetails[0].email, 
-                "subject": "Lyo-Merchant Expire Notification", 
-                "templateData": {"status": "Expired" ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
-                } }
-                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
-                console.log("email_response",email_response)
+                // var emailTemplateName = 
+                // { 
+                // "emailTemplateName": "successtrans.ejs", 
+                // "to": addressObject.clientsdetails[0].email, 
+                // "subject": "Lyo-Merchant Expire Notification", 
+                // "templateData": {"status": "Expired" ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                // } }
+                // let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+                // console.log("email_response",email_response)
                 return JSON.stringify(response)
             }
 
@@ -511,11 +511,11 @@ module.exports =
                 let walletbalance       = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
                 let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
                 let transactionpool     = await posTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
-                let previouspoolwallet  = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
-                if (previouspoolwallet != null) {
-                    let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
-                    let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { balance: totalBalnce } })
-                }
+                // let previouspoolwallet  = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+                // if (previouspoolwallet != null) {
+                //     let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
+                //     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { balance: totalBalnce } })
+                // }
                 let logData = { "transcationDetails": [] }
                 if (amountstatus == 1 || amountstatus == 3) 
                 {
@@ -523,17 +523,17 @@ module.exports =
                     let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance, GasFee.data.fee)
                     
-                    var emailTemplateName = 
-                    { 
-                    "emailTemplateName": "successtrans.ejs", 
-                    "to": addressObject.clientsdetails[0].email, 
-                    "subject": "Lyo-Merchant Confirmation", 
-                    "templateData": { "status": "Success" ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
-                    } }
+                    // var emailTemplateName = 
+                    // { 
+                    // "emailTemplateName": "successtrans.ejs", 
+                    // "to": addressObject.clientsdetails[0].email, 
+                    // "subject": "Lyo-Merchant Confirmation", 
+                    // "templateData": { "status": "Success" ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                    // } }
                     
-                    let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+                    // let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                     
-                    console.log("email_response",email_response)
+                    // console.log("email_response",email_response)
                    
                 }
                 response = { amountstatus: amountstatus, status: 200, "data": logData, message: "Success" };
