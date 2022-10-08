@@ -2,9 +2,6 @@ const ejs = require('ejs');
 const fs = require('fs');
 const Web3 = require('web3');
 const axios = require('axios')
-
-
-
 var stringify = require('json-stringify-safe');
 const transcationLog = require('../Models/transcationLog');
 const network = require('../Models/network');
@@ -17,7 +14,6 @@ const poolWallets = require('../Models/poolWallet');
 const clients = require('../Models/clients');
 const hotWallets = require('../Models/hotWallets');
 const hot_wallet_trans_logs = require('../Models/hot_wallet_trans_logs');
-require("dotenv").config()
 var nodemailer = require('nodemailer');
 var mongoose = require('mongoose');
 const TronWeb = require('tronweb')
@@ -31,6 +27,7 @@ const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
 const IPNS = require('../Models/IPN');
 const emailSending = require('../common/emailSending');
+require("dotenv").config()
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -196,6 +193,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
         return { status: 400, data: datavalues, message: error.message, }
     }
 }
+
 async function Save_Trans_logs(feeding_wallet_id = "", feeding_trans_id = "", merchant_trans_id, poolwalletID, walletNetwork, hot_wallet_id, trans_id, feeLimit, remarksData, status) {
     let data_logs = await hot_wallet_trans_logs.findOne({ merchant_trans_id: merchant_trans_id })
       let logs = ""
@@ -236,7 +234,8 @@ async function Save_Trans_logs(feeding_wallet_id = "", feeding_trans_id = "", me
           )
       }
       return logs
-  }
+}
+
 async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, account_balance, native_balance,feeLimit) {
     try {
         
@@ -498,6 +497,15 @@ async function get_Transcation_Paylink_Data(transkey) {
                 }
             },
             {
+                $lookup: 
+                {
+                    from: "clients", // collection to join
+                    localField: "api_key",//field from the input documents
+                    foreignField: "api_key",//field from the documents of the "from" collection
+                    as: "clientsdetails"// output array field
+                }
+            },
+            {
                 "$project":
                 {
                    "poolWallet._id": 0,
@@ -513,7 +521,6 @@ async function get_Transcation_Paylink_Data(transkey) {
         ])
     return pooldata
 }
-
 
 async function callIPN(transkey) {
     let id           = transkey;
@@ -562,7 +569,8 @@ async function callIPN(transkey) {
             await axios(config) .then(function (response) {
               console.log("Success IPN================",JSON.stringify(response.data));
             })
-            .catch(function (error) {
+            .catch(function (error) 
+            {
               console.log("Error IPN================",error);
             });
           return   { status: 200, message: "Success" }
@@ -581,6 +589,8 @@ module.exports =
     async getTrasnsBalance(transdata) {
         try {
             let addressObject = transdata[0]
+            console.log(addressObject.clientsdetails[0])
+            console.log(addressObject.invoicedetails[0])
             let response = {}
             let account_balance_in_ether = 0
             let token_balance = 0
@@ -590,13 +600,13 @@ module.exports =
             var amountstatus = 0
             let merchantbalance = 0;
             const previousdate = new Date(parseInt(addressObject.timestamps));
-            const currentdate = new Date().getTime()
+            const currentdate  = new Date().getTime()
             var diff = currentdate - previousdate.getTime();
             var minutes = (diff / 60000)
+
             console.log("previousdate   ================", previousdate)
             console.log("currentdate    ================", currentdate)
             console.log("minutes        ================", minutes)
-            
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
@@ -604,14 +614,12 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
-            let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+            let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
             let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
-
             if (minutes > 10) {
                 let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
                 let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
                 response                = { amountstatus: 4,"paymentdata":paymentData,status: 200, "data": {}, message: "Your Transcation is expired." };
-
                 return JSON.stringify(response)
             }
             
@@ -644,19 +652,16 @@ module.exports =
                 {
                   if(addressObject.orderType != "fastCode")
                    {
-                    let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
-                    let invoiceData = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
-                    }
-                    let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
-                    let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
-                    let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
-                    console.log("callIPN=======",addressObject.id)
-                    let IPNData =  await callIPN(addressObject.id) 
-                    console.log("IPNData=======",IPNData)
-                    response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
+                    let paylinkData             = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
+                    let invoiceData             = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
+                   }
+                    let poolwallet              = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
+                    let balanceTransfer         = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
+                    let hot_wallet_transcation  = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
+                    let IPNData                 = await callIPN(addressObject.id) 
+                    response                    = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                     return JSON.stringify(response)
                 }
-             
                 response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
             }

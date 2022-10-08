@@ -1,5 +1,6 @@
 const poolWallet = require('../Models/poolWallet');
 const Network = require('../Models/network');
+const feedWallets = require('../Models/feedWallets');
 const Utility = require('../common/Utility');
 const hotWallets = require('../Models/hotWallets');
 const feedWalletController = require('../controllers/Masters/feedWalletController');
@@ -43,11 +44,27 @@ module.exports =
                     currencyid: req.body.currencyid,
                     scanurl: req.body.scanurl,
                     gaspriceurl: req.body.gaspriceurl,
+                    icon: req.body.icon,
                     kyt_network_id: req.body.kyt_network_id,
 
                 });
                 NetworkItem.save().then(async (val) => {
-                    let feedWallet = await feedWalletController.createFeedWalletsFun(val.id, req.body.created_by)
+
+                    const feedWallet = new feedWallets({
+                        id: mongoose.Types.ObjectId(),
+                        network_id: val.id,
+                        address: req.body.feedingaddress,
+                        privatekey: req.body.feedingprivatekey,
+                        status: 1,
+                        created_by: req.body.created_by,
+                    });
+                    let responnse = await feedWallet.save().then(async (val) => {
+                        console.log("feedWallets val", val)
+                    }).catch(error => {
+                        console.log("feedWallets error", error)
+                        // return { status: 400, data: {}, message: error }
+                    })
+
                     const hotWallet = new hotWallets({
                         id: mongoose.Types.ObjectId(),
                         network_id: val.id,
@@ -56,9 +73,12 @@ module.exports =
                         created_by: req.body.created_by,
                     });
                     hotWallet.save().then(async (val) => {
-                        res.json({ status: 200, message: "Successfully", data: val })
-                    }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
-                    res.json({ status: 200, message: "Successfully", data: val })
+                        console.log("hotWallet val", val)
+                    }).catch(error => {
+                        console.log("hotWallet error", error)
+                    })
+
+                    res.json({ status: 200, data: val, message: "Data" })
                 }).catch(error => {
                     console.log(error)
                     res.json({ status: 400, data: {}, message: error })
