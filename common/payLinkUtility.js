@@ -2,13 +2,13 @@ const ejs = require('ejs');
 const fs = require('fs');
 const Web3 = require('web3');
 const axios = require('axios')
-
+var qs = require('qs');
 
 
 var stringify = require('json-stringify-safe');
 const transcationLog = require('../Models/transcationLog');
 const network = require('../Models/network');
-var qs = require('qs');
+
 const Constant = require('./Constant');
 const transferUtility = require('./transferUtility');
 const Utility = require('./Utility');
@@ -30,7 +30,7 @@ const feedWallets = require('../Models/feedWallets');
 const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
 const IPNS = require('../Models/IPN');
-const emailSending = require('../common/emailSending');
+const emailSending = require('./emailSending');
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -498,6 +498,15 @@ async function get_Transcation_Paylink_Data(transkey) {
                 }
             },
             {
+                $lookup: 
+                {
+                    from: "clients", // collection to join
+                    localField: "api_key",//field from the input documents
+                    foreignField: "api_key",//field from the documents of the "from" collection
+                    as: "clientsdetails"// output array field
+                }
+            },
+            {
                 "$project":
                 {
                    "poolWallet._id": 0,
@@ -563,6 +572,8 @@ async function callIPN(transkey) {
               console.log("Success IPN================",JSON.stringify(response.data));
             })
             .catch(function (error) {
+
+
               console.log("Error IPN================",error);
             });
           return   { status: 200, message: "Success" }
@@ -607,15 +618,30 @@ module.exports =
             let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
             let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
 
-            if (minutes > 10) {
+            if (minutes > 10) 
+            {
                 let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
                 let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
                 response                = { amountstatus: 4,"paymentdata":paymentData,status: 200, "data": {}, message: "Your Transcation is expired." };
-
+                var emailTemplateName = 
+                { 
+                    "emailTemplateName": "successtrans.ejs", 
+                    "to": addressObject.clientsdetails[0].email, 
+                    "subject": "Lyo-Merchant Expired Notification", 
+                    "templateData": {
+                        "status": "Expired" ,
+                        "paymentdata":paymentData ,
+                        "transid": addressObject.id ,
+                        "invoicenumber" :addressObject.invoicedetails[0].invoiceNumber,
+                        "storename" :"",
+                        "network" :addressObject.networkDetails[0].network ,
+                        "coin" :addressObject.networkDetails[0].coin,
+                        "amount" :addressObject.amount 
+                }}
+                let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+                console.log("email_response Success",email_response)
                 return JSON.stringify(response)
             }
-            
-         
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
            
@@ -628,6 +654,8 @@ module.exports =
                     BalanceOfAddress.data.token_balance,
                     addressObject.networkDetails[0].contractAddress)
 
+
+                   
             if (amountstatus != 0) 
             {
                 let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
@@ -647,9 +675,30 @@ module.exports =
                     let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
                     let invoiceData = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
                     }
+
+                    
+
+
                     let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
                     let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
                     let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
+                    var emailTemplateName = 
+                    { 
+                        "emailTemplateName": "successtrans.ejs", 
+                        "to": addressObject.clientsdetails[0].email, 
+                        "subject": "Lyo-Merchant  Notification", 
+                        "templateData": {
+                            "status": "Success" ,
+                            "paymentdata":paymentData ,
+                            "transid": addressObject.id ,
+                            "invoicenumber" :addressObject.invoicedetails[0].invoiceNumber,
+                            "storename" :"",
+                            "network" :addressObject.networkDetails[0].network ,
+                            "coin" :addressObject.networkDetails[0].coin,
+                            "amount" :addressObject.amount 
+                    }}
+                    let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+                    console.log("email_response Success",email_response)
                     console.log("callIPN=======",addressObject.id)
                     let IPNData =  await callIPN(addressObject.id) 
                     console.log("IPNData=======",IPNData)

@@ -12,6 +12,7 @@ const transferUtility = require('./transferUtility');
 const Utility = require('./Utility');
 const clientWallets = require('../Models/clientWallets');
 const poolWallets = require('../Models/poolWallet');
+const emailSending = require('./emailSending');
 const clients = require('../Models/clients');
 const hotWallets = require('../Models/hotWallets');
 const hot_wallet_trans_logs = require('../Models/hot_wallet_trans_logs');

@@ -9,10 +9,13 @@
         <h3 style="font-size: 12px;">Trans-ID : <%=  data.transid%> </h3>
         
         
-        <%if (data.storename > 0) { %>
+        <%if (data.storename.length > 0) { %>
             <h3 style="font-size: 12px;">Store Name : <%= data.storename%> </h3>
-            <% } %>
-       
+        <% } %>
+
+            <%if (data.invoicenumber.length > 0) { %>
+                <h3 style="font-size: 12px;">Invoice # : <%= data.invoicenumber%> </h3>
+           <% } %>
 
         <div>
             <div
