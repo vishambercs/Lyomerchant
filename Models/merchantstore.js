@@ -36,6 +36,18 @@ const merchantstoreSchema = new mongoose.Schema({
         required: false,
        
     },
+    storeaddress:
+    {
+        type: String,
+        required: false,
+       
+    },
+    storephone:
+    {
+        type: String,
+        required: false,
+       
+    },
     status:
     {
         type: Number,

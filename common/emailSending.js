@@ -2,11 +2,7 @@ const ejs = require('ejs');
 const fs = require('fs');
 require("dotenv").config()
 var nodemailer = require('nodemailer');
-
-
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
-
-
 async function sendEmailFunc(paramters) {
     try {
         let respone = {}

@@ -324,13 +324,18 @@ module.exports =
         try {
             let email = req.body.email
             let code = req.body.code
+            
+            console.log("Verfiy_Google_Auth code",code)
             clients.findOne({ 'email': email }).then(async (val) => {
                 if (authenticator.check(code, val.secret)) {
+                    console.log("Verfiy_Google_Auth code","if")
                     if (val.two_fa == false) {
+                      
                         let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { two_fa: true } }, { $new: true })
                         let data = await clients.findOne({ 'email': email })
                         res.json({ "status": 200, "data": data, "message": "Get The Data Successfully" })
                     } else {
+                        console.log("Verfiy_Google_Auth code","elase")
                         res.json({ "status": 200, "data": val, "message": "Get The Data Successfully" })
                     }
 
@@ -344,6 +349,7 @@ module.exports =
             })
         }
         catch (error) {
+            console.log("Verfiy_Google_Auth error",error)
             res.json({ status: 400, data: {}, message: "Verification Failed" })
         }
     },
