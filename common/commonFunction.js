@@ -154,7 +154,9 @@ async function getBalance(transdata, transData) {
                 "emailTemplateName": "successtrans.ejs", 
                 "to": addressObject.clientsdetails[0].email, 
                 "subject": "Lyo-Merchant Expire Notification", 
-                "templateData": {"status": "Expired" ,"paymentdata":paymentData ,"transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                "templateData": {"status": "Expired" ,
+                "invoicenumber":"",
+                "paymentdata":paymentData ,"transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
             }}
             let email_response = await emailSending.sendEmailFunc(emailTemplateName)
             console.log("email_response exipred",email_response)
@@ -194,7 +196,9 @@ async function getBalance(transdata, transData) {
                 "emailTemplateName": "successtrans.ejs", 
                 "to": addressObject.clientsDetails[0].email, 
                 "subject": "Lyo-Merchant Confirmation", 
-                "templateData": {"status": "Success" ,"transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                "templateData": {"status": "Success" ,
+                "invoicenumber" : "",
+                "transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
                 }}
                 let email_response = await emailSending.sendEmailFunc(emailTemplateName)
                 console.log("email_response success",email_response)
