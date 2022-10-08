@@ -128,6 +128,9 @@ router.post('/getPerferedNetwork',                                  Auth.is_merc
 
 router.post('/createHostePayment',                                  Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
 
+
+router.post('/ipntesting',                                  PaymentHostedController.IPN_Testing);
+
 "============================ clientapikey  ==============================="
 
 router.post('/getapistatus',                                        clientapicontroller.getapikey);
@@ -140,6 +143,9 @@ router.post('/getTransStatus',                                        Auth.check
 "============================IPN Controller==============================="
 router.post('/createIPNLink',ipnController.create_IPN_Link);
 router.post('/getIPNLink',ipnController.get_IPN_Link);
+
+
+
 
 module.exports = router;
 
