@@ -17,56 +17,76 @@
                 <h3 style="font-size: 12px;">Invoice # : <%= data.invoicenumber%> </h3>
            <% } %>
 
-        <div>
-            <div
-                style="padding: 1em; padding-top: 3px; padding-bottom: 10px; background: #f5f5f5; border-radius: 0px; font-size: 15px;">
-                <br />
-                <b>Following are the Details </b><br /><br />
+                <%if (data.invoice> 0) { %>
+                    <h3 style="font-size: 12px;">Invoice # : <%= data.invoice%>
+                    </h3>
+                    <% } %>
 
-                <div style="width: 100%; overflow: hidden; overflow-x:auto;">
-                    <table style=" font-family: arial, sans-serif; border-collapse: collapse; width: 100%;">
-                        <tr>
-                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Network</th>
-                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Coin/Token</th>
-                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Amount</th>
-                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Status</th>
-                        </tr>
-                        <tr>
-                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.network%>
-                            </td>
-                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.coin%></td>
-                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.amount%></td>
-                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;"><%= data.status%></td>
-                        </tr>
+                        <div>
+                            <div
+                                style="padding: 1em; padding-top: 3px; padding-bottom: 10px; background: #f5f5f5; border-radius: 0px; font-size: 15px;">
+                                <br />
+                                <b>Following are the Details </b><br /><br />
 
-                    </table>
-                </div>
-                <br />
+                                <div style="width: 100%; overflow: hidden; overflow-x:auto;">
+                                    <table
+                                        style=" font-family: arial, sans-serif; border-collapse: collapse; width: 100%;">
+                                        <tr>
+                                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
+                                                Network</th>
+                                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
+                                                Coin/Token</th>
+                                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Amount
+                                            </th>
+                                            <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Status
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
+                                                <%= data.network%>
+                                            </td>
+                                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
+                                                <%= data.coin%>
+                                            </td>
+                                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
+                                                <%= data.amount%>
+                                            </td>
+                                            <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
+                                                <%= data.status%>
+                                            </td>
+                                        </tr>
 
-                
-            </div>
+                                    </table>
+                                </div>
+                                <br />
 
-            <p style="padding:1rem" style="font-size: 14px;">If you have additional questions, please reach out to us at
-                <br /><a href="mailto:support@lyomerchant.com" target="_blank"
-                    style="font-size: 14px;">support@lyomerchant.com</a>.</p>
-            <p style="font-size: 14px;">Best regards,<br>
-                The LYOMERCHANT Team</p>
-            <img src="https://lyomerchant.com/assets/img/logo.png" style="text-align:center;margin:0 auto; width: 180px"
-                class="CToWUd">
-            <img src="https://ci6.googleusercontent.com/proxy/FS5Hi9DOIow7fl5r6Nqz8En7TkEimaJ3jq583L4vObBMTLlunJa9OEJZAbrxmVhrbe8NyP7xBMTxgGn-HVY6hNeVbChLcKWeuY5NHetVrKWEQk5rmv9vEvzLgAzy=s0-d-e1-ft#https://saas-oss.oss-cn-hongkong.aliyuncs.com/upload/20220219165125390.png"
-                alt="lyotrade crypto buy and sell" title="lyotrade crypto buy and sell"
-                style="text-align:center;margin:0 auto;padding:3rem 0 1rem 0" class="CToWUd">
-            <p style="font-size:1rem;text-align:center;padding:0rem 2rem">Have a question? <a
-                    href="https://support.lyomerchant.com/" style="color:#2b3992;font-weight:bold" target="_blank"
-                    data-saferedirecturl="https://www.google.com/url?q=https://support.lyotrade.com/&amp;source=gmail&amp;ust=1652353693898000&amp;usg=AOvVaw1NGj3ywREdwqtOrzUuDM-Y">Contact
-                    Support</a></p>
-            <p style="font-size: 12px;">© 2022 <b>LYOMERCHANT</b>. All rights reserved.</p>
-            <div class="yj6qo"></div>
-            <div class="adL">
-            </div>
-        </div>
-        <div class="adL">
-        </div>
+
+                            </div>
+
+                            <p style="padding:1rem" style="font-size: 14px;">If you have additional questions, please
+                                reach out to us at
+                                <br /><a href="mailto:support@lyomerchant.com" target="_blank"
+                                    style="font-size: 14px;">support@lyomerchant.com</a>.
+                            </p>
+                            <p style="font-size: 14px;">Best regards,<br>
+                                The LYOMERCHANT Team</p>
+                            <img src="https://lyomerchant.com/assets/img/logo.png"
+                                style="text-align:center;margin:0 auto; width: 180px" class="CToWUd">
+                            <img src="https://ci6.googleusercontent.com/proxy/FS5Hi9DOIow7fl5r6Nqz8En7TkEimaJ3jq583L4vObBMTLlunJa9OEJZAbrxmVhrbe8NyP7xBMTxgGn-HVY6hNeVbChLcKWeuY5NHetVrKWEQk5rmv9vEvzLgAzy=s0-d-e1-ft#https://saas-oss.oss-cn-hongkong.aliyuncs.com/upload/20220219165125390.png"
+                                alt="lyotrade crypto buy and sell" title="lyotrade crypto buy and sell"
+                                style="text-align:center;margin:0 auto;padding:3rem 0 1rem 0" class="CToWUd">
+                            <p style="font-size:1rem;text-align:center;padding:0rem 2rem">Have a question? <a
+                                    href="https://support.lyomerchant.com/" style="color:#2b3992;font-weight:bold"
+                                    target="_blank"
+                                    data-saferedirecturl="https://www.google.com/url?q=https://support.lyotrade.com/&amp;source=gmail&amp;ust=1652353693898000&amp;usg=AOvVaw1NGj3ywREdwqtOrzUuDM-Y">Contact
+                                    Support</a></p>
+                            <p style="font-size: 12px;">© 2022 <b>LYOMERCHANT</b>. All rights reserved.</p>
+                            <div class="yj6qo"></div>
+                            <div class="adL">
+                            </div>
+                        </div>
+                        <div class="adL">
+                        </div>
     </div>
     <div class="adL">
     </div>

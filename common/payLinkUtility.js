@@ -17,7 +17,6 @@ const poolWallets = require('../Models/poolWallet');
 const clients = require('../Models/clients');
 const hotWallets = require('../Models/hotWallets');
 const hot_wallet_trans_logs = require('../Models/hot_wallet_trans_logs');
-require("dotenv").config()
 var nodemailer = require('nodemailer');
 var mongoose = require('mongoose');
 const TronWeb = require('tronweb')
@@ -196,6 +195,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
         return { status: 400, data: datavalues, message: error.message, }
     }
 }
+
 async function Save_Trans_logs(feeding_wallet_id = "", feeding_trans_id = "", merchant_trans_id, poolwalletID, walletNetwork, hot_wallet_id, trans_id, feeLimit, remarksData, status) {
     let data_logs = await hot_wallet_trans_logs.findOne({ merchant_trans_id: merchant_trans_id })
       let logs = ""
@@ -236,7 +236,8 @@ async function Save_Trans_logs(feeding_wallet_id = "", feeding_trans_id = "", me
           )
       }
       return logs
-  }
+}
+
 async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, account_balance, native_balance,feeLimit) {
     try {
         
@@ -523,7 +524,6 @@ async function get_Transcation_Paylink_Data(transkey) {
     return pooldata
 }
 
-
 async function callIPN(transkey) {
     let id           = transkey;
     
@@ -592,6 +592,8 @@ module.exports =
     async getTrasnsBalance(transdata) {
         try {
             let addressObject = transdata[0]
+            console.log(addressObject.clientsdetails[0])
+            console.log(addressObject.invoicedetails[0])
             let response = {}
             let account_balance_in_ether = 0
             let token_balance = 0
@@ -601,13 +603,13 @@ module.exports =
             var amountstatus = 0
             let merchantbalance = 0;
             const previousdate = new Date(parseInt(addressObject.timestamps));
-            const currentdate = new Date().getTime()
+            const currentdate  = new Date().getTime()
             var diff = currentdate - previousdate.getTime();
             var minutes = (diff / 60000)
+
             console.log("previousdate   ================", previousdate)
             console.log("currentdate    ================", currentdate)
             console.log("minutes        ================", minutes)
-            
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
@@ -615,7 +617,7 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
-            let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+            let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
             let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
 
             if (minutes > 10) 
@@ -705,7 +707,6 @@ module.exports =
                     response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                     return JSON.stringify(response)
                 }
-             
                 response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
                 return JSON.stringify(response)
             }
