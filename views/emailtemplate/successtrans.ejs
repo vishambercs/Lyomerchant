@@ -6,6 +6,7 @@
         <h2 style="color: #2B3992;">LYOMERCHANT <br /><small style="font-size: 12px;">PAYMENT
                 CONFIRMATION</small></small>
         </h2>
+<<<<<<< HEAD
         <h3 style="font-size: 12px;">Trans-ID : <%= data.transid%>
         </h3>
 
@@ -13,6 +14,18 @@
             <h3 style="font-size: 12px;">Store Name : <%= data.storename%>
             </h3>
             <% } %>
+=======
+        <h3 style="font-size: 12px;">Trans-ID : <%=  data.transid%> </h3>
+        
+        
+        <%if (data.storename.length > 0) { %>
+            <h3 style="font-size: 12px;">Store Name : <%= data.storename%> </h3>
+        <% } %>
+
+            <%if (data.invoicenumber.length > 0) { %>
+                <h3 style="font-size: 12px;">Invoice # : <%= data.invoicenumber%> </h3>
+           <% } %>
+>>>>>>> f6139084bce3ee79ea4722530bbe1a0903ecc8aa
 
                 <%if (data.invoice> 0) { %>
                     <h3 style="font-size: 12px;">Invoice # : <%= data.invoice%>
