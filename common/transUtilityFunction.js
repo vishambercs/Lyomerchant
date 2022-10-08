@@ -496,7 +496,9 @@ module.exports =
                     "emailTemplateName": "successtrans.ejs", 
                     "to": addressObject.clientsdetails[0].email, 
                     "subject": "Lyo-Merchant Expire Notification", 
-                    "templateData": {"status": "Expired" ,"paymentdata":paymentData ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                    "templateData": {"status": "Expired" ,
+                    "invoicenumber":"",
+                    "paymentdata":paymentData ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
                 }}
                 let email_response = await emailSending.sendEmailFunc(emailTemplateName)
                 console.log("email_response exipred",email_response)
@@ -532,7 +534,9 @@ module.exports =
                         "emailTemplateName": "successtrans.ejs", 
                         "to": addressObject.clientsdetails[0].email, 
                         "subject": "Lyo-Merchant  Notification", 
-                        "templateData": {"status": "Success" ,"paymentdata":paymentData ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                        "templateData": {"status": "Success" ,
+                        "invoicenumber":"",
+                        "paymentdata":paymentData ,"transid": addressObject.id , "storename" :addressObject.merchantstoresdetails[0].storename,"network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
                     }}
                     let email_response = await emailSending.sendEmailFunc(emailTemplateName)
                     console.log("email_response Success",email_response)

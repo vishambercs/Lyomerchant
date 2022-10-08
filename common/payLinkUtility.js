@@ -687,16 +687,6 @@ module.exports =
                 {
                   if(addressObject.orderType != "fastCode")
                    {
-<<<<<<< HEAD
-                    let paylinkData             = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
-                    let invoiceData             = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
-                   }
-                    let poolwallet              = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
-                    let balanceTransfer         = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
-                    let hot_wallet_transcation  = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
-                    let IPNData                 = await callIPN(addressObject.id) 
-                    response                    = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
-=======
                     let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
                     let invoiceData = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
                     }
@@ -728,7 +718,6 @@ module.exports =
                     let IPNData =  await callIPN(addressObject.id) 
                     console.log("IPNData=======",IPNData)
                     response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
->>>>>>> f6139084bce3ee79ea4722530bbe1a0903ecc8aa
                     return JSON.stringify(response)
                 }
                 response = { amountstatus: amountstatus, "paymentdata":paymentData,status: 200, "data": logData, message: "Success" };
