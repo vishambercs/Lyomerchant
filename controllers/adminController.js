@@ -34,7 +34,7 @@ module.exports =
         let secret = authenticator.generateSecret()
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
         if (hash == req.body.hash) {
-            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
+            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT_ADMIN, secret)).then(async (url) => {
                 const admin = new admins({
                     two_fa: false,
                     secret: secret,
