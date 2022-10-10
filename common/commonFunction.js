@@ -121,6 +121,7 @@ async function getBalance(transdata, transData) {
     try {
         let addressObject = transdata[0]
         console.log("addressObject",addressObject.clientsDetails[0].email)
+        let emailto = addressObject.clientsDetails[0].email;
         let response = {}
         let account_balance_in_ether = 0
         let account_balance = 0
@@ -152,7 +153,7 @@ async function getBalance(transdata, transData) {
             var emailTemplateName = 
             { 
                 "emailTemplateName": "successtrans.ejs", 
-                "to": addressObject.clientsdetails[0].email, 
+                "to": emailto, 
                 "subject": "Lyo-Merchant Expire Notification", 
                 "templateData": {"status": "Expired" ,
                 "invoicenumber":"",
