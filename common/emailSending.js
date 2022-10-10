@@ -2,6 +2,9 @@ const ejs = require('ejs');
 const fs = require('fs');
 require("dotenv").config()
 var nodemailer = require('nodemailer');
+const transcationEmailLogs = require('../Models/transcationEmailLogs');
+var mongoose = require('mongoose');
+
 const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
 async function sendEmailFunc(paramters) {
     try {
@@ -31,7 +34,32 @@ async function sendEmailFunc(paramters) {
         return JSON.stringify(respone)
     }
 }
+
+async function emailLogs(trasnkey,emailTemplateName) {
+    let transcationEmailLog = await transcationEmailLogs.findOne({trans_id:trasnkey})
+    if(transcationEmailLog ==  null)
+    {
+        const email_response = await sendEmailFunc(emailTemplateName)
+        let transEmailLog = await transcationEmailLogs.insertMany(
+            [{
+                id          : mongoose.Types.ObjectId(),
+                trans_id    : trasnkey,
+                email_data  : JSON.stringify(email_response),
+                status      : 1,
+                created_at  : new Date().toString(),
+            }])
+            return transEmailLog;
+    }
+    else
+    {
+        return transcationEmailLog;
+    }
+    
+    
+    
+}
 module.exports =
 {
     sendEmailFunc :sendEmailFunc,
+    emailLogs     :emailLogs,
 }    

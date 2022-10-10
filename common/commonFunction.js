@@ -27,7 +27,7 @@ const transUtility = require('./transUtilityFunction');
 const emailSending = require('../common/emailSending');
 const payLinkUtility = require('./payLinkUtility');
 const feedWalletController = require('../controllers/Masters/feedWalletController');
-
+const transcationEmailLogs = require('../Models/transcationEmailLogs');
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -117,10 +117,12 @@ async function getTranscationDataForClient(transkey) {
     return pooldata
 }
 
+
+
+
 async function getBalance(transdata, transData) {
     try {
         let addressObject = transdata[0]
-        console.log("addressObject",addressObject.clientsDetails[0].email)
         let response = {}
         let account_balance_in_ether = 0
         let account_balance = 0
@@ -153,13 +155,15 @@ async function getBalance(transdata, transData) {
             { 
                 "emailTemplateName": "successtrans.ejs", 
                 "to": addressObject.clientsdetails[0].email, 
-                "subject": "Lyo-Merchant Expire Notification", 
+                "subject": "LYOMERCHANT Expire Transaction", 
                 "templateData": {"status": "Expired" ,
                 "invoicenumber":"",
                 "paymentdata":paymentData ,"transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
             }}
-            let email_response = await emailSending.sendEmailFunc(emailTemplateName)
-            console.log("email_response exipred",email_response)
+           
+            let emailLog = await emailSending.emailLogs(addressObject.id,emailTemplateName)
+            console.log("email_response exipred",emailLog)
+            
             return JSON.stringify(response)
         }
         amountstatus     = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
@@ -195,13 +199,17 @@ async function getBalance(transdata, transData) {
                 { 
                 "emailTemplateName": "successtrans.ejs", 
                 "to": addressObject.clientsDetails[0].email, 
-                "subject": "Lyo-Merchant Confirmation", 
+                "subject": "LYOMERCHANT Success Transaction", 
                 "templateData": {"status": "Success" ,
                 "invoicenumber" : "",
-                "transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
+                "transid": addressObject.id , 
+                "storename" :"",
+                "network" :addressObject.networkDetails[0].network ,
+                "coin" :addressObject.networkDetails[0].coin,
+                "amount" :addressObject.amount 
                 }}
-                let email_response = await emailSending.sendEmailFunc(emailTemplateName)
-                console.log("email_response success",email_response)
+                let emailLog = await emailSending.emailLogs(addressObject.id,emailTemplateName)
+                console.log("email_response success",emailLog)
             }
             response = { amountstatus: amountstatus,"paymentdata":paymentData ,status: 200, "data": logData, message: "Success" };
         }
