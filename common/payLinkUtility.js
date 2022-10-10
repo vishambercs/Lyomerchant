@@ -2,12 +2,9 @@ const ejs = require('ejs');
 const fs = require('fs');
 const Web3 = require('web3');
 const axios = require('axios')
-<<<<<<< HEAD
-=======
 var qs = require('qs');
 
 
->>>>>>> f6139084bce3ee79ea4722530bbe1a0903ecc8aa
 var stringify = require('json-stringify-safe');
 const transcationLog = require('../Models/transcationLog');
 const network = require('../Models/network');
@@ -32,12 +29,7 @@ const feedWallets = require('../Models/feedWallets');
 const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
 const IPNS = require('../Models/IPN');
-<<<<<<< HEAD
-const emailSending = require('../common/emailSending');
-require("dotenv").config()
-=======
 const emailSending = require('./emailSending');
->>>>>>> f6139084bce3ee79ea4722530bbe1a0903ecc8aa
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -579,14 +571,9 @@ async function callIPN(transkey) {
             await axios(config) .then(function (response) {
               console.log("Success IPN================",JSON.stringify(response.data));
             })
-<<<<<<< HEAD
-            .catch(function (error) 
-            {
-=======
             .catch(function (error) {
 
 
->>>>>>> f6139084bce3ee79ea4722530bbe1a0903ecc8aa
               console.log("Error IPN================",error);
             });
           return   { status: 200, message: "Success" }
@@ -642,7 +629,7 @@ module.exports =
                 { 
                     "emailTemplateName": "successtrans.ejs", 
                     "to": addressObject.clientsdetails[0].email, 
-                    "subject": "Lyo-Merchant Expired Notification", 
+                    "subject": "LYOMERCHANT Expired Transaction", 
                     "templateData": {
                         "status": "Expired" ,
                         "paymentdata":paymentData ,
@@ -653,7 +640,8 @@ module.exports =
                         "coin" :addressObject.networkDetails[0].coin,
                         "amount" :addressObject.amount 
                 }}
-                let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+               
+                let email_response = await emailSending.emailLogs(addressObject.id,emailTemplateName)
                 console.log("email_response Success",email_response)
                 return JSON.stringify(response)
             }
@@ -701,7 +689,7 @@ module.exports =
                     { 
                         "emailTemplateName": "successtrans.ejs", 
                         "to": addressObject.clientsdetails[0].email, 
-                        "subject": "Lyo-Merchant  Notification", 
+                        "subject": "LYOMERCHANT Success Transaction", 
                         "templateData": {
                             "status": "Success" ,
                             "paymentdata":paymentData ,
@@ -712,7 +700,7 @@ module.exports =
                             "coin" :addressObject.networkDetails[0].coin,
                             "amount" :addressObject.amount 
                     }}
-                    let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+                    let email_response = await emailSending.emailLogs(addressObject.id,emailTemplateName)
                     console.log("email_response Success",email_response)
                     console.log("callIPN=======",addressObject.id)
                     let IPNData =  await callIPN(addressObject.id) 
