@@ -124,7 +124,8 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Verification Failed" })
         }
     },
-    async forgetThePassword(req, res) {
+    async forgetThePassword(req, res) 
+    {
         try {
             let email = req.body.email
             var otp = otpGenerator.generate(6, { digits: true ,specialChars :false,lowerCaseAlphabets :false,upperCaseAlphabets :false,});
@@ -133,9 +134,9 @@ module.exports =
             {
                 res.json({ status: 200, data: {}, message: "Admin did not find." })
             }
-            else {
+            else 
+            {
                 let url = process.env.FORGOTPASSWORD.replace("email", email);
-                url = url.replace("otpcode", otp);
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp,   "url":url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
