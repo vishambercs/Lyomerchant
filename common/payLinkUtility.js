@@ -629,7 +629,7 @@ module.exports =
                 { 
                     "emailTemplateName": "successtrans.ejs", 
                     "to": addressObject.clientsdetails[0].email, 
-                    "subject": "Lyo-Merchant Expired Notification", 
+                    "subject": "LYOMERCHANT Expired Transaction", 
                     "templateData": {
                         "status": "Expired" ,
                         "paymentdata":paymentData ,
@@ -640,7 +640,8 @@ module.exports =
                         "coin" :addressObject.networkDetails[0].coin,
                         "amount" :addressObject.amount 
                 }}
-                let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+               
+                let email_response = await emailSending.emailLogs(addressObject.id,emailTemplateName)
                 console.log("email_response Success",email_response)
                 return JSON.stringify(response)
             }
@@ -688,7 +689,7 @@ module.exports =
                     { 
                         "emailTemplateName": "successtrans.ejs", 
                         "to": addressObject.clientsdetails[0].email, 
-                        "subject": "Lyo-Merchant  Notification", 
+                        "subject": "LYOMERCHANT Success Transaction", 
                         "templateData": {
                             "status": "Success" ,
                             "paymentdata":paymentData ,
@@ -699,7 +700,7 @@ module.exports =
                             "coin" :addressObject.networkDetails[0].coin,
                             "amount" :addressObject.amount 
                     }}
-                    let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+                    let email_response = await emailSending.emailLogs(addressObject.id,emailTemplateName)
                     console.log("email_response Success",email_response)
                     console.log("callIPN=======",addressObject.id)
                     let IPNData =  await callIPN(addressObject.id) 
