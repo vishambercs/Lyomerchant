@@ -24,7 +24,6 @@ const jwt = require('jsonwebtoken');
 module.exports =
 {
     async signup_admin_api(req, res) {
-
         var admin_api_key = crypto.randomBytes(20).toString('hex');
         var email = req.body.email
         var password = req.body.password
@@ -65,11 +64,8 @@ module.exports =
     async Login(req, res) {
         try {
             let email = req.body.email;
-
             await admins.findOne({ 'email': email }).select('+password').then(async (val) => {
-
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
-
                 if (val.status == false) {
                     res.json({ "status": 400, "data": {}, "message": "Your account has disabled" })
                 }
@@ -136,7 +132,7 @@ module.exports =
             }
             else 
             {
-                let url = process.env.FORGOTPASSWORD.replace("email", email);
+                let url = process.env.FORGOTPASSWORD.replace("otpcode", otp);
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp,   "url":url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
@@ -168,9 +164,10 @@ module.exports =
     async updateThePassword(req, res) {
         try {
             let email = req.body.email
+            let otp = req.body.token
             const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
             const password_hash = bcrypt.hashSync(req.body.password, salt);
-            let admin = await admins.findOneAndUpdate({ 'email': email }, { $set: { password: password_hash, status: true } }, { $new: true })
+            let admin = await admins.findOneAndUpdate({ 'email': email, "otptoken": otp }, { $set: { password: password_hash, status: true } }, { $new: true })
             if (admin == null) {
                 res.json({ status: 400, data: {}, message: "Invalid User" })
             }
@@ -246,7 +243,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-
     async changeAdminsLoginStatus(req, res) {
         try {
             let email = req.body.email;
