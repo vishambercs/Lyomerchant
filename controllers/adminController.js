@@ -133,6 +133,7 @@ module.exports =
             else 
             {
                 let url = process.env.FORGOTPASSWORD.replace("otpcode", otp);
+                url = url.replace("email", email);
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp,   "url":url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
