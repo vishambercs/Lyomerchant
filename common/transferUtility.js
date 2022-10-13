@@ -101,7 +101,36 @@ async function check_Status_Feeding_Transcation(nodeUrl, libarayType, privateKey
         return { status: 400, data: {}, message: "Error" }
     }
 }
-
+async function Check_BTC_Balance(address) {
+    try {
+        let COINGECKO_URL = "http://blockchain.info/q/addressbalance/" + address
+        response = {}
+        await axios.get(COINGECKO_URL, { params: {}, headers: {} }).then(res => {
+            var stringify_response = stringify(res)
+            response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+        }).catch(error => {
+            console.error("Error", error)
+            var stringify_response = stringify(error)
+            response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+        })
+        var stringify_response = JSON.parse(response.data)
+        let balance_format = parseFloat(stringify_response.data) / 100000000
+        // return { "status": 200, "balance": stringify_response.data, "format_balance": balance_format }
+        let balanceData = { "token_balance":  stringify_response.data, "format_token_balance": balance_format, "native_balance": stringify_response.data, "format_native_balance": balance_format }
+        return { status: 200, data: balanceData, message: "sucess" }
+    }
+    catch (error) {
+        console.log("error", error)
+        let balanceData = 
+    { 
+        "token_balance"         :  0, 
+        "format_token_balance"  :  0, 
+        "native_balance"        :  0, 
+        "format_native_balance" :  0 
+    }
+        return { status: 400, data: balanceData, message: "Error" }
+    }
+}
 async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
     let token_balance = 0
     let format_token_balance = 0
@@ -123,7 +152,7 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
-        else {
+        else if(Type == "Tronweb") {
             const HttpProvider = TronWeb.providers.HttpProvider;
             const fullNode = new HttpProvider(Nodeurl);
             const solidityNode = new HttpProvider(Nodeurl);
@@ -142,8 +171,12 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
-        // let balanceData = { "token_balance": 0, "format_token_balance": 0, "native_balance": 0, "format_native_balance": 0 }
-        // return { status: 400, data: balanceData, message: "Error" }
+        else
+        {
+            let response =   await Check_BTC_Balance(Address.toLowerCase())
+            return response
+        }
+      
     }
     catch (error) {
         console.log(error)

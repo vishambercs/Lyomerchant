@@ -245,7 +245,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-
     async changeAdminsLoginStatus(req, res) {
         try {
             let email = req.body.email;

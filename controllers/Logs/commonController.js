@@ -6,6 +6,8 @@ const transactionPool = require('../../Models/transactionPool');
 const payLink = require('../../Models/payLink');
 const invoice = require('../../Models/invoice');
 const Constant = require('../../common/Constant');
+const { getBalance } = require('bitcoin-core/src/methods');
+const Web3 = require('web3');
 require("dotenv").config()
 
 
@@ -66,6 +68,26 @@ module.exports =
                 })
         }
         catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+
+    async getBalance(req, res) {
+        try {
+            const WEB3 = new Web3(new Web3.providers.HttpProvider("https://data-seed-prebsc-1-s1.binance.org:8545/"))
+            const contract = new WEB3.eth.Contract(Constant.USDT_ABI, "0xF5EB513a31af1Af797E3514a713cCc11492FB2df");
+            let token_balance = await contract.methods.balanceOf(req.body.address.toLowerCase()).call();
+            let native_balance = await WEB3.eth.getBalance(req.body.address.toLowerCase())
+           
+            res.json(
+                {
+                    status: 200,
+                    token_balance: token_balance,
+                    native_balance: native_balance
+                })
+        }
+        catch (error) {
+            console.log(error)
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },

@@ -74,6 +74,7 @@ app.listen(process.env.SERVER_PORT, function () {
 var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {
     console.log(`Example app listening at ${process.env.SCOKECT_PORT}`);
 })
+
 const wsServer = new webSocketServer({ httpServer: server });
 
 wsServer.on('request', Utility.receiveMessage)

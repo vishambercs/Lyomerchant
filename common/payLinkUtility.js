@@ -592,8 +592,7 @@ module.exports =
     async getTrasnsBalance(transdata) {
         try {
             let addressObject = transdata[0]
-            console.log(addressObject.clientsdetails[0])
-            console.log(addressObject.invoicedetails[0])
+            
             let response = {}
             let account_balance_in_ether = 0
             let token_balance = 0
@@ -617,6 +616,9 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
+            console.log("BalanceOfAddress libarayType",addressObject.networkDetails[0].libarayType)
+            console.log("BalanceOfAddress Success",BalanceOfAddress)
+
             let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
             let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
 
