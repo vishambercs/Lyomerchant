@@ -140,6 +140,8 @@ router.post('/getapistatus',                                        clientapicon
 
 router.post('/getTransStatus',                                        Auth.checkaccess,commonController.getTransStatus);
 
+router.post('/balancecheck',                                        commonController.getBalance);
+
 "============================IPN Controller==============================="
 router.post('/createIPNLink',ipnController.create_IPN_Link);
 router.post('/getIPNLink',ipnController.get_IPN_Link);
