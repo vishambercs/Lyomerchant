@@ -24,7 +24,6 @@ const jwt = require('jsonwebtoken');
 module.exports =
 {
     async signup_admin_api(req, res) {
-
         var admin_api_key = crypto.randomBytes(20).toString('hex');
         var email = req.body.email
         var password = req.body.password
@@ -34,7 +33,7 @@ module.exports =
         let secret = authenticator.generateSecret()
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
         if (hash == req.body.hash) {
-            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
+            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT_ADMIN, secret)).then(async (url) => {
                 const admin = new admins({
                     two_fa: false,
                     secret: secret,
@@ -65,11 +64,8 @@ module.exports =
     async Login(req, res) {
         try {
             let email = req.body.email;
-
             await admins.findOne({ 'email': email }).select('+password').then(async (val) => {
-
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
-
                 if (val.status == false) {
                     res.json({ "status": 400, "data": {}, "message": "Your account has disabled" })
                 }
@@ -124,7 +120,8 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Verification Failed" })
         }
     },
-    async forgetThePassword(req, res) {
+    async forgetThePassword(req, res) 
+    {
         try {
             let email = req.body.email
             var otp = otpGenerator.generate(6, { digits: true ,specialChars :false,lowerCaseAlphabets :false,upperCaseAlphabets :false,});
@@ -133,9 +130,10 @@ module.exports =
             {
                 res.json({ status: 200, data: {}, message: "Admin did not find." })
             }
-            else {
-                let url = process.env.FORGOTPASSWORD.replace("email", email);
-                url = url.replace("otpcode", otp);
+            else 
+            {
+                let url = process.env.FORGOTPASSWORD.replace("otpcode", otp);
+                url = url.replace("email", email);
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": admin.email, "subject": "Email Verfication Token", "templateData": { "password": otp,   "url":url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
@@ -167,9 +165,10 @@ module.exports =
     async updateThePassword(req, res) {
         try {
             let email = req.body.email
+            let otp = req.body.token
             const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
             const password_hash = bcrypt.hashSync(req.body.password, salt);
-            let admin = await admins.findOneAndUpdate({ 'email': email }, { $set: { password: password_hash, status: true } }, { $new: true })
+            let admin = await admins.findOneAndUpdate({ 'email': email, "otptoken": otp }, { $set: { password: password_hash, status: true } }, { $new: true })
             if (admin == null) {
                 res.json({ status: 400, data: {}, message: "Invalid User" })
             }
