@@ -2,7 +2,8 @@ const clients = require('../Models/clients');
 const kycWebHookLogs = require('../Models/kycWebHookLog');
 const transcationLog = require('../Models/transcationLog');
 const admins = require('../Models/admin');
-const cornJobs = require('../common/cornJobs');
+const cornJobs      = require('../common/cornJobs');
+const emailSending  = require('../common/emailSending');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
 var Utility = require('../common/Utility');
@@ -286,15 +287,47 @@ module.exports =
     },
     async changeMerchantEmail(req, res) {
         try {
-            let val = await clients.findOneAndUpdate({ email: req.body.currentemail }, { $set: { email: req.body.newemail } }, { $new: true })
-            if (val != null) {
-                res.json({ status: 200, message: "Email Changed", data: { "email": req.body.newemail } })
+            let prevVal = await clients.findOne({ email: req.body.currentemail } )
+            let val = await clients.findOneAndUpdate({ email: req.body.currentemail }, { $set: { email: req.body.newemail,companyname: req.body.newcompanyname} }, { $new: true })
+            if (val != null) 
+            {
+              
+
+                var emailTemplateName = 
+                { 
+                    "emailTemplateName": "emailchanging.ejs", 
+                    "to": req.body.currentemail, 
+                    "subject": "Email And Company Name Changing", 
+                    "templateData": { 
+                    "oldemail":req.body.currentemail ,
+                    "oldcompanyname": prevVal.companyname , 
+                    "newemail" :req.body.newemail,
+                    "newcompanyname" :req.body.newcompanyname 
+                }}
+                let emailLog = await emailSending.sendEmailFunc(emailTemplateName)
+                console.log("changeMerchantEmail OLD",emailLog)
+
+                var emailTemplateName = 
+                { 
+                    "emailTemplateName": "emailchanging.ejs", 
+                    "to": req.body.newemail, 
+                    "subject": "Email And Company Name Changing", 
+                    "templateData": { 
+                    "oldemail":req.body.currentemail ,
+                    "oldcompanyname": prevVal.companyname , 
+                    "newemail" :req.body.newemail,
+                    "newcompanyname" :req.body.newcompanyname 
+                }}
+                let newemailLog = await emailSending.sendEmailFunc(emailTemplateName)
+                console.log("changeMerchantEmail newemailLog",newemailLog)
+                res.json({ status: 200, message: "Email & Company Changed", data: { "email": req.body.newemail } })
             }
             else {
                 res.json({ status: 400, message: "Invalid Email", data: null })
             }
         }
         catch (error) {
+            console.log()
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }
     },

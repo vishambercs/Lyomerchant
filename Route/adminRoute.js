@@ -55,6 +55,7 @@ const Auth                          = require('../Validation/Auth');
 const poolwalletController          = require('../controllers/poolwalletController');
 const hotwallettranslogsController  = require('../controllers/hotwallettranslogsController');
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
+const commonController = require('../controllers/Logs/commonController');
 
 router.post('/signupadmin',                                    adminController.signup_admin_api);
 router.post('/adminlogin',                                     adminController.Login);
@@ -82,6 +83,8 @@ router.post('/approvekyc',                                     Auth.is_admin,Aut
 "============================ Orphan Transcation ==============================="
 
 router.post('/orphanPoolWallet',                              Auth.is_admin,orphanController.orphanTranscation);
+router.post('/orphanPoolWalletBalance',                       Auth.is_admin,orphanController.checkBalanceorphanWallet);
+router.post('/saveorphanWallet',                              Auth.is_admin,orphanController.save_orphan_wallet);
 
 "============================ Currency Master ==============================="
 
@@ -100,7 +103,7 @@ router.post('/checkbtcbalance',                                 Auth.is_admin, f
 router.post('/transferbtcoin',                                  Auth.is_admin,  feedWalletController.transferbtcoin);
 router.post('/checktransstatus',                                Auth.is_admin,  feedWalletController.checktransstatus);
 router.post('/createfw',                                        Auth.is_admin,feedWalletController.createFeedingwalletby);
-router.post('/checkbalance',                                     Auth.is_admin,feedWalletController.checkbalance);
+router.post('/checkbalance',                                    Auth.is_admin,feedWalletController.checkbalance);
 
 router.post('/transferbtcoin',                                feedWalletController.transferbtcoin);
 "============================ Category ==============================="
@@ -111,9 +114,11 @@ router.post('/createClientCategory',                           Auth.is_admin,mer
 router.post('/getAllClientCategoryRequest',                    Auth.is_admin,merchantcategory.getAllClientCategoryRequest);
 
 "============================ Merchant ==============================="
-router.post('/allMerchant',                                    Auth.is_admin,clientsController.allMerchant);
 
+router.post('/allMerchant',                                    Auth.is_admin,clientsController.allMerchant);
+ 
 "============================ Admin Hot wallets ==============================="
+
 router.post('/get_All_Hot_Wallet_Transcations',                Auth.is_admin,hotwallettranslogsController.get_All_Hot_Wallet_Transcation);
 router.post('/Get_Feeding_Transfer_Status',                    Auth.is_admin,hotwallettranslogsController.Get_Feeding_Transfer_Status);
 router.post('/trans_from_pw_to_hw',                            Auth.is_admin,hotwallettranslogsController.trans_from_pw_to_hw);
@@ -122,8 +127,16 @@ router.post('/trans_fm_FDW_To_PW',                             Auth.is_admin,hot
 router.post('/pool_wallet_balance',                            Auth.is_admin,hotwallettranslogsController.Check_of_pool_wallet_address);
 router.post('/confirm_the_pw_to_hw',                           Auth.is_admin,hotwallettranslogsController.confirm_the_pw_to_hw);
 
+"=============MerchantStore==========================================="
+
+router.post('/changemerchantstore',                             Auth.is_admin,merchantstoreController.adminchangeMerchantStore);
+router.get('/allMerchantStore',                                 Auth.is_admin,merchantstoreController.allMerchantStore);
 
 
+
+"=============All Deposit Transcation==========================================="
+
+router.get('/alldeposittranscation',  Auth.is_admin,commonController.getAllTranscation);
 
 
 

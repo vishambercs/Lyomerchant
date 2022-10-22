@@ -431,7 +431,15 @@ module.exports =
        
         try {
            
-            console.log("Math", Math.floor(Math.random() * 100000))
+            
+            // const fastPayCode = new fastPaymentCode({
+            //     id       : mongoose.Types.ObjectId(),
+            //     storeid  : req.body.storeid,
+            //     fastcodes: Math.floor(Math.random() * 100000),
+            //     status: 1,
+            // })
+            await fastPaymentCode.updateMany({storeid: req.body.storeid}, {$set : {status: 0 } } )
+
             const fastPayCode = new fastPaymentCode({
                 id: mongoose.Types.ObjectId(),
                 storeid: req.body.storeid,
@@ -439,6 +447,7 @@ module.exports =
                 status: 1,
             })
             let val = await fastPayCode.save()
+            
             message = "Fast Code Created Successfully"
             status = 200
             dataResponse = val

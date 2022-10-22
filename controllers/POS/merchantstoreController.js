@@ -1,4 +1,5 @@
 const merchantstores = require('../../Models/merchantstore');
+const storeDevices   = require('../../Models/storeDevices');
 const Network = require('../../Models/network');
 const Utility = require('../../common/Utility');
 var mongoose = require('mongoose');
@@ -56,19 +57,141 @@ module.exports =
         }
     },
 
+    async changeMerchantStore(req, res) {
+        try 
+        {
+
+            if(req.body.status == 3 || req.body.status == 4 )
+            {
+               return res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+            }
+            
+            
+            let merchantstore =  await merchantstores.findOneAndUpdate(
+                { id   : req.body.id },
+                { $set :
+                { 
+                  status     :  req.body.status ,
+                  deleted_by :  req.body.status  == 1 ?  req.headers.authorization : "",
+                  updated_by :  req.body.status  == 1 ?  "" : req.headers.authorization,
+                  updated_at :  req.body.status  == 1 ?  "" : new Date().toString(),
+                  deleted_at :  req.body.status  == 1 ?  new Date().toString() : "",  
+                }
+                },
+                {returnDocument: 'after'} 
+            )
+
+            if(merchantstore == null)
+            {
+               return res.json({ status: 400, data: merchantstore, message: "Invalid Store ID" })
+            }
+
+            let storeDevice =  await storeDevices.updateMany(
+                { storekey : merchantstore.storeapikey },
+                { $set :
+                { 
+                  status     :  req.body.status  == 0 ? 1 : 0 ,
+                  deleted_by :  req.body.status  == 0 ? "" :  req.headers.authorization,
+                  deleted_at :  req.body.status  == 0 ? "" :  new Date().toString(),  
+                  updated_by :  req.body.status  == 0 ? req.headers.authorization  : "" ,
+                  updated_at :  req.body.status  == 0 ? new Date().toString() :  ""   ,  
+                }
+            },
+                {returnDocument: 'after'} 
+            )
+            res.json({ status: 200, data: merchantstore, message: "Success" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
+
+    async adminchangeMerchantStore(req, res) {
+        try 
+        {
+            
+            if(req.body.status == 0 || req.body.status == 1 || req.body.status == 2)
+            {
+               return res.json({ status: 400, data: {}, message: "Invalid Request" })
+            }
+            
+            let prevmerchantstore =  await merchantstores.findOne( { id   : req.body.id })
+            
+            if(prevmerchantstore == null)
+            {
+               return res.json({ status: 400, data: merchantstore, message: "Invalid Store ID" })
+            }
+
+            let merchantstore =  await merchantstores.findOneAndUpdate(
+                { id   : req.body.id },
+                { $set :
+                { 
+                  status     :  req.body.status ,
+                  deleted_by :  req.body.status  == 3 ?  req.headers.authorization : prevmerchantstore.deleted_by,
+                  updated_by :  req.body.status  == 3 ?  prevmerchantstore.updated_by : req.headers.authorization,
+                  updated_at :  req.body.status  == 3 ?  prevmerchantstore.updated_at : new Date().toString(),
+                  deleted_at :  req.body.status  == 3 ?  new Date().toString() : prevmerchantstore.updated_at,  
+                }
+                },
+                {returnDocument: 'after'} 
+            )
+
+
+            let storeDevice =  await storeDevices.updateMany(
+                { storekey : merchantstore.storeapikey },
+                { $set :
+                { 
+                  status     :  req.body.status  == 3 ? 1 : 0 ,
+                  deleted_by :  req.body.status  == 3 ? "" :  req.headers.authorization,
+                  deleted_at :  req.body.status  == 3 ? "" :  new Date().toString(),  
+                  updated_by :  req.body.status  == 3 ? req.headers.authorization  : "" ,
+                  updated_at :  req.body.status  == 3 ? new Date().toString() :  ""   ,  
+                }
+            },
+                {returnDocument: 'after'} 
+            )
+            res.json({ status: 200, data: merchantstore, message: "Success" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
     async allMerchantStore(req, res) {
         try {
+
+
+            let status          = req.body.status == undefined || req.body.status == "" ? 0 : parseInt(req.body.status)
+            let filter          = {}
+            if(Object.keys(req.body).indexOf("clientapikey")!= -1)
+            {
+                filter["clientDetails.api_key"] = req.body.clientapikey
+            }
+            filter["status"] = status
             await merchantstores.aggregate([
-                { "$match": { "status": 0 } },
+               
                 {
                     $lookup:
                     {
-                        from: "clients",        // collection to join
-                        localField: "clientapikey",   //field from the input documents
-                        foreignField: "api_key",        //field from the documents of the "from" collection
-                        as: "clientDetails"   // output array field
+                        from: "clients",                               //  collection to join
+                        localField: "clientapikey",                   //  field from the input documents
+                        foreignField: "api_key",                     //  field from the documents of the "from" collection
+                        as: "clientDetails"                         //  output array field
                     },
                 },
+                {
+                    $lookup:
+                    {
+                        from: "fastPaymentCode",                    //  collection to join
+                        localField: "id",                           //  field from the input documents
+                        foreignField: "storeid",                    //  field from the documents of the "from" collection
+                        as: "fastPaymentcodedetails"                //  output array field
+                    },
+                },
+                { $match: filter },
             ]).then(async (data) => {
                 res.json({ status: 200, message: "All Merchant POS", data: data })
             }).catch(error => {
@@ -82,6 +205,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
     async MerchantStore(req, res) {
         try {
             await merchantstores.aggregate([
@@ -107,6 +231,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
     async updateMerchantStoreProfile(req, res) {
         try {
 
@@ -126,6 +251,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
     async createMerchantStoreByAdmin(req, res) {
         try {
             var api_key = crypto.randomBytes(20).toString('hex');
@@ -169,6 +295,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
     async createMerchantStoreByAdmin(req, res) {
         try {
             var api_key = crypto.randomBytes(20).toString('hex');

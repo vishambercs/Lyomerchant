@@ -1,14 +1,15 @@
-const poolWallet = require('../Models/poolWallet');
-const Network = require('../Models/network');
-const feedWallets = require('../Models/feedWallets');
-const Utility = require('../common/Utility');
-const hotWallets = require('../Models/hotWallets');
-const feedWalletController = require('../controllers/Masters/feedWalletController');
-var mongoose = require('mongoose');
-var crypto = require("crypto");
-const TronWeb = require('tronweb')
-const { generateAccount } = require('tron-create-address')
-const Web3 = require('web3');
+
+const Network               = require('../Models/network');
+const feedWallets           = require('../Models/feedWallets');
+const hotWallets            = require('../Models/hotWallets');
+var   mongoose              = require('mongoose');
+const poolWallet            = require('../Models/poolWallet');
+const Utility               = require('../common/Utility');
+const feedWalletController  = require('../controllers/Masters/feedWalletController');
+var   crypto                = require("crypto");
+const TronWeb               = require('tronweb')
+const { generateAccount }   = require('tron-create-address')
+const Web3                  = require('web3');
 require("dotenv").config()
 
 module.exports =
@@ -27,9 +28,9 @@ module.exports =
             }
             else {
                 const NetworkItem = new Network({
-                    id: mongoose.Types.ObjectId(),
-                    network: req.body.network,
-                    libarayType: req.body.libarayType,
+                    id          : mongoose.Types.ObjectId(),
+                    network     : req.body.network,
+                    libarayType : req.body.libarayType,
                     coin: req.body.coin,
                     nodeUrl: req.body.nodeUrl,
                     apiKey: req.body.apiKey,
@@ -39,14 +40,18 @@ module.exports =
                     cointype: req.body.cointype,
                     contractAddress: req.body.contractAddress == undefined ? " " : req.body.contractAddress,
                     contractABI: req.body.contractABI == undefined ? " " : JSON.stringify(req.body.contractABI),
-                    transferlimit: req.body.transferlimit,
-                    created_by: req.body.created_by,
-                    currencyid: req.body.currencyid,
-                    scanurl: req.body.scanurl,
-                    gaspriceurl: req.body.gaspriceurl,
-                    icon: req.body.icon,
-                    kyt_network_id: req.body.kyt_network_id,
-
+                    transferlimit   : req.body.transferlimit,
+                    created_by      : req.headers.authorization,
+                    currencyid      : req.body.currencyid,
+                    scanurl         : req.body.scanurl,
+                    gaspriceurl     : req.body.gaspriceurl,
+                    icon            : req.body.icon,
+                    kyt_network_id  : req.body.kyt_network_id,
+                    fixedfee            : req.body.fixedfee,
+                    withdrawfee         : req.body.withdrawfee,
+                    withdrawflag        : req.body.withdrawflag,
+                    native_currency_id  : req.body.native_currency_id,
+                    
                 });
                 NetworkItem.save().then(async (val) => {
 
@@ -108,20 +113,27 @@ module.exports =
                             libarayType: req.body.libarayType,
                             coin: req.body.coin,
                             nodeUrl: req.body.nodeUrl,
-                            apiKey: req.body.apiKey,
-                            transcationurl: req.body.transcationurl,
-                            latest_block_number: req.body.latest_block_number,
-                            processingfee: req.body.processingfee,
-                            cointype: req.body.cointype,
-                            contractAddress: req.body.contractAddress == undefined ? " " : req.body.contractAddress,
-                            contractABI: req.body.contractABI == undefined ? " " : JSON.stringify(req.body.contractABI),
-                            transferlimit: req.body.transferlimit,
-                            created_by: req.body.created_by,
-                            scanurl: req.body.scanurl,
-                            gaspriceurl: req.body.gaspriceurl,
-                            icon: req.body.icon,
-                            currencyid: req.body.currencyid,
-                            kyt_network_id: req.body.kyt_network_id,
+                            apiKey              : req.body.apiKey,
+                            transcationurl      : req.body.transcationurl,
+                            latest_block_number : req.body.latest_block_number,
+                            processingfee       : req.body.processingfee,
+                            cointype            : req.body.cointype,
+                            contractAddress     : req.body.contractAddress == undefined ? " " : req.body.contractAddress,
+                            contractABI         : req.body.contractABI == undefined ? " " : JSON.stringify(req.body.contractABI),
+                            transferlimit       : req.body.transferlimit,
+                            created_by          : req.body.created_by,
+                            scanurl             : req.body.scanurl,
+                            gaspriceurl         : req.body.gaspriceurl,
+                            icon                : req.body.icon,
+                            currencyid          : req.body.currencyid,
+                            kyt_network_id      : req.body.kyt_network_id,
+                            native_currency_id  : req.body.native_currency_id,
+                            fixedfee            : req.body.fixedfee,
+                            withdrawfee         : req.body.withdrawfee,
+                            withdrawflag        : req.body.withdrawflag,
+                            updated_by          : req.headers.authorization,
+                            updated_at          : new Date().toString(),
+                      
                         }
                     }).then(async (val) => {
                         if (val != null) {
@@ -338,7 +350,7 @@ module.exports =
     },
     async allNetworkForClient(req, res) {
         try {
-            Network.find({ 'status': 0 }, { id: 1, coin: 1, cointype: 1, libarayType: 1, icon: 1, network: 1 }).then(async (val) => {
+            Network.find({ 'status': 0 }, { currencyid: 1, id: 1, coin: 1, cointype: 1, libarayType: 1, icon: 1, network: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {
@@ -351,7 +363,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async update_kytnetworkid(req, res) {
         try {
             await Network.findOneAndUpdate({ 'id': req.body.id },
@@ -371,5 +382,49 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async update_native_currency_id(req, res) {
+        try {
+            await Network.findOneAndUpdate({ 'id': req.body.id },
+                {
+                    native_currency_id  : req.body.native_currency_id,
+                },
+                { returnDocument: 'after' }
+                ).then(async (val) => 
+                {
+                    res.json({ status: 200, message: "get", data: val })
+                }).
+                catch(error => 
+                    {
+                    res.json({ status: 400, data: {}, message: error })
+                })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async update_withdrawsettings(req, res) {
+        try {
+            await Network.findOneAndUpdate({ 'id': req.body.id },
+                {
+                    withdrawflag    : req.body.withdrawflag,
+                    withdrawfee     : req.body.withdrawfee,
+                    fixedfee        : req.body.fixedfee,
+                },
+                { returnDocument: 'after' }
+                ).then(async (val) => 
+                {
+                    res.json({ status: 200, message: "get", data: val })
+                }).
+                catch(error => {
+                    res.json({ status: 400, data: {}, message: error })
+                })
 
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    
 }

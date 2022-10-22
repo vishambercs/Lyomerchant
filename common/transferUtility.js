@@ -273,18 +273,18 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
         const hotWallet = await hotWallets.findOne({ "network_id": from_wallet[0].network_id, "status": 1 })
 
         if (hotWallet == null) {
-            let message = "Please Add hot wallets"
-            var dateTime = new Date();
-            let remarksData = JSON.stringify([{ "message": message, "timestamp": dateTime.toString(), "method": "hotWallet Wallet Null" }])
-            let logs = await Save_Trans_logs(merchant_trans_id, poolwalletID, from_wallet[0].walletNetwork[0].id, "", "", feeLimit, remarksData, 4)
-            return JSON.stringify({ status: 200, message: "Pool Wallet", data: {} })
+          let message     = "Please Add hot wallets"
+          var dateTime    = new Date();
+          let remarksData = JSON.stringify([{ "message": message, "timestamp": dateTime.toString(), "method": "hotWallet Wallet Null" }])
+          let logs        = await Save_Trans_logs(merchant_trans_id, poolwalletID, from_wallet[0].walletNetwork[0].id, "", "", feeLimit, remarksData, 4)
+          return JSON.stringify({ status: 200, message: "Pool Wallet", data: {} })
         }
-          let poolwallet = await poolWallets.findOneAndUpdate({ id: poolwalletID }, { $set: { status: 4 } })
-          var dateTime = new Date();
-          let remarksData = JSON.stringify([{ "message": "We are sending", "timestamp": dateTime.toString(), "method": "transfer_amount_to_hot_wallet" }])
+          let poolwallet        = await poolWallets.findOneAndUpdate({ id: poolwalletID }, { $set: { status: 4 } })
+          var dateTime          = new Date();
+          let remarksData       = JSON.stringify([{ "message": "We are sending", "timestamp": dateTime.toString(), "method": "transfer_amount_to_hot_wallet" }])
           let feedinglimitPerce = (from_wallet[0].walletNetwork[0].feedinglimitPerce == undefined || from_wallet[0].walletNetwork[0].feedinglimitPerce == "") ? 0.1 : from_wallet[0].walletNetwork[0].feedinglimitPerce
-          let totalsend = parseFloat(feeLimit) + (parseFloat(account_balance) * parseFloat(feedinglimitPerce))
-          let logs = await Save_Trans_logs("", "",merchant_trans_id, poolwalletID, from_wallet[0].walletNetwork[0].id, hotWallet.id, "", feeLimit, remarksData, 5)
+          let totalsend         = parseFloat(feeLimit) + (parseFloat(account_balance) * parseFloat(feedinglimitPerce))
+          let logs              = await Save_Trans_logs("", "",merchant_trans_id, poolwalletID, from_wallet[0].walletNetwork[0].id, hotWallet.id, "", feeLimit, remarksData, 5)
           return JSON.stringify({ status: 200, message: "Pool Wallet", data: {} })
         }
     catch (error) {
@@ -431,9 +431,37 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
         return { status: 400, data: datavalues, message: error.message, }
     }
 }
+
+async function updateClientWallet(client_api_key, networkid, merchantbalance, processingfee = 0.01) 
+{
+    let val = await clientWallets.findOne({ api_key: client_api_key, network_id: networkid })
+    if (val != null) 
+    {
+        let clientWallet = await clientWallets.updateOne({ api_key: client_api_key, network_id: networkid }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * processingfee))) } })
+        return clientWallet
+    }
+    else 
+    {
+        const clientWallet = new clientWallets
+        ({
+            id: mongoose.Types.ObjectId(),
+            client_api_key: client_api_key,
+            address: " ",
+            privatekey: " ",
+            status: 3,
+            network_id: networkid,
+            balance: (merchantbalance - (merchantbalance * processingfee)),
+            remarks: "Please Generate The Wallet Address Of this type"
+        });
+        let client_Wallet = await clientWallet.save()
+        return client_Wallet
+    }
+}
+
 module.exports =
 {
     calculateGasFee:calculateGasFee,
+    updateClientWallet:updateClientWallet,
     transfertokenWeb3: transfertokenWeb3,
     transfertokenTronWeb: transfertokenTronWeb,
     check_Status_Feeding_Transcation: check_Status_Feeding_Transcation,

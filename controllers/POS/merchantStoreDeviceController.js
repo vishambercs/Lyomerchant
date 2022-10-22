@@ -71,7 +71,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Please Contact Admin" })
         }
     },
-
     async verifyDeviceOTP(req, res) {
         try {
             await storeDevices.findOneAndUpdate({ 'devicetoken': req.headers.devicetoken, 'otptoken': req.body.otptoken }, { $set: { "status": 1 } }).then(async (val) => {
@@ -92,18 +91,18 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Please Contact Admin" })
         }
     },
-
     async getAllStoreDevice(req, res) {
         try {
 
             let allstoreDevices = await storeDevices.aggregate([
                 { $match: { storekey: req.headers.authorization, status: 1, } },
                 {
-                    $lookup: {
-                        from: "merchantstores", // collection to join
-                        localField: "storekey",//field from the input documents
-                        foreignField: "storeapikey",//field from the documents of the "from" collection
-                        as: "storedetails"// output array field
+                    $lookup: 
+                    {
+                        from            : "merchantstores", // collection to join
+                        localField      : "storekey",       //field from the input documents
+                        foreignField    : "storeapikey",    //field from the documents of the "from" collection
+                        as              : "storedetails"// output array field
                     },
                 },
             ])
@@ -114,15 +113,16 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Please Contact Admin" })
         }
     },
-
     async getAllStoreDeviceForAdmin(req, res) {
         try {
-            // let status = await Utility.checkthevalue(req.body.status)
-            if(req.body.status == undefined || req.body.status == ""){
+            // let status      = await Utility.checkthevalue(req.body.status)
+            if(req.body.status == undefined || req.body.status == "")
+            {
                 let allstoreDevices = await storeDevices.aggregate([
                     { $match: { storekey: req.headers.authorization ,status: 1, } },
                     {
-                        $lookup: {
+                        $lookup: 
+                        {
                             from: "merchantstores", // collection to join
                             localField: "storekey",//field from the input documents
                             foreignField: "storeapikey",//field from the documents of the "from" collection
@@ -155,7 +155,6 @@ module.exports =
     },
     async disableordelete(req, res) {
         try {
-            console.log(req.body)
             let storeDevice = await storeDevices.findOneAndUpdate({ 'id': req.body.id },
                 {
                     $set: 
@@ -173,6 +172,37 @@ module.exports =
             }
 
         }
+        catch (error) {
+            console.log("400", error)
+            res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+        }
+    },
+    async getAllClientStoreDevices(req, res) {
+        try {
+            
+            let status          = req.body.status == undefined || req.body.status == "" ? 0 : parseInt(req.body.status)
+            let filter          = {}
+            if(Object.keys(req.body).indexOf("storekey")!= -1)
+            {
+                filter["storekey"] =     req.body.storekey 
+            }
+            filter["storedetails.clientapikey"] = req.headers.authorization   
+            filter["status"] = status
+            let allstoreDevices = await storeDevices.aggregate([
+                {
+                        $lookup: 
+                        {
+                            from            : "merchantstores", // collection to join
+                            localField      : "storekey",//field from the input documents
+                            foreignField    : "storeapikey",//field from the documents of the "from" collection
+                            as              : "storedetails"// output array field
+                        },
+                },
+                { $match: filter },
+            ])
+            res.json({ status: 200, data: allstoreDevices, message: "All Store Devices" })
+        
+       }
         catch (error) {
             console.log("400", error)
             res.json({ status: 400, data: {}, message: "Please Contact Admin" })

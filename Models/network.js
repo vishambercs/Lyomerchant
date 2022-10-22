@@ -84,22 +84,22 @@ const networkSchema = new mongoose.Schema
             required: false,
             default     : "",
         },
-        gaslimit:{
+        gaslimit: {
             type        : String,
             required    : false,
             default     : "10000000000",
         },
-        feedinglimit:{
+        feedinglimit: {
             type        : String,
             required    : false,
             default     : "10000000",
         },
-        feedinglimitPerce:{
+        feedinglimitPerce: {
             type        : Number,
             required    : false,
             default     : 0.1,
         },
-        hotwallettranscationstatus:{
+        hotwallettranscationstatus: {
             type        : Boolean,
             required    : true,
             default     : true,
@@ -108,9 +108,37 @@ const networkSchema = new mongoose.Schema
             type        : String,
             required    : true,
         },
+        withdrawflag  : {
+            type        : Number,
+            required    : false,
+            default     : 3,
+        },
+        withdrawfee  : {
+            type        : Number,
+            required    : false,
+            default     : 0,
+        },
+        fixedfee        : {
+            type        : Number,
+            required    : false,
+            default     : 0,
+        },
+        native_currency_id  : {
+            type            : String,
+            required        : true,
+        },
+        
         created_by: {
             type: String,
             required: true,
+        },
+        updated_by: {
+            type: String,
+            required: false,
+        },
+        updated_at: {
+            type: String,
+            required: false,
         },
         deleted_by: {
             type: String,

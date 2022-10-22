@@ -5,9 +5,11 @@ const poolWallets = require('../../Models/poolWallet');
 const transactionPool = require('../../Models/transactionPool');
 const payLink = require('../../Models/payLink');
 const invoice = require('../../Models/invoice');
+
 const Constant = require('../../common/Constant');
 const { getBalance } = require('bitcoin-core/src/methods');
 const Web3 = require('web3');
+const { concat } = require('lodash');
 require("dotenv").config()
 
 
@@ -88,6 +90,550 @@ module.exports =
         }
         catch (error) {
             console.log(error)
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+
+    async getAllTranscation(req, res) {
+        try {
+            let filter = {}
+            let index = -1
+            let type = ""
+            let transtype = ["POS","Website","Paylink"]
+
+            if(Object.keys(req.body).indexOf("fromdate")!= -1){
+                var  fromdate   = req.body.fromdate
+                var  fromdated  = new Date (fromdate)
+                filter["createdAt"] =    { $gte: fromdated }  
+            }
+
+            if(Object.keys(req.body).indexOf("todate") != -1){
+                var  fromdate = Object.keys(req.body).indexOf("fromdate") != -1 ? req.body.fromdate : null
+                var  todate         = req.body.todate
+                var  todateed       = new Date (todate)
+                todateed.setDate(todateed.getDate() + 1);           
+                
+                var inputtodateed = new Date(todateed.toISOString());
+                var  fromdated      = new Date (fromdate)
+                var inputfromdated = new Date(fromdated.toISOString());
+                let dateRange       = fromdate != null ? { $gte:inputfromdated , $lte:inputtodateed}   : { $lte: inputtodateed }  
+                filter["createdAt"] = dateRange 
+            }
+            if(Object.keys(req.body).indexOf("clientapikey") != -1){
+                filter["api_key"] = req.body.clientapikey 
+            }
+          
+            let transactionPoolData = await transactionPool.aggregate([
+                {
+                    $lookup: {
+                        from: "poolwallets",
+                        localField: "poolwalletID",
+                        foreignField: "id",
+                        as: "poolwalletDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "api_key",
+                        foreignField: "api_key",
+                        as: "clientDetails"
+                    }
+                },
+                {
+                    $lookup: 
+                    {
+                        from: "networks",
+                        localField: "poolwalletDetails.network_id",
+                        foreignField: "id",
+                        as: "networkDetails"
+                    }
+                },
+                { 
+                   
+                    $match: filter,
+                  
+                },
+                {
+                    "$project": {
+                        "clientDetails.token": 0,
+                        "clientDetails.secret": 0,
+                        "clientDetails.qrcode": 0,
+                        "clientDetails.hash": 0,
+                        "clientDetails.emailstatus": 0,
+                        "clientDetails.loginstatus": 0,
+                        "clientDetails.emailtoken": 0,
+                        "clientDetails.status": 0,
+                        "clientDetails.two_fa": 0,
+                        "clientDetails.password": 0,
+                        "clientDetails.kycLink": 0,
+                        "poolwalletDetails._id": 0,
+                        "poolwalletDetails.status": 0,
+                        "poolwalletDetails.__v": 0,
+                        "poolwalletDetails.privateKey": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.nodeUrl": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.libarayType": 0,
+                        "networkDetails.contractAddress": 0,
+                        "networkDetails.contractABI": 0,
+                        "networkDetails.apiKey": 0,
+                        "networkDetails.transcationurl": 0,
+                        "networkDetails.scanurl": 0,
+                        "networkDetails.status": 0,
+                        "networkDetails.gaspriceurl": 0,
+                        "networkDetails.latest_block_number": 0,
+                        "networkDetails.processingfee": 0,
+                        "networkDetails.transferlimit": 0,
+                        "networkDetails.deleted_by": 0,
+                        "networkDetails.createdAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                        
+                    }
+                },
+                { $sort : { createdAt : 1 } }
+            ])
+            let posTransactionPoolData = await posTransactionPool.aggregate([
+                {
+                    $lookup: {
+                        from: "poolwallets",
+                        localField: "poolwalletID",
+                        foreignField: "id",
+                        as: "poolwalletDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "merchantstores",
+                        localField: "api_key",
+                        foreignField: "clientapikey",
+                        as: "storesDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "storedevices",
+                        localField: "storesDetails.storeapikey",
+                        foreignField: "storekey",
+                        as: "deviceDetails"
+                    }
+                },
+             
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "api_key",
+                        foreignField: "api_key",
+                        as: "clientDetails"
+                    }
+                },
+                {
+                    $lookup: 
+                    {
+                        from: "networks",
+                        localField: "poolwalletDetails.network_id",
+                        foreignField: "id",
+                        as: "networkDetails"
+                    }
+                },
+                { 
+                   
+                    $match: filter,
+                  
+                },
+                {
+                    "$project": {
+                        "clientDetails.token": 0,
+                        "clientDetails.secret": 0,
+                        "clientDetails.qrcode": 0,
+                        "clientDetails.hash": 0,
+                        "clientDetails.emailstatus": 0,
+                        "clientDetails.loginstatus": 0,
+                        "clientDetails.emailtoken": 0,
+                        "clientDetails.status": 0,
+                        "clientDetails.two_fa": 0,
+                        "clientDetails.password": 0,
+                        "clientDetails.kycLink": 0,
+                        "poolwalletDetails._id": 0,
+                        "poolwalletDetails.status": 0,
+                        "poolwalletDetails.__v": 0,
+                        "poolwalletDetails.privateKey": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.nodeUrl": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.libarayType": 0,
+                        "networkDetails.contractAddress": 0,
+                        "networkDetails.contractABI": 0,
+                        
+                        "networkDetails.transcationurl": 0,
+                        "networkDetails.scanurl": 0,
+                        "networkDetails.status": 0,
+                        "networkDetails.gaspriceurl": 0,
+                        "networkDetails.latest_block_number": 0,
+                        "networkDetails.processingfee": 0,
+                        "networkDetails.transferlimit": 0,
+                        "networkDetails.deleted_by": 0,
+                        "storesDetails.qrcode": 0,
+                        "storesDetails.status": 0,
+                        "storesDetails.created_by": 0,
+                        "storesDetails.deleted_by": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                        
+                    }
+                },
+                { $sort : { createdAt : 1 } }
+            ])
+            let pyLinkTransPools = await payLink.aggregate([
+                {
+                    $lookup: {
+                        from: "poolwallets",
+                        localField: "poolwalletID",
+                        foreignField: "id",
+                        as: "poolwalletDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "api_key",
+                        foreignField: "api_key",
+                        as: "clientDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from            : "paylinkpayments",
+                        localField      : "payLinkId",
+                        foreignField    : "id",
+                        as: "paylinkDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from            : "paylinkpayments",
+                        localField      : "payLinkId",
+                        foreignField    : "id",
+                        as: "paylinkDetails"
+                    }
+                },
+                {
+                    $lookup: 
+                    {
+                        from: "invoices",
+                        localField: "paylinkDetails.invoice_id",
+                        foreignField: "id",
+                        as: "invoicesDetails"
+                    }
+                },
+                { 
+                   
+                    $match: filter,
+                  
+                },
+                {
+                    "$project": {
+                        "clientDetails.token"  : 0,
+                        "clientDetails.secret" : 0,
+                        "clientDetails.qrcode" : 0,
+                        "clientDetails.hash"   : 0,
+                        "clientDetails.emailstatus": 0,
+                        "clientDetails.loginstatus": 0,
+                        "clientDetails.emailtoken": 0,
+                        "clientDetails.status": 0,
+                        "clientDetails.two_fa": 0,
+                        "clientDetails.password": 0,
+                        "clientDetails.kycLink": 0,
+                        "poolwalletDetails._id": 0,
+                        "poolwalletDetails.status": 0,
+                        "poolwalletDetails.__v": 0,
+                        "poolwalletDetails.privateKey": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.nodeUrl": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.libarayType": 0,
+                        "networkDetails.contractAddress": 0,
+                        "networkDetails.contractABI": 0,
+                        "networkDetails.apiKey": 0,
+                        "networkDetails.transcationurl": 0,
+                        "networkDetails.scanurl": 0,
+                        "networkDetails.status": 0,
+                        "networkDetails.gaspriceurl": 0,
+                        "networkDetails.latest_block_number": 0,
+                        "networkDetails.processingfee": 0,
+                        "networkDetails.transferlimit": 0,
+                        "networkDetails.deleted_by": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                    }
+                },
+                { $sort : { createdAt : 1 } }
+            ])
+            
+
+            if(Object.keys(req.body).indexOf("transtype") != -1)
+            {
+                 index = transtype.indexOf(req.body.transtype)
+                 type  = index != -1 ? transtype[index] : type
+            }
+
+            res.json({ status: 200, message: "All Transcation", data:  { 
+                
+                "transactionPool"       : (type == "" || type == "Website" )    ? transactionPoolData  : [], 
+                "posTransactionPool"    : (type == "" || type == "POS" )        ? posTransactionPoolData   : [], 
+                "pyLinkTransPool"       : (type == "" || type == "Paylink" )    ? pyLinkTransPools     : [], 
+            }})
+        }
+        catch (error) {
+            console.log("error",error)
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+    async getAllTranscationOfMerchant(req, res) {
+        try {
+            let transactionPoolData = await transactionPool.aggregate([
+                {
+                    $lookup: {
+                        from: "poolwallets",
+                        localField: "poolwalletID",
+                        foreignField: "id",
+                        as: "poolwalletDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "api_key",
+                        foreignField: "api_key",
+                        as: "clientDetails"
+                    }
+                },
+                {
+                    $lookup: 
+                    {
+                        from: "networks",
+                        localField: "poolwalletDetails.network_id",
+                        foreignField: "id",
+                        as: "networkDetails"
+                    }
+                },
+                { $match: { "api_key": req.headers.authorization } },
+                {
+                    "$project": {
+                        "clientDetails.token": 0,
+                        "clientDetails.secret": 0,
+                        "clientDetails.qrcode": 0,
+                        "clientDetails.hash": 0,
+                        "clientDetails.emailstatus": 0,
+                        "clientDetails.loginstatus": 0,
+                        "clientDetails.emailtoken": 0,
+                        "clientDetails.status": 0,
+                        "clientDetails.two_fa": 0,
+                        "clientDetails.password": 0,
+                        "clientDetails.kycLink": 0,
+                        "poolwalletDetails._id": 0,
+                        "poolwalletDetails.status": 0,
+                        "poolwalletDetails.__v": 0,
+                        "poolwalletDetails.privateKey": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.nodeUrl": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.libarayType": 0,
+                        "networkDetails.contractAddress": 0,
+                        "networkDetails.contractABI": 0,
+                        "networkDetails.apiKey": 0,
+                        "networkDetails.transcationurl": 0,
+                        "networkDetails.scanurl": 0,
+                        "networkDetails.status": 0,
+                        "networkDetails.gaspriceurl": 0,
+                        "networkDetails.latest_block_number": 0,
+                        "networkDetails.processingfee": 0,
+                        "networkDetails.transferlimit": 0,
+                        "networkDetails.deleted_by": 0,
+                        "networkDetails.createdAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                        
+                    }
+                }
+            ])
+            let posTransactionPoolData = await posTransactionPool.aggregate([
+                {
+                    $lookup: {
+                        from: "poolwallets",
+                        localField: "poolwalletID",
+                        foreignField: "id",
+                        as: "poolwalletDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "merchantstores",
+                        localField: "api_key",
+                        foreignField: "storeapikey",
+                        as: "storesDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "storesDetails.clientapikey",
+                        foreignField: "api_key",
+                        as: "clientDetails"
+                    }
+                },
+                {
+                    $lookup: 
+                    {
+                        from: "networks",
+                        localField: "poolwalletDetails.network_id",
+                        foreignField: "id",
+                        as: "networkDetails"
+                    }
+                },
+                { $match: { "api_key": req.headers.authorization } },
+                {
+                    "$project": {
+                        "clientDetails.token": 0,
+                        "clientDetails.secret": 0,
+                        "clientDetails.qrcode": 0,
+                        "clientDetails.hash": 0,
+                        "clientDetails.emailstatus": 0,
+                        "clientDetails.loginstatus": 0,
+                        "clientDetails.emailtoken": 0,
+                        "clientDetails.status": 0,
+                        "clientDetails.two_fa": 0,
+                        "clientDetails.password": 0,
+                        "clientDetails.kycLink": 0,
+                        "poolwalletDetails._id": 0,
+                        "poolwalletDetails.status": 0,
+                        "poolwalletDetails.__v": 0,
+                        "poolwalletDetails.privateKey": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.nodeUrl": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.libarayType": 0,
+                        "networkDetails.contractAddress": 0,
+                        "networkDetails.contractABI": 0,
+                        "networkDetails.apiKey": 0,
+                        "networkDetails.transcationurl": 0,
+                        "networkDetails.scanurl": 0,
+                        "networkDetails.status": 0,
+                        "networkDetails.gaspriceurl": 0,
+                        "networkDetails.latest_block_number": 0,
+                        "networkDetails.processingfee": 0,
+                        "networkDetails.transferlimit": 0,
+                        "networkDetails.deleted_by": 0,
+                        "storesDetails.qrcode": 0,
+                        "storesDetails.status": 0,
+                        "storesDetails.created_by": 0,
+                        "storesDetails.deleted_by": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                        
+                    }
+                }
+            ])
+
+            let pyLinkTransPools = await payLink.aggregate([
+                {
+                    $lookup: {
+                        from: "poolwallets",
+                        localField: "poolwalletID",
+                        foreignField: "id",
+                        as: "poolwalletDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "api_key",
+                        foreignField: "api_key",
+                        as: "clientDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from            : "paylinkpayments",
+                        localField      : "payLinkId",
+                        foreignField    : "id",
+                        as: "paylinkDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from            : "paylinkpayments",
+                        localField      : "payLinkId",
+                        foreignField    : "id",
+                        as: "paylinkDetails"
+                    }
+                },
+                {
+                    $lookup: 
+                    {
+                        from: "invoices",
+                        localField: "paylinkDetails.invoice_id",
+                        foreignField: "id",
+                        as: "invoicesDetails"
+                    }
+                },
+                { 
+                   
+                    $match: filter,
+                  
+                },
+                {
+                    "$project": {
+                        "clientDetails.token"  : 0,
+                        "clientDetails.secret" : 0,
+                        "clientDetails.qrcode" : 0,
+                        "clientDetails.hash"   : 0,
+                        "clientDetails.emailstatus": 0,
+                        "clientDetails.loginstatus": 0,
+                        "clientDetails.emailtoken": 0,
+                        "clientDetails.status": 0,
+                        "clientDetails.two_fa": 0,
+                        "clientDetails.password": 0,
+                        "clientDetails.kycLink": 0,
+                        "poolwalletDetails._id": 0,
+                        "poolwalletDetails.status": 0,
+                        "poolwalletDetails.__v": 0,
+                        "poolwalletDetails.privateKey": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.nodeUrl": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.libarayType": 0,
+                        "networkDetails.contractAddress": 0,
+                        "networkDetails.contractABI": 0,
+                        "networkDetails.apiKey": 0,
+                        "networkDetails.transcationurl": 0,
+                        "networkDetails.scanurl": 0,
+                        "networkDetails.status": 0,
+                        "networkDetails.gaspriceurl": 0,
+                        "networkDetails.latest_block_number": 0,
+                        "networkDetails.processingfee": 0,
+                        "networkDetails.transferlimit": 0,
+                        "networkDetails.deleted_by": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                    }
+                }
+            ])
+            
+            res.json({ status: 200, message: "All Transcation", data:  { 
+                
+                "transactionPool"       : transactionPoolData, 
+                "posTransactionPool"    : posTransactionPoolData,
+                "pyLinkTransPool"       : pyLinkTransPools
+            }})
+        }
+        catch (error) {
+            console.log("error",error)
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },

@@ -28,6 +28,11 @@ const withdrawSchema = new mongoose.Schema
             type: String,
             required: true,
         },
+        netamount :
+        {
+            type: Number,
+            required: true,
+        },
         address_to:
         {
             type: String,
