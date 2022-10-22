@@ -60,6 +60,7 @@ router.post('/forgotPassword',                       clientsController.forgotPas
 router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);
 router.post('/resetPassword',                        clientsController.ResetPassword);
 router.post('/updateMerchantProfileImage',           Auth.is_merchant,clientsController.updateMerchantProfileImage);
+
 "=============Merchant-Sites==========================================="
 
 router.post('/allMerchantSites',                         merchantSitesController.allMerchantSites);
@@ -70,15 +71,18 @@ router.post('/updateMerchantSite',                       merchantSitesController
 "=============MerchantStore==========================================="
 
 router.post('/createMerchantStore',                         Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.createMerchantStore);
-router.get('/allMerchantStore',                             merchantstoreController.allMerchantStore);
 router.post('/merchantstore',                               Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.MerchantStore);
 router.post('/merchantStoreProfileUpdate',                  Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.updateMerchantStoreProfile);
+router.post('/changemerchantstore',                         Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.changeMerchantStore);
 router.post('/regsiterStoreDevices',                        Auth.store_have_access,merchantStoreDeviceController.regsiterStoreDevices);
 router.post('/verifydeviceOTP',                             Auth.store_have_access,merchantStoreDeviceController.verifyDeviceOTP);
 router.post('/getAllStoreDevices',                          Auth.store_have_access,merchantStoreDeviceController.getAllStoreDevice);
 router.post('/getAllStoreDeviceForMerchantAdmin',           Auth.store_have_access,merchantStoreDeviceController.getAllStoreDeviceForAdmin);
 router.post('/disableordeletedevices',                      Auth.store_have_access,merchantStoreDeviceController.disableordelete);
 router.post('/posGetTransByStorekey',                       Auth.store_have_access,posTransactionPoolController.getTranscationDetailsByStoreID);
+router.post('/getallclientstoredevices',                    Auth.is_merchant,merchantStoreDeviceController.getAllClientStoreDevices);
+
+
 "=============Pos Merchant Wallet==========================================="
 
 router.post('/assignPosMerchantWallet',                     Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
@@ -87,6 +91,10 @@ router.get('/posallCurrency',                               Auth.check_Store_Dev
 router.post('/pospriceConversition',                        Auth.check_Store_Device_Access,CurrencyController.priceConversition);
 router.post('/posallNetworks',                              Auth.check_Store_Device_Access,networkController.allNetworkForClient);
 router.post('/posGetTransByDeviceID',                       Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
+
+
+
+
 
 "============================ Currency Master ==============================="
 
@@ -106,10 +114,10 @@ router.post('/cancelClientRequest',                             Auth.is_merchant
 
 "============================ WEB PLUGIN ==============================="
 
-router.post('/assignMerchantWallet',                         Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
-router.post('/pluginallNetworks',                            Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allNetworkForClient);
-router.post('/pluginallCurrency',                            Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
-router.post('/pluginpriceConversition',                      Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversition);
+router.post('/assignMerchantWallet',                            Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
+router.post('/pluginallNetworks',                               Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allNetworkForClient);
+router.post('/pluginallCurrency',                               Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
+router.post('/pluginpriceConversition',                         Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversition);
 
 "============================ Withdraw  ==============================="
 
@@ -127,9 +135,7 @@ router.post('/getPerferedNetwork',                                  Auth.is_merc
 "============================ HOSTRED PAYMENT  ==============================="
 
 router.post('/createHostePayment',                                  Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
-
-
-router.post('/ipntesting',                                  PaymentHostedController.IPN_Testing);
+router.post('/ipntesting',                                          PaymentHostedController.IPN_Testing);
 
 "============================ clientapikey  ==============================="
 
@@ -140,7 +146,9 @@ router.post('/getapistatus',                                        clientapicon
 
 router.post('/getTransStatus',                                        Auth.checkaccess,commonController.getTransStatus);
 
-router.post('/balancecheck',                                        commonController.getBalance);
+router.get('/getalltranscationofmerchant',                           Auth.is_merchant,commonController.getAllTranscationOfMerchant);
+
+router.post('/balancecheck',                                          commonController.getBalance);
 
 "============================IPN Controller==============================="
 router.post('/createIPNLink',ipnController.create_IPN_Link);

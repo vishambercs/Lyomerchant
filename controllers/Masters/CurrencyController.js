@@ -119,12 +119,12 @@ module.exports =
     async priceConversition(req, res) {
         try 
         {
-            let network  = await networks.findOne({ 'id': req.body.coinid })
-            let Currency = await Currencies.findOne({ 'id': req.body.currenid })
-            let parameters = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
-            let COINGECKO_URL   =  process.env.COINGECKO+parameters
-            let axiosGetData    =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
-            var stringify_response = JSON.parse(axiosGetData.data)
+            let network             = await networks.findOne({ 'id': req.body.coinid })
+            let Currency            = await Currencies.findOne({ 'id': req.body.currenid })
+            let parameters          = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
+            let COINGECKO_URL       =  process.env.COINGECKO+parameters
+            let axiosGetData        =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
+            var stringify_response  = JSON.parse(axiosGetData.data)
             res.json({ status: 200, data: stringify_response.data, message: "Currency API Balance" })
         }
         catch (error) 

@@ -117,9 +117,6 @@ async function getTranscationDataForClient(transkey) {
     return pooldata
 }
 
-
-
-
 async function getBalance(transdata, transData) {
     try {
         let addressObject = transdata[0]
@@ -162,7 +159,6 @@ async function getBalance(transdata, transData) {
                 "invoicenumber":"",
                 "paymentdata":paymentData ,"transid": addressObject.id , "storename" :"","network" :addressObject.networkDetails[0].network ,"coin" :addressObject.networkDetails[0].coin,"amount" :addressObject.amount 
             }}
-           
             let emailLog = await emailSending.emailLogs(addressObject.id,emailTemplateName)
             console.log("email_response exipred",emailLog)
             
@@ -489,11 +485,9 @@ module.exports =
             return 0
         }
     },
-
     async transaction_DataForClient(transKey) {
         getTranscationDataForClient(transKey)
     },
-
     async remaining_balance(previous, need, current) {
         console.log("remaining_balance  ", current - previous)
         console.log("remaining_balance  ", need)
@@ -665,8 +659,8 @@ module.exports =
             ])
         return pooldata
     },
-    async get_data_of_transcation() {
-
+    async get_data_of_transcation() 
+    {
         if (Constant.index < Constant.translists.length) {
             let transData = Constant.translists[Constant.index]
             let transcationData = await getTranscationData(transData.transkey)

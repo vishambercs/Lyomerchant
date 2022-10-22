@@ -117,9 +117,9 @@ async function saved_Trans(id, status, remarks,poolwalletid,pooldata,address_bal
         "amount"        :  constant.addressBalance.data.format_token_balance 
        }
     }
-        constant.transid = ""
+        constant.transid        = ""
         constant.addressBalance = [];
-      let email_response = await emailSending.sendEmailFunc(emailTemplateName)
+        let email_response      = await emailSending.sendEmailFunc(emailTemplateName)
      
 }
 

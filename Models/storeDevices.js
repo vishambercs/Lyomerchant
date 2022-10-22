@@ -26,6 +26,7 @@ const storeDevices = new mongoose.Schema({
     status:
     {
         type: Number,
+        enum : [0,1,2],
         required: true,
     },
     deviceid:
@@ -46,6 +47,17 @@ const storeDevices = new mongoose.Schema({
         default : 0
     },
     deleted_at:
+    {
+        type: String,
+        required: false,
+    },
+    updated_by:
+    {
+        type: String,
+        required: false,
+        default : 0
+    },
+    updated_at:
     {
         type: String,
         required: false,
