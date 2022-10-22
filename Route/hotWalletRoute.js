@@ -22,4 +22,4 @@ router.get('/allHotWallets',                        Auth.is_admin, hotwalletCont
 // router.post('/deletehotwallet',                   Auth.is_admin, hotwalletController.deleteHotWallets);
 // router.post('/updateHotWallet',                 Auth.is_admin,   hotwalletController.updateHotWallets);
 // router.post('/manualHotWalletTranscation',      Auth.is_admin,   hotwalletController.manualHotWalletTranscation);
-// module.exports = router;
+module.exports = router;
