@@ -72,6 +72,7 @@ module.exports =
                 else if (password_status == true) {
                     val["admin_api_key"] = ""
                     val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
+                    val["secret"] = val["two_fa"] == false ? val["secret"] : ""
                     let jwttoken = await Utility.Get_JWT_Token(val.id)
                     let wallet = await admins.findOneAndUpdate({ 'email': email }, { $set: { token: jwttoken } }, { $new: true })
                     val["token"] = jwttoken
@@ -95,16 +96,25 @@ module.exports =
         try {
             let email = req.body.email
             let code = req.body.code
+            let data = await admins.findOne({ 'email': email }, {
+                email:1,
+                token:1,
+                admin_api_key:1,
+                status:1
+                
+            })
+
             admins.findOne({ 'email': email }).then(async (val) => {
+                
                 if (authenticator.check(code, val.secret)) {
                     if (val.two_fa == false) {
 
                         let wallet = await admins.findOneAndUpdate({ 'email': email }, { $set: { two_fa: true } }, { $new: true })
+                     
 
-                        let data = await admins.findOne({ 'email': email })
                         res.json({ "status": 200, "data": data, "message": "Get The Data Successfully" })
                     } else {
-                        res.json({ "status": 200, "data": val, "message": "Get The Data Successfully" })
+                        res.json({ "status": 200, "data": data, "message": "Get The Data Successfully" })
                     }
 
                 } else {

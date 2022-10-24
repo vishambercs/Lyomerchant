@@ -229,7 +229,7 @@ module.exports =
             let email = req.body.email;
             clients.findOne({ 'email': email }).select('+password').then(async (val) => {
               
-                console.log(val.password,req.body.password)
+              
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
                 if (val.emailstatus == false) {
                     res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
@@ -241,6 +241,7 @@ module.exports =
                     val["api_key"]   = ""
                     val["hash"]      = ""
                     val["qrcode"]    = val["two_fa"] == false ? val["qrcode"] : ""
+                    val["secret"]    = val["two_fa"] == false ? val["secret"] : ""
                     var jwt_token    = jwt.sign({ id: val.id }, process.env.AUTH_KEY, { expiresIn: "1h" });
                     let wallet       = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
                     val["authtoken"] = jwt_token

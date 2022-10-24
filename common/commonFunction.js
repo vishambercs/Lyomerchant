@@ -78,7 +78,7 @@ async function getTranscationData(transkey) {
                     from: "clients", // collection to join
                     localField: "api_key",//field from the input documents
                     foreignField: "api_key",//field from the documents of the "from" collection
-                    as: "clientsDetails"// output array field
+                    as: "clientsdetails"// output array field
                 }
             },
             {
@@ -150,8 +150,9 @@ async function getBalance(transdata, transData) {
             let totalBalnce                 = parseFloat(previouspoolwallet.balance) + walletbalance
             let poolwallet                  = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 ,"balance": totalBalnce } })
             response                        = { amountstatus: 4,"paymentdata":paymentData ,status: 200, "data": {}, message: "Your Transcation is expired." };
-           console.log(addressObject.clientsdetails)
+            console.log(addressObject.clientsdetails)
            console.log(addressObject.api_key)
+
             var emailTemplateName = 
             { 
                 "emailTemplateName": "successtrans.ejs", 
