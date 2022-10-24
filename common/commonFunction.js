@@ -148,6 +148,8 @@ async function getBalance(transdata, transData) {
             let totalBalnce                 = parseFloat(previouspoolwallet.balance) + walletbalance
             let poolwallet                  = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 ,"balance": totalBalnce } })
             response                        = { amountstatus: 4,"paymentdata":paymentData ,status: 200, "data": {}, message: "Your Transcation is expired." };
+           console.log(addressObject.clientsdetails)
+           console.log(addressObject.api_key)
             var emailTemplateName = 
             { 
                 "emailTemplateName": "successtrans.ejs", 
