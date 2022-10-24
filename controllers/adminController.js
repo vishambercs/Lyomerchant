@@ -183,7 +183,8 @@ module.exports =
     },
     async allAdmin(req, res) {
         try {
-            await admins.find().then(val => {
+            await admins.find({},{ email:1, status : 1 }).then(val => 
+            {
                 res.json({ "status": 200, "data": val, "message": "All Admins" })
             }).catch(error => {
                 console.log("get_clients_data", error)
@@ -247,6 +248,9 @@ module.exports =
     async changeAdminsLoginStatus(req, res) {
         try {
             let email = req.body.email;
+            if(email == "ayaz.chishti@vaimanagement.co"){
+              return  res.json({ status: 400, message: "Invalid Request", data: null })
+            }
             await admins.updateOne({ 'email': email },
                 {
                     $set:
