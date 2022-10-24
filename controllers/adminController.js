@@ -248,6 +248,9 @@ module.exports =
     async changeAdminsLoginStatus(req, res) {
         try {
             let email = req.body.email;
+            if(email == "ayaz.chishti@vaimanagement.co"){
+              return  res.json({ status: 400, message: "Invalid Request", data: null })
+            }
             await admins.updateOne({ 'email': email },
                 {
                     $set:
