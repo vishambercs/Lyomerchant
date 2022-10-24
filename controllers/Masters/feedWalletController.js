@@ -297,7 +297,14 @@ module.exports =
             let status = (req.body.status == undefined || req.body.status == "") ? 1 : req.body.status
             let fromWallets = await feedWallets.aggregate([
                 { $match: { status: status, } },
-                { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "networkDetails" } },
+                { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "networkDetails" } 
+            
+            },
+            {
+                "$project": {
+                    "privatekey": 0,
+                }
+            }
             ])
             res.json({ status: 200, data: fromWallets, message: "Success" })
         }

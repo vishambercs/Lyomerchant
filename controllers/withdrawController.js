@@ -299,7 +299,20 @@ module.exports =
                                 "networkDetails.created_by": 0,
                                 "networkDetails.createdAt": 0,
                                 "networkDetails.updatedAt": 0,
-                                "networkDetails._id": 0
+                                "networkDetails._id": 0,
+                                "clientsDetails._id": 0,
+                                "clientsDetails.authtoken": 0,
+                                "clientsDetails.token": 0,
+                                "clientsDetails.two_fa": 0,
+                                "clientsDetails.password": 0,
+                                "clientsDetails.qrcode": 0,
+                                "clientsDetails.secret": 0,
+                                "clientsDetails.emailstatus": 0,
+                                "clientsDetails.loginstatus": 0,
+                                "clientsDetails.emailtoken": 0,
+                                "clientsDetails.kycLink": 0,
+                                
+
                             }
                         }
                     ]).then(async (data) => {
