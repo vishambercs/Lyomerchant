@@ -538,9 +538,14 @@ async function callIPN(transkey) {
     let amount         = pyTranPool.amount 
     let currency       = pyTranPool.currency 
     let apikey         =  pyTranPool.api_key 
+    console.log("transkey", "transkey=============",transkey,pyTranPool.payLinkId)
+    
     let payLink_data =  await payLink.findOne({ id: pyTranPool.payLinkId}) 
-    let invoice_data =  await invoice.findOne({ id: payLink_data.invoice_id}) 
-
+    console.log("transkey", "payLink_data=============",payLink_data)
+    let invoice_data = null
+    if(payLink_data != null){
+     invoice_data =  await invoice.findOne({ id: payLink_data.invoice_id}) 
+    }
     let datarray = 
     {
         "transaction_status"    : (status.length > 0 ? status[0].title : ""),
@@ -601,6 +606,9 @@ module.exports =
             let format_native_balance = 0
             var amountstatus = 0
             let merchantbalance = 0;
+
+            console.log("==========getTrasnsBalance=========",addressObject)
+
             const previousdate = new Date(parseInt(addressObject.timestamps));
             const currentdate  = new Date().getTime()
             var diff = currentdate - previousdate.getTime();
@@ -664,7 +672,7 @@ module.exports =
             if (amountstatus != 0) 
             {
                 let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
-                let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
+                
                 let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
                 let previouspoolwallet = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
                 if(previouspoolwallet != null)
@@ -675,6 +683,7 @@ module.exports =
                 let logData = { "transcationDetails": [] }
                 if (amountstatus == 1 || amountstatus == 3) 
                 {
+                    let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
                   if(addressObject.orderType != "fastCode")
                    {
                     let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
