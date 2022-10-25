@@ -95,6 +95,7 @@ module.exports =
     
     async save_withdraw(req, res) {
         try {
+           
             const network               = await networks.findOne({ id: req.body.network_id })
             const prevwithdrawLog       = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
             const clientWallet          = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })

@@ -22,11 +22,7 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         enum : ['Individual','Company'],
         required: true,
-    },
-    companyname: 
-    {
-        type: String,
-        required: false,
+      
     },
     email: {
         type: String,
