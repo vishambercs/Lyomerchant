@@ -674,17 +674,19 @@ module.exports =
                 let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
                 
                 let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
-                let previouspoolwallet = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
-                if(previouspoolwallet != null)
-                {
-                    let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
-                    let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { balance: totalBalnce } })
-                }     
+               
                 let logData = { "transcationDetails": [] }
                 if (amountstatus == 1 || amountstatus == 3) 
                 {
                     let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
-                  if(addressObject.orderType != "fastCode")
+                    let previouspoolwallet = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+                    if(previouspoolwallet != null)
+                    {
+                        let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
+                        let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { balance: totalBalnce } })
+                    }     
+                  
+                    if(addressObject.orderType != "fastCode")
                    {
                     let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
                     let invoiceData = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
