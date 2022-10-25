@@ -22,7 +22,7 @@ const commonController              = require('../controllers/Logs/commonControl
 const ipnController                 = require('../controllers/Masters/ipnController');
 
 // router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
-// router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
+
 // router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
 // router.post('/getBalanceAddress',                    Auth.is_merchant,clientsController.get_BalancebyAddress);
 // router.post('/approvekyc',                           clientsController.kyc_approved);
@@ -39,7 +39,7 @@ router.post('/clientWihdrawLogs',                    Auth.is_merchant,withdrawCo
 router.post('/clientTotalWihdraw',                   Auth.is_merchant,withdrawController.get_client_wihdraw_total);
 router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
 router.post('/merchantNetworkTranscation',           Auth.is_merchant,transcationpoolController.get_Trans_by_Network_ID);
-
+router.post('/merchantsTranscation',                 Auth.is_merchant,transcationpoolController.getTrans);
 router.post('/check_kyc',                            clientsController.check_kyc);
 router.post('/createkyclink',                        clientsController.Create_Kyc_Link);
 router.post('/kycstatus',                            Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);
