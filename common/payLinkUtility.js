@@ -697,7 +697,7 @@ module.exports =
                             "status": "Success" ,
                             "paymentdata":paymentData ,
                             "transid": addressObject.id ,
-                            "invoicenumber" :addressObject.invoicedetails[0].invoiceNumber,
+                            "invoicenumber" : addressObject.orderType =="fastCode" ?  ""  : addressObject.invoicedetails[0].invoiceNumber,
                             "storename" :"",
                             "network" :addressObject.networkDetails[0].network ,
                             "coin" :addressObject.networkDetails[0].coin,

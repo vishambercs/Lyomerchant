@@ -31,7 +31,7 @@ const ipnController                 = require('../controllers/Masters/ipnControl
 
 router.post('/signUpMerchant',                        Auth.verify_create_merchant_auth,clientsController.create_merchant);
 router.post('/login',                                 Auth.verify_Login,clientsController.Login);
-router.post('/verfiyMerchantAuth',                    Auth.is_merchant,Auth.verify_MerchantAuth,clientsController.Verfiy_Google_Auth);
+router.post('/verfiyMerchantAuth',                    Auth.verifymerchant,Auth.verify_MerchantAuth,clientsController.Verfiy_Google_Auth);
 router.post('/resendingemail',                        Auth.is_merchant,Auth.verify_resendingemail,clientsController.resendingemail);
 router.post('/verfiyemail',                           Auth.verify_verfiyemail,clientsController.verfiyemail);
 router.post('/getclientkey',                          Auth.verifymerchant,Auth.verify_getclientkey,clientsController.getclientkey);

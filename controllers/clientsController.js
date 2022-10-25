@@ -248,6 +248,7 @@ module.exports =
                         authtoken    : 1,
                         api_key      : 1,
                         type      : 1,
+                        two_fa      : 1,
                     })
                     res.json({ "status": 200, "data": clientsdata, "message": "Successfully Login" })
                 }
