@@ -2,8 +2,8 @@ const clients = require('../Models/clients');
 const kycWebHookLogs = require('../Models/kycWebHookLog');
 const transcationLog = require('../Models/transcationLog');
 const admins = require('../Models/admin');
-const cornJobs      = require('../common/cornJobs');
-const emailSending  = require('../common/emailSending');
+const cornJobs = require('../common/cornJobs');
+const emailSending = require('../common/emailSending');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
 var Utility = require('../common/Utility');
@@ -30,33 +30,24 @@ const { generateAccount } = require('tron-create-address')
 
 module.exports =
 {
-    async create_clients(req, res) {
+    async getclientkey(req, res) {
         try {
-           
-            var api_key = crypto.randomBytes(20).toString('hex');
-            var email = req.body.email
-            var hash = CryptoJS.MD5(email + process.env.BASE_WORD_FOR_HASH).toString();
-            if (hash == req.body.hash) {
-                const client = new clients({ status: false, api_key: api_key, email: req.body.email, });
-                const previous_client = await clients.findOne({ 'email': email }).then(async (val) => {
-                    if (val == null) {
-                       
-                        res.json({ status: 200, message: "Clients Data", data: {} })
-                    }
-                    else {
-                       
-                        res.json({ status: 200, message: "Clients Data", data: { id: val._id, token: val.token, api_key: val.api_key, email: val.email } })
-                    }
-                }).catch(error => {
-                    console.log(error)
-                    res.json({ status: 400, data: {}, message: error })
-                })
-            }
+            const previous_client = await clients.findOne({ 'email': req.body.email }).then(async (val) => {
+                if (val == null) {
+                    res.json({ status: 200, message: "Client does not exist.", data: {} })
+                }
+                else {
+                    res.json({ status: 200, message: "Clients Data", data: { api_key: val.api_key,status: val.status } })
+                }
+            }).catch(error => {
+                console.log("create clients catch", error)
+                res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+            })
         }
         catch (error) {
-            res.json({ status: 400, data: {}, message: "Verification Failed" })
+            console.log("create clients catch", error)
+            res.json({ status: 400, data: {}, message: "Please Contact Admin" })
         }
-
     },
     async updateClientToken(req, res) {
         var token = crypto.randomBytes(20).toString('hex');
@@ -91,33 +82,32 @@ module.exports =
 
         if (hash == req.body.hash) {
             QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
-               
-                 if(req.body.type == "Company" && (req.body.companyname == "" || req.body.companyname == undefined ))
-                 {
-                  return  res.json({ status: 400, message: "Please Enter The Company Name", data: {} })
-                 }
 
-                const client = new clients({ 
-                    token: token, 
-                    loginstatus: false, 
-                    emailtoken: otp, 
-                    emailstatus: false, 
-                    kycLink: " ", 
-                    two_fa: false, 
-                    secret: secret, 
-                    qrcode: url, 
-                    status: false, 
-                    password: password_hash, 
-                    api_key: api_key, 
-                    email: req.body.email, 
-                    hash: hash, 
-                    first_name      : req.body.first_name, 
-                    last_name       : req.body.last_name, 
-                    type            : req.body.type, 
-                    companyname     : (req.body.companyname == "" || req.body.companyname == undefined) ?  "" : req.body.companyname , 
+                if (req.body.type == "Company" && (req.body.companyname == "" || req.body.companyname == undefined)) {
+                    return res.json({ status: 400, message: "Please Enter The Company Name", data: {} })
+                }
+
+                const client = new clients({
+                    token: token,
+                    loginstatus: false,
+                    emailtoken: otp,
+                    emailstatus: false,
+                    kycLink: " ",
+                    two_fa: false,
+                    secret: secret,
+                    qrcode: url,
+                    status: false,
+                    password: password_hash,
+                    api_key: api_key,
+                    email: req.body.email,
+                    hash: hash,
+                    first_name: req.body.first_name,
+                    last_name: req.body.last_name,
+                    type: req.body.type,
+                    companyname: (req.body.companyname == "" || req.body.companyname == undefined) ? "" : req.body.companyname,
                 });
                 client.save().then(async (val) => {
-                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp,"url":"" } }
+                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp, "url": "" } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                     res.json({ status: 200, message: "We sent token to your Email", data: val })
                 }).catch(error => {
@@ -138,9 +128,9 @@ module.exports =
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false })
         await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "emailtoken": otp, "emailstatus": false, "loginstatus": false } }, { $new: true })
             .then(async (val) => {
-               
+
                 if (val != null) {
-                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp,"url":""  } }
+                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp, "url": "" } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                     res.json({ status: 200, message: "Verification Email Sent", data: val.email })
                 }
@@ -173,8 +163,8 @@ module.exports =
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
                 if (val != null) {
-                    let kycurl       = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path2
-                    let kyclevelurl    = process.env.KYC_URL + Constant.KYC_URL_LEVEL 
+                    let kycurl = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path2
+                    let kyclevelurl = process.env.KYC_URL + Constant.KYC_URL_LEVEL
                     let kyc_level = await commonFunction.Get_Request(kyclevelurl, { "Authorization": process.env.KYC_URL_TOKEN })
                     let kyc_link = null
                     let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LyoMerchant_Client" }, { "Authorization": process.env.KYC_URL_TOKEN })
@@ -228,8 +218,6 @@ module.exports =
         try {
             let email = req.body.email;
             clients.findOne({ 'email': email }).select('+password').then(async (val) => {
-              
-              
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
                 if (val.emailstatus == false) {
                     res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
@@ -243,7 +231,7 @@ module.exports =
                     val["qrcode"]    = val["two_fa"] == false ? val["qrcode"] : ""
                     val["secret"]    = val["two_fa"] == false ? val["secret"] : ""
                     var jwt_token    = jwt.sign({ id: val.id }, process.env.AUTH_KEY, { expiresIn: "1h" });
-                    let wallet       = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
+                    let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
                     val["authtoken"] = jwt_token
                     res.json({ "status": 200, "data": val, "message": "Successfully Login" })
                 }
@@ -256,8 +244,7 @@ module.exports =
                 res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
             })
         }
-        catch (error) 
-        {
+        catch (error) {
             console.log("error", error)
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }
@@ -288,39 +275,40 @@ module.exports =
     },
     async changeMerchantEmail(req, res) {
         try {
-            let prevVal = await clients.findOne({ email: req.body.currentemail } )
-            let val = await clients.findOneAndUpdate({ email: req.body.currentemail }, { $set: { email: req.body.newemail,companyname: req.body.newcompanyname} }, { $new: true })
-            if (val != null) 
-            {
-              
+            let prevVal = await clients.findOne({ email: req.body.currentemail })
+            let val = await clients.findOneAndUpdate({ email: req.body.currentemail }, { $set: { email: req.body.newemail, companyname: req.body.newcompanyname } }, { $new: true })
+            if (val != null) {
 
-                var emailTemplateName = 
-                { 
-                    "emailTemplateName": "emailchanging.ejs", 
-                    "to": req.body.currentemail, 
-                    "subject": "Email And Company Name Changing", 
-                    "templateData": { 
-                    "oldemail":req.body.currentemail ,
-                    "oldcompanyname": prevVal.companyname , 
-                    "newemail" :req.body.newemail,
-                    "newcompanyname" :req.body.newcompanyname 
-                }}
+
+                var emailTemplateName =
+                {
+                    "emailTemplateName": "emailchanging.ejs",
+                    "to": req.body.currentemail,
+                    "subject": "Email And Company Name Changing",
+                    "templateData": {
+                        "oldemail": req.body.currentemail,
+                        "oldcompanyname": prevVal.companyname,
+                        "newemail": req.body.newemail,
+                        "newcompanyname": req.body.newcompanyname
+                    }
+                }
                 let emailLog = await emailSending.sendEmailFunc(emailTemplateName)
-                console.log("changeMerchantEmail OLD",emailLog)
+                console.log("changeMerchantEmail OLD", emailLog)
 
-                var emailTemplateName = 
-                { 
-                    "emailTemplateName": "emailchanging.ejs", 
-                    "to": req.body.newemail, 
-                    "subject": "Email And Company Name Changing", 
-                    "templateData": { 
-                    "oldemail":req.body.currentemail ,
-                    "oldcompanyname": prevVal.companyname , 
-                    "newemail" :req.body.newemail,
-                    "newcompanyname" :req.body.newcompanyname 
-                }}
+                var emailTemplateName =
+                {
+                    "emailTemplateName": "emailchanging.ejs",
+                    "to": req.body.newemail,
+                    "subject": "Email And Company Name Changing",
+                    "templateData": {
+                        "oldemail": req.body.currentemail,
+                        "oldcompanyname": prevVal.companyname,
+                        "newemail": req.body.newemail,
+                        "newcompanyname": req.body.newcompanyname
+                    }
+                }
                 let newemailLog = await emailSending.sendEmailFunc(emailTemplateName)
-                console.log("changeMerchantEmail newemailLog",newemailLog)
+                console.log("changeMerchantEmail newemailLog", newemailLog)
                 res.json({ status: 200, message: "Email & Company Changed", data: { "email": req.body.newemail } })
             }
             else {
@@ -336,12 +324,12 @@ module.exports =
         try {
 
             const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
-            var otp = otpGenerator.generate(6, { digits: true ,specialChars :false,lowerCaseAlphabets :false,upperCaseAlphabets :false,});
+            var otp = otpGenerator.generate(6, { digits: true, specialChars: false, lowerCaseAlphabets: false, upperCaseAlphabets: false, });
             const password_hash = bcrypt.hashSync(otp, salt);
             let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { password: password_hash } }, { $new: true })
             if (val != null) {
-                var emailTemplateName   = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp,"url":"" } }
-                let email_response      = await commonFunction.sendEmailFunction(emailTemplateName)
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp, "url": "" } }
+                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
                 res.json({ status: 200, message: "We have changed the password . Please Check your email", data: { "email": req.body.email } })
             }
@@ -449,231 +437,231 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-    async update_cron_job(req, res) {
-        try {
-            let pooldata = await transactionPools.aggregate(
-                [
-                    { $match: { $or: [{ status: 0 }, { status: 2 }] } },
-                    {
-                        $lookup: {
-                            from: "poolwallets", // collection to join
-                            localField: "poolwalletID",//field from the input documents
-                            foreignField: "id",//field from the documents of the "from" collection
-                            as: "poolWallet"// output array field
-                        },
-                    }, {
-                        $lookup: {
-                            from: "networks", // collection to join
-                            localField: "poolWallet.network_id",//field from the input documents
-                            foreignField: "id",//field from the documents of the "from" collection
-                            as: "networkDetails"// output array field
-                        }
-                    },
-                    {
-                        "$project":
-                        {
-                            "poolWallet.privateKey": 0,
-                            "poolWallet.id": 0,
-                            "poolWallet._id": 0,
-                            "poolWallet.status": 0,
-                            "poolWallet.__v": 0,
-                            "networkDetails.__v": 0,
-                            "networkDetails.created_by": 0,
-                            "networkDetails.createdAt": 0,
-                            "networkDetails.updatedAt": 0,
-                            "networkDetails._id": 0
-                        }
-                    }
-                ])
-            let addressObject = pooldata[0];
-            if (addressObject.networkDetails[0].cointype == "Token") {
-                const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-                let abi = [
-                    {
-                        constant: true,
-                        inputs: [{ name: "_owner", type: "address" }],
-                        name: "balanceOf",
-                        outputs: [{ name: "balance", type: "uint256" }],
-                        type: "function",
-                    },
-                ];
-                const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress);
-                let result = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
-                const account_balance_in_ether = await WEB3.utils.fromWei(result.toString());
-                var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
-                if (amountstatus != 0) {
-                    let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
-                    await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
-                        then(async (val) => {
-                            console.log("merchantbalance 4", val)
-                            if (val != null) {
-                                console.log("merchantbalance 2", val.balance)
-                                let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
-                                console.log("merchantbalance 3", clientdetails)
-                            }
-                        }).catch(error => {
-                            console.log("get_clients_data", error)
-                            res.json({ status: 400, data: {}, message: "Verification Failed" })
-                        })
-                    // "balance" :
-                    let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
-                    let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
-                    let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
-                    if (amountstatus != 0) {
+    // async update_cron_job(req, res) {
+    //     try {
+    //         let pooldata = await transactionPools.aggregate(
+    //             [
+    //                 { $match: { $or: [{ status: 0 }, { status: 2 }] } },
+    //                 {
+    //                     $lookup: {
+    //                         from: "poolwallets", // collection to join
+    //                         localField: "poolwalletID",//field from the input documents
+    //                         foreignField: "id",//field from the documents of the "from" collection
+    //                         as: "poolWallet"// output array field
+    //                     },
+    //                 }, {
+    //                     $lookup: {
+    //                         from: "networks", // collection to join
+    //                         localField: "poolWallet.network_id",//field from the input documents
+    //                         foreignField: "id",//field from the documents of the "from" collection
+    //                         as: "networkDetails"// output array field
+    //                     }
+    //                 },
+    //                 {
+    //                     "$project":
+    //                     {
+    //                         "poolWallet.privateKey": 0,
+    //                         "poolWallet.id": 0,
+    //                         "poolWallet._id": 0,
+    //                         "poolWallet.status": 0,
+    //                         "poolWallet.__v": 0,
+    //                         "networkDetails.__v": 0,
+    //                         "networkDetails.created_by": 0,
+    //                         "networkDetails.createdAt": 0,
+    //                         "networkDetails.updatedAt": 0,
+    //                         "networkDetails._id": 0
+    //                     }
+    //                 }
+    //             ])
+    //         let addressObject = pooldata[0];
+    //         if (addressObject.networkDetails[0].cointype == "Token") {
+    //             const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
+    //             let abi = [
+    //                 {
+    //                     constant: true,
+    //                     inputs: [{ name: "_owner", type: "address" }],
+    //                     name: "balanceOf",
+    //                     outputs: [{ name: "balance", type: "uint256" }],
+    //                     type: "function",
+    //                 },
+    //             ];
+    //             const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress);
+    //             let result = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
+    //             const account_balance_in_ether = await WEB3.utils.fromWei(result.toString());
+    //             var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
+    //             if (amountstatus != 0) {
+    //                 let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
+    //                 await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
+    //                     then(async (val) => {
+    //                         console.log("merchantbalance 4", val)
+    //                         if (val != null) {
+    //                             console.log("merchantbalance 2", val.balance)
+    //                             let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
+    //                             console.log("merchantbalance 3", clientdetails)
+    //                         }
+    //                     }).catch(error => {
+    //                         console.log("get_clients_data", error)
+    //                         res.json({ status: 400, data: {}, message: "Verification Failed" })
+    //                     })
+    //                 // "balance" :
+    //                 let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
+    //                 let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
+    //                 let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
+    //                 if (amountstatus != 0) {
 
-                        let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
-                        let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
-                        let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
-                        console.log("parameters", parameters)
-                        let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
-                        console.log("get_addressObject", get_addressObject)
-                        // let get_addressObject    = await commonFunction.Post_Request(addressObject.callbackURL,parameters,headers) 
+    //                     let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
+    //                     let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
+    //                     let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
+    //                     console.log("parameters", parameters)
+    //                     let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
+    //                     console.log("get_addressObject", get_addressObject)
+    //                     // let get_addressObject    = await commonFunction.Post_Request(addressObject.callbackURL,parameters,headers) 
 
-                        // let get_addressObject = await commonFunction.get_Request(addressObject.callbackURL)
+    //                     // let get_addressObject = await commonFunction.get_Request(addressObject.callbackURL)
 
-                    }
+    //                 }
 
-                }
-                // return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Done" })
-                res.json({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
-            }
-            else if (addressObject.networkDetails[0].cointype == "Native") {
-                const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-                let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
-                let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
-                var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
-                if (amountstatus != 0) {
-                    let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
-                    await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
-                        then(async (val) => {
-                            if (val != null) {
-                                console.log("merchantbalance 2", val.balance)
-                                let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
-                                console.log("merchantbalance 3", clientdetails)
-                            }
-                        }).catch(error => {
-                            console.log("get_clients_data", error)
-                            res.json({ status: 400, data: {}, message: "Verification Failed" })
-                        })
-                    let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
-                    let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
-                    let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
-                    if (amountstatus != 0) {
-                        // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
-                        let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
-                        let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
-                        let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
+    //             }
+    //             // return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Done" })
+    //             res.json({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
+    //         }
+    //         else if (addressObject.networkDetails[0].cointype == "Native") {
+    //             const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
+    //             let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
+    //             let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
+    //             var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
+    //             if (amountstatus != 0) {
+    //                 let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
+    //                 await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
+    //                     then(async (val) => {
+    //                         if (val != null) {
+    //                             console.log("merchantbalance 2", val.balance)
+    //                             let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
+    //                             console.log("merchantbalance 3", clientdetails)
+    //                         }
+    //                     }).catch(error => {
+    //                         console.log("get_clients_data", error)
+    //                         res.json({ status: 400, data: {}, message: "Verification Failed" })
+    //                     })
+    //                 let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, "balance": (amountstatus == 0 || amountstatus == 1) ? 0 : (addressObject.amount - merchantbalance) } })
+    //                 let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
+    //                 let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
+    //                 if (amountstatus != 0) {
+    //                     // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
+    //                     let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
+    //                     let transactionPoolData = await transactionPools.find({ 'id': addressObject.id })
+    //                     let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
 
-                        console.log("parameters", parameters)
-                        let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
-                        console.log("get_addressObject", get_addressObject)
-                    }
-                }
-                res.json({ status: 400, data: {}, message: "Verification Failed" })
-            }
-        }
-        catch (error) {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-        }
-    },
-    async get_Balance(addressObject) {
-        console.log("addressObject", addressObject)
-        if (addressObject.networkDetails[0].cointype == "Token") {
-            const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-            let abi = [
-                {
-                    constant: true,
-                    inputs: [{ name: "_owner", type: "address" }],
-                    name: "balanceOf",
-                    outputs: [{ name: "balance", type: "uint256" }],
-                    type: "function",
-                },
-            ];
-            const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress);
-            let result = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
-            const account_balance_in_ether = await WEB3.utils.fromWei(result.toString());
-            var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
-            var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
-            if (amountstatus != 0) {
-                let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
-                await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
-                    then(async (val) => {
+    //                     console.log("parameters", parameters)
+    //                     let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
+    //                     console.log("get_addressObject", get_addressObject)
+    //                 }
+    //             }
+    //             res.json({ status: 400, data: {}, message: "Verification Failed" })
+    //         }
+    //     }
+    //     catch (error) {
+    //         console.log(error)
+    //         res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+    //     }
+    // },
+    // async get_Balance(addressObject) {
+    //     console.log("addressObject", addressObject)
+    //     if (addressObject.networkDetails[0].cointype == "Token") {
+    //         const WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
+    //         let abi = [
+    //             {
+    //                 constant: true,
+    //                 inputs: [{ name: "_owner", type: "address" }],
+    //                 name: "balanceOf",
+    //                 outputs: [{ name: "balance", type: "uint256" }],
+    //                 type: "function",
+    //             },
+    //         ];
+    //         const contract = new WEB3.eth.Contract(abi, addressObject.networkDetails[0].contractAddress);
+    //         let result = await contract.methods.balanceOf(addressObject.poolWallet[0].address).call();
+    //         const account_balance_in_ether = await WEB3.utils.fromWei(result.toString());
+    //         var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
+    //         var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
+    //         if (amountstatus != 0) {
+    //             let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
+    //             await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
+    //                 then(async (val) => {
 
-                        if (val != null) {
-                            let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
-                        }
-                    }).catch(error => {
+    //                     if (val != null) {
+    //                         let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
+    //                     }
+    //                 }).catch(error => {
 
-                        res.json({ status: 400, data: {}, message: "Verification Failed" })
-                    })
-                let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, } })
-                let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
-                let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
-                if (amountstatus != 0) {
+    //                     res.json({ status: 400, data: {}, message: "Verification Failed" })
+    //                 })
+    //             let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus, } })
+    //             let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
+    //             let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
+    //             if (amountstatus != 0) {
 
-                    let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
+    //                 let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
 
-                    let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
-                    let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
-                    let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
+    //                 let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
+    //                 let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
+    //                 let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
 
 
-                }
+    //             }
 
-            }
+    //         }
 
-            return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
-        }
-        else if (addressObject.networkDetails[0].cointype == "Native") {
+    //         return JSON.stringify({ status: 200, data: account_balance_in_ether, message: "Verification Failed" })
+    //     }
+    //     else if (addressObject.networkDetails[0].cointype == "Native") {
 
-            const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
-            let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
-            let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
-            var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
-            var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
-            if (amountstatus != 0) {
-                let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
-                await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
-                    then(async (val) => {
-                        if (val != null) {
+    //         const BSC_WEB3 = new Web3(new Web3.providers.HttpProvider(addressObject.networkDetails[0].nodeUrl))
+    //         let account_balance = await BSC_WEB3.eth.getBalance(addressObject.poolWallet[0].address.toLowerCase())
+    //         let account_balance_in_ether = Web3.utils.fromWei(account_balance.toString(), 'ether')
+    //         var amountstatus = await commonFunction.amount_check(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(account_balance_in_ether))
+    //         var remaining_balance = await commonFunction.remaining_balance(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), account_balance_in_ether)
+    //         if (amountstatus != 0) {
+    //             let merchantbalance = account_balance_in_ether - addressObject.poolWallet[0].balance
+    //             await clientWallets.findOne({ api_key: addressObject.api_key, network_id: addressObject.networkDetails[0].id }).
+    //                 then(async (val) => {
+    //                     if (val != null) {
 
-                            let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
+    //                         let clientdetails = await clientWallets.updateOne({ id: val.id }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * 0.01))) } })
 
-                        }
-                    }).catch(error => {
+    //                     }
+    //                 }).catch(error => {
 
-                        return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
-                    })
-                let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
-                let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
-                let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
-                if (amountstatus != 0) {
-                    // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
-                    let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
-                    console.log("transcationHistory", transcationHistory)
-                    let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
-                    let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
-                    let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
-                }
-            }
-            return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
-        }
+    //                     return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
+    //                 })
+    //             let new_record = await transactionPools.updateOne({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
+    //             let new_record1 = await poolWallet.findOneAndUpdate({ id: addressObject.poolwalletID }, { $set: { status: ((amountstatus == 1 || amountstatus == 3) ? 0 : 1), balance: account_balance_in_ether } })
+    //             let get_transcation_response = await commonFunction.Get_Transcation_List(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
+    //             if (amountstatus != 0) {
+    //                 // let get_addressObject    =   await commonFunction.get_Request(addressObject.callbackURL)
+    //                 let transcationHistory = await transcationLog.find({ 'trans_pool_id': addressObject.id })
+    //                 console.log("transcationHistory", transcationHistory)
+    //                 let transactionPoolData = await transactionPools.findOne({ 'id': addressObject.id })
+    //                 let parameters = { "remainbalance": transactionPoolData.balance, "transactionHistory": JSON.stringify(transcationHistory), "status": amountstatus, "token": transactionPoolData.clientToken, "orderid": transactionPoolData.orderid }
+    //                 let get_addressObject = await commonFunction.Post_Request(addressObject.callbackURL, parameters, {})
+    //             }
+    //         }
+    //         return JSON.stringify({ status: 400, data: {}, message: "Verification Failed" })
+    //     }
 
-    },
-    async Get_Transcation_From_Address(req, res) {
-        try {
-            let get_transcation_response = await commonFunction.Get_Transcation_List(req.body.address)
-            let json_response = JSON.parse(get_transcation_response.data)
-            cornJobs.block = json_response.data.result[0]["blockNumber"]
-            let transcationLogs = await transcationLog.insertMany(json_response.data.result);
-            res.json({ status: 200, message: "Clients Data", data: json_response.data, "transcationLogs": transcationLogs })
-        }
-        catch (error) {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-        }
-    },
+    // },
+    // async Get_Transcation_From_Address(req, res) {
+    //     try {
+    //         let get_transcation_response = await commonFunction.Get_Transcation_List(req.body.address)
+    //         let json_response = JSON.parse(get_transcation_response.data)
+    //         cornJobs.block = json_response.data.result[0]["blockNumber"]
+    //         let transcationLogs = await transcationLog.insertMany(json_response.data.result);
+    //         res.json({ status: 200, message: "Clients Data", data: json_response.data, "transcationLogs": transcationLogs })
+    //     }
+    //     catch (error) {
+    //         console.log(error)
+    //         res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+    //     }
+    // },
     async get_client_Balance(req, res) {
         try {
             poolWallet.aggregate(
@@ -693,26 +681,28 @@ module.exports =
     },
     async kyc_approved(req, res) {
         try {
-             clients.findOneAndUpdate(
-                { email: req.body.email }, 
-                { $set: { 
-                    status              :   true,
-                    loginstatus         :   true,
-                    emailstatus         :   true, 
-                    manual_approved_by  :   req.headers.authorization,
-                    manual_approved_at  :   new Date().toString(),
-                }}, 
+            clients.findOneAndUpdate(
+                { email: req.body.email },
+                {
+                    $set: {
+                        status: true,
+                        loginstatus: true,
+                        emailstatus: true,
+                        manual_approved_by: req.headers.authorization,
+                        manual_approved_at: new Date().toString(),
+                    }
+                },
                 { $new: true }).then(async (val) => {
-                if (val != null) {
-                    res.json({ status: 200, message: "KYC Approved", data: req.body.email })
-                }
-                else {
-                    res.json({ status: 400, message: "Invalid Request", data: val })
-                }
-            }).catch(error => {
-                console.log(error)
-                res.json({ status: 400, data: {}, message: error })
-            })
+                    if (val != null) {
+                        res.json({ status: 200, message: "KYC Approved", data: req.body.email })
+                    }
+                    else {
+                        res.json({ status: 400, message: "Invalid Request", data: val })
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
         }
         catch (error) {
             console.log()
@@ -779,7 +769,19 @@ module.exports =
                             foreignField: "id",//field from the documents of the "from" collection
                             as: "NetworkDetails"// output array field
                         }
+
                     },
+                    {
+                        "$project": {
+                            "balance": 1,
+                            "address": 1,
+                            "network_id": 1,
+                            "NetworkDetails.network": 1,
+                            "NetworkDetails.coin": 1,
+                            "NetworkDetails.cointype": 1,
+                            "NetworkDetails.icon": 1,
+                        }
+                    }
                 ]).then(async (data) => {
 
                     res.json({ status: 200, message: "Hot Wallets", data: data })
@@ -792,51 +794,51 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
-    async Get_Transcation_List(req, res) {
-        response = {}
-        let network_details = await network.findOne({ id: req.body.network_id })
-        var URL = network_details.transcationurl
-        if (network_details.cointype == "Token") {
-            URL += "?module=account&action=tokentx&address=" + req.body.address;
-            URL += "&contractaddress=" + network_details.contractAddress;
-            URL += "&startblock=" + req.body.latest_block_number
-            URL += "&endblock=" + "latest"
-            URL += "&sort=" + "desc"
-            URL += "&apikey=" + network_details.apiKey
-        }
-        else {
-            URL += "?module=account&action=txlist&address=" + req.body.address;
-            URL += "&startblock=" + req.body.latest_block_number
-            URL += "&endblock=" + "latest"
-            URL += "&sort=" + "desc"
-            URL += "&apikey=" + network_details.apiKey
-        }
-        await axios.get(URL, {
-            params: {},
-            headers: {}
-        }).then(async (res) => {
-            var stringify_response = stringify(res)
-            if (res.data.result.length > 0) {
-                let total_payment = 0
-                
-                res.data.result.forEach(async (element) => {
-                    element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
-                    element["scanurl"] = network_details.scanurl + element["hash"]
-                    total_payment += parseFloat(Web3.utils.fromWei(element["value"], 'ether'))
-                    console.log("total_payment", total_payment)
+    // async Get_Transcation_List(req, res) {
+    //     response = {}
+    //     let network_details = await network.findOne({ id: req.body.network_id })
+    //     var URL = network_details.transcationurl
+    //     if (network_details.cointype == "Token") {
+    //         URL += "?module=account&action=tokentx&address=" + req.body.address;
+    //         URL += "&contractaddress=" + network_details.contractAddress;
+    //         URL += "&startblock=" + req.body.latest_block_number
+    //         URL += "&endblock=" + "latest"
+    //         URL += "&sort=" + "desc"
+    //         URL += "&apikey=" + network_details.apiKey
+    //     }
+    //     else {
+    //         URL += "?module=account&action=txlist&address=" + req.body.address;
+    //         URL += "&startblock=" + req.body.latest_block_number
+    //         URL += "&endblock=" + "latest"
+    //         URL += "&sort=" + "desc"
+    //         URL += "&apikey=" + network_details.apiKey
+    //     }
+    //     await axios.get(URL, {
+    //         params: {},
+    //         headers: {}
+    //     }).then(async (res) => {
+    //         var stringify_response = stringify(res)
+    //         if (res.data.result.length > 0) {
+    //             let total_payment = 0
 
-                });
-            }
+    //             res.data.result.forEach(async (element) => {
+    //                 element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
+    //                 element["scanurl"] = network_details.scanurl + element["hash"]
+    //                 total_payment += parseFloat(Web3.utils.fromWei(element["value"], 'ether'))
+    //                 console.log("total_payment", total_payment)
 
-            response = { status: 200, data: res.data.result, message: "Get The Data From URL" }
-        }).catch(error => {
-            // console.error("Error===============", error)
-            var stringify_response = stringify(error)
-            response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
-        })
-        // return response;
-        res.json({ status: 200, data: response, message: "Invalid" })
-    },
+    //             });
+    //         }
+
+    //         response = { status: 200, data: res.data.result, message: "Get The Data From URL" }
+    //     }).catch(error => {
+    //         // console.error("Error===============", error)
+    //         var stringify_response = stringify(error)
+    //         response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+    //     })
+    //     // return response;
+    //     res.json({ status: 200, data: response, message: "Invalid" })
+    // },
     async kyc_status(req, res) {
         response = {}
         let network_details = await network.findOne({ id: req.body.network_id })
@@ -861,7 +863,7 @@ module.exports =
             headers: {}
         }).then(async (res) => {
             var stringify_response = stringify(res)
-          
+
             if (res.data.result.length > 0) {
                 let total_payment = 0
                 console.log("element", res.data.result.length)
@@ -939,7 +941,7 @@ module.exports =
     },
     async allMerchant(req, res) {
         try {
-            await clients.find({  }, { email : 1, status : 1 , companyname : 1,profileimage : 1 ,first_name : 1,last_name : 1 }).then(async (val) => {
+            await clients.find({}, { email: 1, status: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "All Merchant", data: val })
             }).catch(error => {
                 console.log(error)
@@ -1021,7 +1023,7 @@ module.exports =
             var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
             let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, loginstatus: false } }, { $new: true })
             if (val != null) {
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp,"url":"" } }
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp, "url": "" } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 console.log("email_response", email_response)
                 res.json({ status: 200, message: "We have sent token to your email.Please check your email", data: {} })
@@ -1080,30 +1082,29 @@ module.exports =
     },
     async generateNewClientAddress(req, res) {
         try {
-           
-            let clientWallet    = await clientWallets.findOne({ 
-            'client_api_key'    : req.body.client_api_key, 
-            'network_id'        : req.body.network_id,
-            status: 3 })
-            let network_id      = clientWallet == null ? req.body.network_id : clientWallet.network_id
+
+            let clientWallet = await clientWallets.findOne({
+                'client_api_key': req.body.client_api_key,
+                'network_id': req.body.network_id,
+                status: 3
+            })
+            let network_id = clientWallet == null ? req.body.network_id : clientWallet.network_id
             let network_details = await network.findOne({ 'id': network_id })
-            let nodeURL         = network_details.libarayType == "Web3" ? network_details.nodeUrl : "tronweb"
-            let account         = await Utility.GetAddress(nodeURL)
-            if (clientWallet == null)
-            {
+            let nodeURL = network_details.libarayType == "Web3" ? network_details.nodeUrl : "tronweb"
+            let account = await Utility.GetAddress(nodeURL)
+            if (clientWallet == null) {
                 const clientWallet = new clientWallets({
-                    id : mongoose.Types.ObjectId(),
+                    id: mongoose.Types.ObjectId(),
                     client_api_key: req.body.client_api_key,
                     address: account.address,
                     privatekey: account.privateKey,
                     status: 1,
-                    network_id:  req.body.network_id
+                    network_id: req.body.network_id
                 });
                 let client_Wallet = await clientWallet.save()
                 res.json({ status: 200, data: client_Wallet, message: "Updated" })
             }
-            else
-            {
+            else {
                 let clientWallet = await clientWallets.findOneAndUpdate(
                     { 'network_id': req.body.network_id, status: 3 },
                     { $set: { "address": account.address, "privatekey": account.privateKey } }, { $new: true })
@@ -1117,15 +1118,17 @@ module.exports =
     async updateMerchantProfileImage(req, res) {
         try {
             console.log()
-            let update = await clients.findOneAndUpdate({ 'api_key': req.headers.authorization }, 
-            { $set: { 
-                profileimage: req.body.profileimage, 
-                companyname: req.body.companyname
-            } }, { $new: true })
+            let update = await clients.findOneAndUpdate({ 'api_key': req.headers.authorization },
+                {
+                    $set: {
+                        profileimage: req.body.profileimage,
+                        companyname: req.body.companyname
+                    }
+                }, { $new: true })
             let newupdate = await clients.findOne({ 'api_key': req.headers.authorization })
 
             res.json({ status: 200, data: { newupdate }, message: "update profile" })
-        
+
         }
         catch (error) {
             console.log(error)
@@ -1138,7 +1141,7 @@ module.exports =
             let email = req.body.email;
             await clients.findOne({ 'email': email }).then(async (val) => {
                 if (val != null) {
-                        res.json({ "status": 200, "data": val["api_key"], "status": val["loginstatus"],"message": "Success" })
+                    res.json({ "status": 200, "data": val["api_key"], "status": val["loginstatus"], "message": "Success" })
                 }
                 else {
                     res.json({ "status": 400, "data": {}, "message": "Invalid Request" })
@@ -1150,8 +1153,7 @@ module.exports =
                 res.json({ status: 400, data: {}, message: "Invalid Request" })
             })
         }
-        catch (error) 
-        {
+        catch (error) {
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
@@ -1159,29 +1161,28 @@ module.exports =
         try {
             let email = req.body.email;
             await clients.updateOne({ 'email': email },
-            {
-                $set:
                 {
-                    loginstatus: req.body.status,
-                    deleted_by: req.headers.authorization,
-                    deleted_at: new Date().toString(),
-                }
-            }).then(async (val) => {
-                if (val != null) {
-                    res.json({ status: 200, message: "Successfully", data: req.body.email })
-                }
-                else {
-                    res.json({ status: 200, message: "Not Found the Data", data: null })
-                }
-            }).catch(error => {
-                console.log(error)
-                res.json({ status: 400, data: {}, message: error })
-            })
+                    $set:
+                    {
+                        loginstatus: req.body.status,
+                        deleted_by: req.headers.authorization,
+                        deleted_at: new Date().toString(),
+                    }
+                }).then(async (val) => {
+                    if (val != null) {
+                        res.json({ status: 200, message: "Successfully", data: req.body.email })
+                    }
+                    else {
+                        res.json({ status: 200, message: "Not Found the Data", data: null })
+                    }
+                }).catch(error => {
+                    console.log(error)
+                    res.json({ status: 400, data: {}, message: error })
+                })
         }
-        catch (error) 
-        {
+        catch (error) {
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-    
+
 }

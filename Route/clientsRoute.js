@@ -21,24 +21,25 @@ const clientapicontroller           = require('../controllers/Masters/clientapic
 const commonController              = require('../controllers/Logs/commonController');
 const ipnController                 = require('../controllers/Masters/ipnController');
 
+// router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
+// router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
+// router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
+// router.post('/getBalanceAddress',                    Auth.is_merchant,clientsController.get_BalancebyAddress);
+// router.post('/approvekyc',                           clientsController.kyc_approved);
+// router.post('/clientBalance',                        Auth.is_merchant,transcationpoolController.get_Client_Balance);
+// router.post('/update_cron_job',                      clientsController.update_cron_job);
+// router.post('/gettranscationlist',                     clientsController.Get_Transcation_List);
 
-router.post('/merchantsTranscation',                 Auth.Verfiy_Merchant,transcationpoolController.getTrans);
-router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
-router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
-router.post('/createMerchant',                       clientsController.create_clients);
-router.post('/signUpMerchant',                       clientsController.create_merchant);
-router.post('/login',                                clientsController.Login);
-router.post('/verfiyMerchantAuth',                   clientsController.Verfiy_Google_Auth);
-router.post('/clientBalance',                        transcationpoolController.get_Client_Balance);
-router.post('/withdraw',                             withdrawController.save_withdraw);
-router.post('/clientWihdrawLogs',                    withdrawController.get_client_wihdraw);
-router.post('/clientTotalWihdraw',                   withdrawController.get_client_wihdraw_total);
-router.post('/getBalanceAddress',                    Auth.is_merchant,clientsController.get_BalancebyAddress);
-router.post('/approvekyc',                           clientsController.kyc_approved);
+router.post('/signUpMerchant',                       Auth.verify_create_merchant_auth,clientsController.create_merchant);
+router.post('/login',                                Auth.verify_Login,clientsController.Login);
+router.post('/verfiyMerchantAuth',                   Auth.verify_MerchantAuth,clientsController.Verfiy_Google_Auth);
+router.post('/getclientkey',                         Auth.is_merchant,Auth.verify_getclientkey,clientsController.getclientkey);
+router.post('/withdraw',                             Auth.is_merchant,withdrawController.save_withdraw);
+router.post('/clientWihdrawLogs',                    Auth.is_merchant,withdrawController.get_client_wihdraw);
+router.post('/clientTotalWihdraw',                   Auth.is_merchant,withdrawController.get_client_wihdraw_total);
 router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
-router.post('/update_cron_job',                      clientsController.update_cron_job);
-router.post('/merchantNetworkTranscation',           transcationpoolController.get_Trans_by_Network_ID);
-router.post('/gettranscationlist',                   clientsController.Get_Transcation_List);
+router.post('/merchantNetworkTranscation',           Auth.is_merchant,transcationpoolController.get_Trans_by_Network_ID);
+
 router.post('/check_kyc',                            clientsController.check_kyc);
 router.post('/createkyclink',                        clientsController.Create_Kyc_Link);
 router.post('/kycstatus',                            Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);

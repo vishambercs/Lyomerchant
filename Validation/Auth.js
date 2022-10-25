@@ -174,22 +174,19 @@ module.exports =
         }
     },
     async is_merchant(req, res, next) {
-        try {
+        try 
+        {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await client.findOne({ api_key: authorization, authtoken: token });
-            if (user != null) {
-                let profile = jwt.verify(token, process.env.AUTH_KEY)
-                req.user = profile
-                next()
-            }
-            else {
-                res.json({ status: 400, data: {}, message: "you are not merchant" })
-            }
+            // let user = await client.findOne({ api_key: authorization, authtoken: token });
+            let profile = jwt.verify(token, process.env.AUTH_KEY)
+            req.user = profile
+            next()
         }
-        catch (error) {
+        catch (error) 
+        {
             console.log("error",error)
-            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
     async has_Pos_Access(req, res, next) {
@@ -391,6 +388,108 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
+
+    async verify_create_merchant_auth(req, res, next) {
+        try {
+            const validationRule = {
+                "email"         : "required|email",
+                "password"      : "required|string",
+                "first_name"    : "required|string",
+                "last_name"     : "required|date",
+                "type"          : "required|date",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_Login(req, res, next) {
+        try {
+            const validationRule = {
+                "email"         : "required|email",
+                "password"      : "required|string",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_MerchantAuth(req, res, next) {
+        try {
+            const validationRule = {
+                "email"         : "required|email",
+                "code"          : "required|string",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_getclientkey(req, res, next) {
+        try {
+            const validationRule = { "email"  : "required|email" };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    
 }
 
 
