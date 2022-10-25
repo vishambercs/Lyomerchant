@@ -465,6 +465,9 @@ module.exports =
             let networkid = ''
             let settings = ''
             let balance = await clientWallets.findOne({ "id": req.body.clientWalletid })
+            if(balance == null){
+                return res.json({ status: 400, data: { }, message: "Invalid Balance" })
+            }
             networkid = balance.network_id
             settings = await withdrawSettings.find();
             if (settings[0].merchantWithdrawLimit >= balance.balance) {
