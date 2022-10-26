@@ -48,7 +48,10 @@ router.post('/verfiyMerchantAuth',                   Auth.verifymerchant,Auth.ve
 router.post('/resendingemail',                       Auth.is_merchant,Auth.verify_resendingemail,clientsController.resendingemail);
 router.post('/verfiyemail',                          Auth.verify_verfiyemail,clientsController.verfiyemail);
 router.post('/getclientkey',                         Auth.verifymerchant,Auth.verify_getclientkey,clientsController.getclientkey);
-
+router.post('/forgotPassword',                       Auth.verify_forgotPassword,clientsController.forgotPassword);
+router.post('/tokenAndUpdatePassword',               Auth.verify_checkTheTokenAndUpdate,clientsController.checkTheTokenAndUpdatePassword);
+router.post('/resetPassword',                        Auth.is_merchant, Auth.verify_ResetPassword, clientsController.ResetPassword);
+router.post('/updateMerchantProfileImage',           Auth.is_merchant,Auth.verify_updateMerchantProfileImage, clientsController.updateMerchantProfileImage);
 
 "============================ Withdraw ==============================="
 router.post('/withdraw',                             Auth.is_merchant,Auth.verify_withdraw,withdrawController.save_withdraw);
@@ -64,24 +67,21 @@ router.post('/createkyclink',                        Auth.is_merchant,clientsCon
 router.post('/kycstatus',                            Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);
 router.post('/kycLevels',                            Auth.is_merchant,clientsController.clients_kyc_levels);
 router.post('/webHookLog',                           Auth.is_merchant,kycwebhooklogController.getkycWebHookLog);
-router.post('/resetMerchantTwoFa',                   Auth.is_merchant,clientsController.reset_merchant_two_fa);
-router.post('/getTranscationData',                   Auth.is_merchant,hotwallettranslogsController.getTranscationData);
+// router.post('/resetMerchantTwoFa',                   Auth.is_merchant,clientsController.reset_merchant_two_fa);
+// router.post('/getTranscationData',                   Auth.is_merchant,hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             Auth.is_merchant,transcationpoolController.get_Trans_by_txId);
 
 router.post('/transactionFastDetails',               Auth.fastpay_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 router.post('/transactionPaylinkDetails',            Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 
 
-router.post('/forgotPassword',                       clientsController.forgotPassword);
-router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);
-router.post('/resetPassword',                        Auth.is_merchant,clientsController.ResetPassword);
-router.post('/updateMerchantProfileImage',           Auth.is_merchant,clientsController.updateMerchantProfileImage);
+
 
 
 
 "=============MerchantStore==========================================="
 
-router.post('/createMerchantStore',                         Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.createMerchantStore);
+router.post('/createMerchantStore',                         Auth.is_merchant,Auth.has_Pos_Access,Auth.verify_createMerchantStore,merchantstoreController.createMerchantStore);
 router.post('/merchantstore',                               Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.MerchantStore);
 router.post('/merchantStoreProfileUpdate',                  Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.updateMerchantStoreProfile);
 router.post('/changemerchantstore',                         Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.changeMerchantStore);

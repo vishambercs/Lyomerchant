@@ -23,6 +23,7 @@ module.exports =
                     created_by: req.headers.authorization,
                 });
                 merchantcategory.save().then(async (val) => {
+                    val["clientapikey"] = ""
                     res.json({ status: 200, message: "Successfully", data: val })
                 }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
             }
@@ -83,6 +84,31 @@ module.exports =
                             as: "clientdetails"// output array field
                         }
                     },
+                    {
+                        "$project":
+                        {
+
+                            "clientdetails.api_key": 0,
+                            "clientdetails.type": 0,
+                            "clientdetails.authtoken": 0,
+                            "clientdetails.token": 0,
+                            "clientdetails.secret": 0,
+                            "clientdetails.qrcode": 0,
+                            "clientdetails.emailstatus": 0,
+                            "clientdetails.loginstatus": 0,
+                            "clientdetails.emailtoken": 0,
+                            "clientdetails.status": 0,
+                            "clientdetails.two_fa": 0,
+                            "clientdetails.password": 0,
+                            "clientdetails.kycLink": 0,
+                            "clientdetails.manual_approved_by": 0,
+                            "clientdetails.manual_approved_at": 0,
+                            "clientdetails.companyname": 0,
+                            "clientdetails.deleted_by": 0,
+                            "clientdetails.deleted_at": 0
+                        }
+                    }
+
                 ]).then(async (data) => 
                 {
                     res.json({ status: 200, message: "All Merchant Categories", data: data })
@@ -195,7 +221,14 @@ module.exports =
                         foreignField: "id",//field from the documents of the "from" collection
                         as: "categoriesDetails"// output array field
                     }
+                    
                 },
+                {
+                    "$project": {
+                        "clientapikey" : 0,
+                        
+                    }
+                }
             ]).then(async (data) => 
             {
                 res.json({ status: 200, message: "All Merchant Categories", data: data })

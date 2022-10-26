@@ -139,7 +139,7 @@ async function getBalance(transdata, transData) {
 
         let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
         let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
-
+        let client = await clients.findOne({api_key : addressObject.api_key})
         if (minutes > 10) 
         {
             let transactionpool             = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4  } })
@@ -148,13 +148,14 @@ async function getBalance(transdata, transData) {
             let totalBalnce                 = parseFloat(previouspoolwallet.balance) + walletbalance
             let poolwallet                  = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 ,"balance": totalBalnce } })
             response                        = { amountstatus: 4,"paymentdata":paymentData ,status: 200, "data": {}, message: "Your Transcation is expired." };
-            console.log(addressObject.clientsdetails)
-           console.log(addressObject.api_key)
-
+        //    console.log(addressObject.clientsdetails)
+        //    console.log(addressObject.api_key)
+        //    console.log(addressObject)
+           
             var emailTemplateName = 
             { 
                 "emailTemplateName": "successtrans.ejs", 
-                "to": addressObject.clientsdetails[0].email, 
+                "to": client.email, 
                 "subject": "LYOMERCHANT Expire Transaction", 
                 "templateData": {"status": "Expired" ,
                 "invoicenumber":"",
@@ -197,7 +198,7 @@ async function getBalance(transdata, transData) {
                 var emailTemplateName = 
                 { 
                 "emailTemplateName": "successtrans.ejs", 
-                "to": addressObject.clientsDetails[0].email, 
+                "to": client.email, 
                 "subject": "LYOMERCHANT Success Transaction", 
                 "templateData": {"status": "Success" ,
                 "invoicenumber" : "",
@@ -298,16 +299,18 @@ async function getTranscationList(address, trans_id, network_id) {
 }
 async function postRequest(URL, parameters, headers) {
     let response = {}
+
     await axios.post(URL,
         qs.stringify(parameters),
         { headers: headers })
         .then(res => {
             var stringify_response = stringify(res)
-
+            console.log("==========postRequest=========",res)    
             response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
         })
         .catch(error => {
             var stringify_response = stringify(error)
+            console.log("==========post-request-error=========",error)    
             response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
         })
     return response;

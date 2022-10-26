@@ -43,9 +43,17 @@ module.exports =
     },
     async get_perfered_Network(req, res) {
         try {
-            let networksDetails = await perferedNetwork.aggregate([
+            let networksDetails = await perferedNetwork.aggregate
+            ([
                 { $match: { clientapikey: req.headers.authorization, } },
                 { $lookup: { from: "networks", localField: "networkid", foreignField: "id", as: "networkDetails" } },
+                {
+                    "$project":
+                    {
+                         "clientapikey": 0,
+                    }
+                }
+
             ])
             res.json({ status: 200, data: networksDetails, message: "Successfully" })
         }
