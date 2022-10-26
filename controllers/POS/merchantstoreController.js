@@ -37,7 +37,7 @@ module.exports =
                     merchantstore.save().then(async (val) => {
                         res.json({
                             status: 200, message: "Store Created Successfully", "qrcode": val.qrcode,
-                            data: { "merchantapikey": val.clientapikey, "storename": val.storename, "storeapikey": val.storeapikey }
+                            data: {  "storename": val.storename, "storeapikey": val.storeapikey }
                         })
                     }).catch(error => {
                         console.log(error)
@@ -223,7 +223,6 @@ module.exports =
                     "$project":
                     {
                         "id"            : 1,
-                        "clientapikey"  : 1,
                         "storename"     : 1,
                         "storeapikey"   : 1,
                         "qrcode"        : 1,
@@ -257,7 +256,8 @@ module.exports =
                 storeaddress    : req.body.storeaddress,
                 storephone      : req.body.storephone,
 
-            } }, { $new: true } )
+            } }, { returnDocument: 'after' } )
+            update["clientapikey"] = ""
             res.json({ status: 200, data: {update}, message: "update profile" })
         }
         catch (error) {
@@ -290,7 +290,7 @@ module.exports =
                     merchantstore.save().then(async (val) => {
                         res.json({
                             status: 200, message: "Store Created Successfully", "qrcode": val.qrcode,
-                            data: { "merchantapikey": val.clientapikey, "storename": val.storename, "storeapikey": val.storeapikey }
+                            data: {  "storename": val.storename, "storeapikey": val.storeapikey }
                         })
                     }).catch(error => {
                         console.log(error)

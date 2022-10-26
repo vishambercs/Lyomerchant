@@ -93,9 +93,15 @@ module.exports =
     },
     async getAllStoreDevice(req, res) {
         try {
+            let filters = {} 
+            console.log("req.body",req.body)
+            if( Object.keys(req.body).indexOf('status') == -1){
+                filters["status"] = parseInt(req.body.status)
+            }
+            filters["storekey"] = req.headers.authorization
 
             let allstoreDevices = await storeDevices.aggregate([
-                { $match: { storekey: req.headers.authorization, status: 1, } },
+                { $match: filters },
                 {
                     $lookup: 
                     {
@@ -105,6 +111,12 @@ module.exports =
                         as              : "storedetails"// output array field
                     },
                 },
+                {
+                    "$project":
+                    { 
+                        "otptoken": 0,
+                    }
+                }
             ])
             res.json({ status: 200, data: allstoreDevices, message: "All Store Devices" })
         }

@@ -416,6 +416,58 @@ module.exports =
         }
     },
 
+    async verify_forgotPassword(req, res, next) {
+        try {
+            const validationRule = {
+                "email"         : "required|email",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
+    async verify_checkTheTokenAndUpdate(req, res, next) {
+        try {
+            const validationRule = {
+                "email"         : "required|email",
+                "newpassword"   : "required|string|strict",
+                "emailtoken"    : "required|string",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
     async verify_create_merchant_auth(req, res, next) {
         try {
             const validationRule = {
@@ -424,6 +476,60 @@ module.exports =
                 "first_name"    : "required|string",
                 "last_name"     : "required|string",
                  "type" : ['required', { 'in': ['Individual','Company'] }],
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_ResetPassword(req, res, next) {
+        try {
+            const validationRule = {
+                "email"            : "required|email",
+                "password"         : "required|string",
+                "newpassword"      : "required|string|strict",
+                
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_updateMerchantProfileImage(req, res, next) {
+        try {
+            const validationRule = {
+                "profileimage"        : "required|isBase64",
+                "companyname"         : "required|string",
+               
+                
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -593,6 +699,35 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
+    async verify_createMerchantStore(req, res, next) {
+        try {
+            const validationRule = 
+            { 
+                "storename"  : "required|string",
+               
+                "storephone"  : "required|string",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
+    
     async verify_verfiyemail(req, res, next) {
         try {
             const validationRule = 

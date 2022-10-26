@@ -141,7 +141,7 @@ module.exports =
             });
     },
     async verfiyemail(req, res) {
-        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken, "emailstatus": false, "loginstatus": false, "status": false }, { $set: { "emailstatus": true, "loginstatus": true, "status": true } })
+        await clients.findOne({ email: req.body.email, emailtoken: req.body.emailtoken, "emailstatus": false, "loginstatus": false })
             .then(async (val) => {
                 if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email }, {
@@ -237,18 +237,18 @@ module.exports =
                     var jwt_token = jwt.sign({ id: val.api_key }, process.env.AUTH_KEY, { noTimestamp: true, expiresIn: '1h' });
                     let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
                     val["authtoken"] = jwt_token
-                    let clientsdata = await clients.findOne({ email: req.body.email }, {
-                        id: 1,
-                        first_name: 1,
-                        last_name: 1,
-                        companyname: 1,
-                        email: 1,
-                        profileimage: 1,
-                        authtoken: 1,
-                        api_key: 1,
-                        type: 1,
-                        two_fa: 1,
-                    })
+                
+                    let clientsdata = {
+                        "qrcode" : val["two_fa"] == false ? val["qrcode"] : "",
+                        "secret" : val["two_fa"] == false ? val["secret"] : "",
+                        "first_name" : val["first_name"] ,
+                        "last_name" : val["last_name"] ,
+                        "companyname" : val["companyname"],
+                        "email" : val["email"],
+                        "authtoken" : val["authtoken"],    
+                        "type" : val["type"],    
+                        "two_fa" : val["two_fa"], 
+                    }
                     res.json({ "status": 200, "data": clientsdata, "message": "Successfully Login" })
                 }
                 else if (password_status == false) {
@@ -273,7 +273,8 @@ module.exports =
                 let client = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { two_fa: false, secret: secret, qrcode: url } }, { returnDocument: 'after' })
                 if (client != null) 
                 {
-                    res.json({ status: 200, message: "Reset Two Fa", data: { "email": req.body.email,"qrcode": val.qrcode, "secret": val.secret } })
+                  
+                    res.json({ status: 200, message: "Reset Two Fa", data: { "email": req.body.email } })
                 }
                 else
                 {
@@ -377,22 +378,42 @@ module.exports =
         try {
             let email = req.body.email
             let code = req.body.code
-
+            
             clients.findOne({ 'email': email }).then(async (val) => {
                 if (authenticator.check(code, val.secret)) {
                     console.log("Verfiy_Google_Auth code","if")
                     if (val.two_fa == false) {
                       
                         let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { two_fa: true } }, { $new: true })
-                        let data = await clients.findOne(
-                            { 'email': email },
-
-
-                        )
-                        res.json({ "status": 200, "data": data, "message": "Get The Data Successfully" })
+                        let clientsdata = await clients.findOne({ email: req.body.email }, {
+                            id: 1,
+                           
+                            first_name: 1,
+                            last_name: 1,
+                            companyname: 1,
+                            email: 1,
+                            profileimage: 1,
+                            authtoken: 1,
+                            type: 1,
+                            two_fa:1,
+                            
+                        })
+                        res.json({ "status": 200, "data": clientsdata, "message": "Get The Data Successfully" })
                     } else {
-                        console.log("Verfiy_Google_Auth code","elase")
-                        res.json({ "status": 200, "data": val, "message": "Get The Data Successfully" })
+                        let clientsdata = await clients.findOne({ email: req.body.email }, {
+                            id: 1,
+                           
+                            first_name: 1,
+                            last_name: 1,
+                            companyname: 1,
+                            email: 1,
+                            profileimage: 1,
+                            authtoken: 1,
+                            type: 1,
+                            two_fa:1,
+                            
+                        })
+                        res.json({ "status": 200, "data": clientsdata, "message": "Get The Data Successfully" })
                     }
 
                 } else {
@@ -1032,7 +1053,7 @@ module.exports =
         try {
 
             var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, loginstatus: false, status: false } }, { $new: true })
+            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, "emailstatus": false,loginstatus: false } }, { $new: true })
             if (val != null) {
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp, "url": "" } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
@@ -1051,9 +1072,15 @@ module.exports =
     async checkTheTokenAndUpdatePassword(req, res) {
         const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(req.body.newpassword, salt);
-        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken, loginstatus: false, status: false }, { $set: { 
-            "password": password_hash,  loginstatus: true, status: true
-        } })
+        await clients.findOneAndUpdate({ 
+            email: req.body.email, 
+            emailtoken: req.body.emailtoken, 
+            loginstatus: false, 
+            emailstatus: false
+             }, { $set: 
+           { 
+            "password": password_hash,  "emailstatus": true, "loginstatus": true
+          }})
             .then(async (val) => {
                 if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email })
