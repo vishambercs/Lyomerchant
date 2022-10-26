@@ -804,7 +804,7 @@ module.exports =
             let transcationData = await payLinkUtility.get_Transcation_Paylink_Data(transData.transkey)
             let balance_data    = await payLinkUtility.getTrasnsBalance(transcationData)
             let balanceResponse = JSON.parse(balance_data)
-            console.log("get_data_of_Paymentlink_transcation balanceResponse",balanceResponse)
+            
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
                 transData.connection.close(1000)

@@ -37,7 +37,7 @@ module.exports =
                     res.json({ status: 200, message: "Client does not exist.", data: {} })
                 }
                 else {
-                    res.json({ status: 200, message: "Clients Data", data: { api_key: val.api_key,status: val.status } })
+                    res.json({ status: 200, message: "Clients Data", data: { api_key: val.api_key, status: val.status } })
                 }
             }).catch(error => {
                 console.log("create clients catch", error)
@@ -70,69 +70,68 @@ module.exports =
         }
     },
     async create_merchant(req, res) {
-        var api_key     = crypto.randomBytes(20).toString('hex');
-        var email       = req.body.email
-        var password    = req.body.password
-        var hash        = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
+        var api_key = crypto.randomBytes(20).toString('hex');
+        var email = req.body.email
+        var password = req.body.password
+        var hash = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
         const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(password, salt);
-        let secret = authenticator.generateSecret()
+
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
         var token = crypto.randomBytes(20).toString('hex');
+        let secret = authenticator.generateSecret()
         QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
-                if (req.body.type == "Company" && (req.body.companyname == "" || req.body.companyname == undefined)) {
-                    return res.json({ status: 400, message: "Please Enter The Company Name", data: {} })
-                }
-                const client = new clients({
-                    token: token,
-                    loginstatus: false,
-                    emailtoken: otp,
-                    emailstatus: false,
-                    kycLink: " ",
-                    two_fa: false,
-                    secret: secret,
-                    qrcode: url,
-                    status: false,
-                    password: password_hash,
-                    api_key: api_key,
-                    email: req.body.email,
-                    hash: hash,
-                    first_name: req.body.first_name,
-                    last_name: req.body.last_name,
-                    type: req.body.type,
-                    companyname: (req.body.companyname == "" || req.body.companyname == undefined) ? "" : req.body.companyname,
-                });
-                client.save().then(async (val) => {
-                    var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp, "url": "" } }
-                    let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
-                    let response = {"type":val.type,"first_name":val.first_name,"last_name":val.last_name,"email":val.email,"companyname":val.companyname }
-                    res.json({ status: 200, message: "We sent token to your Email", data: response })
-                
-                
-                }).catch(error => {
-                    console.log("============create_merchant=========",error)
-                    res.json({ status: 400, data: {}, message: "Please Contact Admin" })
-                })
-            }).catch(error => {
-                console.log('============create_merchant=========', error);
-                res.json({ status: 400, data: {}, message: "Please Contact Admin"  })
+            if (req.body.type == "Company" && (req.body.companyname == "" || req.body.companyname == undefined)) {
+                return res.json({ status: 400, message: "Please Enter The Company Name", data: {} })
+            }
+            const client = new clients({
+                token: token,
+                loginstatus: false,
+                emailtoken: otp,
+                emailstatus: false,
+                kycLink: " ",
+                two_fa: false,
+                secret: secret,
+                qrcode: url,
+                status: false,
+                password: password_hash,
+                api_key: api_key,
+                email: req.body.email,
+                hash: hash,
+                first_name: req.body.first_name,
+                last_name: req.body.last_name,
+                type: req.body.type,
+                companyname: (req.body.companyname == "" || req.body.companyname == undefined) ? "" : req.body.companyname,
             });
-   
+            client.save().then(async (val) => {
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp, "url": "" } }
+                let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+                let response = { "type": val.type, "first_name": val.first_name, "last_name": val.last_name, "email": val.email, "companyname": val.companyname }
+                res.json({ status: 200, message: "We sent token to your Email", data: response })
+
+
+            }).catch(error => {
+                console.log("============create_merchant=========", error)
+                res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+            })
+        }).catch(error => {
+            console.log('============create_merchant=========', error);
+            res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+        });
+
 
     },
     async resendingemail(req, res) {
         var email = req.body.email
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false })
-        await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "emailtoken": otp, "emailstatus": false, "loginstatus": false, "status":false } }, { $new: true })
+        await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "emailtoken": otp, "emailstatus": false, "loginstatus": false, "status": false } }, { $new: true })
             .then(async (val) => {
-                if (val != null) 
-                {
+                if (val != null) {
                     var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp, "url": "" } }
                     let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                     res.json({ status: 200, message: "Verification Email Sent", data: val.email })
                 }
-                else 
-                {
+                else {
                     res.json({ status: 400, message: "Invalid Email", data: null })
                 }
             })
@@ -142,17 +141,17 @@ module.exports =
             });
     },
     async verfiyemail(req, res) {
-        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken, "emailstatus": false, "loginstatus": false, "status":false  }, { $set: { "emailstatus": true, "loginstatus": true , "status":true } })
+        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken, "emailstatus": false, "loginstatus": false, "status": false }, { $set: { "emailstatus": true, "loginstatus": true, "status": true } })
             .then(async (val) => {
                 if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email }, {
-                        id           : 1,
-                        first_name   : 1,
-                        last_name    : 1,
-                        companyname  : 1,
-                        email        : 1,
-                        profileimage : 1,
-                       
+                        id: 1,
+                        first_name: 1,
+                        last_name: 1,
+                        companyname: 1,
+                        email: 1,
+                        profileimage: 1,
+
                     })
                     res.json({ status: 200, message: "Email Verification Successfully", data: clientsdata })
                 }
@@ -175,7 +174,7 @@ module.exports =
                     let kyc_link = null
                     let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LyoMerchant_Client" }, { "Authorization": process.env.KYC_URL_TOKEN })
                     let json_response = JSON.parse(postRequests.data)
-                    console.log("json_response", json_response)
+
                     if (json_response.status == 200) {
                         if (json_response.data.body.length != 0) {
                             let KYC_ID = json_response.data.body.kyc_link.split("/");
@@ -233,22 +232,22 @@ module.exports =
                     res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
                 }
                 else if (password_status == true) {
-                    val["qrcode"]    = val["two_fa"] == false ? val["qrcode"] : ""
-                    val["secret"]    = val["two_fa"] == false ? val["secret"] : ""
-                    var jwt_token    = jwt.sign({ id: val.api_key }, process.env.AUTH_KEY, { noTimestamp:true, expiresIn: '1h' });
-                    let wallet       = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
+                    val["qrcode"] = val["two_fa"] == false ? val["qrcode"] : ""
+                    val["secret"] = val["two_fa"] == false ? val["secret"] : ""
+                    var jwt_token = jwt.sign({ id: val.api_key }, process.env.AUTH_KEY, { noTimestamp: true, expiresIn: '1h' });
+                    let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
                     val["authtoken"] = jwt_token
                     let clientsdata = await clients.findOne({ email: req.body.email }, {
-                        id           : 1,
-                        first_name   : 1,
-                        last_name    : 1,
-                        companyname  : 1,
-                        email        : 1,
-                        profileimage : 1,
-                        authtoken    : 1,
-                        api_key      : 1,
-                        type      : 1,
-                        two_fa      : 1,
+                        id: 1,
+                        first_name: 1,
+                        last_name: 1,
+                        companyname: 1,
+                        email: 1,
+                        profileimage: 1,
+                        authtoken: 1,
+                        api_key: 1,
+                        type: 1,
+                        two_fa: 1,
                     })
                     res.json({ "status": 200, "data": clientsdata, "message": "Successfully Login" })
                 }
@@ -268,21 +267,36 @@ module.exports =
     },
     async reset_merchant_two_fa(req, res) {
         try {
+            let secret = authenticator.generateSecret()
+            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => 
+            {
+                let client = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { two_fa: false, secret: secret, qrcode: url } }, { returnDocument: 'after' })
+                if (client != null) 
+                {
+                    res.json({ status: 200, message: "Reset Two Fa", data: { "email": req.body.email,"qrcode": val.qrcode, "secret": val.secret } })
+                }
+                else
+                {
+                    res.json({ status: 400, message: "Invalid Request", data: null })
+                }
+            })
+            
+            // await clients.findOneAndUpdate({ email: req.body.email }, { $set: { two_fa: false } }, { $new: true })
+            //     .then(async (val) => {
+            //         if (val != null) 
+            //         {
 
-            await clients.findOneAndUpdate({ email: req.body.email }, { $set: { two_fa: false } }, { $new: true })
-                .then(async (val) => {
-                    if (val != null) {
-                        let data = await clients.findOne({ 'email': req.body.email })
-                        res.json({ status: 200, message: "Reset Two Fa", data: { "qrcode": val.qrcode, "secret": val.secret } })
-                    }
-                    else {
-                        res.json({ status: 400, message: "Invalid Email", data: null })
-                    }
-                })
-                .catch(error => {
-                    console.log('reset_merchant_two_fa ', error);
-                    res.json({ status: 400, data: {}, message: error.message })
-                });
+            //             let data = await clients.findOne({ 'email': req.body.email })
+            //             res.json({ status: 200, message: "Reset Two Fa", data: { "qrcode": val.qrcode, "secret": val.secret } })
+            //         }
+            //         else {
+            //             res.json({ status: 400, message: "Invalid Email", data: null })
+            //         }
+            //     })
+            //     .catch(error => {
+            //         console.log('reset_merchant_two_fa ', error);
+            //         res.json({ status: 400, data: {}, message: error.message })
+            //     });
 
 
         }
@@ -362,7 +376,7 @@ module.exports =
     async Verfiy_Google_Auth(req, res) {
         try {
             let email = req.body.email
-            let code  = req.body.code
+            let code = req.body.code
 
             clients.findOne({ 'email': email }).then(async (val) => {
                 if (authenticator.check(code, val.secret)) {
@@ -371,7 +385,7 @@ module.exports =
                         let data = await clients.findOne(
                             { 'email': email },
 
-                        
+
                         )
                         res.json({ "status": 200, "data": data, "message": "Get The Data Successfully" })
                     } else {
@@ -739,8 +753,7 @@ module.exports =
                     let getRequestData = await commonFunction.Get_Request_FOR_KYC(kycurl, { "Authorization": process.env.KYC_URL_TOKEN })
                     let json_response = JSON.parse(getRequestData.data)
                     console.log(json_response.data)
-                    if (json_response.data.body.review_answer == "GREEN") 
-                    {
+                    if (json_response.data.body.review_answer == "GREEN") {
                         let clientskyc = await clients.findOneAndUpdate({ api_key: req.headers.authorization }, { $set: { status: true } }, { $new: true })
                         res.json({ status: 200, message: "", data: { "status": clientskyc.status } })
 
@@ -748,8 +761,7 @@ module.exports =
                     else if (json_response.data.body.review_answer == "RED") {
                         res.json({ status: 200, message: "KYC Rejected", data: null })
                     }
-                    else 
-                    {
+                    else {
                         res.json({ status: 200, message: "KYC Request Is In Pending State", data: null })
                     }
                 }
@@ -901,20 +913,6 @@ module.exports =
             clients.findOne({ api_key: req.body.client_user_name }).then(async (val) => {
                 if (val != null) {
                     if (req.body.review_answer == "GREEN") {
-                        let networks = await network.find()
-                        networks.forEach(async function (item) {
-                            var web3 = new Web3(new Web3.providers.HttpProvider(item.nodeUrl));
-                            var accountAddress = web3.eth.accounts.create();
-                            const clientWallet = new clientWallets({
-                                id: mongoose.Types.ObjectId(),
-                                client_api_key: val.api_key,
-                                address: accountAddress.address,
-                                privatekey: accountAddress.privateKey,
-                                status: 1,
-                                network_id: item.id
-                            });
-                            let client_Wallet = await clientWallet.save()
-                        });
                         let clientskyc = await clients.findOneAndUpdate({ api_key: req.body.client_user_name }, { $set: { status: true } }, { $new: true })
                         let kycclients = await clients.findOne({ api_key: req.body.client_user_name })
                         res.json({ status: 200, message: "Successfully", data: { "status": kycclients.status } })
@@ -1030,7 +1028,7 @@ module.exports =
         try {
 
             var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, loginstatus: false } }, { $new: true })
+            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, loginstatus: false, status: false } }, { $new: true })
             if (val != null) {
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp, "url": "" } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
@@ -1049,11 +1047,17 @@ module.exports =
     async checkTheTokenAndUpdatePassword(req, res) {
         const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(req.body.newpassword, salt);
-        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken }, { $set: { "password": password_hash, "loginstatus": true } })
+        await clients.findOneAndUpdate({ email: req.body.email, emailtoken: req.body.emailtoken, loginstatus: false, status: false }, { $set: { 
+            "password": password_hash,  loginstatus: true, status: true
+        } })
             .then(async (val) => {
                 if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email })
-                    res.json({ status: 200, message: "Password Updated Successfully", data: clientsdata })
+
+                    res.json({ 
+                        status: 200, 
+                        message: "Password Updated Successfully", 
+                        data: {'email':clientsdata.email } })
                 }
                 else {
                     res.json({ status: 400, message: "Invalid Token", data: null })
@@ -1073,7 +1077,8 @@ module.exports =
                 var password_status = bcrypt.compareSync(req.body.password, val.password)
                 if (password_status == true) {
                     let client = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "password": password_hash } })
-                    res.json({ "status": 200, "data": client, "message": "Password Updated" })
+
+                    res.json({ "status": 200, data: {'email':clientsdata.email }, "message": "Password Updated" })
                 }
                 else if (password_status == false) {
                     res.json({ "status": 400, "data": {}, "message": "Current password is not Correct" })
@@ -1093,9 +1098,9 @@ module.exports =
         try {
 
             let clientWallet = await clientWallets.findOne({
-                'client_api_key': req.body.client_api_key,
-                'network_id': req.body.network_id,
-                status: 3
+                'client_api_key'    : req.body.client_api_key,
+                'network_id'        : req.body.network_id,
+                 status             : 3
             })
             let network_id = clientWallet == null ? req.body.network_id : clientWallet.network_id
             let network_details = await network.findOne({ 'id': network_id })
@@ -1133,10 +1138,10 @@ module.exports =
                         profileimage: req.body.profileimage,
                         companyname: req.body.companyname
                     }
-                }, { $new: true })
-            let newupdate = await clients.findOne({ 'api_key': req.headers.authorization })
-
-            res.json({ status: 200, data: { newupdate }, message: "update profile" })
+                }, { returnDocument : 'after'  })
+            // let newupdate = await clients.findOne({ 'api_key': req.headers.authorization })
+                    
+            res.json({ status: 200, data: { 'email':update.email , 'profileimage':update.profileimage, 'companyname':update.companyname }, message: "update profile" })
 
         }
         catch (error) {

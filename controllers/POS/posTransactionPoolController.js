@@ -32,7 +32,6 @@ module.exports =
                 return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
             }
             let account       = await poolwalletController.getPoolWalletID(networkType) 
-            console.log("account",account)
             if (hash == securityHash) 
             {
                 let currentDateTemp = Date.now();
@@ -158,6 +157,7 @@ module.exports =
                             "networkDetails.transferlimit": 0,
                             "networkDetails.deleted_by": 0,
                             "networkDetails.icon": 0,
+                            "clientDetails.authtoken": 0,
                             "clientDetails.token": 0,
                             "clientDetails.secret": 0,
                             "clientDetails.qrcode": 0,
@@ -401,6 +401,7 @@ module.exports =
                             "networkDetails.transferlimit": 0,
                             "networkDetails.deleted_by": 0,
                             "networkDetails.icon": 0,
+                            "clientDetails.authtoken": 0,
                             "clientDetails.token": 0,
                             "clientDetails.secret": 0,
                             "clientDetails.qrcode": 0,

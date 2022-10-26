@@ -217,10 +217,12 @@ module.exports =
         try {
             let token = req.headers.authorization;
             let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "306d04e5ccf554ffcaebe1b929a6dbc27bc04a3b" }, { status: 1 }] });
-            if (user != null) {
+            if (user != null) 
+            {
                 next()
             }
-            else {
+            else 
+            {
                 res.json({ status: 400, data: {}, message: "You have not pos access. Please create the service request." })
             }
         }
@@ -351,7 +353,8 @@ module.exports =
             let token = req.headers.authorization;
 
             let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8" }, { status: 1 }] });
-            if (user != null) {
+            if (user != null) 
+            {
                 next()
             }
             else {

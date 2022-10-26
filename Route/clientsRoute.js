@@ -27,20 +27,36 @@ const ipnController                 = require('../controllers/Masters/ipnControl
 // router.post('/approvekyc',                           clientsController.kyc_approved);
 // router.post('/clientBalance',                        Auth.is_merchant,transcationpoolController.get_Client_Balance);
 // router.post('/update_cron_job',                      clientsController.update_cron_job);
-// router.post('/gettranscationlist',                   clientsController.Get_Transcation_List);
+// // router.post('/gettranscationlist',                clientsController.Get_Transcation_List);
+// router.post('/customerstatus',                       Auth.is_merchant,clientsController.customerstatus);
+// router.post('/updateClientToken',                    Auth.is_merchant,clientsController.updateClientToken);
+// router.post('/getapikey',                            Auth.is_merchant,clientsController.getapikey);
+// router.post('/generateNewClientAddress',             Auth.is_merchant,clientsController.generateNewClientAddress);
+// "=============Merchant-Sites==========================================="
+// router.post('/allMerchantSites',                         merchantSitesController.allMerchantSites);
+// router.post('/deleteMerchantSite',                       merchantSitesController.deleteMerchantSite);
+// router.post('/savemerchantsite',                         merchantSitesController.savemerchantsite);
+// router.post('/updateMerchantSite',                       merchantSitesController.updateMerchantSite);
+// router.post('/setWithdrawSettings',                                 withdrawController.setWithdrawSettings);
+// router.get('/getWithdrawSettings',                                  Auth.is_merchant,withdrawController.getWithdrawSettings);
+// router.post('/getapistatus',                                        clientapicontroller.getapikey);
+// router.post('/balancecheck',                                          commonController.getBalance);
 
-router.post('/signUpMerchant',                        Auth.verify_create_merchant_auth,clientsController.create_merchant);
-router.post('/login',                                 Auth.verify_Login,clientsController.Login);
-router.post('/verfiyMerchantAuth',                    Auth.verifymerchant,Auth.verify_MerchantAuth,clientsController.Verfiy_Google_Auth);
-router.post('/resendingemail',                        Auth.is_merchant,Auth.verify_resendingemail,clientsController.resendingemail);
-router.post('/verfiyemail',                           Auth.verify_verfiyemail,clientsController.verfiyemail);
-router.post('/getclientkey',                          Auth.verifymerchant,Auth.verify_getclientkey,clientsController.getclientkey);
+router.post('/signUpMerchant',                       Auth.verify_create_merchant_auth,clientsController.create_merchant);
+router.post('/login',                                Auth.verify_Login,clientsController.Login);
+router.post('/verfiyMerchantAuth',                   Auth.verifymerchant,Auth.verify_MerchantAuth,clientsController.Verfiy_Google_Auth);
+router.post('/resendingemail',                       Auth.is_merchant,Auth.verify_resendingemail,clientsController.resendingemail);
+router.post('/verfiyemail',                          Auth.verify_verfiyemail,clientsController.verfiyemail);
+router.post('/getclientkey',                         Auth.verifymerchant,Auth.verify_getclientkey,clientsController.getclientkey);
 
+
+"============================ Withdraw ==============================="
 router.post('/withdraw',                             Auth.is_merchant,Auth.verify_withdraw,withdrawController.save_withdraw);
 router.post('/clientWihdrawLogs',                    Auth.is_merchant,withdrawController.get_client_wihdraw);
 router.post('/clientTotalWihdraw',                   Auth.is_merchant,withdrawController.get_client_wihdraw_total);
-router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
+router.post('/clientwithdrawnetworkid',              Auth.is_merchant,withdrawController.get_client_withdraw_with_network_id);
 
+router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
 router.post('/merchantNetworkTranscation',           Auth.is_merchant,Auth.verify_trans_by_network_id,transcationpoolController.get_Trans_by_Network_ID);
 router.post('/merchantsTranscation',                 Auth.is_merchant,transcationpoolController.getTrans);
 router.post('/check_kyc',                            Auth.is_merchant,clientsController.check_kyc);
@@ -48,27 +64,20 @@ router.post('/createkyclink',                        Auth.is_merchant,clientsCon
 router.post('/kycstatus',                            Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);
 router.post('/kycLevels',                            Auth.is_merchant,clientsController.clients_kyc_levels);
 router.post('/webHookLog',                           Auth.is_merchant,kycwebhooklogController.getkycWebHookLog);
-router.post('/customerstatus',                       Auth.is_merchant,clientsController.customerstatus);
 router.post('/resetMerchantTwoFa',                   Auth.is_merchant,clientsController.reset_merchant_two_fa);
-router.post('/clientwithdrawnetworkid',              Auth.is_merchant,withdrawController.get_client_withdraw_with_network_id);
-router.post('/updateClientToken',                    Auth.is_merchant,clientsController.updateClientToken);
-router.post('/getapikey',                            Auth.is_merchant,clientsController.getapikey);
 router.post('/getTranscationData',                   Auth.is_merchant,hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             Auth.is_merchant,transcationpoolController.get_Trans_by_txId);
+
 router.post('/transactionFastDetails',               Auth.fastpay_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 router.post('/transactionPaylinkDetails',            Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
-router.post('/generateNewClientAddress',             Auth.is_merchant,clientsController.generateNewClientAddress);
+
+
 router.post('/forgotPassword',                       clientsController.forgotPassword);
 router.post('/tokenAndUpdatePassword',               clientsController.checkTheTokenAndUpdatePassword);
-router.post('/resetPassword',                        clientsController.ResetPassword);
+router.post('/resetPassword',                        Auth.is_merchant,clientsController.ResetPassword);
 router.post('/updateMerchantProfileImage',           Auth.is_merchant,clientsController.updateMerchantProfileImage);
 
-"=============Merchant-Sites==========================================="
 
-router.post('/allMerchantSites',                         merchantSitesController.allMerchantSites);
-router.post('/deleteMerchantSite',                       merchantSitesController.deleteMerchantSite);
-router.post('/savemerchantsite',                         merchantSitesController.savemerchantsite);
-router.post('/updateMerchantSite',                       merchantSitesController.updateMerchantSite);
 
 "=============MerchantStore==========================================="
 
@@ -93,10 +102,6 @@ router.get('/posallCurrency',                               Auth.check_Store_Dev
 router.post('/pospriceConversition',                        Auth.check_Store_Device_Access,CurrencyController.priceConversition);
 router.post('/posallNetworks',                              Auth.check_Store_Device_Access,networkController.allNetworkForClient);
 router.post('/posGetTransByDeviceID',                       Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
-
-
-
-
 
 "============================ Currency Master ==============================="
 
@@ -123,10 +128,9 @@ router.post('/pluginpriceConversition',                         Auth.Verfiy_Merc
 
 "============================ Withdraw  ==============================="
 
-router.post('/setWithdrawSettings',                                 withdrawController.setWithdrawSettings);
-router.get('/getWithdrawSettings',                                  withdrawController.getWithdrawSettings);
-router.post('/merchantBalance',                                     withdrawController.merchantBalance);
-router.post('/merchantWithdrawBalance',                             withdrawController.withdrawBalance);
+
+router.post('/merchantBalance',                                     Auth.is_merchant,withdrawController.merchantBalance);
+router.post('/merchantWithdrawBalance',                             Auth.is_merchant,withdrawController.withdrawBalance);
 
 
 "============================ perfered Network Controller  ==============================="
@@ -139,22 +143,16 @@ router.post('/getPerferedNetwork',                                  Auth.is_merc
 router.post('/createHostePayment',                                  Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
 router.post('/ipntesting',                                          PaymentHostedController.IPN_Testing);
 
-"============================ clientapikey  ==============================="
-
-router.post('/getapistatus',                                        clientapicontroller.getapikey);
-
-
 "============================ Common Controller  ==============================="
 
 router.post('/getTransStatus',                                        Auth.checkaccess,commonController.getTransStatus);
 
-router.get('/getalltranscationofmerchant',                           Auth.is_merchant,commonController.getAllTranscationOfMerchant);
+router.get('/getalltranscationofmerchant',                            Auth.is_merchant,commonController.getAllTranscationOfMerchant);
 
-router.post('/balancecheck',                                          commonController.getBalance);
 
 "============================IPN Controller==============================="
-router.post('/createIPNLink',ipnController.create_IPN_Link);
-router.post('/getIPNLink',ipnController.get_IPN_Link);
+router.post('/createIPNLink', Auth.is_merchant,ipnController.create_IPN_Link);
+router.post('/getIPNLink', Auth.is_merchant,ipnController.get_IPN_Link);
 
 
 
