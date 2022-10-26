@@ -92,8 +92,10 @@ async function Network_Fee_Calculation(network) {
 
 module.exports =
 {
+    
     async save_withdraw(req, res) {
         try {
+           
             const network               = await networks.findOne({ id: req.body.network_id })
             const prevwithdrawLog       = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
             const clientWallet          = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
@@ -464,6 +466,9 @@ module.exports =
             let networkid = ''
             let settings = ''
             let balance = await clientWallets.findOne({ "id": req.body.clientWalletid })
+            if(balance == null){
+                return res.json({ status: 400, data: { }, message: "Invalid Balance" })
+            }
             networkid = balance.network_id
             settings = await withdrawSettings.find();
             if (settings[0].merchantWithdrawLimit >= balance.balance) {

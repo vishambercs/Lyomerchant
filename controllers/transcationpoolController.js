@@ -474,10 +474,9 @@ module.exports =
 
     async get_Trans_by_txId(req, res) {
         try {
-            console.log(req.body.id)
             await transactionPools.aggregate(
                 [
-                    { $match: { "id": req.body.id } },
+                    { $match: { "id": req.body.id ,"api_key": req.headers.authorization } },
                     {
                         $lookup: {
                             from: "poolwallets", // collection to join
@@ -555,7 +554,7 @@ module.exports =
         try {
             await paymentlinktxpools.aggregate(
                 [
-                    { $match: { "id": req.body.id } },
+                    { $match: { "id": req.body.id, api_key : req.headers.authorization  } },
                     {
                         $lookup: {
                             from: "poolwallets", // collection to join
@@ -593,17 +592,11 @@ module.exports =
                     
                     {
                         "$project": {
-                            "poolWallet.api_key":0,
                             "poolWallet.privateKey": 0,
-                            "poolWallet.poolwalletID": 0,
-                            "poolWallet.orderid": 0,
-                            "poolWallet.clientToken": 0,
-                            "poolWallet.currency": 0,
                             "poolWallet.callbackURL": 0,
                             "poolWallet.createdAt": 0,
                             "poolWallet.updatedAt": 0,
                             "poolWallet.__v": 0,
-                            "poolWallet.transactionDetails": 0,
                             "poolWallet.balance": 0,
                             "poolWallet.id": 0,
                             "poolWallet._id": 0,

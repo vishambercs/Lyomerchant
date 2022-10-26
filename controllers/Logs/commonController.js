@@ -433,7 +433,9 @@ module.exports =
                         "clientDetails.status": 0,
                         "clientDetails.two_fa": 0,
                         "clientDetails.password": 0,
+                        "clientDetails.authtoken": 0,
                         "clientDetails.kycLink": 0,
+                        
                         "poolwalletDetails._id": 0,
                         "poolwalletDetails.status": 0,
                         "poolwalletDetails.__v": 0,

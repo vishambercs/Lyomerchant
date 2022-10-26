@@ -217,7 +217,21 @@ module.exports =
                         foreignField: "api_key",//field from the documents of the "from" collection
                         as: "clientDetails"// output array field
                     },
+                    
                 },
+                {
+                    "$project":
+                    {
+                        "id"            : 1,
+                        "clientapikey"  : 1,
+                        "storename"     : 1,
+                        "storeapikey"   : 1,
+                        "qrcode"        : 1,
+                        "status"        : 1,
+                        "clientDetails.email": 1,
+                        
+                    }
+                }
             ]).then(async (data) => {
                 res.json({ status: 200, message: "Merchant Stores", data: data })
             }).catch(error => {
