@@ -381,7 +381,7 @@ module.exports =
             
             clients.findOne({ 'email': email }).then(async (val) => {
                 if (authenticator.check(code, val.secret)) {
-                    console.log("Verfiy_Google_Auth code","if")
+                   
                     if (val.two_fa == false) {
                       
                         let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { two_fa: true } }, { $new: true })
