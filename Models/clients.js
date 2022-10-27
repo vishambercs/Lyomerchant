@@ -71,10 +71,16 @@ const clientsSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
     },
+    disablestatus: {
+        type: Boolean,
+        required: false,
+        default : true,
+    },
     emailtoken: {
         type: String,
         required: true,
     },
+    
     status: {
         type: Boolean,
         required: true,
@@ -111,7 +117,14 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    
+    disable_remarks: {
+        type: String,
+        required: false,
+    },
+    disable_date: {
+        type: String,
+        required: false,
+    },
     },
     { timestamps: true },
     {

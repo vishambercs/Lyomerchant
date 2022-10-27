@@ -72,9 +72,9 @@ async function getTranscationDataForClient(transkey, type) {
 
 async function updateClientWallet(client_api_key, networkid, merchantbalance, processingfee = 0.01) {
     
-    let val = await clientWallets.findOne({ api_key: client_api_key, network_id: networkid })
+    let val = await clientWallets.findOne({ client_api_key: client_api_key, network_id: networkid })
     if (val != null) {
-        let clientWallet = await clientWallets.updateOne({ api_key: client_api_key, network_id: networkid }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * processingfee))) } })
+        let clientWallet = await clientWallets.updateOne({ client_api_key: client_api_key, network_id: networkid }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * processingfee))) } })
         return clientWallet
     }
     else {

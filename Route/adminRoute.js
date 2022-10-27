@@ -60,6 +60,7 @@ const commonController = require('../controllers/Logs/commonController');
 router.post('/signupadmin',                                    adminController.signup_admin_api);
 router.post('/adminlogin',                                     adminController.Login);
 router.post('/admingoogleauth',                                adminController.Verfiy_Google_Auth);
+router.post('/customerstatus',                                 Auth.is_admin,clientsController.customerstatus);
 router.post('/getTransForAdmin',                               Auth.is_admin,transcationpoolController.getTransForAdmin);
 router.post('/get_admin_withdraw',                             Auth.is_admin, withdrawController.get_admin_wihdraw);
 router.post('/allAdmin',                                       Auth.is_admin,adminController.allAdmin);

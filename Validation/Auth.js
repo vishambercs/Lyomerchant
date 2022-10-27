@@ -19,7 +19,7 @@ module.exports =
         try {
             let api_key = req.headers.authorization;
             let token = req.headers.token;
-            client.find({ 'token': token, 'api_key': api_key, status: true }).then(val => {
+            client.find({ 'token': token, 'api_key': api_key, status: true,disablestatus : false }).then(val => {
                 if (val != null) {
                     next()
                 }
@@ -260,11 +260,17 @@ module.exports =
             let devicetoken = req.headers.devicetoken;
             let merchantstore = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
             let storeDevice = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-            if (merchantstore != null && storeDevice != null) {
+            let client      = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+
+            if (merchantstore != null && storeDevice != null && client == null) {
                 next()
             }
+            else if (client != null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Your Account is disabled. Please Contact Admin" })
+            }
             else {
-                res.json({ status: 400, data: {}, message: "This device could not identify. Please regsiter this device" })
+                return   res.json({ status: 400, data: {}, message: "This device could not identify. Please regsiter this device" })
             }
         }
         catch (error) {
@@ -275,12 +281,17 @@ module.exports =
     async paylink_have_access(req, res, next) {
         try {
             let token = req.headers.authorization;
+            let client      = await clients.findOne({  api_key: token , disablestatus : true });
             let user = await merchantcategory.findOne({ clientapikey: token, categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
-            if (user != null) {
+            if (user != null && client == null) {
                 next()
             }
+
+            else if (client != null ) {
+                return res.json({ status: 400, data: {}, message: "Your Account is disabled." })
+            }
             else {
-                res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
+                return  res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
             }
         }
         catch (error) {
@@ -308,9 +319,13 @@ module.exports =
                 return res.json({ status: 400, data: {}, message: "Payment link is expired." })
             }
             let user = await merchantcategory.findOne({ clientapikey: invoiceData.merchantapikey, categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
-
-            if (user != null) {
+            let client      = await clients.findOne({  api_key: invoiceData.merchantapikey , disablestatus : true });
+            if (user != null && client == null) {
                 next()
+            }
+            else if (client != null ) 
+            {
+                res.json({ status: 400, data: {}, message: "Your account is disabled" })
             }
             else {
                 res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
@@ -352,13 +367,17 @@ module.exports =
 
             let token = req.headers.authorization;
 
-            let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8" }, { status: 1 }] });
-            if (user != null) 
+            let user        = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8" }, { status: 1 }] });
+            let client      = await clients.findOne({  api_key : token , disablestatus : true });
+            if (user != null && client == null) 
             {
                 next()
             }
+            else if(client != null){
+                return res.json({ status: 400, data: {}, message: "Your account is disabled." })
+            }
             else {
-                res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
+               return res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
             }
         }
         catch (error) {
@@ -526,7 +545,7 @@ module.exports =
     async verify_updateMerchantProfileImage(req, res, next) {
         try {
             const validationRule = {
-                "profileimage"        : "required|isBase64",
+                "profileimage"        : "required|string",
                 "companyname"         : "required|string",
                
                 
@@ -705,7 +724,7 @@ module.exports =
             { 
                 "storename"  : "required|string",
                
-                "storephone"  : "required|string",
+               
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -726,8 +745,66 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
-    
+    async verify_updateMerchantStoreProfile(req, res, next) {
+        try {
+            const validationRule = 
+            { 
+                "storeprofile"  : "required|isBase64",
+                "storename"     : "required|string",
+                "storeaddress"  : "required|string",
+                "storephone"    : "required|string",
+               
+               
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_updateMerchantStoreProfile(req, res, next) {
+        try {
+            const validationRule = 
+            { 
+                "storeprofile"  : "required|string",
+                "storename"     : "required|string",
+                "storeaddress"  : "required|string",
+                "storephone"    : "required|string",
+               
+               
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
     async verify_verfiyemail(req, res, next) {
         try {
             const validationRule = 

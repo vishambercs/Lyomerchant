@@ -8,8 +8,9 @@ const bcrypt            = require('bcrypt');
 const Web3              = require('web3');
 const axios             = require('axios')
 const clientWallets     = require('../Models/clientWallets');
+const client            = require('../Models/clients');
 const withdrawSettings  = require('../Models/withdrawSettings')
-const currencies          = require('../Models/Currency')
+const currencies        = require('../Models/Currency')
 const network           = require('../Models/network')
 const kytlogs           = require('../Models/kytlogs')
 
@@ -99,6 +100,7 @@ module.exports =
             const network               = await networks.findOne({ id: req.body.network_id })
             const prevwithdrawLog       = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
             const clientWallet          = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
+           
             if (prevwithdrawLog != null) 
             {
                return res.json({ status: 200, data: {}, message: "You have already a request in pending" })
@@ -109,7 +111,7 @@ module.exports =
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
 
-            if (req.body.amount > clientWallet.balance) 
+            if (req.body.amount >= clientWallet.balance) 
             {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
@@ -118,7 +120,7 @@ module.exports =
             {
                 return res.json({ status: 400, data: {}, message: "Unsupported Network " })
             }
-
+            let amount = req.body.amount
             let currentDateTemp          = Date.now();
             let transfer_fee = 0;
             let networkFee = null;
@@ -164,11 +166,23 @@ module.exports =
                     let status              = Object.keys(response.data.body).length > 0 ? 2 : 3
                     let withdrawdata        = await withdrawLogs.findOneAndUpdate({ id : withdrawlog.id }, { $set: { status : status , queue_type  :  status }},{ returnDocument: 'after' })
                     let kytlog              = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(kytdata.data.data), withdraw_id: val.id}])
-                    let clientWallet        = await clientWallets.updateOne({ api_key: req.headers.authorization, network_id: network.id }, { $set: { balance: (val.balance - req.body.amount) } })
-                    res.json({ status: 200, message: "Successfully", data: val })
+              
+                    if(status == 3 )
+                    {
+                    let prevbalance         = parseFloat(clientWallet.balance) -  parseFloat(req.body.amount)
+                    let newclientWallet        = await clientWallets.findOneAndUpdate({ id : clientWallet.id }, { $set: { balance: prevbalance } } , {returnDocument : 'after'})
+                    return res.json({ status: 200, message: "Saved Successfully", data: val })
+                    }
+                    if(status == 2 )
+                    {
+                        await client.findOneAndUpdate({ api_key : clientWallet.client_api_key }, { $set: { authtoken : "",disablestatus:true,disable_remarks:"Due to KYT did not approved", disable_date : new Date().toString()} } , {returnDocument : 'after'})
+                        return res.json({ status: 400, message: "Your Account Has Disabled. Kindly Contact Customer Support", data: {} })
+                    }
+                    
                 }).catch( error => 
                 {
-                    res.json({ status: 400, data: {}, message: error })
+                    console.log(error)
+                    res.json({ status: 400, data: {}, message: "Invalid" })
                 })
           }
         catch (error) {
@@ -188,20 +202,29 @@ module.exports =
                         address_from: req.body.address_from,
                         transcation_hash: req.body.transcation_hash
                     }
-                }, { $new: true }).then(async (withdraw) => {
-                    if (withdraw == null) {
+                }, { returnDocument: 'after' }).then(async (withdraw) => {
+                    if (withdraw == null) 
+                    {
                         return res.json({ status: 400, message: "KYT has not finished", data: {} })
                     }
-                    else if (req.body.status == 1) {
-                        let val     = await clientWallets.findOne({ api_key: withdraw.api_key, network_id: withdraw.network_id })
-                        let clientWallet = await clientWallets.updateOne({ api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance - withdraw.amount) } })
+                    else if (req.body.status == 4) 
+                    {
+
+                        res.json({ status: 200, message: "Successfully", data: withdraw })
                     }
-                    let withdrawLog = await withdrawLogs.findOne({ id: req.body.id })
-                    res.json({ status: 200, message: "Successfully", data: withdrawLog })
+                    else if (req.body.status == 5) 
+                    {
+                        let val          = await clientWallets.findOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id })
+                        let clientWallet = await clientWallets.updateOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance + withdraw.amount) } })
+                        res.json({ status: 200, message: "Successfully", data: withdraw })
+                    }
+
+                   
+                   
 
                 }).catch(
                     error => {
-                        res.json({ status: 400, data: {}, message: error })
+                        res.json({ status: 400, data: {}, message: "Invalid" })
                     })
         }
         catch (error) {
@@ -228,8 +251,8 @@ module.exports =
                             "networkDetails.contractAddress": 0,
                             "networkDetails.contractABI": 0,
                             "networkDetails.apiKey": 0,
-                            "networkDetails.transcationurl": 0,
-                            "networkDetails.scanurl": 0,
+                     
+                            
                             "networkDetails.status": 0,
                             "networkDetails.gaspriceurl": 0,
                             "networkDetails.latest_block_number": 0,
@@ -565,12 +588,12 @@ module.exports =
             if (amount < network.transferlimit ) 
             {  
                 return   res.json({
-                 status: 400, 
+                 status: 200, 
                  data: 
                 {
                     "withdraw_amount"   : req.body.amount ,
                     "transcationfee"    : 0 , 
-                    "limt"              : network.transferlimit, 
+                    "limit"              : network.transferlimit, 
                     "netamount"         : req.body.amount 
                 }, 
                  message: "Amount shoud be greater than or equal to minimum Withdrawal limit" }
