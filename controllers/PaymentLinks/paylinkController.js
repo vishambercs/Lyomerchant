@@ -112,8 +112,9 @@ module.exports =
         let response = ''
         let invoiceNumber = ''
         let status = 200;
-        try {
-            let findResult = await invoice.find({ merchantapikey: merchantKey, status: { $ne: 5 }, });
+        try 
+        {
+            let findResult = await invoice.find({ merchantapikey: merchantKey, status: { $ne: 5 } },{callbackURL : 0 , errorURL:0 , merchantapikey:0});
             response = findResult
         }
         catch (error) {

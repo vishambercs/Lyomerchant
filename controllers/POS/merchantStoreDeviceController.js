@@ -94,12 +94,11 @@ module.exports =
     async getAllStoreDevice(req, res) {
         try {
             let filters = {} 
-            console.log("req.body",req.body)
-            if( Object.keys(req.body).indexOf('status') == -1){
+            
+            if( Object.keys(req.body).indexOf('status') != -1){
                 filters["status"] = parseInt(req.body.status)
             }
             filters["storekey"] = req.headers.authorization
-
             let allstoreDevices = await storeDevices.aggregate([
                 { $match: filters },
                 {
@@ -115,6 +114,7 @@ module.exports =
                     "$project":
                     { 
                         "otptoken": 0,
+                        "storedetails.clientapikey": 0,
                     }
                 }
             ])
@@ -127,26 +127,10 @@ module.exports =
     },
     async getAllStoreDeviceForAdmin(req, res) {
         try {
-            // let status      = await Utility.checkthevalue(req.body.status)
-            if(req.body.status == undefined || req.body.status == "")
-            {
+        
+          
                 let allstoreDevices = await storeDevices.aggregate([
-                    { $match: { storekey: req.headers.authorization ,status: 1, } },
-                    {
-                        $lookup: 
-                        {
-                            from: "merchantstores", // collection to join
-                            localField: "storekey",//field from the input documents
-                            foreignField: "storeapikey",//field from the documents of the "from" collection
-                            as: "storedetails"// output array field
-                        },
-                    },
-                ])
-                res.json({ status: 200, data: allstoreDevices, message: "All Store Devices" })
-            } 
-            else{
-                let allstoreDevices = await storeDevices.aggregate([
-                    { $match: { storekey: req.headers.authorization,status: req.body.status, } },
+                   
                     {
                         $lookup: {
                             from: "merchantstores", // collection to join
@@ -155,9 +139,10 @@ module.exports =
                             as: "storedetails"// output array field
                         },
                     },
+                    { $match: { "storedetails.clientapikey": req.headers.authorization } },
                 ])
                 res.json({ status: 200, data: allstoreDevices, message: "All Store Devices" })
-            }
+            
             
         }
         catch (error) {

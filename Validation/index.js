@@ -47,5 +47,18 @@ Validator.registerAsync('exist', function(value,  attribute, req, passes) {
     })
 });
 
+Validator.registerAsync('decimal', function(value,  attribute, req, passes) {
+   
+    let msg =  `${value} has invalid Value`
+    console.log(parseFloat(value))  
+        if(parseFloat(value) <= 0 ){
+   
+            passes(false, msg); // return false if value exists
+            return;
+        }
+        passes();
+    
+});
+
 
 module.exports = validator;

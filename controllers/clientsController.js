@@ -141,7 +141,20 @@ module.exports =
             });
     },
     async verfiyemail(req, res) {
-        await clients.findOne({ email: req.body.email, emailtoken: req.body.emailtoken, "emailstatus": false, "loginstatus": false })
+        await clients.findOneAndUpdate({ 
+            email: req.body.email, 
+            emailtoken: req.body.emailtoken, 
+            "emailstatus": false, 
+            "loginstatus": false,   
+            status: false },
+            { 
+            $set: { "emailtoken": req.body.emailtoken, 
+            "emailstatus": true, 
+            "loginstatus": true, 
+            "status": false,
+            } }
+            )
+        
             .then(async (val) => {
                 if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email }, {
@@ -164,6 +177,7 @@ module.exports =
                 res.json({ status: 400, data: {}, message: error.message })
             });
     },
+ 
     async Create_Kyc_Link(req, res) {
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
@@ -229,6 +243,9 @@ module.exports =
                     res.json({ "status": 400, "data": {}, "message": "Please Verify Email First" })
                 }
                 else if (val.loginstatus == false) {
+                    res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
+                }
+                else if (val.disablestatus == true) {
                     res.json({ "status": 400, "data": {}, "message": "Please contact with admin. Your account disabled" })
                 }
                 else if (password_status == true) {
@@ -816,6 +833,7 @@ module.exports =
                     },
                     {
                         "$project": {
+                            "id": 1,
                             "balance": 1,
                             "address": 1,
                             "network_id": 1,
@@ -827,7 +845,7 @@ module.exports =
                     }
                 ]).then(async (data) => {
 
-                    res.json({ status: 200, message: "Hot Wallets", data: data })
+                    res.json({ status: 200, message: "Merchant Wallet", data: data })
                 }).catch(error => {
                     console.log("get_clients_data", error)
                     res.json({ status: 400, data: {}, message: error })
@@ -970,7 +988,7 @@ module.exports =
     },
     async allMerchant(req, res) {
         try {
-            await clients.find({}, { email: 1, status: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
+            await clients.find({}, { email: 1, status: 1, loginstatus: 1,disablestatus: 1,disable_remarks: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "All Merchant", data: val })
             }).catch(error => {
                 console.log(error)
@@ -984,7 +1002,8 @@ module.exports =
     },
     async customerstatus(req, res) {
         try {
-            await clients.findOneAndUpdate({ api_key: req.body.api_key }, { $set: { "loginstatus": req.body.status } }, { $new: true })
+            console.log(req.body.email)
+            await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "loginstatus": req.body.status, disablestatus : req.body.disablestatus  } }, { $new: true })
                 .then(async (val) => {
                     if (val != null) {
                         res.json({ status: 200, message: "Merchant Updated Successfully", data: val.email })
@@ -1026,31 +1045,12 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Customer did not find" })
         }
     },
-    async customerstatus(req, res) {
-        try {
-            await clients.findOneAndUpdate({ api_key: req.body.api_key }, { $set: { "loginstatus": req.body.status } }, { $new: true })
-                .then(async (val) => {
-                    if (val != null) {
-                        res.json({ status: 200, message: "Merchant Updated Successfully", data: val.email })
-                    }
-                    else {
-                        res.json({ status: 400, message: "Customer did not find", data: null })
-                    }
-                })
-                .catch(error => {
-                    console.log('customerstatus ', error);
-                    res.json({ status: 400, data: {}, message: error.message })
-                });
-        }
-        catch (error) {
-            res.json({ status: 400, data: {}, message: "Customer did not find" })
-        }
-    },
+   
     async forgotPassword(req, res) {
         try {
 
             var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, "emailstatus": false,loginstatus: false } }, { $new: true })
+            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, "emailstatus": false,loginstatus: false,  } }, { $new: true })
             if (val != null) {
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp, "url": "" } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
@@ -1065,6 +1065,27 @@ module.exports =
             console.log("error", error)
             res.json({ status: 400, data: {}, message: "Email or Password is wrong" })
         }
+    },
+    async verifyAuthToken(req, res) {
+        await clients.findOne({ 
+            email: req.body.email, 
+            emailtoken: req.body.emailtoken, 
+            "emailstatus": false,loginstatus: false,   
+            },
+            
+            ).then(async (val) => {
+                if (val != null) {
+                    
+                    res.json({ status: 200, message: "Valid Token", data: {"email" : val.email , "emailtoken" : val.emailtoken } })
+                }
+                else {
+                    res.json({ status: 400, message: "Invalid Token", data: null })
+                }
+            })
+            .catch(error => {
+                console.log('verfiyemail ', error);
+                res.json({ status: 400, data: {}, message: error.message })
+            });
     },
     async checkTheTokenAndUpdatePassword(req, res) {
         const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));

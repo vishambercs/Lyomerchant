@@ -222,12 +222,15 @@ module.exports =
                 {
                     "$project":
                     {
-                        "id"            : 1,
-                        "storename"     : 1,
-                        "storeapikey"   : 1,
-                        "qrcode"        : 1,
-                        "status"        : 1,
-                        "clientDetails.email": 1,
+                        "id"                  : 1,
+                        "storename"           : 1,
+                        "storeapikey"         : 1,
+                        "storeprofile"        : 1,
+                        "storeaddress"        : 1,
+                        "storephone"          : 1,
+                        "qrcode"              : 1,
+                        "status"              : 1,
+                        "clientDetails.email" : 1,
                         
                     }
                 }
@@ -250,7 +253,6 @@ module.exports =
 
 
             let update = await merchantstores.findOneAndUpdate({ 'id': req.body.id,'clientapikey': req.headers.authorization } , { $set: { 
-                
                 storeprofile    : req.body.storeprofile,
                 storename       : req.body.storename,
                 storeaddress    : req.body.storeaddress,
