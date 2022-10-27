@@ -234,6 +234,7 @@ module.exports =
             const newRecord = new paymentLinkTransactionPool({
                 id              : mongoose.Types.ObjectId(), 
                 api_key         : req.headers.authorization,
+                paymenttype     : req.body.paymenttype,
                 poolwalletID    : account.id,
                 amount          : req.body.amount,
                 currency        : req.body.currency,

@@ -14,6 +14,11 @@ const paymentLinkTransactionPoolSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    paymenttype:
+    {
+        type: String,
+        required: false,
+    },
     poolwalletID:
     {
         type: String,

@@ -20,6 +20,7 @@ const PaymentHostedController       = require('../controllers/hostedpayment/Paym
 const clientapicontroller           = require('../controllers/Masters/clientapicontroller');
 const commonController              = require('../controllers/Logs/commonController');
 const ipnController                 = require('../controllers/Masters/ipnController');
+const qpaymentcontroller            = require('../controllers/esropayment/qpaymentcontroller');
 
 // router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
 // router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
@@ -69,8 +70,8 @@ router.post('/createkyclink',                        Auth.is_merchant,clientsCon
 router.post('/kycstatus',                            Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);
 router.post('/kycLevels',                            Auth.is_merchant,clientsController.clients_kyc_levels);
 router.post('/webHookLog',                           Auth.is_merchant,kycwebhooklogController.getkycWebHookLog);
-// router.post('/resetMerchantTwoFa',                   Auth.is_merchant,clientsController.reset_merchant_two_fa);
-// router.post('/getTranscationData',                   Auth.is_merchant,hotwallettranslogsController.getTranscationData);
+// router.post('/resetMerchantTwoFa',                Auth.is_merchant,clientsController.reset_merchant_two_fa);
+// router.post('/getTranscationData',                Auth.is_merchant,hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             Auth.is_merchant,transcationpoolController.get_Trans_by_txId);
 
 router.post('/transactionFastDetails',               Auth.fastpay_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
@@ -124,7 +125,7 @@ router.post('/cancelClientRequest',                             Auth.is_merchant
 "============================ WEB PLUGIN ==============================="
 
 router.post('/assignMerchantWallet',                            Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
-router.post('/pluginallNetworks',                               Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allNetworkForClient);
+router.post('/pluginallNetworks',                               Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/pluginallCurrency',                               Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
 router.post('/pluginpriceConversition',                         Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversition);
 
@@ -156,8 +157,11 @@ router.get('/getalltranscationofmerchant',                            Auth.is_me
 router.post('/createIPNLink', Auth.is_merchant,ipnController.create_IPN_Link);
 router.post('/getIPNLink', Auth.is_merchant,ipnController.get_IPN_Link);
 
-
-
+// "============================Create Quick Payment==============================="
+// router.post('/create_quick_payment',            qpaymentcontroller.create_quick_payment);
+// router.post('/verifythecode',                   qpaymentcontroller.verifyTheCode);
+// router.post('/updateQuickpayment',              qpaymentcontroller.updateQuickpayment);
+// router.post('/getQuickNetwork',                 networkController.allNetworkForClient);
 
 module.exports = router;
 

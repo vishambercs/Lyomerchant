@@ -66,7 +66,8 @@ module.exports =
             let email = req.body.email;
             await admins.findOne({ 'email': email }).select('+password').then(async (val) => {
                 var password_status = bcrypt.compareSync(req.body.password, val.password);
-                if (val.status == false) {
+                if (val.status == false) 
+                {
                     res.json({ "status": 400, "data": {}, "message": "Your account has disabled" })
                 }
                 else if (password_status == true) {

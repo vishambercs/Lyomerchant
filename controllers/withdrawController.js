@@ -58,6 +58,9 @@ async function priceConversition(currencyid, currency) {
         let COINGECKO_URL   =  process.env.COINGECKO+parameters
         let axiosGetData    =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
         var stringify_response = JSON.parse(axiosGetData.data)
+
+        
+        
         return stringify_response.data 
     }
     catch (error) 
@@ -251,8 +254,6 @@ module.exports =
                             "networkDetails.contractAddress": 0,
                             "networkDetails.contractABI": 0,
                             "networkDetails.apiKey": 0,
-                     
-                            
                             "networkDetails.status": 0,
                             "networkDetails.gaspriceurl": 0,
                             "networkDetails.latest_block_number": 0,

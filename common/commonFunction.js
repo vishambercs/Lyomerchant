@@ -1,9 +1,10 @@
-const ejs = require('ejs');
-const fs = require('fs');
-const Web3 = require('web3');
+const ejs   = require('ejs');
+const fs    = require('fs');
+const Web3  = require('web3');
 
-var stringify = require('json-stringify-safe');
-const transcationLog = require('../Models/transcationLog');
+var stringify           = require('json-stringify-safe');
+const transcationLog    = require('../Models/transcationLog');
+const quickpayment      = require('../Models/quickpayment');
 const network = require('../Models/network');
 var qs = require('qs');
 const axios = require('axios')
@@ -18,16 +19,16 @@ const clients = require('../Models/clients');
 const hotWallets = require('../Models/hotWallets');
 const hot_wallet_trans_logs = require('../Models/hot_wallet_trans_logs');
 require("dotenv").config()
-var nodemailer = require('nodemailer');
-var mongoose = require('mongoose');
-const TronWeb = require('tronweb')
-const posTransactionPool = require('../Models/posTransactionPool');
-const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
-const transUtility = require('./transUtilityFunction');
-const emailSending = require('../common/emailSending');
-const payLinkUtility = require('./payLinkUtility');
-const feedWalletController = require('../controllers/Masters/feedWalletController');
-const transcationEmailLogs = require('../Models/transcationEmailLogs');
+var nodemailer              = require('nodemailer');
+var mongoose                = require('mongoose');
+const TronWeb               = require('tronweb')
+const posTransactionPool    = require('../Models/posTransactionPool');
+const transporter           = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
+const transUtility          = require('./transUtilityFunction');
+const emailSending          = require('../common/emailSending');
+const payLinkUtility        = require('./payLinkUtility');
+const feedWalletController  = require('../controllers/Masters/feedWalletController');
+const transcationEmailLogs  = require('../Models/transcationEmailLogs');
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -137,9 +138,9 @@ async function getBalance(transdata, transData) {
             addressObject.poolWallet[0].privateKey
         )
 
-        let remain       =   parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
-        let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
-        let client = await clients.findOne({api_key : addressObject.api_key})
+        let remain                          = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+        let paymentData                     = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
+        let client                          = await clients.findOne({api_key : addressObject.api_key})
         if (minutes > 10) 
         {
             let transactionpool             = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4  } })
@@ -148,10 +149,6 @@ async function getBalance(transdata, transData) {
             let totalBalnce                 = parseFloat(previouspoolwallet.balance) + walletbalance
             let poolwallet                  = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 ,"balance": totalBalnce } })
             response                        = { amountstatus: 4,"paymentdata":paymentData ,status: 200, "data": {}, message: "Your Transcation is expired." };
-        //    console.log(addressObject.clientsdetails)
-        //    console.log(addressObject.api_key)
-        //    console.log(addressObject)
-           
             var emailTemplateName = 
             { 
                 "emailTemplateName": "successtrans.ejs", 
@@ -229,14 +226,13 @@ async function getBalance(transdata, transData) {
 }
 
 async function updateClientWallet(client_api_key, networkid, merchantbalance, processingfee = 0.01) {
-    console.log("===========val===========",client_api_key)
     let val = await clientWallets.findOne({ client_api_key: client_api_key, network_id: networkid })
-    console.log("===========val===========",val)
     if (val != null) {
         let clientWallet = await clientWallets.updateOne({ client_api_key: client_api_key, network_id: networkid }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * processingfee))) } })
         return clientWallet
     }
-    else {
+    else 
+    {
         const clientWallet = new clientWallets({
             id: mongoose.Types.ObjectId(),
             client_api_key: client_api_key,
@@ -825,5 +821,96 @@ module.exports =
             Constant.paymenlinkIndex = 0;
         }
     },
-    
+    async get_Transcation_Paylink_Data(transkey) {
+
+        let pooldata = await paymentLinkTransactionPool.aggregate(
+            [
+                { $match: { id: transkey, $or: [{ status: 0 }, { status: 2 }] } },
+                {
+                    $lookup: {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "poolWallet"// output array field
+                    },
+                }, {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "poolWallet.network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "networkDetails"// output array field
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "transcationlogs", // collection to join
+                        localField: "id",//field from the input documents
+                        foreignField: "trans_pool_id",//field from the documents of the "from" collection
+                        as: "transcationlogsDetails"// output array field
+                    }
+                },
+                {
+                    "$project":
+                    {
+                        "poolWallet.privateKey": 0,
+                        "poolWallet.id": 0,
+                        "poolWallet._id": 0,
+                        "poolWallet.status": 0,
+                        "poolWallet.__v": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.createdAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                    }
+                }
+            ])
+        return pooldata
+    },
+    async get_Transcation_quickpayment_Data(transkey) {
+
+        let pooldata = await quickpayment.aggregate(
+            [
+                { $match: { id: transkey, $or: [{ status: 0 }, { status: 2 }] } },
+                {
+                    $lookup: {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "poolWallet"// output array field
+                    },
+                }, {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "poolWallet.network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "networkDetails"// output array field
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "clients", // collection to join
+                        localField: "api_key",//field from the input documents
+                        foreignField: "api_key",//field from the documents of the "from" collection
+                        as: "clientdetails"// output array field
+                    }
+                },
+                {
+                    "$project":
+                    {
+                        "poolWallet.privateKey": 0,
+                        "poolWallet.id": 0,
+                        "poolWallet._id": 0,
+                        "poolWallet.status": 0,
+                        "poolWallet.__v": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.createdAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                    }
+                }
+            ])
+        return pooldata
+    },
 }

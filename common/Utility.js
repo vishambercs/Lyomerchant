@@ -325,4 +325,45 @@ module.exports =
             return null
         }
     },
+
+    async quickpaymentWebScokect(request) {
+        try {
+            let uniqueKey           =  crypto.randomBytes(20).toString('hex')
+            let url_paremeters      = url.parse(request.httpRequest.url);
+            let queryvariable       = querystring.parse(url_paremeters.query)
+            console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
+            var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            let getTranscationData  = await commonFunction.get_Transcation_quickpayment_Data(queryvariable.transkey)
+            console.log("paymentLinkTranscationWebScokect =====================================",getTranscationData);
+            if(getTranscationData.length > 0)
+            {
+            const connection        = request.accept(null, request.origin);
+            var index = Constant.paymenlinkTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            if(index == -1)
+            {
+            let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+            Constant.paymenlinkTransList.push(client_object)
+            }
+            else
+            {
+                Constant.paymenlinkTransList[index]["connection"] = connection
+            }
+            Constant.interval  = setInterval(commonFunction.get_data_of_Paymentlink_transcation, 20000);
+            connection.on('message', function (message) {
+            if(index == -1)
+            {
+                connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            }
+            })
+        }
+        else
+        {
+            return request.reject(null, request.origin);
+        }
+        }
+        catch (error) {
+            console.log(error)
+            return null
+        }
+    },
 }

@@ -506,7 +506,8 @@ module.exports =
             var amountstatus = 0
             let merchantbalance = 0;
 
-            console.log("==========getTrasnsBalance=========",addressObject)
+           
+
 
             const previousdate = new Date(parseInt(addressObject.timestamps));
             const currentdate  = new Date().getTime()
