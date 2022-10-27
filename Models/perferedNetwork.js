@@ -12,6 +12,12 @@ const perferedNetwork = new mongoose.Schema({
         type: String,
         required: true,
     },
+    pricemargin:
+    {
+        type     : Number,
+        required : false,
+        default  : 0,
+    },
     networkid: {
         type: String,
         required: true,

@@ -100,3 +100,9 @@ console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}`);
 
 const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
 paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
+
+// var quickpayment = https.createServer({}).listen(process.env.ESRO_LINK_PORT, () => {
+// console.log(`Example app listening at ${process.env.ESRO_LINK_PORT}   `);
+// })
+// const quickpayment = new webSocketServer({ httpServer: quickpayment });
+// quickpayment.on('request', Utility.quickpaymentWebScokect)

@@ -6,6 +6,7 @@ var   mongoose              = require('mongoose');
 const poolWallet            = require('../Models/poolWallet');
 const Utility               = require('../common/Utility');
 const feedWalletController  = require('../controllers/Masters/feedWalletController');
+const perferedNetwork = require('../Models/perferedNetwork');
 var   crypto                = require("crypto");
 const TronWeb               = require('tronweb')
 const { generateAccount }   = require('tron-create-address')
@@ -355,8 +356,34 @@ module.exports =
             }).
                 catch(error => {
                     res.json({ status: 400, data: {}, message: error })
-                })
+            })
 
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async allPreferedeNetworkForClient(req, res) {
+        try {
+            let networksDetails = await perferedNetwork.aggregate([
+                { $match: { clientapikey: req.headers.authorization, status : 1  }},
+                { $lookup: { from: "networks", localField: "networkid", foreignField: "id", as: "networkDetails" } },
+                {
+                    "$project":
+                    {
+                        "networkDetails.id"         : 1, 
+                        "networkDetails.currencyid" : 1, 
+                        "networkDetails.coin"       : 1, 
+                        "networkDetails.cointype"   : 1, 
+                        "networkDetails.libarayType": 1, 
+                        "networkDetails.icon"       : 1, 
+                        "networkDetails.network"    : 1, 
+                    }
+                }
+
+            ])
+            res.json({ status: 200, message: "get", data: networksDetails })
         }
         catch (error) {
             console.log(error)

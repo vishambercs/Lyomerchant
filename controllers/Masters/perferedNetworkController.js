@@ -6,14 +6,17 @@ module.exports =
 {
     async create_perfered_Network(req, res) {
         try {
+
             await perferedNetwork.findOneAndUpdate(
                 {
                     clientapikey: req.headers.authorization,
                     networkid: req.body.networkid,
+                    
                 }, {
                 $set:
                 {
                     status: req.body.status,
+                    pricemargin     : req.body.pricemargin,
                 }
                 }).then(async (val) => {
                 if (val != null) {
@@ -23,10 +26,11 @@ module.exports =
                 else 
                 {
                     const perferedNetworkItem = new perferedNetwork({
-                        id: mongoose.Types.ObjectId(),
-                        clientapikey: req.headers.authorization,
-                        networkid: req.body.networkid,
-                        status: req.body.status,
+                        id              : mongoose.Types.ObjectId(),
+                        clientapikey    : req.headers.authorization,
+                        pricemargin     : req.body.pricemargin,
+                        networkid       : req.body.networkid,
+                        status          : req.body.status,
                     });
                     let perfered_network = await perferedNetworkItem.save()
                     res.json({ status: 200, message: "Not Found the Data", data: perfered_network })
