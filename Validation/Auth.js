@@ -256,12 +256,18 @@ module.exports =
     },
     async check_Store_Device_Access(req, res, next) {
         try {
-            let token = req.headers.authorization;
-            let devicetoken = req.headers.devicetoken;
-            let merchantstore = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
-            let storeDevice = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-            let client      = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+            let token           = req.headers.authorization;
+            let devicetoken     = req.headers.devicetoken;
+            console.log("devicetoken",devicetoken)
+            console.log("token",token)
 
+            let merchantstore   = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
+            console.log("merchantstore",merchantstore)
+            console.log("merchantstore",merchantstore)
+            let storeDevice     = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
+            let client          = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+            console.log("client",client)
+            console.log("storeDevice",storeDevice)
             if (merchantstore != null && storeDevice != null && client == null) {
                 next()
             }
