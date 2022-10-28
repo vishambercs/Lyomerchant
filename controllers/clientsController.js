@@ -327,9 +327,7 @@ module.exports =
             let prevVal = await clients.findOne({ email: req.body.currentemail })
             let val = await clients.findOneAndUpdate({ email: req.body.currentemail }, { $set: { email: req.body.newemail, companyname: req.body.newcompanyname } }, { $new: true })
             if (val != null) {
-
-
-                var emailTemplateName =
+            var emailTemplateName =
                 {
                     "emailTemplateName": "emailchanging.ejs",
                     "to": req.body.currentemail,
@@ -342,8 +340,6 @@ module.exports =
                     }
                 }
                 let emailLog = await emailSending.sendEmailFunc(emailTemplateName)
-                console.log("changeMerchantEmail OLD", emailLog)
-
                 var emailTemplateName =
                 {
                     "emailTemplateName": "emailchanging.ejs",
@@ -357,7 +353,6 @@ module.exports =
                     }
                 }
                 let newemailLog = await emailSending.sendEmailFunc(emailTemplateName)
-                console.log("changeMerchantEmail newemailLog", newemailLog)
                 res.json({ status: 200, message: "Email & Company Changed", data: { "email": req.body.newemail } })
             }
             else {
@@ -1005,7 +1000,7 @@ module.exports =
     },
     async customerstatus(req, res) {
         try {
-            console.log(req.body.email)
+            
             await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "loginstatus": req.body.status, disablestatus : req.body.disablestatus  } }, { $new: true })
                 .then(async (val) => {
                     if (val != null) {

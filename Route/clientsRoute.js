@@ -29,7 +29,6 @@ const qpaymentcontroller            = require('../controllers/esropayment/qpayme
 // router.post('/clientBalance',                        Auth.is_merchant,transcationpoolController.get_Client_Balance);
 // router.post('/update_cron_job',                      clientsController.update_cron_job);
 // // router.post('/gettranscationlist',                clientsController.Get_Transcation_List);
-
 // router.post('/updateClientToken',                    Auth.is_merchant,clientsController.updateClientToken);
 // router.post('/getapikey',                            Auth.is_merchant,clientsController.getapikey);
 // router.post('/generateNewClientAddress',             Auth.is_merchant,clientsController.generateNewClientAddress);
@@ -52,12 +51,12 @@ router.post('/login',                                Auth.verify_Login,clientsCo
 router.post('/verfiyMerchantAuth',                   Auth.verifymerchant,Auth.verify_MerchantAuth,clientsController.Verfiy_Google_Auth);
 router.post('/getclientkey',                         Auth.verifymerchant,Auth.verify_getclientkey,clientsController.getclientkey);
 router.post('/forgotPassword',                       Auth.verify_forgotPassword,clientsController.forgotPassword);
-
 router.post('/tokenAndUpdatePassword',               Auth.verify_checkTheTokenAndUpdate,clientsController.checkTheTokenAndUpdatePassword);
 router.post('/resetPassword',                        Auth.is_merchant, Auth.verify_ResetPassword, clientsController.ResetPassword);
 router.post('/updateMerchantProfileImage',           Auth.is_merchant,Auth.verify_updateMerchantProfileImage, clientsController.updateMerchantProfileImage);
 
 "============================ Withdraw ==============================="
+
 router.post('/withdraw',                             Auth.is_merchant,Auth.verify_withdraw,withdrawController.save_withdraw);
 router.post('/clientWihdrawLogs',                    Auth.is_merchant,withdrawController.get_client_wihdraw);
 router.post('/clientTotalWihdraw',                   Auth.is_merchant,withdrawController.get_client_wihdraw_total);
@@ -73,89 +72,69 @@ router.post('/webHookLog',                           Auth.is_merchant,kycwebhook
 // router.post('/resetMerchantTwoFa',                Auth.is_merchant,clientsController.reset_merchant_two_fa);
 // router.post('/getTranscationData',                Auth.is_merchant,hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             Auth.is_merchant,transcationpoolController.get_Trans_by_txId);
-
 router.post('/transactionFastDetails',               Auth.fastpay_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 router.post('/transactionPaylinkDetails',            Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
-
-
-
-
-
-
 "=============MerchantStore==========================================="
-
-router.post('/createMerchantStore',                         Auth.is_merchant,Auth.has_Pos_Access,Auth.verify_createMerchantStore,merchantstoreController.createMerchantStore);
-router.post('/merchantstore',                               Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.MerchantStore);
-router.post('/merchantStoreProfileUpdate',                  Auth.is_merchant,Auth.has_Pos_Access,Auth.verify_updateMerchantStoreProfile,merchantstoreController.updateMerchantStoreProfile);
-router.post('/changemerchantstore',                         Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.changeMerchantStore);
-router.post('/regsiterStoreDevices',                        Auth.store_have_access,merchantStoreDeviceController.regsiterStoreDevices);
-router.post('/verifydeviceOTP',                             Auth.store_have_access,merchantStoreDeviceController.verifyDeviceOTP);
-router.post('/getAllStoreDevices',                          Auth.store_have_access,merchantStoreDeviceController.getAllStoreDevice);
-router.post('/getAllStoreDeviceForMerchantAdmin',           Auth.is_merchant,merchantStoreDeviceController.getAllStoreDeviceForAdmin);
-router.post('/disableordeletedevices',                      Auth.store_have_access,merchantStoreDeviceController.disableordelete);
-router.post('/posGetTransByStorekey',                       Auth.store_have_access,posTransactionPoolController.getTranscationDetailsByStoreID);
-router.post('/getallclientstoredevices',                    Auth.is_merchant,merchantStoreDeviceController.getAllClientStoreDevices);
-
-
+router.post('/createMerchantStore',                  Auth.is_merchant,Auth.has_Pos_Access,Auth.verify_createMerchantStore,merchantstoreController.createMerchantStore);
+router.post('/merchantstore',                        Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.MerchantStore);
+router.post('/merchantStoreProfileUpdate',           Auth.is_merchant,Auth.has_Pos_Access,Auth.verify_updateMerchantStoreProfile,merchantstoreController.updateMerchantStoreProfile);
+router.post('/changemerchantstore',                  Auth.is_merchant,Auth.has_Pos_Access,merchantstoreController.changeMerchantStore);
+router.post('/regsiterStoreDevices',                 Auth.store_have_access,merchantStoreDeviceController.regsiterStoreDevices);
+router.post('/verifydeviceOTP',                      Auth.store_have_access,merchantStoreDeviceController.verifyDeviceOTP);
+router.post('/getAllStoreDevices',                   Auth.store_have_access,merchantStoreDeviceController.getAllStoreDevice);
+router.post('/getAllStoreDeviceForMerchantAdmin',    Auth.is_merchant,merchantStoreDeviceController.getAllStoreDeviceForAdmin);
+router.post('/disableordeletedevices',               Auth.store_have_access,merchantStoreDeviceController.disableordelete);
+router.post('/posGetTransByStorekey',                Auth.store_have_access,posTransactionPoolController.getTranscationDetailsByStoreID);
+router.post('/getallclientstoredevices',             Auth.is_merchant,merchantStoreDeviceController.getAllClientStoreDevices);
 "=============Pos Merchant Wallet==========================================="
-
-router.post('/assignPosMerchantWallet',                     Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
-router.post('/shopTransList',                               Auth.check_Store_Device_Access,posTransactionPoolController.getShopTransList);
-router.get('/posallCurrency',                               Auth.check_Store_Device_Access,CurrencyController.allCurrency);
-router.post('/pospriceConversition',                        Auth.check_Store_Device_Access,CurrencyController.priceConversition);
-router.post('/posallNetworks',                              Auth.check_Store_Device_Access,networkController.allNetworkForClient);
-router.post('/posGetTransByDeviceID',                       Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
-
+router.post('/assignPosMerchantWallet',              Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
+router.post('/shopTransList',                        Auth.check_Store_Device_Access,posTransactionPoolController.getShopTransList);
+router.get('/posallCurrency',                        Auth.check_Store_Device_Access,CurrencyController.allCurrency);
+router.post('/pospriceConversition',                 Auth.check_Store_Device_Access,CurrencyController.priceConversitionPosChanges);
+router.post('/posallNetworks',                       Auth.check_Store_Device_Access,networkController.allNetworkForPOSClient);
+router.post('/posGetTransByDeviceID',                Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
 "============================ Currency Master ==============================="
-
-router.get('/allCurrency',                                      CurrencyController.allCurrency);
-router.post('/priceConversition',                               CurrencyController.priceConversition);
-
+router.get('/allCurrency',                           CurrencyController.allCurrency);
+router.post('/priceConversition',                    CurrencyController.priceConversition);
 "============================ NETWORK Master ==============================="
-
-router.post('/allNetworks',                                     Auth.is_merchant,networkController.allNetworkForClient);
-
+router.post('/allNetworks',                          Auth.is_merchant,networkController.allNetworkForClient);
 "============================ Category Master ==============================="
-
-router.post('/createClientCategory',                            Auth.is_merchant,merchantcategory.createClientCategory);
-router.get('/allcategory',                                      Auth.is_merchant,categoryController.allcategory);
-router.get('/getClientCategory',                                Auth.is_merchant,merchantcategory.getClientCategory);
-router.post('/cancelClientRequest',                             Auth.is_merchant,merchantcategory.cancelClientRequest);
-
+router.post('/createClientCategory',                 Auth.is_merchant,merchantcategory.createClientCategory);
+router.get('/allcategory',                           Auth.is_merchant,categoryController.allcategory);
+router.get('/getClientCategory',                     Auth.is_merchant,merchantcategory.getClientCategory);
+router.post('/cancelClientRequest',                  Auth.is_merchant,merchantcategory.cancelClientRequest);
 "============================ WEB PLUGIN ==============================="
-
-router.post('/assignMerchantWallet',                            Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
-router.post('/pluginallNetworks',                               Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
-router.post('/pluginallCurrency',                               Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
-router.post('/pluginpriceConversition',                         Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversition);
-
+router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
+router.post('/pluginallNetworks',                    Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
+router.post('/pluginallCurrency',                    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
+router.post('/pluginpriceConversition',              Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
 "============================ Withdraw  ==============================="
-
-
-router.post('/merchantBalance',                                     Auth.is_merchant,withdrawController.merchantBalance);
-router.post('/merchantWithdrawBalance',                             Auth.is_merchant,withdrawController.withdrawBalance);
-
-
+router.post('/merchantBalance',                      Auth.is_merchant,withdrawController.merchantBalance);
+router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 "============================ perfered Network Controller  ==============================="
-
-router.post('/createPerferedNetwork',                               Auth.is_merchant,perferedNetworkController.create_perfered_Network);
-router.post('/getPerferedNetwork',                                  Auth.is_merchant,perferedNetworkController.get_perfered_Network);
-
+router.post('/createPerferedNetwork',                Auth.is_merchant,perferedNetworkController.create_perfered_Network);
+router.post('/getPerferedNetwork',                   Auth.is_merchant,perferedNetworkController.get_perfered_Network);
 "============================ HOSTRED PAYMENT  ==============================="
-
-router.post('/createHostePayment',                                  Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
-router.post('/ipntesting',                                          PaymentHostedController.IPN_Testing);
+router.post('/createHostePayment',                   Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
+router.post('/ipntesting',                           PaymentHostedController.IPN_Testing);
 
 "============================ Common Controller  ==============================="
+router.post('/getTransStatus',                       Auth.checkaccess,commonController.getTransStatus);
+router.get('/getalltranscationofmerchant',           Auth.is_merchant,commonController.getAllTranscationOfMerchant);
 
-router.post('/getTransStatus',                                        Auth.checkaccess,commonController.getTransStatus);
 
-router.get('/getalltranscationofmerchant',                            Auth.is_merchant,commonController.getAllTranscationOfMerchant);
-
+"============================ Assign Top UP Merchant Wallet  ==============================="
+router.post('/assigntopupMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWalletForTopUP);
+router.post('/pluginallNetworks',                         Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
+router.post('/getTranscationDataofTopup',                 transcationpoolController.getTranscationDataofTopup);
+router.post('/canceltopup',                               transcationpoolController.cancelpaymentLink);
 
 "============================IPN Controller==============================="
-router.post('/createIPNLink', Auth.is_merchant,ipnController.create_IPN_Link);
-router.post('/getIPNLink', Auth.is_merchant,ipnController.get_IPN_Link);
+router.post('/createIPNLink',                        Auth.is_merchant,ipnController.create_IPN_Link);
+router.post('/getIPNLink',                           Auth.is_merchant,ipnController.get_IPN_Link);
+
+
+
 
 // "============================Create Quick Payment==============================="
 // router.post('/create_quick_payment',            qpaymentcontroller.create_quick_payment);

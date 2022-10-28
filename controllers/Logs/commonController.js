@@ -394,6 +394,34 @@ module.exports =
     },
     async getAllTranscationOfMerchant(req, res) {
         try {
+
+            let filter = {}
+            let index = -1
+            let type = ""
+            let transtype = ["POS","Website","Paylink"]
+
+            if(Object.keys(req.body).indexOf("fromdate")!= -1){
+                var  fromdate   = req.body.fromdate
+                var  fromdated  = new Date (fromdate)
+                filter["createdAt"] =    { $gte: fromdated }  
+            }
+
+            if(Object.keys(req.body).indexOf("todate") != -1){
+                var  fromdate = Object.keys(req.body).indexOf("fromdate") != -1 ? req.body.fromdate : null
+                var  todate         = req.body.todate
+                var  todateed       = new Date (todate)
+                todateed.setDate(todateed.getDate() + 1);           
+                
+                var inputtodateed = new Date(todateed.toISOString());
+                var  fromdated      = new Date (fromdate)
+                var inputfromdated = new Date(fromdated.toISOString());
+                let dateRange       = fromdate != null ? { $gte:inputfromdated , $lte:inputtodateed}   : { $lte: inputtodateed }  
+                filter["createdAt"] = dateRange 
+            }
+            if(Object.keys(req.body).indexOf("clientapikey") != -1){
+                filter["api_key"] = req.body.clientapikey 
+            }
+          
             let transactionPoolData = await transactionPool.aggregate([
                 {
                     $lookup: {
@@ -435,7 +463,6 @@ module.exports =
                         "clientDetails.password": 0,
                         "clientDetails.authtoken": 0,
                         "clientDetails.kycLink": 0,
-                        
                         "poolwalletDetails._id": 0,
                         "poolwalletDetails.status": 0,
                         "poolwalletDetails.__v": 0,

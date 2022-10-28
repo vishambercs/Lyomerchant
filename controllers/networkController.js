@@ -4,6 +4,9 @@ const feedWallets           = require('../Models/feedWallets');
 const hotWallets            = require('../Models/hotWallets');
 var   mongoose              = require('mongoose');
 const poolWallet            = require('../Models/poolWallet');
+const clients               = require('../Models/clients');
+const merchantstores        = require('../Models/merchantstore');
+
 const Utility               = require('../common/Utility');
 const feedWalletController  = require('../controllers/Masters/feedWalletController');
 const perferedNetwork = require('../Models/perferedNetwork');
@@ -262,15 +265,14 @@ module.exports =
     async updateprefixandimage(req, res) {
         try {
 
-
-
             await Network.updateOne({ 'id': req.body.id },
                 {
                     $set:
                     {
                         icon: req.body.icon,
                     }
-                }).then(async (val) => {
+                }).then(async (val) => 
+                {
                     if (val != null) {
                         const NetworkDetails = await Network.find({ 'id': req.body.id })
                         res.json({ status: 200, message: "Successfully", data: NetworkDetails })
@@ -358,6 +360,36 @@ module.exports =
                     res.json({ status: 400, data: {}, message: error })
             })
 
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async allNetworkForPOSClient(req, res) {
+        try 
+        {
+            let token = req.headers.authorization;
+            let merchantstore  = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
+          
+            let networksDetails = await perferedNetwork.aggregate([
+                { $match    :   { clientapikey: merchantstore.clientapikey, status : 1  }},
+                { $lookup   :   { from: "networks", localField: "networkid", foreignField: "id", as: "networkDetails" } },
+                {
+                    "$project":
+                    {
+                        "networkDetails.id"         : 1, 
+                        "networkDetails.currencyid" : 1, 
+                        "networkDetails.coin"       : 1, 
+                        "networkDetails.cointype"   : 1, 
+                        "networkDetails.libarayType": 1, 
+                        "networkDetails.icon"       : 1, 
+                        "networkDetails.network"    : 1, 
+                    }
+                }
+
+            ])
+            res.json({ status: 200, message: "get", data: networksDetails })
         }
         catch (error) {
             console.log(error)

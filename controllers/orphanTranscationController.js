@@ -52,10 +52,11 @@ module.exports =
                         "clientDetails.hash": 0,
                         "clientDetails.emailstatus": 0,
                         "clientDetails.loginstatus": 0,
+                        "clientDetails.authtoken": 0,
+                        "clientDetails.password": 0,
                         "clientDetails.emailtoken": 0,
                         "clientDetails.status": 0,
                         "clientDetails.two_fa": 0,
-                        "clientDetails.password": 0,
                         "clientDetails.kycLink": 0,
                         "poolwalletDetails._id": 0,
                         "poolwalletDetails.status": 0,
@@ -280,8 +281,8 @@ module.exports =
             let network                =  await networks.findOne({ id:poolwl.network_id })
             let balnace                =  await transferUtility.CheckBalanceOfAddress(network.nodeUrl,network.libarayType,poolwl.address,network.contractAddress,poolwl.privateKey,)
             let response               =  balnace.data
-            response["coin"]           = network.coin
-            response["network"]        = network.network
+            response["coin"]           =  network.coin
+            response["network"]        =  network.network
             let statusresponse         =  balnace.status == 200 ? 200 : 400
             let messageresponse        =  balnace.status == 200 ?  "Success" :  "Error"
             res.json({ status: statusresponse, data: response, message: messageresponse })

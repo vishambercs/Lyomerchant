@@ -15,6 +15,8 @@ const clients = require('../Models/clients');
 require("dotenv").config()
 module.exports =
 {
+
+    
     async Verfiy_Merchant(req, res, next) {
         try {
             let api_key = req.headers.authorization;
@@ -124,8 +126,9 @@ module.exports =
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await admins.findOne({ admin_api_key: authorization });
-            if (user != null) {
+            let user = await admins.findOne({ admin_api_key: authorization ,token :token,  status :true });
+            if (user != null) 
+            {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
                 next()
@@ -256,20 +259,21 @@ module.exports =
     },
     async check_Store_Device_Access(req, res, next) {
         try {
-            let token = req.headers.authorization;
-            let devicetoken = req.headers.devicetoken;
-            let merchantstore = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
-            let storeDevice = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-            let client      = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
-
-            if (merchantstore != null && storeDevice != null && client == null) {
+            let token           = req.headers.authorization;
+            let devicetoken     = req.headers.devicetoken;
+            let merchantstore   = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
+            let storeDevice     = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
+            let client          = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+            if (merchantstore != null && storeDevice != null && client == null) 
+            {
                 next()
             }
             else if (client != null) 
             {
                 return res.json({ status: 400, data: {}, message: "Your Account is disabled. Please Contact Admin" })
             }
-            else {
+            else 
+            {
                 return   res.json({ status: 400, data: {}, message: "This device could not identify. Please regsiter this device" })
             }
         }
@@ -822,6 +826,86 @@ module.exports =
                             data: err
                         });
                 } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
+    async verify_signup_admin_api(req, res, next) {
+        try {
+            const validationRule = 
+            { 
+                "email"         : "required|email", 
+                "password"      : "required|string|strict", 
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_admin_Login(req, res, next) {
+        try {
+            const validationRule = 
+            { 
+                "email"         : "required|email", 
+                "password"      : "required|string", 
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200)
+                        .send({
+                            status: 400,
+                            success: false,
+                            message: 'Validation failed',
+                            data: err
+                        });
+                } else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_Verfiy_Google_Auth(req, res, next) {
+        try {
+            const validationRule = 
+            { 
+                "email"         : "required|email", 
+                "code"          : "required|string", 
+            };
+            let authorization   = req.headers.authorization;
+            let user            = await admins.findOne({ admin_api_key: authorization, status : true  });
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) 
+                {
+                res.status(200).send({status: 400,success: false,message: 'Validation failed',data: err});
+                } 
+                else if(user == null){
+                res.status(200).send({status: 400,message: "Invalid User",data: {}});
+                }
+                else {
                     next();
                 }
             })
