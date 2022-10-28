@@ -355,8 +355,6 @@ module.exports =
                                 "clientsDetails.loginstatus": 0,
                                 "clientsDetails.emailtoken": 0,
                                 "clientsDetails.kycLink": 0,
-                                
-
                             }
                         }
                     ]).then(async (data) => {

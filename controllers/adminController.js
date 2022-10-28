@@ -24,14 +24,15 @@ const jwt = require('jsonwebtoken');
 module.exports =
 {
     async signup_admin_api(req, res) {
-        var admin_api_key = crypto.randomBytes(20).toString('hex');
-        var email = req.body.email
-        var password = req.body.password
-        var hash = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
-        const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+        var admin_api_key   = crypto.randomBytes(20).toString('hex');
+        var email           = req.body.email
+        var password        = req.body.password
+        var hash            = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
+        const salt          = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(password, salt);
-        let secret = authenticator.generateSecret()
-        var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+        let secret          = authenticator.generateSecret()
+        
+        var otp             = otpGenerator.generate(6, { upperCase: false, specialChars: false });
         if (hash == req.body.hash) {
             QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT_ADMIN, secret)).then(async (url) => {
                 const admin = new admins({
@@ -46,7 +47,7 @@ module.exports =
                 });
                 admin.save().then(async (val) => {
 
-                    res.json({ status: 200, message: "Client Added Successfully", data: val })
+                    res.json({ status: 200, message: "Client Added Successfully", data: { "email": val.email , "id": val.id } })
 
                 }).catch(error => {
                     console.log(error)
@@ -209,13 +210,18 @@ module.exports =
     async reset_two_fa(req, res) {
         try {
             let email = req.body.email
-            let admin = await admins.findOneAndUpdate({ 'email': email }, { $set: { two_fa: false } }, { $new: true })
-            if (admin == null) {
+            let secret          = authenticator.generateSecret()
+            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT_ADMIN, secret)).then(async (url) => {
+            let admin = await admins.findOneAndUpdate({ 'email': email }, { $set: { two_fa: false, secret: secret, qrcode: url } }, { $new: true })
+            if (admin == null) 
+            {
                 res.json({ status: 400, data: {}, message: "Invalid User" })
             }
-            else {
-                res.json({ status: 200, data: { "email": email, "qrcode": admin.qrcode }, message: "Password Update Successfully" })
+            else 
+            {
+                res.json({ status: 200, data: { "email": email, "secret": secret, "qrcode": url  }, message: "Password Update Successfully" })
             }
+        })
         }
         catch (error) {
             res.json({ status: 400, data: {}, message: "Verification Failed" })

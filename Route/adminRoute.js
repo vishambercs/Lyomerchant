@@ -57,25 +57,25 @@ const hotwallettranslogsController  = require('../controllers/hotwallettranslogs
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 const commonController = require('../controllers/Logs/commonController');
 
-router.post('/signupadmin',                                    adminController.signup_admin_api);
-router.post('/adminlogin',                                     adminController.Login);
-router.post('/admingoogleauth',                                adminController.Verfiy_Google_Auth);
+// router.post('/sendemail',                                      Auth.is_admin,adminController.sendEmail);
+// router.post('/merchantImpersonation',                          Auth.is_admin,clientsController.merchantImpersonation);
+
+router.post('/signupadmin',                                    Auth.is_admin,Auth.verify_signup_admin_api,adminController.signup_admin_api);
+router.post('/adminlogin',                                     Auth.verify_admin_Login,adminController.Login);
+router.post('/admingoogleauth',                                Auth.verify_Verfiy_Google_Auth,adminController.Verfiy_Google_Auth);
 router.post('/customerstatus',                                 Auth.is_admin,clientsController.customerstatus);
 router.post('/getTransForAdmin',                               Auth.is_admin,transcationpoolController.getTransForAdmin);
 router.post('/get_admin_withdraw',                             Auth.is_admin, withdrawController.get_admin_wihdraw);
 router.post('/allAdmin',                                       Auth.is_admin,adminController.allAdmin);
-router.post('/sendemail',                                      Auth.is_admin,adminController.sendEmail);
 router.post('/transcationListByNetworkID',                     Auth.is_admin,transcationpoolController.get_Trans_by_Network_ID_For_Admin);
 router.post('/forgetThePassword',                              adminController.forgetThePassword);
-router.post('/VerfiyTheCode',                                  Auth.is_admin,adminController.VerfiyTheCode);
-router.post('/updatePassword',                                 adminController.updateThePassword);
+router.post('/VerfiyTheCode',                                  Auth.verify_Verfiy_Google_Auth,adminController.VerfiyTheCode);
+router.post('/updatePassword',                                 Auth.verify_admin_Login,adminController.updateThePassword);
 router.post('/resettwofa',                                     Auth.is_admin,adminController.reset_two_fa);
 router.post('/resetMerchantTwoFa',                             Auth.is_admin,clientsController.reset_merchant_two_fa);
 router.post('/changeMerchantEmail',                            Auth.is_admin,clientsController.changeMerchantEmail);
-router.post('/merchantImpersonation',                          Auth.is_admin,clientsController.merchantImpersonation);
 router.post('/changeClientLoginStatus',                        Auth.is_admin,Auth.verfiyAdminToken,clientsController.changeClientLoginStatus);
 router.post('/changeAdminsLoginStatus',                        Auth.is_admin,Auth.verfiyAdminToken,adminController.changeAdminsLoginStatus);
-router.post('/createMerchantStoreByAdmin',                     Auth.is_admin,Auth.verfiyAdminToken,merchantstoreController.createMerchantStoreByAdmin);
 router.post('/createMerchantStoreByAdmin',                     Auth.is_admin,Auth.verfiyAdminToken,merchantstoreController.createMerchantStoreByAdmin);
 router.post('/getapikey',                                      Auth.verfiyAdminToken,adminController.getapikey);
 router.post('/approvekyc',                                     Auth.is_admin,Auth.verfiyAdminToken, clientsController.kyc_approved);
@@ -105,9 +105,10 @@ router.post('/transferbtcoin',                                  Auth.is_admin,  
 router.post('/checktransstatus',                                Auth.is_admin,  feedWalletController.checktransstatus);
 router.post('/createfw',                                        Auth.is_admin,feedWalletController.createFeedingwalletby);
 router.post('/checkbalance',                                    Auth.is_admin,feedWalletController.checkbalance);
-
 router.post('/transferbtcoin',                                feedWalletController.transferbtcoin);
+
 "============================ Category ==============================="
+
 router.post('/approvecategoryRequest',                         Auth.is_admin,merchantcategory.approveClientRequest);
 router.post('/savecategory',                                   Auth.is_admin,categoryController.savecategory);
 router.get('/allcategory',                                     Auth.is_admin,categoryController.allcategory);
