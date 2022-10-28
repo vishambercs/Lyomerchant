@@ -182,6 +182,7 @@ async function getBalance(transdata, transData) {
             let transactionpool             = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
             let get_transcation_response    = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
             let trans_data                  = await getTranscationDataForClient(addressObject.id)
+            console.log("trans_data",       trans_data)
             let logData                     = { "transcationDetails": trans_data[0] }
             
             if (amountstatus == 1 || amountstatus == 3) 
@@ -194,16 +195,16 @@ async function getBalance(transdata, transData) {
                 let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
                 var emailTemplateName = 
                 { 
-                "emailTemplateName": "successtrans.ejs", 
-                "to": client.email, 
-                "subject": "LYOMERCHANT Success Transaction", 
-                "templateData": {"status": "Success" ,
-                "invoicenumber" : "",
-                "transid": addressObject.id , 
-                "storename" :"",
-                "network" :addressObject.networkDetails[0].network ,
-                "coin" :addressObject.networkDetails[0].coin,
-                "amount" :addressObject.amount 
+                "emailTemplateName" : "successtrans.ejs", 
+                "to"                : client.email, 
+                "subject"           : "LYOMERCHANT Success Transaction", 
+                "templateData"      : {"status": "Success" ,
+                "invoicenumber"     : "",
+                "transid"           :   addressObject.id , 
+                "storename"         :   "",
+                "network"           :   addressObject.networkDetails[0].network ,
+                "coin"              :   addressObject.networkDetails[0].coin,
+                "amount"            :   addressObject.amount 
                 }}
                 let emailLog = await emailSending.emailLogs(addressObject.id,emailTemplateName)
                 console.log("email_response success",emailLog)
