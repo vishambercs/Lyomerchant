@@ -179,7 +179,7 @@ module.exports =
         }
         catch (error) 
         {
-            console.log(error)
+            console.log("priceConversitionPosChanges",error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },

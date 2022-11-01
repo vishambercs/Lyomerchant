@@ -325,16 +325,15 @@ module.exports =
             return null
         }
     },
-
-    async quickpaymentWebScokect(request) {
+    async topupWebScokect(request) {
         try {
             let uniqueKey           =  crypto.randomBytes(20).toString('hex')
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
-            console.log("paymentLinkTranscationWebScokect =====================================",queryvariable);
+            console.log("topupWebScokect =====================================",queryvariable);
             var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData  = await commonFunction.get_Transcation_quickpayment_Data(queryvariable.transkey)
-            console.log("paymentLinkTranscationWebScokect =====================================",getTranscationData);
+            console.log("topupWebScokect =====================================",getTranscationData);
             if(getTranscationData.length > 0)
             {
             const connection        = request.accept(null, request.origin);

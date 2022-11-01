@@ -106,7 +106,7 @@ module.exports =
             if (duedate <= currentdate) {
                 return res.json({ status: 400, data: {}, message: "Invalid Date" })
             }
-            console.log(req.body.items)
+          
             const sum = (req.body.items != null && req.body.items != "") ? req.body.items.reduce((accumulator, object) => {
                 return accumulator + object.amount;
             }, 0) : req.body.totalAmount;
@@ -152,7 +152,7 @@ module.exports =
         }
         catch (error) {
             console.log("paymentHostedController createHostePayment", error)
-            return { status: 400, data: {}, message: error.message }
+            return { status: 400, data: {}, message: "Error" }
         }
     },
 
@@ -195,7 +195,7 @@ module.exports =
 
         }
         catch (error) {
-            console.log("paymentHostedController createHostePayment", error)
+            console.log("paymentHostedController IPN_Testing", error)
           
             res.json({ status: 400, data: {}, message: error.message })
         }

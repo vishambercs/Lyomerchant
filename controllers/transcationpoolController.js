@@ -639,11 +639,29 @@ module.exports =
                             "poolWallet.id": 0,
                             "poolWallet._id": 0,
                             "poolWallet.status": 0,                            
-                            "networkDetails.__v": 0,
-                            "networkDetails.nodeUrl": 0,
-                            "networkDetails.created_by": 0,
-                            "networkDetails.createdAt": 0,
-                            "networkDetails.updatedAt": 0,
+                            "networkDetails.__v"                    : 0,
+                            "networkDetails.nodeUrl"               : 0,
+                            "networkDetails.withdrawflag"          : 0,
+                            "networkDetails.withdrawfee"           : 0,
+                            "networkDetails.fixedfee"              : 0,
+                            "networkDetails.native_currency_id"    : 0,
+                            "networkDetails.kyt_network_id"        : 0,
+                            "networkDetails.created_by"            : 0,
+                            "networkDetails.libarayType"           : 0,
+                            "networkDetails.contractAddress"           : 0,
+                            "networkDetails.contractABI"               : 0,
+                            "networkDetails.apiKey"                    : 0,
+                            "networkDetails.transcationurl"            : 0,
+                            "networkDetails.scanurl"                   : 0,
+                            "networkDetails.status"                    : 0,
+                            "networkDetails.gaspriceurl"               : 0,
+                            "networkDetails.latest_block_number"       : 0,
+                            "networkDetails.processingfee"             : 0,
+                            "networkDetails.transferlimit"             : 0,
+                            "networkDetails.deleted_by"                : 0,
+                            "networkDetails.updatedAt"                 : 0,
+                            "networkDetails.updatedAt"                 : 0,
+                            "networkDetails.hotwallettranscationstatus": 0,
                             "networkDetails._id": 0
                         }
                     }
@@ -668,7 +686,7 @@ module.exports =
                 let currentDate         = parseInt((currentDateTemp / 1000).toFixed());
                 let account             = await poolwalletController.getPoolWalletID(networkType) 
                 const transactionPool = new transactionPools({
-                    id: crypto.randomBytes(20).toString('hex'),
+                    id              : crypto.randomBytes(20).toString('hex'),
                     api_key         : req.headers.authorization,
                     poolwalletID    : account.id,
                     amount          : req.body.amount,
