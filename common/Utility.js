@@ -347,7 +347,7 @@ module.exports =
             {
                 Constant.topupTransList[index]["connection"] = connection
             }
-            Constant.interval  = setInterval(commonFunction.get_data_of_topup_transcation, 20000);
+            Constant.interval  = setInterval(commonFunction.get_data_of_topup_transcation, 10000);
             connection.on('message', function (message) {
             if(index == -1)
             {

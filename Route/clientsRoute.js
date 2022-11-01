@@ -137,7 +137,7 @@ router.get('/getalltranscationofmerchant',           Auth.is_merchant,commonCont
 
 
 "============================ Assign Top up Merchant Wallet  ==============================="
-router.post('/assigntopupMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWalletForTopUP);
+// router.post('/assigntopupMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWalletForTopUP);
 
 // router.post('/getTranscationDataofTopup',transcationpoolController.getTranscationDataofTopup);
 // router.post('/canceltopup',transcationpoolController.cancelpaymentLink);
@@ -147,7 +147,7 @@ router.post('/createIPNLink',                        Auth.is_merchant,ipnControl
 router.post('/getIPNLink',                           Auth.is_merchant,ipnController.get_IPN_Link);
 
 "============================Create Top UP==============================="
-router.post('/create_top_up',               topupcontroller.create_top_payment);
+router.post('/assigntopupMerchantWallet',               topupcontroller.create_top_payment);
 router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);

@@ -25,7 +25,8 @@ const transstatus = [
   { "id": 1, "title": "Completed" },
   { "id": 2, "title": "Partial" },
   { "id": 3, "title": "Completed" },
-  { "id": 4, "title": "Expired" }
+  { "id": 4, "title": "Expired" },
+  { "id": 5, "title": "Canceled" }
 ]
 const abi =
   [

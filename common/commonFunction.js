@@ -184,7 +184,6 @@ async function getBalance(transdata, transData) {
             let transactionpool             = await transactionPools.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
             let get_transcation_response    = await getTranscationList(addressObject.poolWallet[0].address, addressObject.id, addressObject.networkDetails[0].id)
             let trans_data                  = await getTranscationDataForClient(addressObject.id)
-            console.log("trans_data",       trans_data)
             let logData                     = { "transcationDetails": trans_data[0] }
             
             if (amountstatus == 1 || amountstatus == 3) 
@@ -918,12 +917,14 @@ module.exports =
 
     async get_data_of_topup_transcation() 
     {
-        if (Constant.topupIndex < Constant.topupIndex.length) 
+        if (Constant.topupIndex < Constant.topupTransList.length) 
         {
             let transData       = Constant.topupTransList[Constant.topupIndex]
             let transcationData = await topupUtility.get_Transcation_topup(transData.transkey)
             let balance_data    = await topupUtility.getTrasnsBalance(transcationData)
+            console.log("balance_data",balance_data)
             let balanceResponse = JSON.parse(balance_data)
+            console.log("balanceResponse",balanceResponse)
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
                 transData.connection.close(1000)

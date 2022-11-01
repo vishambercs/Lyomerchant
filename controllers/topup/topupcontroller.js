@@ -20,7 +20,7 @@ module.exports =
                 id: mongoose.Types.ObjectId(),
                 api_key: req.headers.authorization,
                 poolwalletID: account.id,
-                amount: req.body.amount,
+                amount: 0,
                 currency: req.body.currency,
                 callbackURL: req.body.callbackurl,
                 apiredirectURL: req.body.apiredirecturl,
@@ -46,10 +46,9 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async get_top_payment_data(req, res) {
         try {
-            let transactionPool = await topup.findOne({ id: req.body.id })
+            let transactionPool = await topup.findOne({ id: req.body.id , status : 0 })
             console.log("transactionPool",transactionPool)
             if (transactionPool == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
@@ -84,7 +83,7 @@ module.exports =
     },
     async cancelpaymentLink(req, res) {
         try {
-            let tranPool     = await topup.findOne({id  : req.body.id})
+            let tranPool     = await topup.findOne({id  : req.body.id })
             if(tranPool == null)
             {
                return  res.json({ status: 400, message: "Invalid Trans ID", data: {} })
@@ -103,9 +102,7 @@ module.exports =
             console.log(error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
-    },
-
-   
+    },   
 }
 
 
