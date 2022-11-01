@@ -15,8 +15,9 @@ module.exports =
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             let account = await poolwalletController.getPoolWalletID(networkType)
+
             const transactionPool = new topup({
-                id: crypto.randomBytes(20).toString('hex'),
+                id: mongoose.Types.ObjectId(),
                 api_key: req.headers.authorization,
                 poolwalletID: account.id,
                 amount: req.body.amount,
@@ -49,31 +50,54 @@ module.exports =
     async get_top_payment_data(req, res) {
         try {
             let transactionPool = await topup.findOne({ id: req.body.id })
-
+            console.log("transactionPool",transactionPool)
             if (transactionPool == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
             let transWallet = await poolWallet.findOne({ id: transactionPool.poolwalletID })
+            console.log("transWallet",transWallet)
             if (transWallet == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
             let network = await networks.findOne({ id: transWallet.network_id })
             let data =
             {
-                transactionID: transactionPool.id,
-                address: transWallet.address,
-                walletValidity: transactionPool.walletValidity,
-                amount: transactionPool.amount,
-                key: transactionPool.api_key,
-                apiredirecturl: transactionPool.apiredirectURL,
-                errorurl: transactionPool.errorurl,
-                orderid: transactionPool.orderid,
-                network: network.network,
-                coin: network.coin
+                transactionID   : transactionPool.id,
+                address         : transWallet.address,
+                walletValidity  : transactionPool.walletValidity,
+                amount          : transactionPool.amount,
+                key             : transactionPool.api_key,
+                apiredirecturl  : transactionPool.apiredirectURL,
+                errorurl        : transactionPool.errorurl,
+                orderid         : transactionPool.orderid,
+                network         : network.network,
+                coin            : network.coin
             }
             res.json({ status: 200, message: "Get The Data", data: data })
 
 
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async cancelpaymentLink(req, res) {
+        try {
+            let tranPool     = await topup.findOne({id  : req.body.id})
+            if(tranPool == null)
+            {
+               return  res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let transactionPool = await topup.findOneAndUpdate({ 'id':tranPool.id  }, { $set: { "status" : 5 , "remarks" : "By Client Canceled" , "canceled_at" : new Date().toString() }} ,{ returnDocument: 'after' })
+            let data = 
+            { 
+                transactionID: transactionPool.id, 
+                orderid     : transactionPool.orderid,
+            }
+            res.json({ status: 200, message: "Get The Data", data: data })
+
+            
         }
         catch (error) {
             console.log(error)

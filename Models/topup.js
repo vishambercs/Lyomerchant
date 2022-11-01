@@ -52,6 +52,12 @@ const topupschema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    canceled_at : 
+    {
+        type: String,
+        required: false,
+    },
+    
     timestamps : 
     {
         type: String,

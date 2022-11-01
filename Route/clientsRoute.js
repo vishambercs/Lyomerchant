@@ -115,6 +115,7 @@ router.post('/pluginallNetworks',                    Auth.Verfiy_Merchant,Auth.c
 router.post('/pluginallCurrency',                    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
 router.post('/pluginpriceConversition',              Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
 
+
 "============================ Withdraw  ==============================="
 
 router.post('/merchantBalance',                      Auth.is_merchant,withdrawController.merchantBalance);
@@ -137,18 +138,19 @@ router.get('/getalltranscationofmerchant',           Auth.is_merchant,commonCont
 
 "============================ Assign Top up Merchant Wallet  ==============================="
 router.post('/assigntopupMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWalletForTopUP);
-router.post('/pluginallNetworks',                         Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
-router.post('/getTranscationDataofTopup',                 transcationpoolController.getTranscationDataofTopup);
-router.post('/canceltopup',                               transcationpoolController.cancelpaymentLink);
 
+// router.post('/getTranscationDataofTopup',transcationpoolController.getTranscationDataofTopup);
+// router.post('/canceltopup',transcationpoolController.cancelpaymentLink);
 
 "============================IPN Controller==============================="
 router.post('/createIPNLink',                        Auth.is_merchant,ipnController.create_IPN_Link);
 router.post('/getIPNLink',                           Auth.is_merchant,ipnController.get_IPN_Link);
 
 "============================Create Top UP==============================="
-router.post('/create_top_up', topupcontroller.create_top_payment);
-router.post('/get_top_payment_data',topupcontroller.get_top_payment_data);
+router.post('/create_top_up',               topupcontroller.create_top_payment);
+router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
+router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
+router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
 
 // router.post('/updateQuickpayment',              topupcontroller.updateQuickpayment);
 // router.post('/getQuickNetwork',                 topupcontroller.allNetworkForClient);

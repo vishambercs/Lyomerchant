@@ -16,6 +16,9 @@ const web_hook_link = "/api/clients/webhook/"
 const posTransList = []
 const paymenlinkTransList = []
 const paymenlinkIndex = 0
+
+const topupTransList = []
+const topupIndex = 0
 const addressBalance = []
 const transstatus = [
   { "id": 0, "title": "Pending" },
@@ -86,6 +89,8 @@ module.exports =
   postransindex: postransindex,
   paymenlinkTransList: paymenlinkTransList,
   paymenlinkIndex: paymenlinkIndex,
-  transstatus: transstatus
+  transstatus: transstatus,
+  topupTransList :topupTransList,
+  topupIndex :topupIndex,
 
 }

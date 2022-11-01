@@ -103,7 +103,7 @@ paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
 
 
 var topupserver = https.createServer({}).listen(process.env.TOP_UP_PORT, () => {
-console.log(`Example app listening at ${process.env.TOP_UP_PORT}   `);
+console.log(`Example app listening at ${process.env.TOP_UP_PORT}`);
 })
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.topupWebScokect)
