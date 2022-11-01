@@ -56,7 +56,7 @@ module.exports =
                     res.json({ status: 200, message: "Please Check Email we send otp", data: { id: val.id, devicetoken: val.devicetoken, deviceid: val.deviceid, devicedata: val.devicedata } })
                 }).catch(error => {
                     console.log(error)
-                    res.json({ status: 400, message: error, data: {} })
+                    res.json({ status: 400, message: "Please Contact Admin", data: {} })
                 })
             }
             else {
@@ -67,7 +67,7 @@ module.exports =
             }
         }
         catch (error) {
-
+            console.log("error",error)
             res.json({ status: 400, data: {}, message: "Please Contact Admin" })
         }
     },
