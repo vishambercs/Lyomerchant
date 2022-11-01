@@ -1,25 +1,15 @@
-const Validator = require('validatorjs');
-const network = require('../Models/network');
-const Models = require("../Models/clients");
-const validator = (body, rules, customMessages, callback) => 
+const Validator         = require('validatorjs');
+const networks           = require('../Models/network');
+const perferedNetwork   = require('../Models/perferedNetwork');
+const Currency          = require('../Models/Currency');
+const Models            = require("../Models/clients");
+
+const validator         = (body, rules, customMessages, callback) => 
 {
     const validation = new Validator(body, rules, customMessages);
     validation.passes(() => callback(null, true));
     validation.fails(() => callback(validation.errors, false));
 };
-
-// Validator.registerAsync('exist', function (value, attribute, req, passes) {
-//     network.findOne({ ["id"]: value })
-//         .then((result) => {
-//             if (result) {
-//                 passes();
-//             }
-//             else {
-//                 passes(false, "Invalid Network ID");
-//                 return;
-//             }
-//         })
-// });
 
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]/;
 Validator.register('strict', value => passwordRegex.test(value),
@@ -60,5 +50,47 @@ Validator.registerAsync('decimal', function(value,  attribute, req, passes) {
     
 });
 
+Validator.registerAsync('networkexist', function(value,  attribute, req, passes) 
+{
+    let msg             =  `Invalid Network`
+    let pernetwork      = perferedNetwork.findOne({ "networkid" : value, "status" : 1 })
+    let network         = networks.findOne({ "id" : value, "status" : 1 })
+    if(network == null) {
+        passes(false, msg); // return false if value exists
+        return;
+    }
+    else if(pernetwork == null)
+    {
+        passes(false, msg); // return false if value exists
+        return;
+    }
+    else 
+    {
+        passes();
+    }
+    //  .then((result) => {
+    //     if(result == null )
+    //     {
+    //         passes(false, msg); // return false if value exists
+    //         return;
+    //     }
+    //     passes();
+    // })
+    
+});
+
+Validator.registerAsync('currencyexist', function(value,  attribute, req, passes) 
+{
+    let msg =  `Invalid Currency`
+    Currency.findOne({ "id" : value, "status" : 1 }).then((result) => {
+        if(result == null )
+        {
+            passes(false, msg); // return false if value exists
+            return;
+        }
+        passes();
+    })
+    
+});
 
 module.exports = validator;
