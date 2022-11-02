@@ -9,7 +9,7 @@ const transcationLog    = require('../Models/transcationLog');
 const transactionPools  = require('../Models/transactionPool');
 const clients           = require('../Models/clients');
 var clientsController   = require('../controllers/clientsController');
-const { constant }      = require('./Constant');
+
 var crypto              = require("crypto");
 const jwt               = require('jsonwebtoken');
 const url               = require('url')
@@ -19,10 +19,27 @@ const commonFunction    = require('./commonFunction');
 const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
 
-const transporter       = nodemailer.createTransport({ host: process.env.HOST, port: process.env.PORT, auth: { user: process.env.USER, pass: process.env.PASS, }});
+async function Get_RequestByAxios(URL, parameters, headers) {
+    response = {}
+    await axios.get(URL, {
+        params: parameters,
+        headers: headers
+    }).then(res => {
+        var stringify_response = stringify(res)
+        response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+    })
+        .catch(error => {
+            console.error("Error", error)
+            var stringify_response = stringify(error)
+            response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+        })
+    return response;
+}
+
 var CryptoJS            = require('crypto-js')
 module.exports =
 {
+    Get_RequestByAxios : Get_RequestByAxios,
     async generateKey() {
        let key =  await crypto.randomBytes(20).toString('hex')
        return key ;

@@ -34,10 +34,8 @@ module.exports =
 
             let payLink_data = pyTranPool != null ? await payLink.findOne({ id: pyTranPool.payLinkId}) : null
             let invoice_data = payLink_data != null ? await invoice.findOne({ id: payLink_data.invoice_id}) : null
-
             let networkDetails = poolwallet != null ? await network.findOne({ id: poolwallet.network_id}) : null
-
-            let status = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
+            let status  = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
             status = (status.length == 0 && posTranPool != null) ? Constant.transstatus.filter(index => index.id == posTranPool.status) : status
             status = (status.length == 0 && TranPool != null) ? Constant.transstatus.filter(index => index.id == TranPool.status) : status
             status = (status.length == 0 && topup != null) ? Constant.transstatus.filter(index => index.id == topup.status) : status

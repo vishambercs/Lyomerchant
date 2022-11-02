@@ -105,7 +105,7 @@ router.post('/transferbtcoin',                                  Auth.is_admin,  
 router.post('/checktransstatus',                                Auth.is_admin,  feedWalletController.checktransstatus);
 router.post('/createfw',                                        Auth.is_admin,feedWalletController.createFeedingwalletby);
 router.post('/checkbalance',                                    Auth.is_admin,feedWalletController.checkbalance);
-router.post('/transferbtcoin',                                feedWalletController.transferbtcoin);
+// router.post('/transferbtcoin',                                feedWalletController.transferbtcoin);
 
 "============================ Category ==============================="
 

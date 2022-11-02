@@ -25,6 +25,7 @@ const transactionPools = require('../Models/transactionPool');
 const feedWallets = require('../Models/feedWallets');
 const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
+const btchotwallet = require('../Models/btchotwallet');
 const IPNS = require('../Models/IPN');
 const topup = require('../Models/topup');
 const emailSending = require('./emailSending');
@@ -61,7 +62,7 @@ async function get_Transcation_topup(transkey) {
             {
                 "$project":
                 {
-                    "poolWallet.privateKey": 0,
+                   
 
                     "poolWallet._id": 0,
                     "poolWallet.status": 0,
@@ -76,6 +77,41 @@ async function get_Transcation_topup(transkey) {
         ])
     return pooldata
 }
+
+
+async function pricecalculation(coinid,balance) {
+    try {
+        let networks = await network.findOne({ 'id': coinid })
+        let networktitle = networks.currencyid.toLowerCase()
+        let parameters = `ids=${networks.currencyid}&vs_currencies=usd`
+        let COINGECKO_URL = process.env.COINGECKO + parameters
+        response = {}
+        await axios.get(COINGECKO_URL, {
+            params: {},
+            headers: {}
+        }).then(res => {
+            var stringify_response = stringify(res)
+            response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+        })
+            .catch(error => {
+                console.error("Error", error)
+                var stringify_response = stringify(error)
+                response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+            })
+
+        var stringify_response = JSON.parse(response.data)
+        let pricedata = stringify_response.data
+        let pricedatacurrency           = pricedata[networktitle]
+        let price                       = parseFloat(pricedatacurrency["usd"]) * parseFloat(balance)
+        return price;
+    }
+    catch (error) {
+        console.log("pricecalculation", error)
+        return 0;
+
+    }
+}
+
 async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
     let token_balance = 0
     let format_token_balance = 0
@@ -84,19 +120,49 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
     try {
         if (Type == "Web3") {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
-
             if (ContractAddress != "") {
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
                 token_balance = await contract.methods.balanceOf(Address.toLowerCase()).call();
                 let decimals = await contract.methods.decimals().call();
                 format_token_balance = token_balance / (1 * 10 ** decimals)
-
             }
             native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
             native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
+
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
+            return { status: 200, data: balanceData, message: "sucess" }
+        }
+        else if (Type == "btcnetwork") {
+            let COINGECKO_URL = "http://blockchain.info/q/addressbalance/" + Address
+            response = {}
+            await axios.get(COINGECKO_URL, {
+                params: {},
+                headers: {}
+            }).then(res => {
+                var stringify_response = stringify(res)
+                console.log(stringify_response)
+                response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+
+            }).catch(error => {
+                console.error("Error", error)
+                var stringify_response = stringify(error)
+                console.log(stringify_response)
+                response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+
+            })
+            var stringify_response = JSON.parse(response.data)
+            console.log("data", stringify_response.data)
+            let balance_format = parseFloat(stringify_response.data) / 100000000
+            console.log("balance_format", balance_format)
+            let balanceData =
+            {
+                "token_balance": stringify_response.data,
+                "format_token_balance": balance_format,
+                "native_balance": stringify_response.data,
+                "format_native_balance": balance_format
+            }
             return { status: 200, data: balanceData, message: "sucess" }
         }
         else {
@@ -108,7 +174,6 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             let contract = await tronWeb.contract().at(ContractAddress);
             native_balance = await tronWeb.trx.getBalance(Address)
             token_balance = await contract.balanceOf(Address).call();
-
             format_token_balance = tronWeb.toBigNumber(token_balance)
             format_token_balance = tronWeb.toDecimal(format_token_balance)
             format_token_balance = tronWeb.fromSun(format_token_balance)
@@ -118,8 +183,7 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
-        // let balanceData = { "token_balance": 0, "format_token_balance": 0, "native_balance": 0, "format_native_balance": 0 }
-        // return { status: 400, data: balanceData, message: "Error" }
+
     }
     catch (error) {
         console.log(error)
@@ -196,7 +260,7 @@ async function postRequest(URL, parameters, headers) {
         })
         .catch(error => {
             var stringify_response = stringify(error)
-            console.log("==========post-request-error=========", error)
+            // console.log("==========post-request-error=========", error)
             response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
         })
     return response;
@@ -259,29 +323,47 @@ async function getTrasnsBalance(transdata) {
         }
         amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
         const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
-
-        let GasFee = await transUtility.calculateGasFee
-            (
-                addressObject.networkDetails[0].nodeUrl, addressObject.networkDetails[0].libarayType,
-                addressObject.poolWallet[0].address,
-                hotWallet.address,
-                BalanceOfAddress.data.token_balance,
-                addressObject.networkDetails[0].contractAddress
-            )
-
+        let GasFee = ""
+        if (addressObject.networkDetails[0].libarayType != "btcnetwork") {
+            GasFee = await transUtility.calculateGasFee
+                (
+                    addressObject.networkDetails[0].nodeUrl, addressObject.networkDetails[0].libarayType,
+                    addressObject.poolWallet[0].address,
+                    hotWallet.address,
+                    BalanceOfAddress.data.token_balance,
+                    addressObject.networkDetails[0].contractAddress
+                )
+        }
         if (BalanceOfAddress.data.format_token_balance > 0) {
+            let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id,BalanceOfAddress.data.format_token_balance)
+            let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
+            let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
+            let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 1, "amount": BalanceOfAddress.data.format_token_balance } })
+            let trans_data = await getTranscationDataForClient(addressObject.id)
+            let logData = { "transcationDetails": trans_data[0],"paid_in_usd": pricecal }
+            let previouspoolwallet = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
+            let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
+            let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4, balance: totalBalnce } })
+            let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
+            let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance
+            if (addressObject.networkDetails[0].libarayType != "btcnetwork") {
+                let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance, GasFee.data.fee)
+            }
+            else 
+            {
+                let btchxwallet = await btchotwallet.insertMany(
+                    {
+                        id: mongoose.Types.ObjectId(),
+                        transid: addressObject.id,
+                        pollwalletid: addressObject.poolWallet[0].id,
+                        networkid: addressObject.poolWallet[0].network_id,
+                        status: 0,
+                        created_by: new Date().toString(),
+                    }
+                )
+               
+            }
 
-            let walletbalance           = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
-            let ClientWallet            = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
-            let transactionpool         = await topup.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 1, "amount" : BalanceOfAddress.data.format_token_balance } })
-            let trans_data              = await getTranscationDataForClient(addressObject.id)
-            let logData                 = { "transcationDetails": trans_data[0] }
-            let previouspoolwallet      = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
-            let totalBalnce             = parseFloat(previouspoolwallet.balance) + walletbalance
-            let poolwallet              = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4, balance: totalBalnce } })
-            let get_addressObject       = await postRequest(addressObject.callbackURL, logData, {})
-            let balanceTransfer         = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance
-            let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance, GasFee.data.fee)
             var emailTemplateName =
             {
                 "emailTemplateName": "successtrans.ejs",
@@ -299,11 +381,12 @@ async function getTrasnsBalance(transdata) {
             }
             let emailLog = await emailSending.emailLogs(addressObject.id, emailTemplateName)
             console.log("email_response success", emailLog)
-            response = { amountstatus: 1, "paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "Success" };
+            response = { amountstatus: 1, "paid_in_usd":pricecal,"paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "Success" };
             return JSON.stringify(response)
         }
-        else {
-            response = { amountstatus: amountstatus, "paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "Success" };
+        else 
+        {
+            response = { amountstatus: amountstatus,"paid_in_usd":0, "paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "Success" };
             return JSON.stringify(response)
         }
 
