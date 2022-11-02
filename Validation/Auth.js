@@ -43,7 +43,9 @@ module.exports =
         try {
 
             let api_key = req.headers.authorization;
-            let user = await merchantcategory.findOne({ $and: [{ clientapikey: api_key }, { status: 1 }] });
+            
+            let user = await merchantcategory.findOne({ clientapikey: api_key , status: 1 });
+            
             if (user != null) {
                 next()
             }
@@ -894,6 +896,33 @@ module.exports =
             { 
                 "email"         : "required|email", 
                 "code"          : "required|string", 
+            };
+            let authorization   = req.headers.authorization;
+            let user            = await admins.findOne({ admin_api_key: authorization, status : true  });
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) 
+                {
+                res.status(200).send({status: 400,success: false,message: 'Validation failed',data: err});
+                } 
+                else if(user == null){
+                res.status(200).send({status: 400,message: "Invalid User",data: {}});
+                }
+                else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async verify_priceConversitionPosChanges(req, res, next) {
+        try {
+            const validationRule = 
+            { 
+                "coinid"            : "required|networkexist", 
+                "currenid"          : "required|currencyexist", 
             };
             let authorization   = req.headers.authorization;
             let user            = await admins.findOne({ admin_api_key: authorization, status : true  });

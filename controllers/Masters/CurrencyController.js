@@ -137,6 +137,7 @@ module.exports =
         try 
         {
             let network                     = await networks.findOne({ 'id': req.body.coinid })
+            let networktitle                = network.currencyid.toLowerCase()
             let Currency                    = await Currencies.findOne({ 'id': req.body.currenid })
             let perferedNetwork             = await perferedNetworks.findOne({ networkid: req.body.coinid, clientapikey : req.headers.authorization })
             let pricemargin                 = perferedNetwork != null ? perferedNetwork.pricemargin : 0
@@ -145,10 +146,10 @@ module.exports =
             let axiosGetData                =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
             var stringify_response          = JSON.parse(axiosGetData.data)
             let pricedata                   = stringify_response.data 
-            let pricedatacurrency           = pricedata[network.currencyid]
+            let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
             pricedatacurrency[pricetitle]   = pricedatacurrency[pricetitle] - pricemargin
-            pricedata[network.currencyid]   = pricedatacurrency[pricetitle]
+            pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
         catch (error) 
@@ -171,15 +172,16 @@ module.exports =
             let axiosGetData                =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
             var stringify_response          = JSON.parse(axiosGetData.data)
             let pricedata                   = stringify_response.data 
-            let pricedatacurrency           = pricedata[network.currencyid]
+            let networktitle                = network.currencyid.toLowerCase()
+            let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
             pricedatacurrency[pricetitle]   = pricedatacurrency[pricetitle] - pricemargin
-            pricedata[network.currencyid]   = pricedatacurrency[pricetitle]
+            pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
         catch (error) 
         {
-            console.log(error)
+            console.log("priceConversitionPosChanges",error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },

@@ -139,15 +139,3 @@ console.log(`Example app listening at ${process.env.TOP_UP_PORT}   `);
 })
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.topupWebScokect)
-
-// var quickpayment = https.createServer({
-//     key                 :  privateKey,
-//     cert                :  certificate,  
-//     ca                  :  ca, 
-//     requestCert         :  false, 
-//     rejectUnauthorized  :  false
-// }).listen(process.env.ESRO_LINK_PORT, () => {
-// console.log(`Example app listening at ${process.env.ESRO_LINK_PORT}   `);
-// })
-// const quickpayment = new webSocketServer({ httpServer: quickpayment });
-// quickpayment.on('request', Utility.quickpayment)
