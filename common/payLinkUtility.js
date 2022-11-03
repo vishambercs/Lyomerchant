@@ -512,7 +512,7 @@ module.exports =
 
             const previousdate           = new Date(parseInt(addressObject.timestamps));
             const currentdate            = new Date().getTime()
-            var diff = currentdate - previousdate.getTime();
+            var diff                     = currentdate - previousdate.getTime();
             var minutes = (diff / 60000)
 
 

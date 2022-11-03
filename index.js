@@ -1,20 +1,20 @@
-var express = require('express');
-const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-var client = require('./Route/clientsRoute');
-var poolRoute = require('./Route/poolRoute');
-var networkRoute = require('./Route/networkRoute');
-var walletRoute = require('./Route/poolwalletRoute');
-var hotWalletRoute = require('./Route/hotWalletRoute');
-var withdrawRoute = require('./Route/withdrawRoute');
-var adminRoute = require('./Route/adminRoute');
-var payLinkRoute = require('./Route/paylinkRoute');
-var cornJobs = require('./common/cornJobs');
-const fileUpload = require('express-fileupload');
-const fs                = require('fs');
-var path = require('path');
-const Web3 = require('web3');
-var cron = require('node-cron');
+var express         = require('express');
+const mongoose      = require('mongoose');
+const bodyParser    = require('body-parser');
+var client          = require('./Route/clientsRoute');
+var poolRoute       = require('./Route/poolRoute');
+var networkRoute    = require('./Route/networkRoute');
+var walletRoute     = require('./Route/poolwalletRoute');
+var hotWalletRoute  = require('./Route/hotWalletRoute');
+var withdrawRoute   = require('./Route/withdrawRoute');
+var adminRoute      = require('./Route/adminRoute');
+var payLinkRoute    = require('./Route/paylinkRoute');
+var cornJobs        = require('./common/cornJobs');
+const fileUpload    = require('express-fileupload');
+const fs              = require('fs');
+var path              = require('path');
+const Web3            = require('web3');
+var cron              = require('node-cron');
 const webSocketServer = require('websocket').server;
 var app = express();
 // const https              = require('https');
@@ -104,11 +104,10 @@ var posTranscationserver = https.createServer({
     }).listen(process.env.POS_TRANSCATION, () => {
     console.log(`Example app listening at ${process.env.POS_TRANSCATION}   `);
 })
+
 const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 
 posTranscation.on('request', Utility.posTranscationWebScokect)
-
-
 
 var paymentLinkTranscationserver = https.createServer({
     key                 :  privateKey,
@@ -121,7 +120,6 @@ console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}   `);
 })
 const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
 paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
-
 
 var topupserver = https.createServer({
     key                 :  privateKey,
