@@ -1,21 +1,21 @@
-var nodemailer          = require('nodemailer');
-const ejs               = require('ejs');
-const fs                = require('fs');
-const Web3              = require('web3');
-const axios             = require('axios')
-var stringify           = require('json-stringify-safe');
-var cornJobs            = require('./cornJobs');
-const transcationLog    = require('../Models/transcationLog');
-const transactionPools  = require('../Models/transactionPool');
-const clients           = require('../Models/clients');
-var clientsController   = require('../controllers/clientsController');
-
-var crypto              = require("crypto");
-const jwt               = require('jsonwebtoken');
-const url               = require('url')
-const querystring       = require('querystring');
-const Constant          = require('./Constant');
-const commonFunction    = require('./commonFunction');
+var nodemailer            = require('nodemailer');
+const ejs                 = require('ejs');
+const fs                  = require('fs');
+const Web3                = require('web3');
+const axios               = require('axios')
+var stringify             = require('json-stringify-safe');
+var cornJobs              = require('./cornJobs');
+const transcationLog      = require('../Models/transcationLog');
+const transactionPools    = require('../Models/transactionPool');
+const clients             = require('../Models/clients');
+var clientsController     = require('../controllers/clientsController');
+var crypto                = require("crypto");
+const jwt                 = require('jsonwebtoken');
+const url                 = require('url')
+const querystring         = require('querystring');
+const Constant            = require('./Constant');
+const commonFunction      = require('./commonFunction');
+const Multiprocess        = require('./Multiprocess');
 const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
 
@@ -47,8 +47,7 @@ module.exports =
     async checkthevalue(title) {
         let key =  (title == "" || title == undefined) ? " " : title
         return key ;
-     },
-
+    },
     async Get_JWT_Token(userid,expiretime='1h') 
     {
         var token = jwt.sign({ id: userid }, process.env.AUTH_KEY, { expiresIn: expiretime });
@@ -344,13 +343,16 @@ module.exports =
     },
     async topupWebScokect(request) {
         try {
-            let uniqueKey           =  crypto.randomBytes(20).toString('hex')
+            let uniqueKey           = crypto.randomBytes(20).toString('hex')
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
             console.log("topupWebScokect =====================================",queryvariable);
+
             var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData  = await commonFunction.get_Transcation_topup(queryvariable.transkey,queryvariable.apikey)
+            
             console.log("topupWebScokect =====================================",getTranscationData);
+
             if(getTranscationData.length > 0)
             {
             const connection        = request.accept(null, request.origin);
@@ -364,13 +366,19 @@ module.exports =
             {
                 Constant.topupTransList[index]["connection"] = connection
             }
-            Constant.interval  = setInterval(commonFunction.get_data_of_topup_transcation, 10000);
-            connection.on('message', function (message) {
-            if(index == -1)
-            {
-                connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
-            }
-            })
+            connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount)
+            console.log("============Multiprocess==============",data)
+
+
+
+            // Constant.interval  = setInterval(commonFunction.get_data_of_topup_transcation, 10000);
+            // connection.on('message', function (message) {
+            // if(index == -1)
+            // {
+            //     connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            // }
+            // })
         }
         else
         {
