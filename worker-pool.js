@@ -38,7 +38,5 @@ async function checkbalance(a)
   let balance          = await contract.methods.balanceOf(a.toLowerCase()).call();
   let decimals         = await contract.methods.decimals().call();
   let format_balance   = balance / (1 * 10 ** decimals)
-  return  {
-    "balance":balance,
-  "format_balance":format_balance};
+  return  {"balance":balance,"format_balance":format_balance};
 }
