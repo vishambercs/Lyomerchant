@@ -16,6 +16,7 @@ var path = require('path');
 const Web3 = require('web3');
 var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
+const WebSocketClient = require('websocket').client;
 var app = express();
 const https = require('http');
 const Utility = require('./common/Utility');
@@ -69,6 +70,8 @@ cron.schedule('5 * * * * *', async() => {
 
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
+
+   
 });
 
 var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {
@@ -107,3 +110,30 @@ console.log(`Example app listening at ${process.env.TOP_UP_PORT}`);
 })
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.topupWebScokect)
+
+
+
+
+// var client = new WebSocketClient();
+// client.on('connectFailed', function(error) {
+//     console.log('Connect Error: ' + error.toString());
+// });
+// client.on('connect', function(connection) {
+//     console.log('Connection established!');
+    
+//     connection.on('error', function(error) {
+//         console.log("Connection error: " + error.toString());
+//     });
+    
+//     connection.on('close', function() {
+//         console.log('Connection closed!');
+//     });
+    
+//     connection.on('message', function(message) {
+//         connection.send(message.utf8Data);
+//         console.log("Current time on server is: '" + message.utf8Data + "'");
+//     });
+// });
+
+// client.connect('ws://10.101.12.136:3011?transkey=0x0548f59fee79f8832c299e01dca5c76f034f558e&apikey=8541cf5816f284cbee0220659c2e4575a9d4d3f8&network_id=8541cf5816f284cbee0220659c2e4575a9d4d3f8&amount=1', '' ,"");
+
