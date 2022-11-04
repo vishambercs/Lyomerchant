@@ -20,6 +20,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             let jsondata        = JSON.parse(message.utf8Data)
             let transData       = Constant.topupTransList[index]
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
+            console.log(jsondata.status)
             if(index != -1 )
             {
                 transData       = Constant.topupTransList[index]
@@ -28,7 +29,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             {
                 let responseapi     = await topupUtility.verifyTheBalance(jsondata.transid)
                 let responseapijson = JSON.parse(responseapi)
-                let response        = { amountstatus: jsondata.status,"paid_in_usd":jsondata.paid, "paid": jsondata.paid, status: 200, message: "Success" };
+                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paid_in_usd":jsondata.paid, "paid": jsondata.paid, status: 200, message: "Success" };
                 transData.connection.sendUTF(JSON.stringify(response));
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
@@ -36,9 +37,9 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             else if (index != -1)
             {
                 let transData       = Constant.topupTransList[index]
-                let response        = { amountstatus: jsondata.status,"paid_in_usd":0, "paid": jsondata.paid, status: 200, message: "Success" };
+                let response        = { transkey:jsondata.transid ,amountstatus: jsondata.status,"paid_in_usd":0, "paid": jsondata.paid, status: 200, message: "Success" };
                 let balanceResponse = JSON.stringify(response)
-                transData.connection.sendUTF(JSON.stringify(balanceResponse));
+                transData.connection.sendUTF(balanceResponse);
             }
         });
     });
