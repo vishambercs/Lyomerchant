@@ -17,8 +17,6 @@ const Web3            = require('web3');
 var cron              = require('node-cron');
 const webSocketServer = require('websocket').server;
 var app = express();
-// const https              = require('https');
-// const https = require('http');
 const https             = require('https');
 const Utility = require('./common/Utility');
 require('dotenv').config()
@@ -33,20 +31,9 @@ app.use((req, res, next) => {
     next();
 });
 app.get('/',    function (req, res) { res.send('Welcome to Lyo Merchant'); });
-app.use('/v1',           client);
-app.use('/admin/v1',     poolRoute);
-app.use('/network/v1',   networkRoute);
-app.use('/wallet/v1',    walletRoute);
-app.use('/hotWallet/v1', hotWalletRoute);
-app.use('/withdraw/v1',  withdrawRoute);
-app.use('/admin/v1',     adminRoute);
 
-app.use('/paymentlink/v1', payLinkRoute);
 
-cron.schedule('1 * * * * *', async() => {
-    let response = await cornJobs.Balance_Cron_Job()
-    console.log('running a task every minute',response);
-  });
+
 
 
   
@@ -56,7 +43,7 @@ const privateKey   = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerch
 const certificate  = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/cert.pem',     'utf8');
 const ca           = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/fullchain.pem',    'utf8');
 
-mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
+mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.connection.once('open', function () {
     console.log('Database connected Successfully');
 }).on('error', function (err) {
@@ -79,47 +66,14 @@ const wsServer = new webSocketServer({ httpServer: server });
 
 wsServer.on('request', Utility.receiveMessage)
 
-var kycserver = https.createServer({
-    key                 :  privateKey,
-    cert                :  certificate,  
-    ca                  :  ca, 
-    requestCert         :  false, 
-    rejectUnauthorized  :  false
-    }).listen(process.env.KYC_PORT, () => {
-    console.log(`Example app listening at ${process.env.KYC_PORT}   `);
-})
-const kyc = new webSocketServer({ httpServer: kycserver });
-
-kyc.on('request', Utility.approvekyc)
 
 
 
 
-var posTranscationserver = https.createServer({
-    key                 :  privateKey,
-    cert                :  certificate,  
-    ca                  :  ca, 
-    requestCert         :  false, 
-    rejectUnauthorized  :  false
-    }).listen(process.env.POS_TRANSCATION, () => {
-    console.log(`Example app listening at ${process.env.POS_TRANSCATION}   `);
-})
 
-const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 
-posTranscation.on('request', Utility.posTranscationWebScokect)
 
-var paymentLinkTranscationserver = https.createServer({
-    key                 :  privateKey,
-    cert                :  certificate,  
-    ca                  :  ca, 
-    requestCert         :  false, 
-    rejectUnauthorized  :  false
-}).listen(process.env.PAYMENT_LINK_PORT, () => {
-console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}   `);
-})
-const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
-paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
+
 
 var topupserver = https.createServer({
     key                 :  privateKey,

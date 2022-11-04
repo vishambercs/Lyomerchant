@@ -45,9 +45,7 @@ console.log(`Example app listening at ${process.env.TOP_UP_PORT}   `);
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.addressBalance)
 
-// app.listen(process.env.SERVER_PORT, async function () {
 
-// })
 
 
 
