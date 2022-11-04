@@ -1,10 +1,13 @@
-const axios = require('axios')
-var stringify = require('json-stringify-safe');
+const axios               = require('axios')
+var stringify             = require('json-stringify-safe');
 require("dotenv").config()
-var CryptoJS = require('crypto-js')
-var qs = require('qs');
+var CryptoJS              = require('crypto-js')
+var crypto                = require("crypto");
+var qs                    = require('qs');
 const url                 = require('url')
 const querystring         = require('querystring');
+const Constant            = require('./Constant');
+const Multiprocess        = require('./Multiprocess');
 module.exports =
 {
     
@@ -35,12 +38,11 @@ module.exports =
     },
 
     async topupWebScokect(request) {
-        try {
+        try 
+        {
             let uniqueKey           = crypto.randomBytes(20).toString('hex')
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
-            if(getTranscationData.length > 0)
-            {
             const connection        = request.accept(null, request.origin);
             var index               = Constant.topupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
             if(index == -1)
@@ -53,13 +55,7 @@ module.exports =
                 Constant.topupTransList[index]["connection"] = connection
             }
             connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
-           
-           
-        }
-        else
-        {
-            return request.reject(null, request.origin);
-        }
+            let data = Multiprocess.Create_Node_Sockect_Connection(queryvariable.transkey,queryvariable.apikey)
         }
         catch (error) {
             console.log(error)

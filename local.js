@@ -1,8 +1,9 @@
-var express         = require('express');
-const mongoose      = require('mongoose');
-const bodyParser      = require('body-parser');
-var client            = require('./Route/clientsRoute');
-const fs              = require('fs');
+var express             = require('express');
+const mongoose          = require('mongoose');
+const bodyParser        = require('body-parser');
+var client              = require('./Route/clientsRoute');
+var Utility             = require('./common/Utility');
+const fs                = require('fs');
 var path                = require('path');
 const Web3              = require('web3');
 var cron                = require('node-cron');
@@ -32,35 +33,7 @@ app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });
 
-// var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {
-//     console.log(`Example app listening at ${process.env.SCOKECT_PORT}`);
-// })
 
-// const wsServer = new webSocketServer({ httpServer: server });
-
-// wsServer.on('request', Utility.receiveMessage)
-
-// var kycserver = https.createServer().listen(process.env.KYC_PORT, () => {
-//     console.log(`Example app listening at ${process.env.KYC_PORT}   `);
-// })
-// const kyc = new webSocketServer({ httpServer: kycserver });
-// kyc.on('request', Utility.approvekyc)
-
-// var posTranscationserver = https.createServer({
-//     }).listen(process.env.POS_TRANSCATION, () => {
-//     console.log(`Example app listening at ${process.env.POS_TRANSCATION}   `);
-// })
-
-// const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
-// posTranscation.on('request', Utility.posTranscationWebScokect)
-
-// var paymentLinkTranscationserver = https.createServer({
-// }).listen(process.env.PAYMENT_LINK_PORT, () => {
-// console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}`);
-// })
-
-// const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
-// paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
 
 
 var topupserver = https.createServer({}).listen(process.env.TOP_UP_PORT, () => {
