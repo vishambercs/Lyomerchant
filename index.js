@@ -52,9 +52,9 @@ cron.schedule('1 * * * * *', async() => {
   
 //  Database
 
-const privateKey   = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/privkey.pem',  'utf8');
-const certificate  = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/cert.pem',     'utf8');
-const ca           = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/fullchain.pem',    'utf8');
+const privateKey   = fs.readFileSync('/etc/ssl/api.lyomerchant.com/privkey.pem',  'utf8');
+// const certificate  = fs.readFileSync('/etc/ssl/api.lyomerchant.com/fullchain.pem',     'utf8');
+const ca           = fs.readFileSync('/etc/ssl/api.lyomerchant.com/fullchain.pem',    'utf8');
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
@@ -68,7 +68,7 @@ app.listen(process.env.SERVER_PORT, function () {
 
 var server = https.createServer({
     key                 :  privateKey,
-    cert                :  certificate,  
+    // cert                :  certificate,  
     ca                  :  ca, 
     requestCert         :  false, 
     rejectUnauthorized  :  false
@@ -81,7 +81,7 @@ wsServer.on('request', Utility.receiveMessage)
 
 var kycserver = https.createServer({
     key                 :  privateKey,
-    cert                :  certificate,  
+    // cert                :  certificate,  
     ca                  :  ca, 
     requestCert         :  false, 
     rejectUnauthorized  :  false
@@ -97,7 +97,7 @@ kyc.on('request', Utility.approvekyc)
 
 var posTranscationserver = https.createServer({
     key                 :  privateKey,
-    cert                :  certificate,  
+    // cert                :  certificate,  
     ca                  :  ca, 
     requestCert         :  false, 
     rejectUnauthorized  :  false
@@ -112,7 +112,7 @@ posTranscation.on('request', Utility.posTranscationWebScokect)
 
 var paymentLinkTranscationserver = https.createServer({
     key                 :  privateKey,
-    cert                :  certificate,  
+    // cert                :  certificate,  
     ca                  :  ca, 
     requestCert         :  false, 
     rejectUnauthorized  :  false
