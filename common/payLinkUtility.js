@@ -495,24 +495,26 @@ module.exports =
     get_Transcation_Paylink_Data : get_Transcation_Paylink_Data,
     async getTrasnsBalance(transdata) {
         try {
-            let addressObject = transdata[0]
-            
-            let response = {}
+            let addressObject            = transdata[0]
+            let response                 = {}
             let account_balance_in_ether = 0
-            let token_balance = 0
-            let native_balance = 0
-            let format_token_balance = 0
-            let format_native_balance = 0
-            var amountstatus = 0
-            let merchantbalance = 0;
+            let token_balance            = 0
+            let native_balance           = 0
+            let format_token_balance     = 0
+            let format_native_balance    = 0
+            var amountstatus             = 0
+            let merchantbalance          = 0;
 
-           
+            if(addressObject.timestamps == null || addressObject.timestamps == undefined){
+                response = { amountstatus: 0,"paymentdata":{}, status: 200, "data": {}, message: "Success" };
+                return JSON.stringify(response)
+            }
 
-
-            const previousdate = new Date(parseInt(addressObject.timestamps));
-            const currentdate  = new Date().getTime()
+            const previousdate           = new Date(parseInt(addressObject.timestamps));
+            const currentdate            = new Date().getTime()
             var diff = currentdate - previousdate.getTime();
             var minutes = (diff / 60000)
+
 
             console.log("previousdate   ================", previousdate)
             console.log("currentdate    ================", currentdate)
@@ -524,13 +526,13 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
-            console.log("BalanceOfAddress libarayType",addressObject.networkDetails[0].libarayType)
-            console.log("BalanceOfAddress Success",BalanceOfAddress)
+            console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
+            console.log("BalanceOfAddress Success",     BalanceOfAddress)
 
             let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
             let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
 
-            if (minutes > 10) 
+            if (minutes > 180) 
             {
                 let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
                 let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
@@ -555,7 +557,7 @@ module.exports =
                 console.log("email_response Success",email_response)
                 return JSON.stringify(response)
             }
-            amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
+            amountstatus    = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
            
             let GasFee = await calculateGasFee
@@ -590,6 +592,25 @@ module.exports =
                    {
                     let paylinkData = await payLink.findOneAndUpdate({ id: addressObject.payLinkId }, { $set: { status: amountstatus } })
                     let invoiceData = await invoice.findOneAndUpdate({ id: paylinkData.invoice_id }, { $set: { status: amountstatus } })
+                    
+                    if(invoiceData != null )
+                    var emailTemplateName = 
+                    { 
+                        "emailTemplateName" : "paymentconfirmation.ejs", 
+                        "to"                :  invoiceData.email, 
+                        "subject"           : "LYOMERCHANT Success Transaction", 
+                        "templateData"      : 
+                        {
+                            "status"        : "Success" ,
+                            "transid"       : addressObject.id ,
+                            "address"       : addressObject.poolWallet[0].address,
+                            "network"       : addressObject.networkDetails[0].network ,
+                            "coin"          : addressObject.networkDetails[0].coin,
+                            "amount"        : addressObject.amount,
+                            "orderid"       : invoiceData.invoiceNumber   
+                        }}
+                    let email_response = await emailSending.emailLogs(addressObject.id,emailTemplateName)
+                    console.log("email_response Success",email_response)
                     }
                     let poolwallet             = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
                     let balanceTransfer        = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 

@@ -378,22 +378,16 @@ module.exports =
         }
     },
     async verifyFastPayment(req, res) {
-        let findResult = ''
-        let response = []
-        let status = 200;
-        try {
-            findResult = await fastPaymentCode.findOne({
-                "storeid": req.body.businessName,
-            })
-            console.log("fastCode number", findResult)
-            response = findResult
+        try 
+        {
+        let findResult = await fastPaymentCode.findOne({ "storeid": req.body.businessName, "status": 1})
+        res.json({ status: 200, data: findResult, message: "verify fast code" })
         }
-        catch (error) {
-            response = "someting went wrong"
-            status = 400
-            response = error
+        catch (error) 
+        {
+            console.log("verifyFastPayment error",error)        
+            res.json({ status: 400, data: findResult, message: "error" })
         }
-        res.json({ status: status, data: response, message: "verify fast code" })
     },
     async verifyFastCode(req, res) {
         // var token = ''
@@ -406,7 +400,7 @@ module.exports =
             // let findResult = await fastPaymentCode.find({ "fastcodes": req.body.fastCode })
             let findResult = await fastPaymentCode.aggregate(
                 [
-                    { $match: { "fastcodes": req.body.fastCode } },
+                    { $match: { "fastcodes": req.body.fastCode,status: 1 } },
                     {
                         $lookup: {
                             from: "merchantstores", // collection to join

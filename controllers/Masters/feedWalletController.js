@@ -13,6 +13,7 @@ var stringify = require('json-stringify-safe');
 var TronStation = require('tronstation');
 const emailSending = require('../../common/emailSending');
 const CryptoAccount     = require("send-crypto");
+const axios             = require('axios')
 async function createFeedWalletsFun(network_id, created_by) {
     try {
 
@@ -483,31 +484,31 @@ module.exports =
             res.json({ status: 400, data: {}, message: error.message, })
         }
     },
-    async transferbtcoin(req, res) {
-        try {
+    // async transferbtcoin(req, res) {
+    //     try {
 
-            const  privatekey = CryptoAccount.newPrivateKey(); 
-            console.log("new private key",privatekey);
-            const account = new CryptoAccount(privatekey,{
-                network: "testnet",
-            });
-            console.log(await account.address("BTC"));
-            // console.log(privatekey);
-            // const account = new CryptoAccount("038180d2f81c8d930ea18fb2aa0820f6771e66100f9a70aaad65a3e6417b4f0e90");
+    //         const  privatekey = CryptoAccount.newPrivateKey(); 
+    //         console.log("new private key",privatekey);
+    //         const account = new CryptoAccount(privatekey,{
+    //             network: "testnet",
+    //         });
+    //         console.log(await account.address("BTC"));
+    //         // console.log(privatekey);
+    //         // const account = new CryptoAccount("038180d2f81c8d930ea18fb2aa0820f6771e66100f9a70aaad65a3e6417b4f0e90");
            
             
-            // console.log(await account.getBalance("BTC"));
-            // const txHash = await account.send("1D2onCCjUF9JVaw2JTK2qUBfvVq9wAXrAL", 0.01, "BTC").on("transactionHash", console.log).on("confirmation", console.log);
-            // console.log("txHash",txHash);
-            res.json({ status: 200, data: "Saved", message: "Currency API Balance" })
-        }
-        catch (error) {
-            console.log("Message %s sent: %s", error);
-            res.json({ status: 400, data: {}, message: error.message, })
-        }
+    //         // console.log(await account.getBalance("BTC"));
+    //         // const txHash = await account.send("1D2onCCjUF9JVaw2JTK2qUBfvVq9wAXrAL", 0.01, "BTC").on("transactionHash", console.log).on("confirmation", console.log);
+    //         // console.log("txHash",txHash);
+    //         res.json({ status: 200, data: "Saved", message: "Currency API Balance" })
+    //     }
+    //     catch (error) {
+    //         console.log("Message %s sent: %s", error);
+    //         res.json({ status: 400, data: {}, message: error.message, })
+    //     }
 
 
-    },
+    // },
 
     
 }

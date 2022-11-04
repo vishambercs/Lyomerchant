@@ -271,7 +271,7 @@ module.exports =
              return  res.json({ status: 400, data: null, message: "Invalid Trans ID" })
             }
    
-            let poolwl             =  await poolWallet.findOne({ id:poolwalletid,status:3 })
+            let poolwl             =  await poolWallet.findOne({ id:poolwalletid })
             
             if(poolwl == null)
             {

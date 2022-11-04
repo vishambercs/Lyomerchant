@@ -11,6 +11,7 @@ var commonFunction       = require('../common/commonFunction');
 const bcrypt             = require('bcrypt');
 const Web3               = require('web3');
 var crypto               = require("crypto");
+const networks         = require('../Models/network');
 var poolwalletController = require('./poolwalletController');
 require("dotenv").config()
 module.exports =
@@ -38,6 +39,8 @@ module.exports =
                     callbackURL     : req.body.callbackURL,
                     orderid         : req.body.orderid,
                     clientToken     : req.body.token,
+                    errorurl        : " ",
+                    apiredirectURL  : " ",
                     status          : 0,
                     walletValidity  : currentDate,
                     timestamps      : new Date().getTime()
@@ -60,8 +63,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
-    
     async getTrans(req, res) {
         try {
 
@@ -510,7 +511,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async get_Trans_by_txId(req, res) {
         try {
             await transactionPools.aggregate(
@@ -588,7 +588,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async get_Fastlink_Trans_by_txId(req, res) {
         try {
             await paymentlinktxpools.aggregate(
@@ -640,11 +639,29 @@ module.exports =
                             "poolWallet.id": 0,
                             "poolWallet._id": 0,
                             "poolWallet.status": 0,                            
-                            "networkDetails.__v": 0,
-                            "networkDetails.nodeUrl": 0,
-                            "networkDetails.created_by": 0,
-                            "networkDetails.createdAt": 0,
-                            "networkDetails.updatedAt": 0,
+                            "networkDetails.__v"                    : 0,
+                            "networkDetails.nodeUrl"               : 0,
+                            "networkDetails.withdrawflag"          : 0,
+                            "networkDetails.withdrawfee"           : 0,
+                            "networkDetails.fixedfee"              : 0,
+                            "networkDetails.native_currency_id"    : 0,
+                            "networkDetails.kyt_network_id"        : 0,
+                            "networkDetails.created_by"            : 0,
+                            "networkDetails.libarayType"           : 0,
+                            "networkDetails.contractAddress"           : 0,
+                            "networkDetails.contractABI"               : 0,
+                            "networkDetails.apiKey"                    : 0,
+                            "networkDetails.transcationurl"            : 0,
+                            "networkDetails.scanurl"                   : 0,
+                            "networkDetails.status"                    : 0,
+                            "networkDetails.gaspriceurl"               : 0,
+                            "networkDetails.latest_block_number"       : 0,
+                            "networkDetails.processingfee"             : 0,
+                            "networkDetails.transferlimit"             : 0,
+                            "networkDetails.deleted_by"                : 0,
+                            "networkDetails.updatedAt"                 : 0,
+                            "networkDetails.updatedAt"                 : 0,
+                            "networkDetails.hotwallettranscationstatus": 0,
                             "networkDetails._id": 0
                         }
                     }
@@ -660,5 +677,104 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-    
+    async assignMerchantWalletForTopUP(req, res) {
+        try {
+            var merchantKey   = req.headers.authorization
+            var networkType   = req.body.networkType
+            var orderid       = req.body.orderid
+                let currentDateTemp     = Date.now();
+                let currentDate         = parseInt((currentDateTemp / 1000).toFixed());
+                let account             = await poolwalletController.getPoolWalletID(networkType) 
+                const transactionPool = new transactionPools({
+                    id              : crypto.randomBytes(20).toString('hex'),
+                    api_key         : req.headers.authorization,
+                    poolwalletID    : account.id,
+                    amount          : req.body.amount,
+                    currency        : req.body.currency,
+                    callbackURL     : req.body.callbackurl,
+                    apiredirectURL  : req.body.apiredirecturl,
+                    errorurl        : req.body.errorurl,
+                    orderid         : req.body.orderid,
+                    clientToken     : " ",
+                    status          : 0,
+                    walletValidity  : currentDate,
+                    timestamps      : new Date().getTime()
+                });
+                transactionPool.save().then(async (val) => {
+                    await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
+                    let url = process.env.TOP_UP_URL+val.id
+                    let data = { url:url }
+                    res.json({ status: 200, message: "Assigned Merchant Wallet Successfully", data: data })
+                }).catch(error => {
+                    console.log("error",error)
+                    res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+                })
+            
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async getTranscationDataofTopup(req, res) {
+        try {
+            let transactionPool     = await transactionPools.findOne({id    : req.body.id})
+
+            if(transactionPool == null){
+               return  res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let transWallet         = await poolWallet.findOne({id  : transactionPool.poolwalletID}) 
+            if(transWallet == null)
+            {
+                return  res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let network         = await networks.findOne({ id  : transWallet.network_id}) 
+            let data = 
+            { 
+                transactionID: transactionPool.id, 
+                address: transWallet.address, 
+                walletValidity: transactionPool.walletValidity,
+                amount: transactionPool.amount ,
+                key: transactionPool.api_key ,
+                apiredirecturl     : transactionPool.apiredirectURL,
+                errorurl     : transactionPool.errorurl,
+                orderid     : transactionPool.orderid,
+                network: network.network,
+                coin: network.coin  
+            }
+            res.json({ status: 200, message: "Get The Data", data: data })
+
+            
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async cancelpaymentLink(req, res) {
+        try {
+            let tranPool     = await transactionPools.findOne({id  : req.body.id})
+
+            if(tranPool == null)
+            {
+               return  res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+
+            let transactionPool = await transactionPools.findOneAndUpdate({ 'id':tranPool.id  }, { $set: { "status" : 5 , "remarks" : "By Client Canceled" , "canceled_at" : new Date().toString() }} ,{ returnDocument: 'after' })
+           
+           
+            let data = 
+            { 
+                transactionID: transactionPool.id, 
+                orderid     : transactionPool.orderid,
+            }
+            res.json({ status: 200, message: "Get The Data", data: data })
+
+            
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
 }

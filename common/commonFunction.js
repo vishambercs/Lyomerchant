@@ -12,7 +12,8 @@ const Constant = require('./Constant');
 const transferUtility = require('./transferUtility');
 const Utility = require('./Utility');
 const clientWallets = require('../Models/clientWallets');
-const poolWallets = require('../Models/poolWallet');
+const poolWallets   = require('../Models/poolWallet');
+const topup         = require('../Models/topup');
 const transactionPools = require('../Models/transactionPool');
 const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool');
 const clients = require('../Models/clients');
@@ -26,6 +27,7 @@ const posTransactionPool    = require('../Models/posTransactionPool');
 const transporter           = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
 const transUtility          = require('./transUtilityFunction');
 const emailSending          = require('../common/emailSending');
+const topupUtility          = require('./topupUtility');
 const payLinkUtility        = require('./payLinkUtility');
 const feedWalletController  = require('../controllers/Masters/feedWalletController');
 const transcationEmailLogs  = require('../Models/transcationEmailLogs');
@@ -194,16 +196,16 @@ async function getBalance(transdata, transData) {
                 let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
                 var emailTemplateName = 
                 { 
-                "emailTemplateName": "successtrans.ejs", 
-                "to": client.email, 
-                "subject": "LYOMERCHANT Success Transaction", 
-                "templateData": {"status": "Success" ,
-                "invoicenumber" : "",
-                "transid": addressObject.id , 
-                "storename" :"",
-                "network" :addressObject.networkDetails[0].network ,
-                "coin" :addressObject.networkDetails[0].coin,
-                "amount" :addressObject.amount 
+                "emailTemplateName" : "successtrans.ejs", 
+                "to"                : client.email, 
+                "subject"           : "LYOMERCHANT Success Transaction", 
+                "templateData"      : {"status": "Success" ,
+                "invoicenumber"     : "",
+                "transid"           :   addressObject.id , 
+                "storename"         :   "",
+                "network"           :   addressObject.networkDetails[0].network ,
+                "coin"              :   addressObject.networkDetails[0].coin,
+                "amount"            :   addressObject.amount 
                 }}
                 let emailLog = await emailSending.emailLogs(addressObject.id,emailTemplateName)
                 console.log("email_response success",emailLog)
@@ -805,7 +807,6 @@ module.exports =
             let transcationData = await payLinkUtility.get_Transcation_Paylink_Data(transData.transkey)
             let balance_data    = await payLinkUtility.getTrasnsBalance(transcationData)
             let balanceResponse = JSON.parse(balance_data)
-            
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
                 transData.connection.close(1000)
@@ -867,11 +868,11 @@ module.exports =
             ])
         return pooldata
     },
-    async get_Transcation_quickpayment_Data(transkey) {
+    async get_Transcation_topup(transkey,api_key) {
 
-        let pooldata = await quickpayment.aggregate(
+        let pooldata = await topup.aggregate(
             [
-                { $match: { id: transkey, $or: [{ status: 0 }, { status: 2 }] } },
+                { $match: { id: transkey,api_key:api_key, $or: [{ status: 0 }, { status: 2 }] } },
                 {
                     $lookup: {
                         from: "poolwallets", // collection to join
@@ -887,14 +888,14 @@ module.exports =
                         as: "networkDetails"// output array field
                     }
                 },
-                {
-                    $lookup: {
-                        from: "clients", // collection to join
-                        localField: "api_key",//field from the input documents
-                        foreignField: "api_key",//field from the documents of the "from" collection
-                        as: "clientdetails"// output array field
-                    }
-                },
+                // {
+                //     $lookup: {
+                //         from: "clients", // collection to join
+                //         localField: "api_key",//field from the input documents
+                //         foreignField: "api_key",//field from the documents of the "from" collection
+                //         as: "clientdetails"// output array field
+                //     }
+                // },
                 {
                     "$project":
                     {
@@ -912,5 +913,32 @@ module.exports =
                 }
             ])
         return pooldata
+    },
+
+    async get_data_of_topup_transcation() 
+    {
+        if (Constant.topupIndex < Constant.topupTransList.length) 
+        {
+            let transData       = Constant.topupTransList[Constant.topupIndex]
+            let transcationData = await topupUtility.get_Transcation_topup(transData.transkey)
+            let balance_data    = await topupUtility.getTrasnsBalance(transcationData)
+            console.log("balance_data",balance_data)
+            let balanceResponse = JSON.parse(balance_data)
+            console.log("balanceResponse",balanceResponse)
+            if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
+                transData.connection.sendUTF(JSON.stringify(balanceResponse));
+                transData.connection.close(1000)
+                Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != transData.transkey);
+            }
+            else 
+            {
+                transData.connection.sendUTF(JSON.stringify(balanceResponse));
+            }
+            Constant.topupIndex = Constant.topupIndex + 1
+        }
+        else 
+        {
+            Constant.topupIndex = 0;
+        }
     },
 }

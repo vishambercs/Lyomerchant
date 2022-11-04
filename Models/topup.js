@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-
-
-const transactionPoolSchema = new mongoose.Schema({
+var uniqueValidator = require('mongoose-unique-validator');
+const topupschema = new mongoose.Schema({
     id:
     {
         type: String,
@@ -23,20 +22,7 @@ const transactionPoolSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
-    balance: {
-        type: Number,
-        required: true,
-        default : 0
-    },
     orderid: {
-        type: String,
-        required: true,
-    },
-    clientToken: {
-        type: String,
-        required: true,
-    },
-    currency: {
         type: String,
         required: true,
     },
@@ -61,12 +47,26 @@ const transactionPoolSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    remarks : 
+    {
+        type: String,
+        required: false,
+    },
+    canceled_at : 
+    {
+        type: String,
+        required: false,
+    },
+    
     timestamps : 
     {
         type: String,
         required: true,
     },
-  },
+
+},
+   
     { timestamps: true }
 )
-module.exports = mongoose.model('transactionPool', transactionPoolSchema)
+topupschema.plugin(uniqueValidator);
+module.exports = mongoose.model('topup', topupschema)
