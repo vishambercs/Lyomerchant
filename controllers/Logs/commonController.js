@@ -692,7 +692,15 @@ module.exports =
                         as: "clientDetails"
                     }
                 },
-
+                {
+                    $lookup: 
+                    {
+                        from: "networks",
+                        localField: "poolwalletDetails.network_id",
+                        foreignField: "id",
+                        as: "networkDetails"
+                    }
+                },
 
                 { 
                     $match: filter,
