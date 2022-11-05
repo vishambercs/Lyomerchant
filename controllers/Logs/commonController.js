@@ -5,6 +5,7 @@ const poolWallets = require('../../Models/poolWallet');
 const transactionPool = require('../../Models/transactionPool');
 const payLink    = require('../../Models/payLink');
 const invoice    = require('../../Models/invoice');
+
 const topups      = require('../../Models/topup');
 const Constant   = require('../../common/Constant');
 const { getBalance } = require('bitcoin-core/src/methods');
@@ -674,11 +675,81 @@ module.exports =
                 }
             ])
             
+            let topupPools = await topups.aggregate([
+                {
+                    $lookup: {
+                        from: "poolwallets",
+                        localField: "poolwalletID",
+                        foreignField: "id",
+                        as: "poolwalletDetails"
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "clients",
+                        localField: "api_key",
+                        foreignField: "api_key",
+                        as: "clientDetails"
+                    }
+                },
+
+
+                { 
+                    $match: filter,
+                },
+                {
+                    "$project": {
+                        
+                        "clientDetails.token"                   : 0,
+                        "clientDetails.secret"                  : 0,
+                        "clientDetails.qrcode"                  : 0,
+                        "clientDetails.hash"                    : 0,
+                        "clientDetails.emailstatus"             : 0,
+                        "clientDetails.loginstatus"             : 0,
+                        "clientDetails.emailtoken"              : 0,
+                        "clientDetails.authtoken"               : 0,
+                        "clientDetails.updatedAt"               : 0,
+                        "clientDetails.status"                  : 0,
+                        "clientDetails.two_fa"                  : 0,
+                        "clientDetails.password"                : 0,
+                        "clientDetails.kycLink"                 : 0,
+                        "poolwalletDetails._id"                 : 0,
+                        "poolwalletDetails.status"              : 0,
+                        "poolwalletDetails.__v"                 : 0,
+                        "poolwalletDetails.privateKey"          : 0,
+                        "networkDetails.__v"                    : 0,
+                         "networkDetails.nodeUrl"               : 0,
+                         "networkDetails.withdrawflag"          : 0,
+                         "networkDetails.withdrawfee"           : 0,
+                         "networkDetails.fixedfee"              : 0,
+                         "networkDetails.native_currency_id"    : 0,
+                         "networkDetails.kyt_network_id"        : 0,
+                         "networkDetails.created_by"            : 0,
+                         "networkDetails.libarayType"           : 0,
+                         "networkDetails.contractAddress"           : 0,
+                         "networkDetails.contractABI"               : 0,
+                         "networkDetails.apiKey"                    : 0,
+                         "networkDetails.transcationurl"            : 0,
+                         "networkDetails.scanurl"                   : 0,
+                         "networkDetails.status"                    : 0,
+                         "networkDetails.gaspriceurl"               : 0,
+                         "networkDetails.latest_block_number"       : 0,
+                         "networkDetails.processingfee"             : 0,
+                         "networkDetails.transferlimit"             : 0,
+                         "networkDetails.deleted_by"                : 0,
+                         "networkDetails.updatedAt"                 : 0,
+                         "networkDetails.updatedAt"                 : 0,
+                         "networkDetails.hotwallettranscationstatus": 0,
+                         "networkDetails._id": 0
+                    }
+                }
+            ])
             res.json({ status: 200, message: "All Transcation", data:  { 
                 
                 "transactionPool"       : transactionPoolData, 
                 "posTransactionPool"    : posTransactionPoolData,
-                "pyLinkTransPool"       : pyLinkTransPools
+                "pyLinkTransPool"       : pyLinkTransPools,
+                "topupPools"            :   topupPools, 
             }})
         }
         catch (error) {
