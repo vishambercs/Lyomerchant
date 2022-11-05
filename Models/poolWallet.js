@@ -14,7 +14,13 @@ const poolWalletSchema = new mongoose.Schema({
     },
     balance:
     {
-        type: String,
+        type: Number,
+        required: true,
+        default : 0
+    },
+    previousbalance:
+    {
+        type: Number,
         required: true,
         default : 0
     },
