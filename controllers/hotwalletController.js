@@ -107,6 +107,7 @@ module.exports =
 
     async createHotWalletsAPI(req, res) {
         try {
+            let hotwallet = await  hotWallets.updateMany({network_id  : req.body.network_id,status:0}) 
             const hotWallet = new hotWallets({
                 id          : mongoose.Types.ObjectId(),
                 network_id  : req.body.network_id,
@@ -115,7 +116,7 @@ module.exports =
                 created_by  : req.body.created_by,
             });
             hotWallet.save().then(async (val) => {
-                res.json({ status: 200, message: "Successfully", data: val })
+            res.json({ status: 200, message: "Successfully", data: val })
             }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
 
         }

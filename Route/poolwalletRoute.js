@@ -6,7 +6,7 @@ const Auth = require('../Validation/Auth');
 
 router.post('/createPoolWallet',                Auth.is_admin,poolwalletController.create_Pool_Wallet);
 router.get('/allPoolWallet',                    Auth.is_admin,poolwalletController.all_pool_wallet);
-router.get('/updatePoolWallet',                 Auth.is_admin,poolwalletController.all_pool_wallet);
+// router.get('/updatePoolWallet',                 Auth.is_admin,poolwalletController.all_pool_wallet);
 router.post('/create_Pool_Wallet_100',          Auth.is_admin,poolwalletController.create_Pool_Wallet_100);
 router.post('/getPoolWalletWithBalance',        Auth.is_admin,poolwalletController.getPoolWalletWithBalance);
 router.post('/getUsedPercentage',               Auth.is_admin,poolwalletController.getUsedPercentage);

@@ -10,7 +10,7 @@ const topups      = require('../../Models/topup');
 const Constant   = require('../../common/Constant');
 const { getBalance } = require('bitcoin-core/src/methods');
 const Web3 = require('web3');
-const { concat } = require('lodash');
+const { concat, isEmpty } = require('lodash');
 require("dotenv").config()
 
 
@@ -405,6 +405,8 @@ module.exports =
             let index = -1
             let type = ""
             let transtype = ["POS","Website","Paylink"]
+            var limit  = isEmpty(req.body.limit) == true ? 25 : parseInt(req.body.limit)
+            var skip  = isEmpty(req.body.skip) == true ? 0 : parseInt(req.body.skip)
 
             if(Object.keys(req.body).indexOf("fromdate")!= -1){
                 var  fromdate   = req.body.fromdate
@@ -424,10 +426,10 @@ module.exports =
                 let dateRange       = fromdate != null ? { $gte:inputfromdated , $lte:inputtodateed}   : { $lte: inputtodateed }  
                 filter["createdAt"] = dateRange 
             }
-            if(Object.keys(req.body).indexOf("clientapikey") != -1){
-                filter["api_key"]   = req.body.clientapikey 
-            }
-          
+            // if(Object.keys(req.body).indexOf("clientapikey") != -1){
+            //     filter["api_key"]   = req.body.clientapikey 
+            // }
+            filter["api_key"]   = req.headers.authorization 
             let transactionPoolData = await transactionPool.aggregate([
                 {
                     $lookup: {
@@ -500,7 +502,9 @@ module.exports =
                         
                     }
                 }
-            ])
+            ]).sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             let posTransactionPoolData = await posTransactionPool.aggregate([
                 {
                     $lookup: {
@@ -535,7 +539,9 @@ module.exports =
                         as: "networkDetails"
                     }
                 },
-                { $match: { "api_key": req.headers.authorization } },
+                { 
+                    $match: filter,
+                },
                 {
                     "$project": {
                         "clientDetails.token": 0,
@@ -579,7 +585,9 @@ module.exports =
                         
                     }
                 }
-            ])
+            ]).sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
 
             let pyLinkTransPools = await paymentLinkTransactionPool.aggregate([
                 {
@@ -673,7 +681,9 @@ module.exports =
                          "networkDetails._id": 0
                     }
                 }
-            ])
+            ]).sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             
             let topupPools = await topups.aggregate([
                 {
@@ -743,7 +753,9 @@ module.exports =
                          "networkDetails._id": 0
                     }
                 }
-            ])
+            ]).sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
             res.json({ status: 200, message: "All Transcation", data:  { 
                 
                 "transactionPool"       : transactionPoolData, 

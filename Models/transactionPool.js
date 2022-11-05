@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-
+const mongoosePaginate = require("mongoose-paginate-v2");
 
 const transactionPoolSchema = new mongoose.Schema({
     id:
@@ -69,4 +69,5 @@ const transactionPoolSchema = new mongoose.Schema({
   },
     { timestamps: true }
 )
+transactionPoolSchema.plugin(mongoosePaginate);
 module.exports = mongoose.model('transactionPool', transactionPoolSchema)
