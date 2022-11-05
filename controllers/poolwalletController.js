@@ -205,9 +205,10 @@ module.exports =
         try {
         
             let network_details = await network.findOne({ 'id': network_id })
-          
+            console.log("========getPoolWalletID========",network_details) 
+
             let account = await poolWallet.findOne({ network_id: network_id, status: 0 })
-          
+            console.log("========account========",account) 
           
             if (account == null) {
                 if (network_details.libarayType == "Web3") {
@@ -218,6 +219,7 @@ module.exports =
                 }
                 else if (network_details.libarayType == "Tronweb") {
                     const { address, privateKey } = generateAccount()
+                    console.log("========account========", address, privateKey) 
                     const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
                     let val = await poolWalletItem.save()
                     return val

@@ -65,8 +65,8 @@ async function getTranscationDataForClient(transkey, type) {
     }
 }
 
-async function updateClientWallet(client_api_key, networkid, merchantbalance, processingfee = 0.01) {
-    console.log("==============updateClientWallet============", client_api_key, networkid, merchantbalance)
+async function updateClientWallet(client_api_key, networkid, merchantbalance, processingfee = 0.01) 
+{
     let val = await clientWallets.findOne({ api_key: client_api_key, network_id: networkid })
     if (val != null) {
         let clientWallet = await clientWallets.updateOne({ api_key: client_api_key, network_id: networkid }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * processingfee))) } })
@@ -505,7 +505,7 @@ module.exports =
                 return JSON.stringify(response)
             }
             amountstatus = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
-
+            console.log("BalanceOfAddress",BalanceOfAddress)  
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
             let GasFee = await calculateGasFee
                 (

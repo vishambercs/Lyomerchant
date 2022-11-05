@@ -393,7 +393,9 @@ module.exports =
             
             clients.findOne({ 'email': email }).then(async (val) => {
                 if (authenticator.check(code, val.secret)) {
+                   
                     if (val.two_fa == false) {
+                      
                         let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { two_fa: true } }, { $new: true })
                         let clientsdata = await clients.findOne({ email: req.body.email }, {
                             id: 1,
@@ -436,6 +438,7 @@ module.exports =
             })
         }
         catch (error) {
+            console.log("Verfiy_Google_Auth error",error)
             res.json({ status: 400, data: {}, message: "Verification Failed" })
         }
     },

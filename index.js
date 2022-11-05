@@ -46,15 +46,20 @@ app.use('/paymentlink/v1', payLinkRoute);
 cron.schedule('1 * * * * *', async() => {
     let response = await cornJobs.Balance_Cron_Job()
     console.log('running a task every minute',response);
-  });
+});
+
+cron.schedule('5 * * * * *', async() => {
+    let response = await cornJobs.Check_KYT_Address()
+    console.log('running a task every minute',response);
+});
 
 
   
 //  Database
 
-const privateKey   = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/privkey.pem',  'utf8');
-const certificate  = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/cert.pem',     'utf8');
-const ca           = fs.readFileSync('/etc/letsencrypt/live/sandbox.api.lyomerchant.com/fullchain.pem',    'utf8');
+const privateKey   = fs.readFileSync('/etc/letsencrypt/live/staging.api.lyomerchant.com/privkey.pem',  'utf8');
+const certificate  = fs.readFileSync('/etc/letsencrypt/live/staging.api.lyomerchant.com/cert.pem',     'utf8');
+const ca           = fs.readFileSync('/etc/letsencrypt/live/staging.api.lyomerchant.com/fullchain.pem',    'utf8');
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {

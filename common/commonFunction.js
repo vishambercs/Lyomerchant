@@ -123,6 +123,7 @@ async function getTranscationDataForClient(transkey) {
 async function getBalance(transdata, transData) {
     try {
         let addressObject = transdata[0]
+     
         let response = {}
         let account_balance_in_ether = 0
         let account_balance = 0
@@ -735,9 +736,9 @@ module.exports =
     },
     async get_data_of_Pos_transcation() {
         if (Constant.postransindex < Constant.posTransList.length) {
-            let transData = Constant.posTransList[Constant.postransindex]
+            let transData       = Constant.posTransList[Constant.postransindex]
             let transcationData = await transUtility.getPosTranscationData(transData.transkey)
-            let balance_data = await transUtility.getTrasnsBalance(transcationData)
+            let balance_data    = await transUtility.getTrasnsBalance(transcationData)
             let balanceResponse = JSON.parse(balance_data)
             console.log("get_data_of_Pos_transcation      ==", balanceResponse);
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
