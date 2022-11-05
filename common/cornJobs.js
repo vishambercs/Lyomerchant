@@ -20,7 +20,7 @@ var qs = require('qs');
 
 require("dotenv").config()
 
-async function transfer_from_pw_to_hw(nodeUrl, libarayType, fromaddress, toaddress, contractAddress, privateKey, balance) {
+async function transfer_from_pw_to_hw(nodeUrl, libarayType, cointype ,fromaddress, toaddress, contractAddress, privateKey, balance) {
     try {
         let gasfee = await transferUtility.calculateGasFee
             (
@@ -29,7 +29,8 @@ async function transfer_from_pw_to_hw(nodeUrl, libarayType, fromaddress, toaddre
                 fromaddress,
                 toaddress,
                 balance,
-                contractAddress
+                contractAddress,
+                cointype
             )
         console.log("=======gasfee=======", gasfee)
         if (gasfee.status == 400) {
@@ -59,6 +60,7 @@ async function transfer_from_pw_to_hw(nodeUrl, libarayType, fromaddress, toaddre
                     toaddress,
                     balance,
                     gasfee.data.gasamount,
+                    cointype,
                 )
             console.log("=======transfertokenWeb3=======", transfertoken)
             return transfertoken
@@ -222,6 +224,7 @@ async function Balance_Cron_Job() {
             let transfer_from_pw_to_hw_data = await transfer_from_pw_to_hw(
                 pooldata[0].networkDetails[0].nodeUrl,
                 pooldata[0].networkDetails[0].libarayType,
+                pooldata[0].networkDetails[0].cointype,
                 pooldata[0].poolwalletsDetails[0].address,
                 pooldata[0].hotwalletsDetails[0].address,
                 pooldata[0].networkDetails[0].contractAddress,

@@ -25,9 +25,9 @@ const transporter = nodemailer.createTransport({ host: "srv.lyotechlabs.com", po
 const feedWalletController = require('../controllers/Masters/feedWalletController');
 const transactionPools = require('../Models/transactionPool');
 
-async function transfertokenWeb3(nodeUrl, contractAddress, fromaddress, privateKey, toaddress, balance, gas = 100000) {
+async function transfertokenWeb3(nodeUrl, contractAddress, fromaddress, privateKey, toaddress, balance, cointype,gas = 100000) {
     try {
-        console.log("transfertokenWeb3", balance,gas)
+        if(cointype == "Token"){
         var web3 = new Web3(new Web3.providers.HttpProvider(nodeUrl));
         const contract = new web3.eth.Contract(Constant.USDT_ABI, contractAddress, { from: fromaddress })
         let decimals = await contract.methods.decimals().call();
@@ -45,6 +45,55 @@ async function transfertokenWeb3(nodeUrl, contractAddress, fromaddress, privateK
             }
         })
         return { status: 200, message: "Done", data: responsedata.transactionHash , output: responsedata }
+    }
+    else{
+        const web3 = new Web3(new Web3.providers.HttpProvider(nodeUrl))
+        const pubkey = await web3.eth.accounts.privateKeyToAccount(privateKey).address;
+        const balance = await web3.eth.getBalance(pubkey);
+        console.log("❗ balance ", balance)
+        const currentGas = await web3.eth.getGasPrice();
+        console.log("❗ currentGas ", currentGas)
+        console.log("❗ currentGas ", web3.utils.fromWei(currentGas, 'ether'))
+        const requiredGasPrice = await web3.eth.estimateGas({ to: toaddress });
+        console.log("❗ requiredGasPrice ", requiredGasPrice)
+        const gas = currentGas * requiredGasPrice;
+        console.log("❗ gas ", gas)
+        let amount = balance;
+        console.log("❗ amount ", amount)
+        console.log("❗ amount ", web3.utils.toWei(amount.toString(), 'ether'))
+        const nonce = await web3.eth.getTransactionCount(pubkey, 'latest');
+        const transaction =
+        {
+            'to': toaddress,
+            'value': web3.utils.toWei(amount.toString(), 'ether'),
+            'gas': requiredGasPrice,
+            'gasPrice': currentGas,
+            'nonce': nonce
+        };
+        const signedTx = await web3.eth.accounts.signTransaction(transaction, privateKey);
+        let responseData = await web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) {
+            if (!error) {
+                // console.log("🎉 The hash of your transaction is: ", hash);
+                // let datavalues = { "address": poolwalletAddress, "trans_id": hash, "transoutput": {}, "feeding_wallet_id": "0" }
+                // response = { status: 200, message: "success", data: datavalues }
+                // // res.json(response)
+                // return response
+                return { status: 200, message: "Done Successfully", data: hash }
+
+            } else {
+                
+             
+                let datavalues = { "address": poolwalletAddress, "trans_id": "0", "transoutput": {}, "feeding_wallet_id": "0" }
+                response =
+                {
+                    status: 400,
+                    message: "❗ Something went wrong while submitting your transaction: " + error,
+                    data: datavalues
+                }
+                return response
+            }
+        });
+    }
     }
     catch (error) {
         console.log("transfertokenWeb3", error)
@@ -293,12 +342,12 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
         return JSON.stringify(respone)
     }
 }
-async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, ContractAddress = "") {
+async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, ContractAddress = "",cointype="") {
     let gasAmount = 0
     let gasPrice = 0
     try {
        
-        if (Type == "Web3") {
+        if (Type == "Web3"  ) {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             gasPrice = await WEB3.eth.getGasPrice();
             if (ContractAddress != "") 

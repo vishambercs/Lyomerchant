@@ -128,11 +128,15 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
     let hotWallet = {};
     let created_by = 0
     try {
+        console.log("network_id",network_id)
         from_wallet = await feedWallets.aggregate([
             { $match: { "network_id": network_id, status: 1, } },
             { $lookup: { from: "networks", localField: "network_id", foreignField: "id", as: "networkDetails" } },
         ])
-        if (from_wallet != null) {
+     
+        console.log("from_wallet",from_wallet)
+        console.log("from_wallet", from_wallet[0].networkDetails[0])
+        if (from_wallet.length > 0) {
             let balance = await CheckBalanceOfAddress(
                 from_wallet[0].networkDetails[0].nodeUrl,
                 from_wallet[0].networkDetails[0].libarayType,
