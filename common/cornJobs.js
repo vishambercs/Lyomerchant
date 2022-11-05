@@ -210,6 +210,7 @@ async function Balance_Cron_Job() {
         )
         constant.addressBalance = constant.addressBalance.length == 0 ? address_balance : constant.addressBalance
         let trans_status = parseInt(pooldata[0].status)
+        
         if (address_balance.status == 200 &&  parseFloat(address_balance.data.format_token_balance) == 0) {
             let remarks = pooldata[0].remarks;
             let remarksData = await transferUtility.push_The_Remarks(remarks, "Previous Trans", "Balance_Cron_Job")

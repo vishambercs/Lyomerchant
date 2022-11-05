@@ -40,13 +40,12 @@ app.use('/wallet/v1',    walletRoute);
 app.use('/hotWallet/v1', hotWalletRoute);
 app.use('/withdraw/v1',  withdrawRoute);
 app.use('/admin/v1',     adminRoute);
-
 app.use('/paymentlink/v1', payLinkRoute);
 
-// cron.schedule('1 * * * * *', async() => {
-//     let response = await cornJobs.Balance_Cron_Job()
-//     console.log('running a task every minute',response);
-// });
+cron.schedule('1 * * * * *', async() => {
+    let response = await cornJobs.Balance_Cron_Job()
+    console.log('running a task every minute',response);
+});
 
 cron.schedule('5 * * * * *', async() => {
     let response = await cornJobs.Check_KYT_Address()
