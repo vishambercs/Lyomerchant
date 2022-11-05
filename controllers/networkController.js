@@ -413,12 +413,11 @@ module.exports =
                         "networkDetails.network"    : 1, 
                     }
                 }
-
             ])
             res.json({ status: 200, message: "get", data: networksDetails })
         }
         catch (error) {
-            console.log(error)
+            console.log("allPreferedeNetworkForClient",error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },

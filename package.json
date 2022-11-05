@@ -45,6 +45,7 @@
     "qrcode": "^1.5.1",
     "send-crypto": "^0.2.38",
     "socket.io": "^4.5.1",
+    "socket.io-client": "^4.5.3",
     "tron-create-address": "^0.1.10",
     "tronstation": "^1.0.1",
     "tronweb": "^4.3.0",
