@@ -40,6 +40,12 @@
                                             </th>
                                             <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Status
                                             </th>
+                                            <!-- <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Address
+                                            </th> -->
+                                            <%if (data.address.length > 0) { %>
+                                                <th style="border: 1px solid #dddddd; text-align: left;padding: 8px;">Address
+                                                </th>
+                                           <% } %>
                                         </tr>
                                         <tr>
                                             <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
@@ -54,6 +60,11 @@
                                             <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
                                                 <%= data.status%>
                                             </td>
+                                            <%if (data.address.length > 0) { %>
+                                                <td style="border: 1px solid #dddddd; text-align: left;padding: 8px;">
+                                                    <%= data.address%>
+                                                </td>
+                                           <% } %>
                                         </tr>
 
                                     </table>
