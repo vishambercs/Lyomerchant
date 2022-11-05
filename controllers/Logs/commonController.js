@@ -20,12 +20,11 @@ module.exports =
     async getTransStatus(req, res) {
         try {
             let id = req.body.transid;
-            let pyTranPool      = await paymentLinkTransactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
-            let posTranPool     = await posTransactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
-            let TranPool        = await transactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
-            console.log(TranPool)
-            let topup           = await topups.findOne({ "id": id, "api_key": req.headers.authorization })
-            console.log(topup)
+            let pyTranPool      = await paymentLinkTransactionPool.findOne({ "id": id,  "api_key": req.headers.authorization })
+            let posTranPool     = await posTransactionPool.findOne({ "id": id,          "api_key": req.headers.authorization })
+            let TranPool        = await transactionPool.findOne({ "id": id,             "api_key": req.headers.authorization })
+            let topup           = await topups.findOne({ "id": id,                      "api_key": req.headers.authorization })
+          
 
             let poolwallet = pyTranPool != null ? await poolWallets.findOne({ id: pyTranPool.poolwalletID }) : null
             poolwallet = (poolwallet == null && posTranPool != null) ? await poolWallets.findOne({ id: posTranPool.poolwalletID }) : poolwallet

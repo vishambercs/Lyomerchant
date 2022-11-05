@@ -49,14 +49,14 @@ async function createFeedWalletsFun(network_id, created_by) {
     }
 }
 
-async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") 
+async function CheckBalanceOfAddress(Nodeurl, Type, cointype,Address, ContractAddress = "", privateKey = "") 
 {
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
     let format_native_balance = 0
     try {
-        if (Type == "Web3") 
+        if (Type == "Web3" && cointype == "Token") 
         {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             if (ContractAddress != "") {
@@ -70,6 +70,18 @@ async function CheckBalanceOfAddress(Nodeurl, Type, Address, ContractAddress = "
             native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
+            return { status: 200, data: balanceData, message: "sucess" }
+        }
+        else if (Type == "Web3" && cointype == "Native") 
+        {
+            const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
+            let native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
+            let format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
+            let balanceData = { 
+                "token_balance": native_balance, 
+                "format_token_balance": format_native_balance, 
+                "native_balance": native_balance, 
+                "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
         else if(Type == "Tronweb")
@@ -124,6 +136,7 @@ async function addressFeedingFun(network_id, poolwalletAddress, amount) {
             let balance = await CheckBalanceOfAddress(
                 from_wallet[0].networkDetails[0].nodeUrl,
                 from_wallet[0].networkDetails[0].libarayType,
+                from_wallet[0].networkDetails[0].cointype,
                 from_wallet[0].address,
                 from_wallet[0].networkDetails[0].contractAddress,
                 from_wallet[0].privatekey)
@@ -326,7 +339,7 @@ module.exports =
             {
                 res.json({ status: 400, data: {}, message: "Invalid id" })
             }
-            let balance = await CheckBalanceOfAddress(fromWallets[0].networkDetails[0].nodeUrl, fromWallets[0].networkDetails[0].libarayType, fromWallets[0].address, fromWallets[0].networkDetails[0].contractAddress, fromWallets[0].privatekey) 
+            let balance = await CheckBalanceOfAddress(fromWallets[0].networkDetails[0].nodeUrl, fromWallets[0].networkDetails[0].libarayType,fromWallets[0].networkDetails[0].cointype, fromWallets[0].address, fromWallets[0].networkDetails[0].contractAddress, fromWallets[0].privatekey) 
           
             res.json(balance)
         }

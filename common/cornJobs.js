@@ -200,16 +200,13 @@ async function Balance_Cron_Job() {
         let address_balance = await feedWalletController.CheckBalanceOfAddress(
             pooldata[0].networkDetails[0].nodeUrl,
             pooldata[0].networkDetails[0].libarayType,
+            pooldata[0].networkDetails[0].cointype,
             pooldata[0].poolwalletsDetails[0].address,
             pooldata[0].networkDetails[0].contractAddress,
             pooldata[0].poolwalletsDetails[0].privateKey
         )
-
-
         constant.addressBalance = constant.addressBalance.length == 0 ? address_balance : constant.addressBalance
         let trans_status = parseInt(pooldata[0].status)
-       
-
         if (address_balance.status == 200 &&  parseFloat(address_balance.data.format_token_balance) == 0) {
             let remarks = pooldata[0].remarks;
             let remarksData = await transferUtility.push_The_Remarks(remarks, "Previous Trans", "Balance_Cron_Job")
