@@ -27,7 +27,9 @@ const transactionPools = require('../Models/transactionPool');
 
 async function transfertokenWeb3(nodeUrl, contractAddress, fromaddress, privateKey, toaddress, balance, cointype,gas = 100000) {
     try {
-        if(cointype == "Token"){
+        console.log(nodeUrl, contractAddress, fromaddress, privateKey, toaddress, balance, cointype)
+        if(cointype == "Token")
+        {
         var web3 = new Web3(new Web3.providers.HttpProvider(nodeUrl));
         const contract = new web3.eth.Contract(Constant.USDT_ABI, contractAddress, { from: fromaddress })
         let decimals = await contract.methods.decimals().call();
@@ -40,7 +42,7 @@ async function transfertokenWeb3(nodeUrl, contractAddress, fromaddress, privateK
             if (!error) {
                 return { status: 200, message: "Done Successfully", data: hash }
             } else {
-                console.log("❗Something went wrong while submitting your transaction:", error)
+                console.log("❗transfertokenWeb3 Token Something went wrong while submitting your transaction:", error)
                 return { status: 400, message: error, data: "" }
             }
         })
@@ -71,7 +73,7 @@ async function transfertokenWeb3(nodeUrl, contractAddress, fromaddress, privateK
             'nonce': nonce
         };
         const signedTx = await web3.eth.accounts.signTransaction(transaction, privateKey);
-        let responseData = await web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) {
+        let responsedata = await web3.eth.sendSignedTransaction(signedTx.rawTransaction, function (error, hash) {
             if (!error) {
                 // console.log("🎉 The hash of your transaction is: ", hash);
                 // let datavalues = { "address": poolwalletAddress, "trans_id": hash, "transoutput": {}, "feeding_wallet_id": "0" }
@@ -87,16 +89,17 @@ async function transfertokenWeb3(nodeUrl, contractAddress, fromaddress, privateK
                 response =
                 {
                     status: 400,
-                    message: "❗ Something went wrong while submitting your transaction: " + error,
+                    message: "❗transfertokenWeb3 Native Something went wrong while submitting your transaction: " + error,
                     data: datavalues
                 }
                 return response
             }
         });
+        return { status: 200, message: "Done", data: responsedata.transactionHash , output: responsedata }
     }
     }
     catch (error) {
-        console.log("transfertokenWeb3", error)
+        console.log("transfertokenWeb3 Native ", error)
         return { status: 401, data: "", output: "",message: error.message }
     }
 }
@@ -342,7 +345,8 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
         return JSON.stringify(respone)
     }
 }
-async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, ContractAddress = "",cointype="") {
+async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, ContractAddress = "") {
+   
     let gasAmount = 0
     let gasPrice = 0
     try {

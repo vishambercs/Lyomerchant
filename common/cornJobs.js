@@ -22,15 +22,16 @@ require("dotenv").config()
 
 async function transfer_from_pw_to_hw(nodeUrl, libarayType, cointype ,fromaddress, toaddress, contractAddress, privateKey, balance) {
     try {
+      
         let gasfee = await transferUtility.calculateGasFee
             (
                 nodeUrl,
                 libarayType,
-                fromaddress,
-                toaddress,
+                fromaddress.toLowerCase(),
+                toaddress.toLowerCase(),
                 balance,
-                contractAddress,
-                cointype
+                contractAddress.toLowerCase(),
+             
             )
         console.log("=======gasfee=======", gasfee)
         if (gasfee.status == 400) {
