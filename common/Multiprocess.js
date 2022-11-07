@@ -19,12 +19,6 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
         {
             let jsondata        =  JSON.parse(message.utf8Data)
           
-           
-            // console.log("==========jsondata================", jsondata) 
-            // const jsonresponse    = JSON.parse(jsondata)
-            // console.log("==========jsondata================", typeof jsonresponse) 
-            // console.log("==========jsondata================",  jsonresponse) 
-            // console.log("==========jsondata================", jsonresponse.transkey) 
             let transData       = {} 
             var index               = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transkey)
              
@@ -36,7 +30,14 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
             if((jsondata.amountstatus == 1 || jsondata.amountstatus == 3 ) && index != -1)
             {
 
-                let response        = { amountstatus: jsondata.amountstatus,"paid_in_usd":jsondata.paid, "paid": jsondata.paid, status: 200, message: "Success" };
+                let response        = { amountstatus: jsondata.amountstatus,"paid_in_usd":jsondata.paid_in_usd, "paid": jsondata.paid, status: 200, message: "Success" };
+                transData.connection.sendUTF(JSON.stringify(response));
+                transData.connection.close(1000)
+                Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transkey);
+            }
+            if((jsondata.amountstatus == 4 ) && index != -1)
+            {
+                let response        = { amountstatus: jsondata.amountstatus,"paid_in_usd":jsondata.paid_in_usd, "paid": jsondata.paid, status: 200, message: "Transcation Expired" };
                 transData.connection.sendUTF(JSON.stringify(response));
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transkey);
