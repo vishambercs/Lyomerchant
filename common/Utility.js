@@ -47,12 +47,12 @@ module.exports =
             let uniqueKey           = crypto.randomBytes(20).toString('hex')
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
-            console.log("topupWebScokect =====================================",queryvariable);
+            // console.log("topupWebScokect =====================================",queryvariable);
 
             var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData  = await commonFunction.get_Transcation_topup(queryvariable.transkey,queryvariable.apikey)
             
-            console.log("topupWebScokect =====================================",getTranscationData);
+            
 
             if(getTranscationData.length > 0)
             {
@@ -69,7 +69,7 @@ module.exports =
             }
             connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
             let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount)
-            console.log("============Multiprocess==============",data)
+            // console.log("============Multiprocess==============",data)
 
 
 
@@ -96,12 +96,15 @@ module.exports =
             let uniqueKey           = crypto.randomBytes(20).toString('hex')
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
-            console.log("topupWebScokect =====================================",queryvariable);
+            // console.log("topupWebScokect =====================================",queryvariable);
             let timestamp = new Date().getTime()
             const connection        = request.accept(null, request.origin);
             var index = Constant.topupTransList.findIndex(translist => translist.transid == queryvariable.transid)
             const details             = await Network.findOne({id:queryvariable.network_id});
             const walletdetails       = await poolWallet.findOne({network_id:queryvariable.network_id ,address : queryvariable.transkey});
+            
+            const forked_child_process = childProcess.fork('./worker-pool.js');
+           
             if(index == -1)
             {
             let client_object  = {  
@@ -116,16 +119,15 @@ module.exports =
               
             }
                Constant.topupTransList.push(client_object)
+               let parameters ={  "details"    : details, "walletdetails": walletdetails,"transid" : queryvariable.transid,"amount" : queryvariable.amount,"network_id" : queryvariable.network_id,"address" : queryvariable.transkey, "timestamp" :timestamp }
+               forked_child_process.send(parameters);
             }
             else
             {
                 Constant.topupTransList[index]["connection"]    = connection
                 Constant.topupTransList[index]["timestamp"]     = timestamp
             }
-
-            const forked_child_process = childProcess.fork('./worker-pool.js');
-            let parameters ={  "details"    : details, "walletdetails": walletdetails,"transid" : queryvariable.transid,"amount" : queryvariable.amount,"network_id" : queryvariable.network_id,"address" : queryvariable.transkey, "timestamp" :timestamp }
-            forked_child_process.send(parameters);
+          
             forked_child_process.on("message", balancedata => { 
             var index = Constant.topupTransList.findIndex(translist => translist.transkey == balancedata.address)
             if(index != -1)

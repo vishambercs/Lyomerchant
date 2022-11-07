@@ -27,6 +27,16 @@ const poolWalletSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    previousbalance: {
+        type: Number,
+        required: false,
+        default : 0,
+    },
+    queue: {
+        type: Number,
+        required: false,
+        default : 0,
+    },
     status: {
         type: Number,
         required: false,
@@ -43,14 +53,14 @@ const poolWalletSchema = new mongoose.Schema({
         default: " ",
     },
 },
-    {
-        toJSON: {
-            transform(doc, ret) {
-                delete ret.privateKey;
-                delete ret.__v;
-            },
-        },
-    },
+    // {
+    //     toJSON: {
+    //         transform(doc, ret) {
+    //             delete ret.privateKey;
+    //             delete ret.__v;
+    //         },
+    //     },
+    // },
     { timestamps: true }
 )
 module.exports = mongoose.model('poolWallet', poolWalletSchema)

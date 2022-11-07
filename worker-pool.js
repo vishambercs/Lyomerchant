@@ -3,16 +3,40 @@ const WEB3          = new Web3(new Web3.providers.HttpProvider("https://data-see
 const Constant      = require('./common/Constant');
 const Network       = require('./Models/network');
 const poolWallet    = require('./Models/poolWallet');
-const TronWeb       = require('tronweb')
+const TronWeb       = require('tronweb');
+
+const HttpProvider = TronWeb.providers.HttpProvider;
+const fullNode = new HttpProvider("https://api.trongrid.io");
+const solidityNode = new HttpProvider("https://api.trongrid.io");
+const eventServer = new HttpProvider("https://api.trongrid.io");
+const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, "50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78");
+
+function sleep(milliseconds) {
+  const date = Date.now();
+  let currentDate = null;
+  do {
+    currentDate = Date.now();
+  } while (currentDate - date < milliseconds);
+}
+
+let checkBalStatus = true;
 process.on("message",async (parameters) => {
-  var minutes = 0;
-  var remain = 0;
-  var status = 0 ;
-  console.log(parameters)
+  var minutes  = 0;
+  var remain   = 0;
+  var status   = 0 ;
   while(minutes < 10 && status == 0)
   {
-   
-  let balancedata     = await checkbalance(parameters.address,parameters.details,parameters.walletdetails);
+
+    // let balancedata = { status: 200, message: "sucess","balance": 0, "format_balance": 0, "native_balance": 0, "format_native_balance": 0 };
+    let balancedata = await checkbalance(parameters.address,parameters.details,parameters.walletdetails);
+    // if (checkBalStatus) {
+    //   checkBalStatus = false;
+    //   balancedata = await checkbalance(parameters.address,parameters.details,parameters.walletdetails);
+    //   setTimeout(() => {
+    //     checkBalStatus = true;
+    //   }, 2000);
+    // }
+
   let balance         = 
   { 
     "balancedata" : balancedata , 
@@ -23,7 +47,7 @@ process.on("message",async (parameters) => {
   const currentdate   = new Date().getTime()
   var diff            = currentdate - previousdate.getTime();
   minutes             = (diff / 60000)
-  status              = parseFloat(balancedata.format_balance) > 0 ? 1 : 0
+  status              = balancedata.format_balance > 0 ? 1 : 0
   balance["time"]     = minutes
   balance["remain"]   = parameters.amount - balancedata.format_balance
   balance["address"]  = parameters.address
@@ -32,28 +56,36 @@ process.on("message",async (parameters) => {
   balance["paid"]     = balancedata.format_balance
   balance["transid"]  = parameters.transid
   process.send(balance);
+  sleep(2000)
   }
   process.exit();
 })
 
 async function checkbalance(address,details,walletdetails)
 {
-
-  if(details != null )
+  
+  if(details == null )
   {
     return {"status":400, "balance":0,"format_balance":0 ,"native_balance": 0, "format_native_balance": 0,"message": "Invalid Network"};
   }
-  let checkadd = await CheckAddress(details.nodeUrl, details.libarayType, address, details.contractAddress, walletdetails.privateKey)
+  
+  let checkadd = await CheckAddress(details.nodeUrl, details.libarayType,details.cointype, address, details.contractAddress, walletdetails.privateKey)
+   if(checkadd.balance > 0){
+    console.log("Web3 checkadd========================================",checkadd)
+   }
+  
+ 
   return checkadd;
 }
-async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
+async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "", privateKey = "") {
 
   let balance = 0
   let format_balance = 0
   let native_balance = 0
   let format_native_balance = 0
   try {
-      if (Type == "Web3") {
+      if (Type == "Web3" && cointype == "Token") {
+        
           const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
           if (ContractAddress != "") {
               const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
@@ -69,16 +101,28 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
           let balanceData = {  message: "sucess",status: 200, "balance": balance, "format_balance": format_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
           return balanceData
       }
+      else if (Type == "Web3" && cointype == "Native") {
+      
+        const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
+        let native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
+        let format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
+        let balanceData = {  message: "sucess",status: 200, "balance": native_balance, "format_balance": format_native_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
+        return balanceData
+      }
       else {
-          const HttpProvider = TronWeb.providers.HttpProvider;
-          const fullNode = new HttpProvider(Nodeurl);
-          const solidityNode = new HttpProvider(Nodeurl);
-          const eventServer = new HttpProvider(Nodeurl);
-          const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+          
+        
+          // console.log("Web3 Native========================================",Type,cointype,Address,cointype)
+          // let headers = {};
+          //       headers["TRON-PRO-API-KEY"] = "12c2276c-a9e9-4121-8721-31c8ffb4c1c7";
+          //       const tronWeb = new TronWeb({
+          //           fullHost: "https://api.trongrid.io",
+          //           headers: headers,
+          //           privateKey : "50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78"
+          //       });
           let contract = await tronWeb.contract().at(ContractAddress);
           native_balance = await tronWeb.trx.getBalance(Address)
           balance = await contract.balanceOf(Address).call();
-
           format_balance = tronWeb.toBigNumber(balance)
           format_balance = tronWeb.toDecimal(format_balance)
           format_balance = tronWeb.fromSun(format_balance)
@@ -91,7 +135,8 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
 
   }
   catch (error) {
-      console.log(error)
+    
+      console.log("Error========================================",error)
       let balanceData = { status: 400,message: "Error","balance": balance, "format_balance": format_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
       return balanceData
   }
