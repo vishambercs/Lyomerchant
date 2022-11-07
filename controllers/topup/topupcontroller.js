@@ -107,9 +107,8 @@ module.exports =
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             let account = await poolwalletController.getPoolWalletID(networkType)
-
             const transactionPool = new topup({
-                id: mongoose.Types.ObjectId(),
+                id  : mongoose.Types.ObjectId(),
                 api_key: req.headers.authorization,
                 poolwalletID: account.id,
                 amount: 0,
