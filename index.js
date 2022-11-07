@@ -125,7 +125,7 @@ paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
 
 var topupserver = https.createServer({
     key                 :  privateKey,
-    cert                :  certificate,  
+    // cert                :  certificate,  
     ca                  :  ca, 
     requestCert         :  false, 
     rejectUnauthorized  :  false

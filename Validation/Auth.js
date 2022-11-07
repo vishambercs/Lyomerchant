@@ -44,7 +44,6 @@ module.exports =
         try {
 
             let api_key = req.headers.authorization;
-            console.log(api_key)
             let user = await merchantcategory.findOne({ clientapikey: api_key , status: 1 });
             
             if (user != null) {

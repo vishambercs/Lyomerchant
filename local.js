@@ -53,15 +53,15 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 
-cron.schedule('1 * * * * *', async() => {
-    let response = await cornJobs.Balance_Cron_Job()
-    console.log('running a task every minute',response);
-});
+// cron.schedule('1 * * * * *', async() => {
+//     let response = await cornJobs.Balance_Cron_Job()
+//     console.log('running a task every minute',response);
+// });
 
-cron.schedule('5 * * * * *', async() => {
-    let response = await cornJobs.Check_KYT_Address()
-    console.log('running a task every minute',response);
-});
+// cron.schedule('5 * * * * *', async() => {
+//     let response = await cornJobs.Check_KYT_Address()
+//     console.log('running a task every minute',response);
+// });
 
 // cron.schedule('1 * * * * *', async() => {
 //     let response = await cornJobs.Check_KYT_Address()

@@ -57,13 +57,21 @@ const topupschema = new mongoose.Schema({
         type: String,
         required: false,
     },
-    
     timestamps : 
     {
         type: String,
         required: true,
     },
-
+    manaulupdatedby : 
+    {
+        type: String,
+        required: false,
+    },
+    manaulupdatedat : 
+    {
+        type: String,
+        required: false,
+    },
 },
    
     { timestamps: true }

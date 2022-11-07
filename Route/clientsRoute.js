@@ -151,6 +151,7 @@ router.post('/assigntopupMerchantWallet',               topupcontroller.create_t
 router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
+router.post('/checkbalance',                 topupcontroller.checkbalance);
 
 // router.post('/updateQuickpayment',              topupcontroller.updateQuickpayment);
 // router.post('/getQuickNetwork',                 topupcontroller.allNetworkForClient);

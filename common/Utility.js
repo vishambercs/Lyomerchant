@@ -346,12 +346,12 @@ module.exports =
             let uniqueKey           = crypto.randomBytes(20).toString('hex')
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
-            console.log("topupWebScokect =====================================",queryvariable);
+     
 
             var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData  = await commonFunction.get_Transcation_topup(queryvariable.transkey,queryvariable.apikey)
             
-            console.log("topupWebScokect =====================================",getTranscationData);
+          
 
             if(getTranscationData.length > 0)
             {
@@ -368,7 +368,7 @@ module.exports =
             }
             connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
             let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount)
-            console.log("============Multiprocess==============",data)
+            
 
 
 
