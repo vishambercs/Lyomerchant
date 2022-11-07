@@ -20,7 +20,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             let jsondata        = JSON.parse(message.utf8Data)
             let transData       = Constant.topupTransList[index]
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
-            console.log(jsondata.status)
+          
             if(index != -1 )
             {
                 transData       = Constant.topupTransList[index]
@@ -33,6 +33,14 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                 transData.connection.sendUTF(JSON.stringify(response));
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
+            }
+            else if (jsondata.minutes > 10)
+            {
+             
+                let response        = { transkey:jsondata.transid ,amountstatus: 4,"paid_in_usd":0, "paid": 0, status: 200, message: "Transcation Expirexd" };
+                transData.connection.sendUTF(JSON.stringify(response));
+                transData.connection.close(1000)
+                Constant.topupTransList =  Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
             }
             else if (index != -1)
             {
