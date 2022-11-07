@@ -1,9 +1,8 @@
-const WebSocketClient = require('websocket').client;
+const WebSocketClient  = require('websocket').client;
+const Constant         = require('./Constant');
 require("dotenv").config()
-const topupUtility     = require('./topupUtility');
-const Constant        = require('./Constant');
 
-function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount) {
+function Create_Node_Sockect_Connection(transkey,apikey) {
     var client = new WebSocketClient();
     client.on('connectFailed', function (error) {
         console.log('Connect Error: ' + error.toString());
@@ -16,39 +15,44 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
         connection.on('close', function () {
             console.log('Connection closed!');
         });
-        connection.on('message', async function (message) {
-            let jsondata        = JSON.parse(message.utf8Data)
-            let transData       = Constant.topupTransList[index]
-            var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
-            console.log(jsondata.status)
+        connection.on('message', async function (message) 
+        {
+            let jsondata        =  JSON.parse(message.utf8Data)
+          
+           
+            // console.log("==========jsondata================", jsondata) 
+            // const jsonresponse    = JSON.parse(jsondata)
+            // console.log("==========jsondata================", typeof jsonresponse) 
+            // console.log("==========jsondata================",  jsonresponse) 
+            // console.log("==========jsondata================", jsonresponse.transkey) 
+            let transData       = {} 
+            var index               = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transkey)
+             
             if(index != -1 )
             {
                 transData       = Constant.topupTransList[index]
             }
-            if((jsondata.status == 1 || jsondata.status == 3 ) && index != -1)
+
+            if((jsondata.amountstatus == 1 || jsondata.amountstatus == 3 ) && index != -1)
             {
-                let responseapi     = await topupUtility.verifyTheBalance(jsondata.transid)
-                let responseapijson = JSON.parse(responseapi)
-                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paid_in_usd":jsondata.paid, "paid": jsondata.paid, status: 200, message: "Success" };
+
+                let response        = { amountstatus: jsondata.amountstatus,"paid_in_usd":jsondata.paid, "paid": jsondata.paid, status: 200, message: "Success" };
                 transData.connection.sendUTF(JSON.stringify(response));
                 transData.connection.close(1000)
-                Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
+                Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transkey);
             }
             else if (index != -1)
             {
                 let transData       = Constant.topupTransList[index]
-                let response        = { transkey:jsondata.transid ,amountstatus: jsondata.status,"paid_in_usd":0, "paid": jsondata.paid, status: 200, message: "Success" };
+                let response        = { amountstatus: jsondata.amountstatus,"paid_in_usd":0, "paid": jsondata.paid, status: 200, message: "Success" };
                 let balanceResponse = JSON.stringify(response)
-                transData.connection.sendUTF(balanceResponse);
+                transData.connection.sendUTF(JSON.stringify(balanceResponse));
             }
         });
     });
     let url = process.env.NODE_WEB_SCOKECT
     url += "transkey="+transkey
     url += "&apikey="+apikey
-    url += "&network_id="+network_id
-    url += "&amount="+amount
-    url += "&transid="+transid
     console.log("============url============",url)
     client.connect(url, '', "");
 
