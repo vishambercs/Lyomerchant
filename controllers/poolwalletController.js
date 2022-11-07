@@ -1,6 +1,7 @@
 const poolWallet = require('../Models/poolWallet');
 const network = require('../Models/network');
 const feedWallets = require('../Models/feedWallets');
+const hotWallets = require('../Models/hotWallets');
 const Utility = require('../common/Utility');
 var mongoose = require('mongoose');
 var crypto = require("crypto");
@@ -223,11 +224,24 @@ module.exports =
                     return val
                 }
                 else if (network_details.libarayType == "btcnetwork") {
-                    const privateKey =  CryptoAccount.newPrivateKey();
-                    const account = new CryptoAccount(privateKey);
-                    const address = await account.address("BTC")
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
-                    let val = await poolWalletItem.save()
+                    let URL = process.env.BTC_ADDRESS_GENERATION
+                    let hotwallet = await hotWallets.findOne({network_id : network_id , status : 1})
+                    URL += "action=createChild_BTC_Wallet"
+                    URL += "&master_BTC_Wallet="+hotwallet.address
+                    let btc_address = await Utility.Get_RequestByAxios(URL,{},{})
+                    let btcaddress = JSON.parse(btc_address.data).data
+                    let address    = btcaddress.errorCode == 0 ? btcaddress.data.child_BTC_WalletAddress : null
+                    let val   = null
+                    if(address != null)
+                    { 
+                    const poolWalletItem  = new poolWallet({ 
+                        remarks: "Created at Run Time: " + (new Date().toString()), 
+                        id: crypto.randomBytes(20).toString('hex'), 
+                        network_id: network_id, 
+                        address: address, 
+                        privateKey: " ", });
+                    val     = await poolWalletItem.save()
+                    }
                     return val
                 }
             }
