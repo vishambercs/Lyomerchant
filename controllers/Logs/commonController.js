@@ -23,9 +23,8 @@ module.exports =
             let pyTranPool      = await paymentLinkTransactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
             let posTranPool     = await posTransactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
             let TranPool        = await transactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
-            console.log(TranPool)
             let topup           = await topups.findOne({ "id": id, "api_key": req.headers.authorization })
-            console.log(topup)
+        
 
             let poolwallet = pyTranPool != null ? await poolWallets.findOne({ id: pyTranPool.poolwalletID }) : null
             poolwallet = (poolwallet == null && posTranPool != null) ? await poolWallets.findOne({ id: posTranPool.poolwalletID }) : poolwallet
@@ -51,19 +50,25 @@ module.exports =
             currency     = (amount == 0 && TranPool != null)    ? TranPool.currency : currency
             currency     = (amount == 0 && topup != null)       ? topup.currency : currency
             
+            let fiat_amount = topup != null  ? topup.fiat_amount : 0
+          
+
+            let order_id = topup != null  ? topup.orderid : ""
             // let invoiceNumber = pyTranPool != null ? pyTranPool.invoiceNumber : ""
 
             let datarray = 
             {
                 "transaction_status"    : (status.length > 0 ? status[0].title : ""),
+                "orderid"               :   order_id,
                 "transaction_id"        : req.body.transid,
                 "address"               : (poolwallet != null ? poolwallet.address : ""),
                 "coin"                  : (networkDetails != null ? networkDetails.coin : ""),
                 "network"               : (networkDetails != null ? networkDetails.network : ""),
                 "crypto_amount"         :  amount,
-                "invoicenumber"         :  (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
-                "fiat_amount"           :  (invoice_data != null ) ? invoice_data.totalAmount : "" ,
-                "currency"              :   currency   
+                // "invoicenumber"      :  (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
+             
+                "fiat_amount"           :  fiat_amount ,
+                // "currency"           :   currency   
                 
             }
 
