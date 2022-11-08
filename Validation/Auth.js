@@ -15,8 +15,21 @@ const clients = require('../Models/clients');
 require("dotenv").config()
 module.exports =
 {
+  async Verfiy_WebHook(req, res, next) {
+        try {
+            let api_key = req.headers.authorization;
+            if (api_key == "UPd34b73f4ab3ba08fae12e39c4660f746dad5dbe7TOP"){
+                next()
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
 
-    
+        }
+        catch (error) {
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
     async Verfiy_Merchant(req, res, next) {
         try {
             let api_key = req.headers.authorization;

@@ -79,24 +79,19 @@ async function get_Transcation_topup(transkey) {
 }
 async function pricecalculation(coinid,balance) {
     try {
-        let networks = await network.findOne({ 'id': coinid })
-        let networktitle = networks.currencyid.toLowerCase()
-        let parameters = `ids=${networks.currencyid}&vs_currencies=usd`
-        let COINGECKO_URL = process.env.COINGECKO + parameters
-        response = {}
-        await axios.get(COINGECKO_URL, {
-            params: {},
-            headers: {}
-        }).then(res => {
+        let networks         = await network.findOne({ 'id': coinid })
+        let networktitle     = networks.currencyid.toLowerCase()
+        let parameters       = `ids=${networks.currencyid}&vs_currencies=usd`
+        let COINGECKO_URL    = process.env.COINGECKO + parameters
+        response             = {}
+        await axios.get(COINGECKO_URL, { params: {},headers: {}}).then(res => {
             var stringify_response = stringify(res)
             response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
-        })
-            .catch(error => {
+        }).catch(error => {
                 console.error("Error", error)
                 var stringify_response = stringify(error)
                 response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
-            })
-
+        })
         var stringify_response = JSON.parse(response.data)
         let pricedata = stringify_response.data
         let pricedatacurrency           = pricedata[networktitle]

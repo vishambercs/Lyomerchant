@@ -36,14 +36,14 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
             }
-            else if (jsondata.time > 10 && index != -1)
-            {
-                let responseapi     = await topupUtility.expiredTheBalance(jsondata.transid)
-                let response        = {transkey:jsondata.transid ,amountstatus: 4 ,"paid_in_usd":responseapi.paid_in_usd, "paid": responseapi.paid, status: 200, message: "Transcation Expired" };
-                transData.connection.sendUTF(JSON.stringify(response));
-                transData.connection.close(1000)
-                Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
-            }
+            // else if (jsondata.time > 10 && index != -1)
+            // {
+            //     let responseapi     = await topupUtility.expiredTheBalance(jsondata.transid)
+            //     let response        = {transkey:jsondata.transid ,amountstatus: 4 ,"paid_in_usd":responseapi.paid_in_usd, "paid": responseapi.paid, status: 200, message: "Transcation Expired" };
+            //     transData.connection.sendUTF(JSON.stringify(response));
+            //     transData.connection.close(1000)
+            //     Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
+            // }
             else if (index != -1)
             {
                 let transData       = Constant.topupTransList[index]
