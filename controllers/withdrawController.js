@@ -614,20 +614,20 @@ module.exports =
             const network   = await networks.findOne({ id: balance.network_id })
             let coinprice   = await priceNewConversition(network.currencyid)
             let nativeprice = await priceNewConversition(network.native_currency_id)
-            // if (amount <= (network.transferlimit/coinprice) ) 
-            // {  
-            //     return   res.json({
-            //      status: 200, 
-            //      data: 
-            //     {
-            //         "withdraw_amount"   : req.body.amount ,
-            //         "transcationfee"    : 0 , 
-            //         "limit"             : network.transferlimit/coinprice, 
-            //         "netamount"         : req.body.amount 
-            //     }, 
-            //      message: "Amount shoud be greater than or equal to minimum Withdrawal limit" }
-            //     )
-            // }
+            if (amount <= (network.transferlimit/coinprice) ) 
+            {  
+                return   res.json({
+                 status: 200, 
+                 data: 
+                {
+                    "withdraw_amount"   : req.body.amount ,
+                    "transcationfee"    : 0 , 
+                    "limit"             : network.transferlimit/coinprice, 
+                    "netamount"         : req.body.amount 
+                }, 
+                 message: "Amount shoud be greater than or equal to minimum Withdrawal limit" }
+                )
+            }
 
             let transfer_fee      = 0;
             let networkFee        = null;
