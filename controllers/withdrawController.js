@@ -155,7 +155,7 @@ module.exports =
             let currentDateTemp          = Date.now();
             let transfer_fee = 0;
             let networkFee = null;
-             
+            let new_networkFee = 0;
            if(network.withdrawflag == 1)
             {
                 networkFee            = await Network_Fee_Calculation(network,amount)
@@ -164,6 +164,7 @@ module.exports =
             }
             else if(network.withdrawflag == 2)
             {
+                
                 // networkFee            = await Network_Fee_Calculation(network)
                 transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  network.fixedfee
             
@@ -179,8 +180,9 @@ module.exports =
                     api_key          : req.headers.authorization,
                     network_id       : req.body.network_id,
                     amount           : req.body.amount,
-                    fee              : transfer_fee,
-                    netamount        : (req.body.amount - transfer_fee),
+                    networkFee       : new_networkFee,
+                    fee              : (transfer_fee + new_networkFee),
+                    netamount        : (req.body.amount - (transfer_fee + new_networkFee)),
                     address_to       : req.body.address_to,
                     address_from     : " ",
                     transcation_hash : " ",
@@ -224,7 +226,7 @@ module.exports =
     async update_withdraw_request(req, res) {
         try {
             await withdrawLogs.findOneAndUpdate(
-                { id: req.body.id, status: 3 },
+                { id: req.body.id },
                 {
                     $set:
                     {
@@ -245,8 +247,8 @@ module.exports =
                     }
                     else if (req.body.status == 5) 
                     {
-                        let val          = await clientWallets.findOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id })
-                        let clientWallet = await clientWallets.updateOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance + withdraw.amount) } })
+                        // let val          = await clientWallets.findOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id })
+                        // let clientWallet = await clientWallets.updateOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance + withdraw.amount) } })
                         res.json({ status: 200, message: "Successfully", data: withdraw })
                     }
 
@@ -825,7 +827,6 @@ module.exports =
     async setMerchantWitthdrawMode(req, res) {
         try {
             let data = await withdrawSettings.findOneAndUpdate({}, { $set: { "merchantWithdrawMode": req.body.mode } });
-            console.log("withdraw settings", data)
             res.json({ status: 200, data: req.body.mode, message: "setMerchantWitthdrawMode" })
         }
         catch (error) {

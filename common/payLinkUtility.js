@@ -522,7 +522,7 @@ module.exports =
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
-                addressObject.poolWallet[0].address,
+                addressObject.poolWallet[0].address.toLowerCase(),
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
