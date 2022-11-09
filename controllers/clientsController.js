@@ -2,6 +2,8 @@ const clients = require('../Models/clients');
 const kycWebHookLogs = require('../Models/kycWebHookLog');
 const transcationLog = require('../Models/transcationLog');
 const admins = require('../Models/admin');
+const topup = require('../Models/topup');
+const withdrawLog = require('../Models/withdrawLog');
 const cornJobs = require('../common/cornJobs');
 const emailSending = require('../common/emailSending');
 var CryptoJS = require('crypto-js')
@@ -26,7 +28,8 @@ const TronWeb = require('tronweb')
 require("dotenv").config()
 
 const jwt = require('jsonwebtoken');
-const { generateAccount } = require('tron-create-address')
+const { generateAccount } = require('tron-create-address');
+const { topupIndex } = require('../common/Constant');
 
 module.exports =
 {
@@ -141,20 +144,23 @@ module.exports =
             });
     },
     async verfiyemail(req, res) {
-        await clients.findOneAndUpdate({ 
-            email: req.body.email, 
-            emailtoken: req.body.emailtoken, 
-            "emailstatus": false, 
-            "loginstatus": false,   
-            status: false },
-            { 
-            $set: { "emailtoken": req.body.emailtoken, 
-            "emailstatus": true, 
-            "loginstatus": true, 
-            "status": false,
-            } }
-            )
-        
+        await clients.findOneAndUpdate({
+            email: req.body.email,
+            emailtoken: req.body.emailtoken,
+            "emailstatus": false,
+            "loginstatus": false,
+            status: false
+        },
+            {
+                $set: {
+                    "emailtoken": req.body.emailtoken,
+                    "emailstatus": true,
+                    "loginstatus": true,
+                    "status": false,
+                }
+            }
+        )
+
             .then(async (val) => {
                 if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email }, {
@@ -177,7 +183,7 @@ module.exports =
                 res.json({ status: 400, data: {}, message: error.message })
             });
     },
- 
+
     async Create_Kyc_Link(req, res) {
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
@@ -254,17 +260,17 @@ module.exports =
                     var jwt_token = jwt.sign({ id: val.api_key }, process.env.AUTH_KEY, { noTimestamp: true, expiresIn: '1h' });
                     let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { authtoken: jwt_token } }, { $new: true })
                     val["authtoken"] = jwt_token
-                
+
                     let clientsdata = {
-                        "qrcode" : val["two_fa"] == false ? val["qrcode"] : "",
-                        "secret" : val["two_fa"] == false ? val["secret"] : "",
-                        "first_name" : val["first_name"] ,
-                        "last_name" : val["last_name"] ,
-                        "companyname" : val["companyname"],
-                        "email" : val["email"],
-                        "authtoken" : val["authtoken"],    
-                        "type" : val["type"],    
-                        "two_fa" : val["two_fa"], 
+                        "qrcode": val["two_fa"] == false ? val["qrcode"] : "",
+                        "secret": val["two_fa"] == false ? val["secret"] : "",
+                        "first_name": val["first_name"],
+                        "last_name": val["last_name"],
+                        "companyname": val["companyname"],
+                        "email": val["email"],
+                        "authtoken": val["authtoken"],
+                        "type": val["type"],
+                        "two_fa": val["two_fa"],
                     }
                     res.json({ "status": 200, "data": clientsdata, "message": "Successfully Login" })
                 }
@@ -285,20 +291,17 @@ module.exports =
     async reset_merchant_two_fa(req, res) {
         try {
             let secret = authenticator.generateSecret()
-            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => 
-            {
+            QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT, secret)).then(async (url) => {
                 let client = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { two_fa: false, secret: secret, qrcode: url } }, { returnDocument: 'after' })
-                if (client != null) 
-                {
-                  
+                if (client != null) {
+
                     res.json({ status: 200, message: "Reset Two Fa", data: { "email": req.body.email } })
                 }
-                else
-                {
+                else {
                     res.json({ status: 400, message: "Invalid Request", data: null })
                 }
             })
-            
+
             // await clients.findOneAndUpdate({ email: req.body.email }, { $set: { two_fa: false } }, { $new: true })
             //     .then(async (val) => {
             //         if (val != null) 
@@ -327,7 +330,7 @@ module.exports =
             let prevVal = await clients.findOne({ email: req.body.currentemail })
             let val = await clients.findOneAndUpdate({ email: req.body.currentemail }, { $set: { email: req.body.newemail, companyname: req.body.newcompanyname } }, { $new: true })
             if (val != null) {
-            var emailTemplateName =
+                var emailTemplateName =
                 {
                     "emailTemplateName": "emailchanging.ejs",
                     "to": req.body.currentemail,
@@ -390,16 +393,16 @@ module.exports =
         try {
             let email = req.body.email
             let code = req.body.code
-            
+
             clients.findOne({ 'email': email }).then(async (val) => {
                 if (authenticator.check(code, val.secret)) {
-                   
+
                     if (val.two_fa == false) {
-                      
+
                         let wallet = await clients.findOneAndUpdate({ 'email': email }, { $set: { two_fa: true } }, { $new: true })
                         let clientsdata = await clients.findOne({ email: req.body.email }, {
                             id: 1,
-                           
+
                             first_name: 1,
                             last_name: 1,
                             companyname: 1,
@@ -407,14 +410,14 @@ module.exports =
                             profileimage: 1,
                             authtoken: 1,
                             type: 1,
-                            two_fa:1,
-                            
+                            two_fa: 1,
+
                         })
                         res.json({ "status": 200, "data": clientsdata, "message": "Get The Data Successfully" })
                     } else {
                         let clientsdata = await clients.findOne({ email: req.body.email }, {
                             id: 1,
-                           
+
                             first_name: 1,
                             last_name: 1,
                             companyname: 1,
@@ -422,8 +425,8 @@ module.exports =
                             profileimage: 1,
                             authtoken: 1,
                             type: 1,
-                            two_fa:1,
-                            
+                            two_fa: 1,
+
                         })
                         res.json({ "status": 200, "data": clientsdata, "message": "Get The Data Successfully" })
                     }
@@ -438,7 +441,7 @@ module.exports =
             })
         }
         catch (error) {
-            console.log("Verfiy_Google_Auth error",error)
+            console.log("Verfiy_Google_Auth error", error)
             res.json({ status: 400, data: {}, message: "Verification Failed" })
         }
     },
@@ -817,87 +820,87 @@ module.exports =
     },
     async getClientWallets(req, res) {
         try {
-            await clientWallets.aggregate(
+
+            let datatopup = await topup.aggregate(
                 [
-                    { $match: { client_api_key: req.headers.authorization } },
+                    { $match: { api_key: req.headers.authorization, status: 1 } },
                     {
                         $lookup: {
-                            from: "networks", // collection to join
-                            localField: "network_id",//field from the input documents
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
                             foreignField: "id",//field from the documents of the "from" collection
-                            as: "NetworkDetails"// output array field
+                            as: "pooldetailswallets"// output array field
                         }
-
                     },
-                    {
-                        "$project": {
-                            "id": 1,
-                            "balance": 1,
-                            "address": 1,
-                            "network_id": 1,
-                            "NetworkDetails.network": 1,
-                            "NetworkDetails.coin": 1,
-                            "NetworkDetails.cointype": 1,
-                            "NetworkDetails.icon": 1,
-                        }
+                    { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+                ])
+            let withdrawdata = await withdrawLog.aggregate([
+                { $match: { api_key: req.headers.authorization, status: 3 } },
+                { $group: { _id: "$network_id", balance: { $sum: '$amount' } } },
+            ])
+            let clientwallet = await clientWallets.aggregate([
+                { $match: { client_api_key: req.headers.authorization } },
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "NetworkDetails"// output array field
                     }
-                ]).then(async (data) => {
 
-                    res.json({ status: 200, message: "Merchant Wallet", data: data })
-                }).catch(error => {
-                    console.log("get_clients_data", error)
-                    res.json({ status: 400, data: {}, message: error })
-                })
+                },
+                {
+                    "$project": {
+                        "id": 1,
+                        "balance": 1,
+                        "address": 1,
+                        "network_id": 1,
+                        "NetworkDetails.network": 1,
+                        "NetworkDetails.coin": 1,
+                        "NetworkDetails.cointype": 1,
+                        "NetworkDetails.icon": 1,
+                        "NetworkDetails.currencyid": 1,
+                    }
+                }
+            ])
+            // clientwallet
+            
+            clientwallet.forEach(async function(element) 
+            {
+                        let index = datatopup.findIndex(translist => translist["_id"][0]  == element.network_id)
+                        let clientindex = clientwallet.findIndex(translist => translist.id  == element.id)
+                        if(index != -1){ 
+                            clientwallet[clientindex]["total"] = datatopup[index]["balance"] 
+                            clientwallet[clientindex]["balance"] = datatopup[index]["balance"]
+                        }
+                        else{
+                            clientwallet[clientindex]["total"]   = 0 
+                            clientwallet[clientindex]["balance"] = 0
+                        }
+            })
+            // withdrawdata
+            clientwallet.forEach( async function(element) 
+            {
+                        let clientindex = clientwallet.findIndex(translist => translist.id == element.id)
+                        let index       = withdrawdata.findIndex(translist => translist["_id"] == element.network_id)
+                        if(index != -1)
+                        { 
+                            clientwallet[clientindex]["withdraw"]  = withdrawdata[index]["balance"] 
+                            clientwallet[clientindex]["netamount"] = clientwallet[clientindex]["total"] - withdrawdata[index]["balance"] 
+                        }
+                        else
+                        {
+                            clientwallet[clientindex]["withdraw"] = 0 
+                            clientwallet[clientindex]["netamount"] = clientwallet[clientindex]["total"] - 0
+                        }
+            })
+            res.json({ status: 200,  data: clientwallet, message: "Success" })
         }
         catch (error) {
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
-    // async Get_Transcation_List(req, res) {
-    //     response = {}
-    //     let network_details = await network.findOne({ id: req.body.network_id })
-    //     var URL = network_details.transcationurl
-    //     if (network_details.cointype == "Token") {
-    //         URL += "?module=account&action=tokentx&address=" + req.body.address;
-    //         URL += "&contractaddress=" + network_details.contractAddress;
-    //         URL += "&startblock=" + req.body.latest_block_number
-    //         URL += "&endblock=" + "latest"
-    //         URL += "&sort=" + "desc"
-    //         URL += "&apikey=" + network_details.apiKey
-    //     }
-    //     else {
-    //         URL += "?module=account&action=txlist&address=" + req.body.address;
-    //         URL += "&startblock=" + req.body.latest_block_number
-    //         URL += "&endblock=" + "latest"
-    //         URL += "&sort=" + "desc"
-    //         URL += "&apikey=" + network_details.apiKey
-    //     }
-    //     await axios.get(URL, {
-    //         params: {},
-    //         headers: {}
-    //     }).then(async (res) => {
-    //         var stringify_response = stringify(res)
-    //         if (res.data.result.length > 0) {
-    //             let total_payment = 0
 
-    //             res.data.result.forEach(async (element) => {
-    //                 element["valuetowei"] = await Web3.utils.fromWei(element["value"], 'ether')
-    //                 element["scanurl"] = network_details.scanurl + element["hash"]
-    //                 total_payment += parseFloat(Web3.utils.fromWei(element["value"], 'ether'))
-    //                 console.log("total_payment", total_payment)
-
-    //             });
-    //         }
-
-    //         response = { status: 200, data: res.data.result, message: "Get The Data From URL" }
-    //     }).catch(error => {
-    //         // console.error("Error===============", error)
-    //         var stringify_response = stringify(error)
-    //         response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
-    //     })
-    //     // return response;
-    //     res.json({ status: 200, data: response, message: "Invalid" })
-    // },
     async kyc_status(req, res) {
         response = {}
         let network_details = await network.findOne({ id: req.body.network_id })
@@ -986,7 +989,7 @@ module.exports =
     },
     async allMerchant(req, res) {
         try {
-            await clients.find({}, { email: 1, status: 1, loginstatus: 1,disablestatus: 1,disable_remarks: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
+            await clients.find({}, { email: 1, status: 1, loginstatus: 1, disablestatus: 1, disable_remarks: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "All Merchant", data: val })
             }).catch(error => {
                 console.log(error)
@@ -1000,8 +1003,8 @@ module.exports =
     },
     async customerstatus(req, res) {
         try {
-            
-            await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "loginstatus": req.body.status, disablestatus : req.body.disablestatus  } }, { $new: true })
+
+            await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "loginstatus": req.body.status, disablestatus: req.body.disablestatus } }, { $new: true })
                 .then(async (val) => {
                     if (val != null) {
                         res.json({ status: 200, message: "Merchant Updated Successfully", data: val.email })
@@ -1043,12 +1046,12 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Customer did not find" })
         }
     },
-   
+
     async forgotPassword(req, res) {
         try {
 
             var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, "emailstatus": false,loginstatus: false,  } }, { $new: true })
+            let val = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { emailtoken: otp, "emailstatus": false, loginstatus: false, } }, { $new: true })
             if (val != null) {
                 var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": req.body.email, "subject": "Change The Password", "templateData": { "password": otp, "url": "" } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
@@ -1065,21 +1068,21 @@ module.exports =
         }
     },
     async verifyAuthToken(req, res) {
-        await clients.findOne({ 
-            email: req.body.email, 
-            emailtoken: req.body.emailtoken, 
-            "emailstatus": false,loginstatus: false,   
-            },
-            
-            ).then(async (val) => {
-                if (val != null) {
-                    
-                    res.json({ status: 200, message: "Valid Token", data: {"email" : val.email , "emailtoken" : val.emailtoken } })
-                }
-                else {
-                    res.json({ status: 400, message: "Invalid Token", data: null })
-                }
-            })
+        await clients.findOne({
+            email: req.body.email,
+            emailtoken: req.body.emailtoken,
+            "emailstatus": false, loginstatus: false,
+        },
+
+        ).then(async (val) => {
+            if (val != null) {
+
+                res.json({ status: 200, message: "Valid Token", data: { "email": val.email, "emailtoken": val.emailtoken } })
+            }
+            else {
+                res.json({ status: 400, message: "Invalid Token", data: null })
+            }
+        })
             .catch(error => {
                 console.log('verfiyemail ', error);
                 res.json({ status: 400, data: {}, message: error.message })
@@ -1088,23 +1091,26 @@ module.exports =
     async checkTheTokenAndUpdatePassword(req, res) {
         const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(req.body.newpassword, salt);
-        await clients.findOneAndUpdate({ 
-            email: req.body.email, 
-            emailtoken: req.body.emailtoken, 
-            loginstatus: false, 
+        await clients.findOneAndUpdate({
+            email: req.body.email,
+            emailtoken: req.body.emailtoken,
+            loginstatus: false,
             emailstatus: false
-             }, { $set: 
-           { 
-            "password": password_hash,  "emailstatus": true, "loginstatus": true
-          }})
+        }, {
+            $set:
+            {
+                "password": password_hash, "emailstatus": true, "loginstatus": true
+            }
+        })
             .then(async (val) => {
                 if (val != null) {
                     let clientsdata = await clients.findOne({ email: req.body.email })
 
-                    res.json({ 
-                        status: 200, 
-                        message: "Password Updated Successfully", 
-                        data: {'email':clientsdata.email } })
+                    res.json({
+                        status: 200,
+                        message: "Password Updated Successfully",
+                        data: { 'email': clientsdata.email }
+                    })
                 }
                 else {
                     res.json({ status: 400, message: "Invalid Token", data: null })
@@ -1125,7 +1131,7 @@ module.exports =
                 if (password_status == true) {
                     let client = await clients.findOneAndUpdate({ email: req.body.email }, { $set: { "password": password_hash } })
 
-                    res.json({ "status": 200, data: {'email':clientsdata.email }, "message": "Password Updated" })
+                    res.json({ "status": 200, data: { 'email': clientsdata.email }, "message": "Password Updated" })
                 }
                 else if (password_status == false) {
                     res.json({ "status": 400, "data": {}, "message": "Current password is not Correct" })
@@ -1145,9 +1151,9 @@ module.exports =
         try {
 
             let clientWallet = await clientWallets.findOne({
-                'client_api_key'    : req.body.client_api_key,
-                'network_id'        : req.body.network_id,
-                 status             : 3
+                'client_api_key': req.body.client_api_key,
+                'network_id': req.body.network_id,
+                status: 3
             })
             let network_id = clientWallet == null ? req.body.network_id : clientWallet.network_id
             let network_details = await network.findOne({ 'id': network_id })
@@ -1185,10 +1191,10 @@ module.exports =
                         profileimage: req.body.profileimage,
                         companyname: req.body.companyname
                     }
-                }, { returnDocument : 'after'  })
+                }, { returnDocument: 'after' })
             // let newupdate = await clients.findOne({ 'api_key': req.headers.authorization })
-                    
-            res.json({ status: 200, data: { 'email':update.email , 'profileimage':update.profileimage, 'companyname':update.companyname }, message: "update profile" })
+
+            res.json({ status: 200, data: { 'email': update.email, 'profileimage': update.profileimage, 'companyname': update.companyname }, message: "update profile" })
 
         }
         catch (error) {
@@ -1243,6 +1249,38 @@ module.exports =
         }
         catch (error) {
             res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+    async gettotalbalance(req, res) {
+        try {
+            let data = await topup.aggregate(
+                [
+                    { $match: { api_key: req.headers.authorization, status: 1 } },
+                    {
+                        $lookup: {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "pooldetailswallets"// output array field
+                        }
+
+                    },
+
+                    { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+
+                ])
+
+            let withdrawdata = await withdrawLog.aggregate(
+                [
+                    { $match: { api_key: req.headers.authorization, status: 4 } },
+                    { $group: { _id: "$network_id", balance: { $sum: '$amount' } } },
+
+                ])
+            res.json({ status: 200, message: "Merchant Wallet", data: data, "withdrawdata": withdrawdata })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
 

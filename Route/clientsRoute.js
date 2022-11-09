@@ -22,31 +22,10 @@ const commonController              = require('../controllers/Logs/commonControl
 const ipnController                 = require('../controllers/Masters/ipnController');
 const topupcontroller               = require('../controllers/topup/topupcontroller');
 
-// router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
-// router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
-// router.post('/getBalanceAddress',                    Auth.is_merchant,clientsController.get_BalancebyAddress);
-// router.post('/approvekyc',                           clientsController.kyc_approved);
-// router.post('/clientBalance',                        Auth.is_merchant,transcationpoolController.get_Client_Balance);
-// router.post('/update_cron_job',                      clientsController.update_cron_job);
-// // router.post('/gettranscationlist',                clientsController.Get_Transcation_List);
-// router.post('/updateClientToken',                    Auth.is_merchant,clientsController.updateClientToken);
-// router.post('/getapikey',                            Auth.is_merchant,clientsController.getapikey);
-// router.post('/generateNewClientAddress',             Auth.is_merchant,clientsController.generateNewClientAddress);
-// "=============Merchant-Sites==========================================="
-// router.post('/allMerchantSites',                         merchantSitesController.allMerchantSites);
-// router.post('/deleteMerchantSite',                       merchantSitesController.deleteMerchantSite);
-// router.post('/savemerchantsite',                         merchantSitesController.savemerchantsite);
-// router.post('/updateMerchantSite',                       merchantSitesController.updateMerchantSite);
-// router.post('/setWithdrawSettings',                                 withdrawController.setWithdrawSettings);
-// router.get('/getWithdrawSettings',                                  Auth.is_merchant,withdrawController.getWithdrawSettings);
-// router.post('/getapistatus',                                        clientapicontroller.getapikey);
-// router.post('/balancecheck',                                          commonController.getBalance);
-
 router.post('/signUpMerchant',                       Auth.verify_create_merchant_auth,clientsController.create_merchant);
 router.post('/resendingemail',                       Auth.is_merchant,Auth.verify_resendingemail,clientsController.resendingemail);
 router.post('/verfiyemail',                          Auth.verify_verfiyemail,clientsController.verfiyemail);
 router.post('/verifyAuthToken',                      Auth.verify_verfiyemail,clientsController.verifyAuthToken);
-
 router.post('/login',                                Auth.verify_Login,clientsController.Login);
 router.post('/verfiyMerchantAuth',                   Auth.verifymerchant,Auth.verify_MerchantAuth,clientsController.Verfiy_Google_Auth);
 router.post('/getclientkey',                         Auth.verifymerchant,Auth.verify_getclientkey,clientsController.getclientkey);
@@ -62,6 +41,7 @@ router.post('/clientWihdrawLogs',                    Auth.is_merchant,withdrawCo
 router.post('/clientTotalWihdraw',                   Auth.is_merchant,withdrawController.get_client_wihdraw_total);
 router.post('/clientwithdrawnetworkid',              Auth.is_merchant,withdrawController.get_client_withdraw_with_network_id);
 router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
+router.post('/newWallets',                           Auth.is_merchant,clientsController.gettotalbalance);
 router.post('/merchantNetworkTranscation',           Auth.is_merchant,Auth.verify_trans_by_network_id,transcationpoolController.get_Trans_by_Network_ID);
 router.post('/merchantsTranscation',                 Auth.is_merchant,transcationpoolController.getTrans);
 router.post('/check_kyc',                            Auth.is_merchant,clientsController.check_kyc);
@@ -69,8 +49,6 @@ router.post('/createkyclink',                        Auth.is_merchant,clientsCon
 router.post('/kycstatus',                            Auth.Verfiy_Kyc_Header,clientsController.kyc_verification_status);
 router.post('/kycLevels',                            Auth.is_merchant,clientsController.clients_kyc_levels);
 router.post('/webHookLog',                           Auth.is_merchant,kycwebhooklogController.getkycWebHookLog);
-// router.post('/resetMerchantTwoFa',                Auth.is_merchant,clientsController.reset_merchant_two_fa);
-// router.post('/getTranscationData',                Auth.is_merchant,hotwallettranslogsController.getTranscationData);
 router.post('/transactionDetailsClient',             Auth.is_merchant,transcationpoolController.get_Trans_by_txId);
 router.post('/transactionFastDetails',               Auth.fastpay_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
 router.post('/transactionPaylinkDetails',            Auth.paylink_have_access,transcationpoolController.get_Fastlink_Trans_by_txId);
@@ -111,7 +89,6 @@ router.post('/cancelClientRequest',                  Auth.is_merchant,merchantca
 "============================ WEB PLUGIN ==============================="
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
-// router.post('/pluginallNetworks',                    Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/pluginallCurrency',                    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
 router.post('/pluginpriceConversition',              Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
 
@@ -119,7 +96,9 @@ router.post('/pluginpriceConversition',              Auth.Verfiy_Merchant,Auth.c
 "============================ Withdraw  ==============================="
 
 router.post('/merchantBalance',                      Auth.is_merchant,withdrawController.merchantBalance);
+
 router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
+// router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 
 "============================ perfered Network Controller  ==============================="
 

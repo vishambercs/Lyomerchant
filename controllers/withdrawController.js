@@ -127,15 +127,19 @@ module.exports =
             let currentDateTemp          = Date.now();
             let transfer_fee = 0;
             let networkFee = null;
-             
+            let new_networkFee = 0;
            if(network.withdrawflag == 1)
             {
                 networkFee            = await Network_Fee_Calculation(network)
-                transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  networkFee.data.gaspriceether 
+                console.log(new_networkFee)
+                new_networkFee        = amount * 0.01
+                console.log(new_networkFee)
+                transfer_fee          =  ((amount / network.transferlimit ) * 9 ) +  networkFee.data.gaspriceether 
             
             }
             else if(network.withdrawflag == 2)
             {
+                
                 // networkFee            = await Network_Fee_Calculation(network)
                 transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  network.fixedfee
             
@@ -151,8 +155,9 @@ module.exports =
                     api_key          : req.headers.authorization,
                     network_id       : req.body.network_id,
                     amount           : req.body.amount,
-                    fee              : transfer_fee,
-                    netamount        : (req.body.amount - transfer_fee),
+                    networkFee       : new_networkFee,
+                    fee              : (transfer_fee + new_networkFee),
+                    netamount        : (req.body.amount - (transfer_fee + new_networkFee)),
                     address_to       : req.body.address_to,
                     address_from     : " ",
                     transcation_hash : " ",
@@ -196,7 +201,7 @@ module.exports =
     async update_withdraw_request(req, res) {
         try {
             await withdrawLogs.findOneAndUpdate(
-                { id: req.body.id, status: 3 },
+                { id: req.body.id },
                 {
                     $set:
                     {
@@ -217,8 +222,8 @@ module.exports =
                     }
                     else if (req.body.status == 5) 
                     {
-                        let val          = await clientWallets.findOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id })
-                        let clientWallet = await clientWallets.updateOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance + withdraw.amount) } })
+                        // let val          = await clientWallets.findOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id })
+                        // let clientWallet = await clientWallets.updateOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance + withdraw.amount) } })
                         res.json({ status: 200, message: "Successfully", data: withdraw })
                     }
 
@@ -578,6 +583,7 @@ module.exports =
 
             }
 
+            
 
             if (balance == null ) 
             {
@@ -601,12 +607,17 @@ module.exports =
             
             let transfer_fee = 0;
             let networkFee = null;
-             
+            let new_networkFee = 0;
            if(network.withdrawflag == 1)
             {
                 networkFee            = await Network_Fee_Calculation(network)
-                transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  networkFee.data.gaspriceether 
-            
+                new_networkFee        = amount * 0.01
+                console.log("new_networkFee",new_networkFee)
+                let priceconversition        = await priceConversition(network.currencyid, current_currency)
+                transfer_fee              =  ((amount / network.transferlimit ) * 9) + networkFee.data.gaspriceether 
+                console.log("transfer_fee",transfer_fee)
+                transfer_fee          += new_networkFee
+                console.log("transfer_fee total",transfer_fee)
             }
             else if(network.withdrawflag == 2)
             {
@@ -640,7 +651,9 @@ module.exports =
             }
             else
             {
+             
              native_currency       = await priceConversition(network.native_currency_id, current_currency)
+            
              pricenative_currency  = native_currency[network.native_currency_id]
              price                 = pricenative_currency[current_currency]  * transfer_fee
              token_currency        = await priceConversition(network.currencyid, current_currency)
@@ -655,7 +668,8 @@ module.exports =
                  data       : 
                  {    
                     "limit"             : network.transferlimit,
-                    "currency"          : current_currency, 
+                    "currency"          : current_currency,
+                    "new_networkFee"    : new_networkFee, 
                     "withdraw_amount"   : parseFloat(req.body.amount),
                     "native_price"      : pricenative_currency[current_currency],
                     "token_price"       : pricetoken_currency[current_currency],
@@ -760,7 +774,6 @@ module.exports =
     async setMerchantWitthdrawMode(req, res) {
         try {
             let data = await withdrawSettings.findOneAndUpdate({}, { $set: { "merchantWithdrawMode": req.body.mode } });
-            console.log("withdraw settings", data)
             res.json({ status: 200, data: req.body.mode, message: "setMerchantWitthdrawMode" })
         }
         catch (error) {

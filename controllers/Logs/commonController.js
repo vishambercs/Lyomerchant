@@ -776,9 +776,7 @@ module.exports =
                     {
                         $sort: { createdAt: -1 }
                     },
-                ])
-                    .skip(skip)
-                    .limit(limit)
+                ]).skip(skip).limit(limit)
                 return res.json({ status: 200, message: "All Transcation", data: topupPools })
             }
             else {
