@@ -40,12 +40,7 @@ router.post('/withdraw',                             Auth.is_merchant,Auth.verif
 router.post('/clientWihdrawLogs',                    Auth.is_merchant,withdrawController.get_client_wihdraw);
 router.post('/clientTotalWihdraw',                   Auth.is_merchant,withdrawController.get_client_wihdraw_total);
 router.post('/clientwithdrawnetworkid',              Auth.is_merchant,withdrawController.get_client_withdraw_with_network_id);
-<<<<<<< HEAD
 router.post('/getmerchantWallets',                   clientsController.getClientWallets);
-=======
-router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
-router.post('/newWallets',                           Auth.is_merchant,clientsController.gettotalbalance);
->>>>>>> 5456a72c205e65b22faaafe8967026d409a430c0
 router.post('/merchantNetworkTranscation',           Auth.is_merchant,Auth.verify_trans_by_network_id,transcationpoolController.get_Trans_by_Network_ID);
 router.post('/merchantsTranscation',                 Auth.is_merchant,transcationpoolController.getTrans);
 router.post('/check_kyc',                            Auth.is_merchant,clientsController.check_kyc);
