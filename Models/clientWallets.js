@@ -13,6 +13,12 @@ const clientWalletSchema = new mongoose.Schema
             type: String,
             required: true,
         },
+        new_balance: 
+        {
+            type: Number,
+            required: false,
+            default: 0,
+        },
         balance: 
         {
             type: Number,

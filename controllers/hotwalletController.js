@@ -107,7 +107,8 @@ module.exports =
 
     async createHotWalletsAPI(req, res) {
         try {
-            let hotwallet = await  hotWallets.updateMany({network_id  : req.body.network_id,status:0}) 
+            let hotwa = await  hotWallets.updateMany({network_id  : req.body.network_id} ,{$set:{status:0}}) 
+
             const hotWallet = new hotWallets({
                 id          : mongoose.Types.ObjectId(),
                 network_id  : req.body.network_id,

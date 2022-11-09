@@ -1,19 +1,21 @@
 const clients = require('../Models/clients');
 const kycWebHookLogs = require('../Models/kycWebHookLog');
-const transcationLog = require('../Models/transcationLog');
+
+const withdrawLog = require('../Models/withdrawLog');
 const admins = require('../Models/admin');
-const cornJobs = require('../common/cornJobs');
+const topup = require('../Models/topup');
+
 const emailSending = require('../common/emailSending');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
 var Utility = require('../common/Utility');
-var constant = require('../common/Constant');
+
 var commonFunction = require('../common/commonFunction');
 const bcrypt = require('bcrypt');
 const Web3 = require('web3');
 const clientWallets = require('../Models/clientWallets');
 const poolWallet = require('../Models/poolWallet');
-const transactionPools = require('../Models/transactionPool');
+
 const { authenticator } = require('otplib')
 const QRCode = require('qrcode')
 const network = require('../Models/network');
@@ -23,10 +25,77 @@ var stringify = require('json-stringify-safe');
 const Constant = require('../common/Constant');
 var otpGenerator = require('otp-generator')
 const TronWeb = require('tronweb')
+
+
 require("dotenv").config()
 
 const jwt = require('jsonwebtoken');
 const { generateAccount } = require('tron-create-address')
+
+async function Get_Request_By_Axios(URL, parameters, headers) {
+    response = {}
+    await axios.get(URL, {
+        params: parameters,
+        headers: headers
+    }).then(res => {
+        var stringify_response = stringify(res)
+        response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+    })
+        .catch(error => {
+            console.error("Error", error)
+            var stringify_response = stringify(error)
+            response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+        })
+    return response;
+}
+async function priceNewConversition(currencyid) {
+    try 
+    {
+        console.log(currencyid)
+        let parameters            = `ids=${currencyid}&vs_currencies=usd`
+        let COINGECKO_URL         =  process.env.COINGECKO+parameters
+        let axiosGetData          =  await Get_Request_By_Axios(COINGECKO_URL,{},{})
+        var stringify_response    = JSON.parse(axiosGetData.data)
+        let native_currency       = stringify_response.data 
+        let pricenative_currency  = native_currency[currencyid]
+        let price                 = pricenative_currency["usd"] 
+        
+        return price
+    }
+    catch (error) 
+    {
+        console.log(error)
+       return {  }
+    }
+}
+async function updateClientWallet(client_api_key, networkid, merchantbalance) {
+    try{
+    let val = await clientWallets.findOne({ client_api_key: client_api_key, network_id: networkid })
+    if (val != null) {
+        let clientWallet = await clientWallets.updateOne({ client_api_key: client_api_key, network_id: networkid }, 
+            { $set: { balance:  merchantbalance } })
+        return clientWallet
+    }
+
+    else {
+        const clientWallet = new clientWallets({
+            id: mongoose.Types.ObjectId(),
+            client_api_key: client_api_key,
+            address: " ",
+            privatekey: " ",
+            status: 1,
+            network_id: networkid,
+            balance: merchantbalance ,
+            remarks: "Please Generate The Wallet Address Of this type"
+        });
+        let client_Wallet = await clientWallet.save()
+        return client_Wallet
+    }
+}
+catch(error){
+    console.log(error)
+}
+}
 
 module.exports =
 {
@@ -104,7 +173,8 @@ module.exports =
                 companyname: (req.body.companyname == "" || req.body.companyname == undefined) ? "" : req.body.companyname,
             });
             client.save().then(async (val) => {
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp, "url": "" } }
+                var url = process.env.SIGN_UP_URL
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": "", "url": url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 let response = { "type": val.type, "first_name": val.first_name, "last_name": val.last_name, "email": val.email, "companyname": val.companyname }
                 res.json({ status: 200, message: "We sent token to your Email", data: response })
@@ -817,39 +887,102 @@ module.exports =
     },
     async getClientWallets(req, res) {
         try {
-            await clientWallets.aggregate(
-                [
-                    { $match: { client_api_key: req.headers.authorization } },
+            let network_data = []
+            let datatopup = await topup.aggregate([
+                    { $match: { api_key: req.headers.authorization, status: 1 } },
                     {
-                        $lookup: {
-                            from: "networks", // collection to join
-                            localField: "network_id",//field from the input documents
+                        $lookup: 
+                        {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
                             foreignField: "id",//field from the documents of the "from" collection
-                            as: "NetworkDetails"// output array field
+                            as: "pooldetailswallets"// output array field
                         }
-
                     },
-                    {
-                        "$project": {
-                            "id": 1,
-                            "balance": 1,
-                            "address": 1,
-                            "network_id": 1,
-                            "NetworkDetails.network": 1,
-                            "NetworkDetails.coin": 1,
-                            "NetworkDetails.cointype": 1,
-                            "NetworkDetails.icon": 1,
-                        }
+                    { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+                ])
+            let withdrawdata = await withdrawLog.aggregate([
+                { $match: { api_key: req.headers.authorization, status: 3 } },
+                { $group: { _id: "$network_id", balance: { $sum: '$amount' } } },
+            ])
+            let clientwallet = await clientWallets.aggregate([
+                { $match: { client_api_key: req.headers.authorization } },
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "NetworkDetails"// output array field
                     }
-                ]).then(async (data) => {
 
-                    res.json({ status: 200, message: "Merchant Wallet", data: data })
-                }).catch(error => {
-                    console.log("get_clients_data", error)
-                    res.json({ status: 400, data: {}, message: error })
-                })
+                },
+                {
+                    "$project": {
+                        "id": 1,
+                        "balance": 1,
+                        "address": 1,
+                        "network_id": 1,
+                        "NetworkDetails.network": 1,
+                        "NetworkDetails.coin": 1,
+                        "NetworkDetails.cointype": 1,
+                        "NetworkDetails.icon": 1,
+                        "NetworkDetails.currencyid": 1,
+                    }
+                }
+            ])
+
+
+            // clientwallet
+            clientwallet.forEach(async function(element) 
+            {
+                        let index = datatopup.findIndex(translist => translist["_id"][0]            == element.network_id)
+                        let clientindex = clientwallet.findIndex(translist => translist.id          == element.id)
+                        let network_data_index = network_data.findIndex(translist => translist.network_id  == element.network_id)
+
+                        if(index != -1)
+                        { 
+                            clientwallet[clientindex]["total"]   = datatopup[index]["balance"] 
+                            clientwallet[clientindex]["balance"] = datatopup[index]["balance"]
+                            updateClientWallet(req.headers.authorization, element.network_id, datatopup[index]["balance"])
+                            
+                        }
+                        else
+                        {
+                            clientwallet[clientindex]["total"]   = 0 
+                            clientwallet[clientindex]["balance"] = 0
+                            updateClientWallet(req.headers.authorization, element.network_id, 0)
+                        }
+                        network_data_index == -1 ? network_data.push(clientwallet[clientindex]) : network_data[network_data_index] = clientwallet[clientindex]
+            })
+            // withdrawdata
+            clientwallet.forEach( async function(element) 
+            {
+                        let clientindex = clientwallet.findIndex(translist => translist.id == element.id)
+                        let index       = withdrawdata.findIndex(translist => translist["_id"] == element.network_id)
+                        let network_data_index = network_data.findIndex(translist => translist.network_id  == element.network_id)
+                        if(index != -1)
+                        { 
+                            clientwallet[clientindex]["withdraw"]  = withdrawdata[index]["balance"] 
+                            clientwallet[clientindex]["netamount"] = clientwallet[clientindex]["total"] - withdrawdata[index]["balance"] 
+                            clientwallet[clientindex]["fait_amount_net_amount"] =  0
+                            updateClientWallet(req.headers.authorization, element.network_id, clientwallet[clientindex]["netamount"])
+                        }
+                        else
+                        {
+                            clientwallet[clientindex]["withdraw"] = 0 
+                            clientwallet[clientindex]["netamount"] = clientwallet[clientindex]["total"] - 0
+                            clientwallet[clientindex]["fait_amount_net_amount"] = 0
+                            updateClientWallet(req.headers.authorization, element.network_id, clientwallet[clientindex]["netamount"])
+                            
+                        }
+                        network_data_index == -1 ? network_data.push(clientwallet[clientindex]) : network_data[network_data_index] = clientwallet[clientindex]
+            })
+          
+            
+            res.json({ status: 200,  data: network_data, message: "Success" })
         }
         catch (error) {
+            console.log(error)
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },

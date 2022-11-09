@@ -17,6 +17,8 @@ const topupschema = new mongoose.Schema({
     {
         type: String,
         required: true,
+
+        
     },
     amount: {
         type: Number,

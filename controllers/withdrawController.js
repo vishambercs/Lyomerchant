@@ -70,6 +70,27 @@ async function priceConversition(currencyid, currency) {
     }
 }
 
+async function priceNewConversition(currencyid) {
+    try 
+    {
+        let parameters            = `ids=${currencyid}&vs_currencies=usd`
+        let COINGECKO_URL         =  process.env.COINGECKO+parameters
+        let axiosGetData          =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
+        var stringify_response    = JSON.parse(axiosGetData.data)
+        let native_currency       = stringify_response.data 
+        let pricenative_currency  = native_currency[currencyid]
+        let price                 = pricenative_currency["usd"] 
+        
+        return price
+    }
+    catch (error) 
+    {
+        console.log(error)
+       return {  }
+    }
+}
+
+
 async function Network_Fee_Calculation(network) {
     try 
     {
@@ -81,9 +102,16 @@ async function Network_Fee_Calculation(network) {
         const gaspriceether     = await WEB3.utils.fromWei(gasprice,'ether')
         return { status: 200, data: {"gasprice":gasprice, "gaspriceether" : gaspriceether}, message: "GasPrice" }
         }
+        else if(network.libarayType == "btcnetwork")
+        {
+            let netfee = ((189 * 1) / 100000000) 
+            console.log(netfee)
+            return { status: 200, data: {"gasprice":netfee, "gaspriceether" : netfee}, message: "GasPrice" }
+        }
         else
-        {  console.log("else",network.withdrawfee)
-            return { status: 200, data: {"gasprice":network.withdrawfee, "gaspriceether" : network.withdrawfee}, message: "GasPrice" }
+        {  
+            
+            return { status: 200, data: {"gasprice":10, "gaspriceether" : 10}, message: "GasPrice" }
         }
 
     }
@@ -130,8 +158,8 @@ module.exports =
              
            if(network.withdrawflag == 1)
             {
-                networkFee            = await Network_Fee_Calculation(network)
-                transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  networkFee.data.gaspriceether 
+                networkFee            = await Network_Fee_Calculation(network,amount)
+                transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) * networkFee.data.gaspriceether 
             
             }
             else if(network.withdrawflag == 2)
@@ -561,7 +589,7 @@ module.exports =
         let current_currency = "usd"
         
         try {
-            const balance       = await clientWallets.findOne({ "id": req.body.clientWalletid , "client_api_key":req.headers.authorization })
+            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid , "client_api_key":req.headers.authorization })
            
             if( req.body.currencyid  != undefined && req.body.currencyid  != ""  )
             {
@@ -577,96 +605,133 @@ module.exports =
             }
 
             }
-
-
             if (balance == null ) 
             {
                return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
             const network   = await networks.findOne({ id: balance.network_id })
-            if (amount < network.transferlimit ) 
-            {  
-                return   res.json({
-                 status: 200, 
-                 data: 
-                {
-                    "withdraw_amount"   : req.body.amount ,
-                    "transcationfee"    : 0 , 
-                    "limit"              : network.transferlimit, 
-                    "netamount"         : req.body.amount 
-                }, 
-                 message: "Amount shoud be greater than or equal to minimum Withdrawal limit" }
-                 )
-            }
-            
-            let transfer_fee = 0;
-            let networkFee = null;
-             
-           if(network.withdrawflag == 1)
-            {
-                networkFee            = await Network_Fee_Calculation(network)
-                transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  networkFee.data.gaspriceether 
-            
-            }
-            else if(network.withdrawflag == 2)
-            {
-                // networkFee            = await Network_Fee_Calculation(network)
-                transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  network.fixedfee
-            
-            }
+            let coinprice   = await priceNewConversition(network.currencyid)
+            let nativeprice = await priceNewConversition(network.native_currency_id)
+            // if (amount <= (network.transferlimit/coinprice) ) 
+            // {  
+            //     return   res.json({
+            //      status: 200, 
+            //      data: 
+            //     {
+            //         "withdraw_amount"   : req.body.amount ,
+            //         "transcationfee"    : 0 , 
+            //         "limit"             : network.transferlimit/coinprice, 
+            //         "netamount"         : req.body.amount 
+            //     }, 
+            //      message: "Amount shoud be greater than or equal to minimum Withdrawal limit" }
+            //     )
+            // }
 
-            else if(network.withdrawflag == 3)
+            let transfer_fee      = 0;
+            let networkFee        = null;
+            let tokencurrency     = amount * coinprice
+            let cryptoprice       = 0;
+            networkFee            = await Network_Fee_Calculation(network,amount)
+            let token_data        = 0;
+            if(network.cointype == "Token")
             {
-                transfer_fee =  ((amount / network.transferlimit ) + network.processingfee) *  (amount * network.withdrawfee )
-            }
-           
-
-            let native_currency      = {}
-            let pricenative_currency = {}
-            let price                = 0
-            let netamount            = 0
-            let tokenprice           = 0
-            let token_currency       = {}
-            let pricetoken_currency  = {}
-        
-            if(network.cointype == "Native")
-            {
-                native_currency       = await priceConversition(network.native_currency_id, current_currency)
-                pricenative_currency  = native_currency[network.native_currency_id]
-                price                 = pricenative_currency[current_currency]  * transfer_fee
-                pricetoken_currency   = native_currency[network.native_currency_id]
-                netamount             = amount - price
-                tokenprice            = price
+                console.log(nativeprice)
+                console.log(network.cointype)
+                token_data =    ( networkFee.data.gaspriceether * nativeprice  )
+                // console.log(token_data)
+                // token_data =  token_data / coinprice
+                // token_data =  token_data * coinprice
+                // console.log(token_data)
+               
             }
             else
             {
-             native_currency       = await priceConversition(network.native_currency_id, current_currency)
-             pricenative_currency  = native_currency[network.native_currency_id]
-             price                 = pricenative_currency[current_currency]  * transfer_fee
-             token_currency        = await priceConversition(network.currencyid, current_currency)
-             pricetoken_currency   = token_currency[network.currencyid]
-             tokenprice            = (pricetoken_currency[current_currency]  * price)
-             netamount             = amount - tokenprice
-            }
+                token_data =    ( networkFee.data.gaspriceether * coinprice  )
+            } 
+         
+            transfer_fee          = ((tokencurrency / network.transferlimit ) * network.withdrawfee) +  token_data
+            cryptoprice           = transfer_fee / coinprice
+            res.json
+                ({
+                  status                            : 200, 
+                  data                              : 
+                  {                                                     
+                     "price"                        : coinprice, 
+                     "currency"                     : current_currency, 
+                     "limit"                        : (network.transferlimit/coinprice),
+                     "withdraw_amount_in_crypto"     : parseFloat(req.body.amount),
+                     "fee_in_crypto"                : (transfer_fee / coinprice),
+                     "net_amount_in_crypto"         : parseFloat(req.body.amount) - (transfer_fee / coinprice),
+                     "withdraw_amount_in_fiat"      : coinprice * parseFloat(req.body.amount) ,
+                     "fee_in_fiat"                  : transfer_fee ,
+                     "net_amount_in_fiat"           : (coinprice * parseFloat(req.body.amount)) - transfer_fee ,
+                     "Network"                      : network.network, 
+                     "coin"                         : network.coin, 
+                  }, 
+                  message                           : "Fee Details" 
+                })
+            
+            // }
+            // else if(network.withdrawflag == 2)
+            // {
+               
+            //     transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  network.fixedfee
+            
+            // }
+
+            // else if(network.withdrawflag == 3)
+            // {
+            //     transfer_fee =  ((amount / network.transferlimit ) + network.processingfee) *  (amount * network.withdrawfee )
+            // }
            
-            return res.json
-               ({
-                 status     : 200, 
-                 data       : 
-                 {    
-                    "limit"             : network.transferlimit,
-                    "currency"          : current_currency, 
-                    "withdraw_amount"   : parseFloat(req.body.amount),
-                    "native_price"      : pricenative_currency[current_currency],
-                    "token_price"       : pricetoken_currency[current_currency],
-                    "fee_in_native"     : transfer_fee ,
-                    "Network"           : network.network, 
-                    "coin"              : network.coin , 
-                    "fee_in_token"      : tokenprice , 
-                    "netamount"         : netamount 
-                 }, 
-                 message                : "Fee Details" 
-               })
+
+            // let native_currency      = {}
+            // let pricenative_currency = {}
+            // let price                = 0
+            // let netamount            = 0
+            // let tokenprice           = 0
+            // let token_currency       = {}
+            // let pricetoken_currency  = {}
+         
+
+            // if(network.cointype == "Native")
+            // {
+            //     native_currency       = await priceConversition(network.native_currency_id, current_currency)
+            //     pricenative_currency  = native_currency[network.native_currency_id]
+            //     price                 = pricenative_currency[current_currency]  * transfer_fee
+            //     pricetoken_currency   = native_currency[network.native_currency_id]
+            //     netamount             = amount - price
+            //     tokenprice            = price
+            // }
+            // else
+            // {
+            //  native_currency       = await priceConversition(network.native_currency_id, current_currency)
+            //  pricenative_currency  = native_currency[network.native_currency_id]
+            //  price                 = pricenative_currency[current_currency]  * transfer_fee
+            //  token_currency        = await priceConversition(network.currencyid, current_currency)
+            //  pricetoken_currency   = token_currency[network.currencyid]
+            //  tokenprice            = (pricetoken_currency[current_currency]  * price)
+            //  netamount             = amount - tokenprice
+            // }
+           
+            // return res.json
+            //    ({
+            //      status     : 200, 
+            //      data       : 
+            //      {    
+            //         "limit"             : network.transferlimit,
+            //         "currency"          : current_currency, 
+            //         "withdraw_amount"   : parseFloat(req.body.amount),
+            //         "native_price"      : pricenative_currency[current_currency],
+            //         "token_price"       : pricetoken_currency[current_currency],
+            //         "fee_in_native"     : transfer_fee ,
+            //         "Network"           : network.network, 
+            //         "coin"              : network.coin, 
+            //         "fee_in_token"      : tokenprice, 
+            //         "netamount"         : netamount 
+            //      }, 
+            //      message                : "Fee Details" 
+            //    })
 
 
             // if (balance.balance >= amount) {
