@@ -13,6 +13,7 @@ var CryptoJS            = require('crypto-js')
 const childProcess      = require('child_process')
 const Network       = require('../Models/network');
 const poolWallet    = require('../Models/poolWallet');
+
 async function Get_RequestByAxios(URL, parameters, headers) {
     response = {}
     await axios.get(URL, {
@@ -29,6 +30,8 @@ async function Get_RequestByAxios(URL, parameters, headers) {
         })
     return response;
 }
+
+
 module.exports =
 {
     Get_RequestByAxios:Get_RequestByAxios,
@@ -43,12 +46,8 @@ module.exports =
             var index = Constant.topupTransList.findIndex(translist => translist.transid == queryvariable.transid)
             const details             = await Network.findOne({id:queryvariable.network_id});
             const walletdetails       = await poolWallet.findOne({network_id:queryvariable.network_id ,address : queryvariable.transkey});
-            
-
-           
-
             const forked_child_process = childProcess.fork('./worker-pool.js');
-           
+            let topitem = await topup.findOneAndUpdate({id:queryvariable.transid},{$set:{ is_check : true, comes_at : new Date().toString() }})
             if(index == -1)
             {
                 let client_object  = {  
@@ -72,10 +71,7 @@ module.exports =
                 Constant.topupTransList[index]["timestamp"]     = timestamp
             }
             forked_child_process.on("message", async (balancedata) => { 
-
-               
             var index = Constant.topupTransList.findIndex(translist => translist.transkey == balancedata.address)
-            
             if(index != -1)
             {
             const transelement =   Constant.topupTransList[index]    
@@ -84,6 +80,7 @@ module.exports =
             {
                 transelement.connection.sendUTF(JSON.stringify(balancedata));
                 transelement.connection.close(1000)
+                let topitem = await topup.findOneAndUpdate({id:balancedata.transid},{$set:{ is_check : true, expire_at : new Date().toString() }})
                 Constant.topupTransList =  Constant.topupTransList.filter(translist => translist.transid != balancedata.transid);
             }  
             else if (balancedata.time > 5)
@@ -93,7 +90,8 @@ module.exports =
                 //     is_check_at : new Date().toString()
                 
                 // }})
-                // console.log("topitem",topitem)
+                
+                let topitem = await topup.findOneAndUpdate({id:balancedata.transid},{$set:{ is_check : true, expire_at : new Date().toString() }})
                 transelement.connection.sendUTF(JSON.stringify(balancedata));
                 transelement.connection.close(1000)
                 Constant.topupTransList =  Constant.topupTransList.filter(translist => translist.transid != balancedata.transid);

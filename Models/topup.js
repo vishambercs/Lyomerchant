@@ -87,6 +87,14 @@ const topupschema = new mongoose.Schema({
         type: String,
         default: false,
     },
+    comes_at: {
+        type: String,
+        default: false,
+    },
+    expire_at: {
+        type: String,
+        default: false,
+    },
 },
    
     { timestamps: true }
