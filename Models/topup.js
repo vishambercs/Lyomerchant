@@ -97,6 +97,12 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: "",
     },
+    transtype : 
+    {
+        type: String,
+        required: false,
+        default: "",
+    },
 
 },
    

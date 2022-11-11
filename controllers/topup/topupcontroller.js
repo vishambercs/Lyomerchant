@@ -263,6 +263,7 @@ module.exports =
             var merchantKey = req.headers.authorization
             var networkType = req.body.networkType
             var orderid = req.body.orderid
+            var transtype = req.body.transtype
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             let account = await poolwalletController.getPoolWalletID(networkType)
@@ -279,6 +280,7 @@ module.exports =
                 orderid: req.body.orderid,
                 status: 0,
                 walletValidity: currentDate,
+                transtype: transtype,
                 remarks: req.body.remarks,
                 timestamps: new Date().getTime()
             });
