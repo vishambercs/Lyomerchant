@@ -8,17 +8,11 @@ var poolwalletController = require('../poolwalletController');
 const clientWallets = require('../../Models/clientWallets');
 const Web3 = require('web3');
 const TronWeb = require('tronweb')
-<<<<<<< HEAD
 require('dotenv').config()
 const axios               = require('axios')
 var stringify             = require('json-stringify-safe');
 var otpGenerator = require('otp-generator')
 var commonFunction = require('../../common/commonFunction');
-=======
-const axios          = require('axios')
-const fetch = require('node-fetch');
-var stringify = require('json-stringify-safe');
->>>>>>> 42763fbae709ed960ce359fd58b1017501bbffca
 async function CheckAddress(Nodeurl, Type,cointype ,Address, ContractAddress = "", privateKey = "") {
    
     
@@ -108,7 +102,6 @@ async function CheckAddress(Nodeurl, Type,cointype ,Address, ContractAddress = "
     }
 }
 
-<<<<<<< HEAD
 async function Check_Trans_Hash(Nodeurl, Type,cointype ,tranxid, address,ContractAddress = "", privateKey = "") {
    
     let token_balance = 0
@@ -262,72 +255,6 @@ axios(config)
 
 
 
-=======
-async function pricecalculation(networktitle,balance) {
-    try {
-        let parameters       = `ids=${networktitle}&vs_currencies=usd`
-        let COINGECKO_URL    = process.env.COINGECKO + parameters
-        response             = {}
-        await axios.get(COINGECKO_URL, { params: {},headers: {}}).then(res => {
-            var stringify_response = stringify(res)
-            response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
-        }).catch(error => {
-                console.error("Error", error)
-                var stringify_response = stringify(error)
-                response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
-        })
-        var stringify_response = JSON.parse(response.data)
-        let pricedata = stringify_response.data
-        console.log(pricedata)
-        let pricedatacurrency           = pricedata[networktitle]
-        let price                       = parseFloat(pricedatacurrency["usd"]) * parseFloat(balance)
-        return price;
-    }
-    catch (error) {
-        console.log("pricecalculation", error)
-        return 0;
-
-    }
-}
-async function updateClientWallet(client_api_key, networkid, merchantbalance, processingfee = 0.01) {
-    let val = await clientWallets.findOne({ client_api_key: client_api_key, network_id: networkid,status: 1 })
-    if (val != null) 
-    {
-        let clientWallet = await clientWallets.updateOne({ client_api_key: client_api_key, network_id: networkid }, { $set: { balance: (val.balance + (merchantbalance - (merchantbalance * processingfee))) } })
-        return clientWallet
-    }
-    else 
-    {
-        const clientWallet = new clientWallets({
-            id: mongoose.Types.ObjectId(),
-            client_api_key: client_api_key,
-            address: " ",
-            privatekey: " ",
-            status: 1,
-            network_id: networkid,
-            balance: (merchantbalance - (merchantbalance * processingfee)),
-            remarks: "Please Generate The Wallet Address Of this type"
-        });
-        let client_Wallet = await clientWallet.save()
-        console.log("==============new val=====================================",clientWallet )
-        return client_Wallet
-    }
-}
-async function fetchpostRequest(URL, parameters) {
-    try
-    {
-    await fetch(URL, {
-        method: 'POST',
-        body: JSON.stringify(parameters),
-        headers: { 'Content-Type': 'application/json' }
-    }).then(res => console.log(res))
-      .then(json => console.log(json));
-    }
-    catch(error){
-        console.log("======================================== fetchpostRequest",error)
-    }
-}
->>>>>>> 42763fbae709ed960ce359fd58b1017501bbffca
 module.exports =
 {
     
@@ -478,7 +405,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },  
-<<<<<<< HEAD
     async verfiythebalance(req, res) 
     {
         try 
@@ -527,82 +453,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-    async verfiythebalance(req, res) 
-    {
-        try 
-        {
-            let transactionPool = await topup.findOneAndUpdate(
-            { id: req.body.id ,status: 0} , {$set:
-=======
-    async verifyTheBalance(req,res) {
-        try 
-        {
-            let balance     = +(req.body.balance)
-            let status      =  req.body.status
-            let pw          = await poolWallet.findOne({ 'address': req.body.address,status:1 })
-            if(pw   ==  null)
->>>>>>> 42763fbae709ed960ce359fd58b1017501bbffca
-            {
-               return res.json({ status: 400, data: {}, message: "Invalid Request" })
-            }
-            let topitem = await topup.findOne({ poolwalletID: pw.id, status: 0 })
-            if(topitem ==  null)
-            {
-               return res.json({ status: 400, data: {}, message: "Invalid Request" })
-            }
-            let network             = await networks.findOne({ id: pw.network_id })
-            let networktitle        = network.currencyid.toLowerCase()
-            let price               = await pricecalculation(networktitle,balance) 
-            let updatetopup         = await topup.updateOne({ id: topitem.id}, { $set:{
-                amount              : balance,
-                fiat_amount         : price, 
-                status              : status,
-                api_updated_at      : new Date().toString()
-            }},{'returnDocument'    : 'after'})
-            let updatebalance       = await updateClientWallet( topitem.api_key, balance,network.processingfee)
-            let updatepoolwallet    = await poolWallet.updateOne({'id': pw.id},{$set:{ status:20 } })
-            var index               = Constant.topupTransList.findIndex(translist => translist.transkey == topitem.id)
-            
-            if(index != -1 && status == 1)
-            {
-               const transData      = Constant.topupTransList[index]
-                let response        = 
-                { 
-                    transkey:topitem.id ,
-                    amountstatus: status,
-                    "paid_in_usd":price, 
-                    "paid": balance, 
-                    status: 200, 
-                    message: "Success" 
-                };
-                transData.connection.sendUTF(JSON.stringify(response));
-                transData.connection.close(1000)
-                Constant.topupTransList =  Constant.topupTransList.filter(translist => translist.transkey != topitem.id);
-                let get_addressObject = await fetchpostRequest(topitem.callbackURL, updatetopup)
-            }
-            else
-            {
-                const transData      = Constant.topupTransList[index]
-                let response = 
-                { 
-                    transkey:topitem.id ,
-                    amountstatus: status,
-                    "paid_in_usd":price, 
-                    "paid": balance, 
-                    status: 200, 
-                    message: "Success" 
-                };
-                transData.connection.sendUTF(JSON.stringify(response));
-                transData.connection.close(1000)
-            }
 
-            res.json({ status: 200, data: {}, message: "Thanks I am updating" })
-        }
-        catch (error) {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: "Error" })
-        }
-    },  
     async verfiytranshash(req, res) 
     {
         try 
