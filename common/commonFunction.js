@@ -888,14 +888,7 @@ module.exports =
                         as: "networkDetails"// output array field
                     }
                 },
-                // {
-                //     $lookup: {
-                //         from: "clients", // collection to join
-                //         localField: "api_key",//field from the input documents
-                //         foreignField: "api_key",//field from the documents of the "from" collection
-                //         as: "clientdetails"// output array field
-                //     }
-                // },
+
                 {
                     "$project":
                     {

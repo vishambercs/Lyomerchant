@@ -3,7 +3,9 @@ require("dotenv").config()
 const topupUtility     = require('./topupUtility');
 const Constant        = require('./Constant');
 
-function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount) {
+function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount,details,walletdetails) {
+    console.log(details)
+    console.log(walletdetails)
     var client = new WebSocketClient();
     client.on('connectFailed', function (error) {
         console.log('Connect Error: ' + error.toString());
@@ -59,7 +61,6 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
     url += "&network_id="+network_id
     url += "&amount="+amount
     url += "&transid="+transid
-   
     client.connect(url, '', "");
 
 }

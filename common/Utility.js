@@ -363,7 +363,7 @@ module.exports =
             }
             connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
             
-            //let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount)
+            let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
             if(index == -1)
             {
                 let response        = { transkey:queryvariable.transkey,amountstatus: 0, "paid_in_usd": 0, "paid": 0, status: 200, message: "We are checking. Please Wait" };
@@ -373,13 +373,7 @@ module.exports =
 
 
 
-            // Constant.interval  = setInterval(commonFunction.get_data_of_topup_transcation, 10000);
-            // connection.on('message', function (message) {
-            // if(index == -1)
-            // {
-            //     connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
-            // }
-            // })
+           
         }
         else
         {

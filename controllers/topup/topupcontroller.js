@@ -166,20 +166,21 @@ async function fetchpostRequest(URL, parameters) {
 }
 module.exports =
 {
-    
     async create_top_payment(req, res) {
-        try {
+        try 
+        {
             var merchantKey = req.headers.authorization
             var networkType = req.body.networkType
             var orderid = req.body.orderid
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             let account = await poolwalletController.getPoolWalletID(networkType)
+            let amount = Object.keys(req.body).indexOf("amount") == -1 ?  0 : parseFloat(req.body.amount)
             const transactionPool = new topup({
                 id  : mongoose.Types.ObjectId(),
                 api_key: req.headers.authorization,
                 poolwalletID: account.id,
-                amount: 0,
+                amount: amount,
                 currency: req.body.currency,
                 callbackURL: req.body.callbackurl,
                 apiredirectURL: req.body.apiredirecturl,
@@ -193,7 +194,6 @@ module.exports =
             transactionPool.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
                 let url = process.env.TOP_UP_URL + val.id
-                
                 let data = { url: url }
                 res.json({ status: 200, message: "Assigned Merchant Wallet Successfully", data: data })
             }).catch(error => {
