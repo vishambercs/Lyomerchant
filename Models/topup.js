@@ -78,7 +78,25 @@ const topupschema = new mongoose.Schema({
     extra_gas: {
         type: Number,
         required: false,
-    }
+    },
+    otp : 
+    {
+        type: String,
+        required: false,
+        default: "",
+    }, 
+    transhash : 
+    {
+        type: String,
+        required: false,
+        default: "",
+    }, 
+    updated_at : 
+    {
+        type: String,
+        required: false,
+        default: "",
+    },
 
 },
    

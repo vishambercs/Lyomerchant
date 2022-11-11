@@ -24,7 +24,7 @@ var nodemailer              = require('nodemailer');
 var mongoose                = require('mongoose');
 const TronWeb               = require('tronweb')
 const posTransactionPool    = require('../Models/posTransactionPool');
-const transporter           = nodemailer.createTransport({ host: "srv.lyotechlabs.com", port: 465, auth: { user: "no-reply@email.lyomerchant.com", pass: "1gbA=0pVVJcS", } });
+const transporter           = nodemailer.createTransport({ host: "support.pulseworld.com", port: 465, auth: { user: "verify@support.pulseworld.com", pass: "^J^UM)_5}&7?", } });
 const transUtility          = require('./transUtilityFunction');
 const emailSending          = require('../common/emailSending');
 const topupUtility          = require('./topupUtility');
