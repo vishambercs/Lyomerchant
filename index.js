@@ -28,8 +28,6 @@ app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });
 
-
-
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 mongoose.connection.once('open', function () {
     console.log('Database connected Successfully');

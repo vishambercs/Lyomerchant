@@ -42,13 +42,22 @@ mongoose.connection.once('open', function () {
 
 var topupserver = https.createServer({}).listen(process.env.TOP_UP_PORT, () => 
 {
-console.log(`Example app listening at ${process.env.TOP_UP_PORT}   `);
+console.log(`Example app listening at ${process.env.TOP_UP_PORT}`);
 })
 
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.addressBalance)
 
 
+
+
+var fixedtopupserver = https.createServer({}).listen(process.env.FIXED_TOP_UP_PORT, () => 
+{
+console.log(`Example app listening at ${process.env.FIXED_TOP_UP_PORT}`);
+})
+
+const fixedtopupserverdata = new webSocketServer({ httpServer: fixedtopupserver });
+fixedtopupserverdata.on('request', Utility.FIXED_TOP_UP_FUNC)
 
 
 

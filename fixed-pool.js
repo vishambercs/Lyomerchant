@@ -14,18 +14,20 @@ process.on("message",async (parameters) => {
   var status   = 0 ;
   let balance          = {}
   const previousdate  = new Date(parseInt(parameters.timestamp));
-
-  while(minutes < process.env.SOCKET_TIME && status == 0)
+  while(minutes < process.env.SOCKET_TIME && (status == 0 || status == 2))
   {
 
   let balancedata      = await checkbalance(parameters.address,parameters.details,parameters.walletdetails);
- 
+
   balance          = 
   { 
     "balancedata" : balancedata , 
     "address"     : parameters.address,  
   }
-  status              =  balancedata.format_balance > 0 ? 1 : 0
+  
+  status              =   balancedata.format_balance  == parameters.amount  ? 1 : status
+  status              =   balancedata.format_balance  > parameters.amount   ? 3 : status 
+  status              =   balancedata.format_balance > 0 && (balancedata.format_balance  < parameters.amount)   ? 2 : status 
   const currentdate   = new Date().getTime()
   var diff            = currentdate - previousdate.getTime();
   minutes             = (diff / 60000)
@@ -54,20 +56,19 @@ async function checkbalance(address,details,walletdetails)
   let checkadd = await CheckAddress(details.nodeUrl, details.libarayType,details.cointype, address, details.contractAddress, "")
    if(checkadd.balance > 0)
    {
-    console.log("Web3 checkadd========================================",checkadd)
+    console.log("Web3 checkadd Fixed Pool========================================",checkadd)
    }
    return checkadd;
 }
 async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "", privateKey = "") {
-  
+ 
   let balance = 0
   let format_balance = 0
   let native_balance = 0
   let format_native_balance = 0
   try {
       if (Type == "Web3" && cointype == "Token") {
-        
-          const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
+         const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
           if (ContractAddress != "") {
               const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
               balance = await contract.methods.balanceOf(Address.toLowerCase()).call();
@@ -108,7 +109,6 @@ async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "
         }
         return balanceData
       }
-
       else 
       {
       const HttpProvider = TronWeb.providers.HttpProvider;

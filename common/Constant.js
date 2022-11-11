@@ -18,6 +18,8 @@ const paymenlinkTransList = []
 const paymenlinkIndex = 0
 
 const topupTransList = []
+const fixedTopupTransList = []
+const fixedtopupIndex = 0
 const topupIndex = 0
 const addressBalance = []
 const transstatus = [
@@ -92,6 +94,7 @@ module.exports =
   paymenlinkIndex: paymenlinkIndex,
   transstatus: transstatus,
   topupTransList :topupTransList,
+  fixedTopupTransList :fixedTopupTransList,
   topupIndex :topupIndex,
 
 }
