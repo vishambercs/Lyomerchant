@@ -103,19 +103,13 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: 0,
     },
-    transtype : 
-    {
-        type: String,
-        required: false,
-        default: "",
-    },
-
+    
 },
    
     { timestamps: true }
 )
 topupschema.plugin(uniqueValidator);
-module.exports = mongoose.model('topup', topupschema)
+module.exports = mongoose.model('Fixedtopup', topupschema)
 
 
 

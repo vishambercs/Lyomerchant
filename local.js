@@ -2,13 +2,13 @@ var express         = require('express');
 const mongoose      = require('mongoose');
 const bodyParser    = require('body-parser');
 var client          = require('./Route/clientsRoute');
-var poolRoute       = require('./Route/poolRoute');
-var networkRoute    = require('./Route/networkRoute');
-var walletRoute     = require('./Route/poolwalletRoute');
-var payLinkRoute    = require('./Route/paylinkRoute');
-var hotWalletRoute  = require('./Route/hotWalletRoute');
-var withdrawRoute   = require('./Route/withdrawRoute');
-var adminRoute      = require('./Route/adminRoute');
+// var poolRoute       = require('./Route/poolRoute');
+// var networkRoute    = require('./Route/networkRoute');
+// var walletRoute     = require('./Route/poolwalletRoute');
+// var payLinkRoute    = require('./Route/paylinkRoute');
+// var hotWalletRoute  = require('./Route/hotWalletRoute');
+// var withdrawRoute   = require('./Route/withdrawRoute');
+// var adminRoute      = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
@@ -43,7 +43,7 @@ app.use('/v1', client);
 // app.use('/wallet/v1', walletRoute);
 // app.use('/hotWallet/v1', hotWalletRoute);
 // app.use('/withdraw/v1', withdrawRoute);
-app.use('/admin', adminRoute);
+// app.use('/admin', adminRoute);
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 
@@ -96,13 +96,15 @@ var posTranscationserver = https.createServer({
 const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 posTranscation.on('request', Utility.posTranscationWebScokect)
 
-var paymentLinkTranscationserver = https.createServer({
-}).listen(process.env.PAYMENT_LINK_PORT, () => {
-console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}`);
+
+
+var fixedtotup = https.createServer({
+}).listen(process.env.FIXED_UP_PORT, () => {
+console.log(`Example app listening at ${process.env.FIXED_UP_PORT}`);
 })
 
-const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
-paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
+const fixedtotupdata = new webSocketServer({ httpServer: fixedtotup });
+fixedtotupdata.on('request', Utility.fixedtopupWebScokect)
 
 
 var topupserver = https.createServer({}).listen(process.env.TOP_UP_PORT, () => {

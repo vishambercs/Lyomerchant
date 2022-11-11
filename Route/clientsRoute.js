@@ -21,26 +21,8 @@ const clientapicontroller           = require('../controllers/Masters/clientapic
 const commonController              = require('../controllers/Logs/commonController');
 const ipnController                 = require('../controllers/Masters/ipnController');
 const topupcontroller               = require('../controllers/topup/topupcontroller');
+const fixedtopupcontroller          = require('../controllers/topup/fixedtopupcontroller');
 
-// router.post('/Get_Transcation_From_Address',         clientsController.Get_Transcation_From_Address);
-// router.post('/check_balance_api',                    transcationpoolController.check_balance_api);
-// router.post('/getBalanceAddress',                    Auth.is_merchant,clientsController.get_BalancebyAddress);
-// router.post('/approvekyc',                           clientsController.kyc_approved);
-// router.post('/clientBalance',                        Auth.is_merchant,transcationpoolController.get_Client_Balance);
-// router.post('/update_cron_job',                      clientsController.update_cron_job);
-// // router.post('/gettranscationlist',                clientsController.Get_Transcation_List);
-// router.post('/updateClientToken',                    Auth.is_merchant,clientsController.updateClientToken);
-// router.post('/getapikey',                            Auth.is_merchant,clientsController.getapikey);
-// router.post('/generateNewClientAddress',             Auth.is_merchant,clientsController.generateNewClientAddress);
-// "=============Merchant-Sites==========================================="
-// router.post('/allMerchantSites',                         merchantSitesController.allMerchantSites);
-// router.post('/deleteMerchantSite',                       merchantSitesController.deleteMerchantSite);
-// router.post('/savemerchantsite',                         merchantSitesController.savemerchantsite);
-// router.post('/updateMerchantSite',                       merchantSitesController.updateMerchantSite);
-// router.post('/setWithdrawSettings',                                 withdrawController.setWithdrawSettings);
-// router.get('/getWithdrawSettings',                                  Auth.is_merchant,withdrawController.getWithdrawSettings);
-// router.post('/getapistatus',                                        clientapicontroller.getapikey);
-// router.post('/balancecheck',                                          commonController.getBalance);
 
 router.post('/signUpMerchant',                       Auth.verify_create_merchant_auth,clientsController.create_merchant);
 router.post('/resendingemail',                       Auth.is_merchant,Auth.verify_resendingemail,clientsController.resendingemail);
@@ -155,6 +137,21 @@ router.post('/checkbalance',                topupcontroller.checkbalance);
 router.post('/verfiytranshash',             topupcontroller.verfiytranshash);
 router.post('/sendotp',                     topupcontroller.sendotp);
 router.post('/updatetrans',                 topupcontroller.updatetrans);
+
+
+"============================Create Fixed Top UP==============================="
+router.post('/fixedassigntopupMerchantWallet',   fixedtopupcontroller.create_top_payment);
+router.post('/fixedpluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
+router.post('/fixedgettransdataoftopup',         fixedtopupcontroller.get_top_payment_data);
+router.post('/fixedallCurrency',                 Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
+router.post('/fixedpriceConversitionChanges',    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
+// router.post('/fixedcheckbalance',                fixedtopupcontroller.checkbalance);
+// router.post('/fixedverfiytranshash',             fixedtopupcontroller.verfiytranshash);
+// router.post('/fixedcanceltopup',                 fixedtopupcontroller.cancelpaymentLink);
+
+
+// router.post('/fixedsendotp',                     fixedtopupcontroller.sendotp);
+// router.post('/fixedupdatetrans',                 fixedtopupcontroller.updatetrans);
 
 
 module.exports = router;
