@@ -4,6 +4,7 @@ const querystring         = require('querystring');
 const Constant            = require('./Constant');
 const axios               = require('axios')
 var stringify             = require('json-stringify-safe');
+const topup               = require('../Models/topup');
 require("dotenv").config()
 
 
@@ -43,21 +44,24 @@ module.exports =
             const details             = await Network.findOne({id:queryvariable.network_id});
             const walletdetails       = await poolWallet.findOne({network_id:queryvariable.network_id ,address : queryvariable.transkey});
             
+
+           
+
             const forked_child_process = childProcess.fork('./worker-pool.js');
            
             if(index == -1)
             {
-            let client_object  = {  
-                "timestamp"         : timestamp,
-                "uniqueKey"         : uniqueKey,  
-                "connection"        : connection,  
-                "transkey"          : queryvariable.transkey,  
-                "apikey"            : queryvariable.apikey,
-                "network_id"        : queryvariable.network_id,
-                "amount"            : queryvariable.amount,
-                "transid"           : queryvariable.transid,
-              
-            }
+                let client_object  = {  
+                    "timestamp"         : timestamp,
+                    "uniqueKey"         : uniqueKey,  
+                    "connection"        : connection,  
+                    "transkey"          : queryvariable.transkey,  
+                    "apikey"            : queryvariable.apikey,
+                    "network_id"        : queryvariable.network_id,
+                    "amount"            : queryvariable.amount,
+                    "transid"           : queryvariable.transid,
+                
+                }
                Constant.topupTransList.push(client_object)
                let parameters ={  "details"    : details, "walletdetails": walletdetails,"transid" : queryvariable.transid,"amount" : queryvariable.amount,"network_id" : queryvariable.network_id,"address" : queryvariable.transkey, "timestamp" :timestamp }
                forked_child_process.send(parameters);
@@ -67,8 +71,11 @@ module.exports =
                 Constant.topupTransList[index]["connection"]    = connection
                 Constant.topupTransList[index]["timestamp"]     = timestamp
             }
-            forked_child_process.on("message", balancedata => { 
+            forked_child_process.on("message", async (balancedata) => { 
+
+               
             var index = Constant.topupTransList.findIndex(translist => translist.transkey == balancedata.address)
+            
             if(index != -1)
             {
             const transelement =   Constant.topupTransList[index]    
@@ -79,8 +86,14 @@ module.exports =
                 transelement.connection.close(1000)
                 Constant.topupTransList =  Constant.topupTransList.filter(translist => translist.transid != balancedata.transid);
             }  
-            else if (balancedata.time > 10)
+            else if (balancedata.time > 5)
             {
+                // let topitem = await topup.findOneAndUpdate({id:queryvariable.transid},{$set:{
+                //     is_check : true,
+                //     is_check_at : new Date().toString()
+                
+                // }})
+                // console.log("topitem",topitem)
                 transelement.connection.sendUTF(JSON.stringify(balancedata));
                 transelement.connection.close(1000)
                 Constant.topupTransList =  Constant.topupTransList.filter(translist => translist.transid != balancedata.transid);

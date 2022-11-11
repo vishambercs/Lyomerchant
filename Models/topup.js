@@ -22,6 +22,18 @@ const topupschema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    fiat_amount: {
+        type: Number,
+        required: false,
+    },
+    tx_hash: {
+        type: String,
+        required: false,
+    },
+    coin: {
+        type: String,
+        required: false,
+    },
     orderid: {
         type: String,
         required: true,
@@ -63,7 +75,18 @@ const topupschema = new mongoose.Schema({
         type: String,
         required: true,
     },
-
+    extra_gas: {
+        type: Number,
+        required: false,
+    },
+    is_check: {
+        type: Boolean,
+        default: true,
+    },
+    is_check_at: {
+        type: String,
+        default: false,
+    },
 },
    
     { timestamps: true }

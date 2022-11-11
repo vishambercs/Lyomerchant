@@ -18,7 +18,7 @@ process.on("message",async (parameters) => {
   var status   = 0 ;
   let balance          = {}
   const previousdate  = new Date(parseInt(parameters.timestamp));
-  while(minutes < 10 && status == 0)
+  while(minutes < 5 && status == 0)
   {
   let balancedata      = await checkbalance(parameters.address,parameters.details,parameters.walletdetails);
   balance          = 
@@ -52,23 +52,19 @@ async function checkbalance(address,details,walletdetails)
   }
   
   let checkadd = await CheckAddress(details.nodeUrl, details.libarayType,details.cointype, address, details.contractAddress, walletdetails.privateKey)
-   if(checkadd.balance > 0){
-    console.log("Web3 checkadd========================================",checkadd)
-   }
-  
  
+
   return checkadd;
 }
 async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "", privateKey = "") {
-  
+ 
   let balance = 0
   let format_balance = 0
   let native_balance = 0
   let format_native_balance = 0
   try {
       if (Type == "Web3" && cointype == "Token") {
-        
-          const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
+         const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
           if (ContractAddress != "") {
               const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
               balance = await contract.methods.balanceOf(Address.toLowerCase()).call();
@@ -127,7 +123,7 @@ async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "
   }
   catch (error) {
     
-      console.log("Error========================================",error)
+      console.log("Error========================================",error.response.status)
       let balanceData = { status: 400,message: "Error","balance": balance, "format_balance": format_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
       return balanceData
   }
