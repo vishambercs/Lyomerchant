@@ -145,6 +145,8 @@ router.post('/fixedpluginallNetworks',           Auth.Verfiy_Merchant,Auth.check
 router.post('/fixedgettransdataoftopup',         fixedtopupcontroller.get_top_payment_data);
 router.post('/fixedallCurrency',                 Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
 router.post('/fixedpriceConversitionChanges',    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
+
+
 // router.post('/fixedcheckbalance',                fixedtopupcontroller.checkbalance);
 // router.post('/fixedverfiytranshash',             fixedtopupcontroller.verfiytranshash);
 // router.post('/fixedcanceltopup',                 fixedtopupcontroller.cancelpaymentLink);
