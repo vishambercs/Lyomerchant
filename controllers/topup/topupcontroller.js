@@ -241,7 +241,7 @@ axios(config)
 
 }
 
- async function getTimeprice(time, coin)  {
+async function getTimeprice(time, coin)  {
     try {
        const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=1m&startTime=${time}&limit=1`);
        return getBalanceRes.data[0][4];
@@ -249,7 +249,7 @@ axios(config)
        console.log(e);
        return 1;
     }
- }
+}
 
 
 
@@ -552,7 +552,7 @@ module.exports =
                 transactionPool.amount,
                 faitprice,network.id,transWallet.address,faitprice,
                 network.network,
-                new Date().toString(),transactionPool.timestamps )
+                new Date().toString(),transactionPool.timestamps)
 
             res.json({ status: 200, message: "Get The Data", data: "" })
             

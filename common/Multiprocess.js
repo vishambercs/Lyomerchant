@@ -18,7 +18,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             console.log('Connection closed!');
         });
         connection.on('message', async function (message) {
-         
+            console.log("message",message)         
             let jsondata        = JSON.parse(message.utf8Data)
             let transData       = Constant.topupTransList[index]
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
@@ -35,6 +35,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                 transData.connection.sendUTF(JSON.stringify(response));
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
+            
             }
             // else if (jsondata.time > 10 && index != -1)
             // {

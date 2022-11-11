@@ -275,20 +275,55 @@ async function postRequest(URL, parameters, headers) {
     return response;
 }
 
-
+async function updateOtherAPI(tx_status, tx_id,toupid ,tx_hash, orderid,coin,crypto_amount,fiat_amount,network_id,address,fiat_usd,network_name,createdAt,timestamps ) {
+   
+    console.log("==============updateOtherAPI=======================",
+    tx_status, tx_id,toupid ,tx_hash, orderid,coin,crypto_amount,fiat_amount,network_id,address,fiat_usd,network_name,createdAt,timestamps
+    ) 
+    
+    var data = '';
+    
+    var params = "tx_status="+tx_status
+        params += "&tx_id="+tx_id
+        params += "&toupid="+toupid
+        params += "&tx_hash="+tx_hash
+        params += "&orderid="+orderid
+        params += "&coin="+coin
+        params += "&crypto_amount="+crypto_amount
+        params += "&fiat_amount="+fiat_amount
+        params += "&network_id="+network_id
+        params += "&address="+address
+        params += "&fiat_usd="+fiat_usd
+        params += "&network_name="+network_name
+        params += "&createdAt="+createdAt
+        params += "&timestamps="+timestamps
+        var config = {
+        method: 'post',
+        url: 'https://api.pulseworld.com:9987/v1/create_tx_records?',
+        headers: { },
+        data : data
+    };
+    
+    axios(config)
+    .then(function (response) {
+      console.log("==============updateOtherAPI=======================",JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log("==============updateOtherAPI=======================",error);
+    });
+    
+    }
+async function getTimeprice(time, coin)  {
+        try {
+           const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=1m&startTime=${time}&limit=1`);
+           return getBalanceRes.data[0][4];
+        } catch(e) {
+           console.log(e);
+           return 1;
+        }
+    }
 async function fetchpostRequest(URL, parameters) {
     try{
-    // let todo = {
-    //     userId: 123,
-    //     title: "loren impsum doloris",
-    //     completed: false
-    // };
-    // await fetch(URL, {
-    //     method: 'POST',
-    //     body: JSON.stringify(parameters),
-    //     headers: { 'Content-Type': 'application/json' }
-    // }).then(res => res.json())
-    //   .then(json => console.log(json));
     await fetch(URL, {
         method: 'POST',
         body: JSON.stringify(parameters),
@@ -462,6 +497,18 @@ async function verifyTheBalance(transkey) {
         let logData           = { "transcationDetails": trans_data[0],"paid_in_usd": pricecal }
         let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData)
         let ClientWallet      = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
+        await updateOtherAPI(1, 
+            addressObject.id,
+            addressObject.id ,"", 
+            addressObject.orderid,
+            addressObject.networkDetails[0].coin,
+            BalanceOfAddress.data.format_token_balance,
+            pricecal,
+            addressObject.networkDetails[0].id,
+            addressObject.poolWallet[0].address,pricecal,
+            addressObject.networkDetails[0].network,
+            new Date().toString(),
+            addressObject.timestamps )
         response = { amountstatus: 0, "paid_in_use": pricecal,"paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "success" };
         return JSON.stringify(response)
     }
