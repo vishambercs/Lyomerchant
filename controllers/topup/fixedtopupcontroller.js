@@ -70,7 +70,7 @@ module.exports =
     async getTransStatus(req, res) {
         try {
             var merchantKey         =  req.headers.authorization
-            const url               =  process.env.API_URL+"/v1/fixedupdatetrans"
+            const url               =  process.env.API_URL+"/v1/getTransStatus"
             let parameters          =  
             {
                 "transid"       : req.body.id,
