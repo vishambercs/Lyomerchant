@@ -6,11 +6,7 @@ const poolWallet    = require('./Models/poolWallet');
 const Utility       = require('./common/Utility');
 const TronWeb       = require('tronweb');
 require("dotenv").config()
-const HttpProvider = TronWeb.providers.HttpProvider;
-const fullNode = new HttpProvider("https://api.trongrid.io");
-const solidityNode = new HttpProvider("https://api.trongrid.io");
-const eventServer = new HttpProvider("https://api.trongrid.io");
-const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, "50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78");
+
 
 process.on("message",async (parameters) => {
   var minutes  = 0;
@@ -18,18 +14,37 @@ process.on("message",async (parameters) => {
   var status   = 0 ;
   let balance          = {}
   const previousdate  = new Date(parseInt(parameters.timestamp));
-  while(minutes < 10 && status == 0)
+
+  while(minutes < 30 && status == 0)
   {
+
   let balancedata      = await checkbalance(parameters.address,parameters.details,parameters.walletdetails);
+ 
   balance          = 
   { 
     "balancedata" : balancedata , 
     "address"     : parameters.address,  
-  } 
+  }
+  
+  if(parameters.amount == 0)
+  {
+    status              =  parseFloat(parameters.walletdetails.balance) != balancedata.format_balance ? 1 : 0
+  }
+  else
+  {
+    console.log("current_balance in db",balancedata.format_balance)
+    console.log("walletdetails",parameters.walletdetails.balance)
+   
+    let current_balance =  (balancedata.format_balance - parseFloat(parameters.walletdetails.balance))
+    console.log("current_balance",current_balance)
+    status              =   current_balance == parameters.amount      ? 1 : status
+    status              =   current_balance > parameters.amount       ? 3 : status 
+    status              =   ( current_balance < parameters.amount  &&  current_balance > 0)    ? 2 : status 
+  }
   const currentdate   = new Date().getTime()
   var diff            = currentdate - previousdate.getTime();
   minutes             = (diff / 60000)
-  status              = balancedata.format_balance > 0 ? 1 : 0
+  status              = status
   balance["time"]     = minutes
   balance["remain"]   = parameters.amount - balancedata.format_balance
   balance["address"]  = parameters.address
@@ -45,19 +60,18 @@ process.on("message",async (parameters) => {
 
 async function checkbalance(address,details,walletdetails)
 {
-  
+   
   if(details == null )
   {
     return {"status":400, "balance":0,"format_balance":0 ,"native_balance": 0, "format_native_balance": 0,"message": "Invalid Network"};
   }
   
-  let checkadd = await CheckAddress(details.nodeUrl, details.libarayType,details.cointype, address, details.contractAddress, walletdetails.privateKey)
-   if(checkadd.balance > 0){
+  let checkadd = await CheckAddress(details.nodeUrl, details.libarayType,details.cointype, address, details.contractAddress, "")
+   if(checkadd.balance > 0)
+   {
     console.log("Web3 checkadd========================================",checkadd)
    }
-  
- 
-  return checkadd;
+   return checkadd;
 }
 async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "", privateKey = "") {
   
@@ -110,7 +124,13 @@ async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "
         return balanceData
       }
 
-      else {
+      else 
+      {
+      const HttpProvider = TronWeb.providers.HttpProvider;
+      const fullNode = new HttpProvider("https://api.trongrid.io");
+      const solidityNode = new HttpProvider("https://api.trongrid.io");
+      const eventServer = new HttpProvider("https://api.trongrid.io");
+      const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, "50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78");
           let contract = await tronWeb.contract().at(ContractAddress);
           native_balance = await tronWeb.trx.getBalance(Address)
           balance = await contract.balanceOf(Address).call();

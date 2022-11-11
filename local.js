@@ -10,12 +10,15 @@ const https             = require('http');
 const Utility           = require('./common/Utility');
 var os                  = require('os');
 const mongoose          = require('mongoose');
+var index               = require('./Route/index');
 require('dotenv').config()
 app.use(fileUpload());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// app.use('/', index);
 
 app.use((req, res, next) => 
 {
