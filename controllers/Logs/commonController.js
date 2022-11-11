@@ -24,21 +24,23 @@ module.exports =
             let posTranPool     = await posTransactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
             let TranPool        = await transactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
             let topup           = await topups.findOne({ "id": id, "api_key": req.headers.authorization })
-        
-
             let poolwallet = pyTranPool != null ? await poolWallets.findOne({ id: pyTranPool.poolwalletID }) : null
             poolwallet = (poolwallet == null && posTranPool != null) ? await poolWallets.findOne({ id: posTranPool.poolwalletID }) : poolwallet
             poolwallet = (poolwallet == null && TranPool != null) ? await poolWallets.findOne({ id: TranPool.poolwalletID }) : poolwallet
             poolwallet = (poolwallet == null && topup != null) ? await poolWallets.findOne({ id: topup.poolwalletID }) : poolwallet
-
             let payLink_data = pyTranPool != null ? await payLink.findOne({ id: pyTranPool.payLinkId}) : null
             let invoice_data = payLink_data != null ? await invoice.findOne({ id: payLink_data.invoice_id}) : null
             let networkDetails = poolwallet != null ? await network.findOne({ id: poolwallet.network_id}) : null
+           
             let status  = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
             status = (status.length == 0 && posTranPool != null) ? Constant.transstatus.filter(index => index.id == posTranPool.status) : status
             status = (status.length == 0 && TranPool != null) ? Constant.transstatus.filter(index => index.id == TranPool.status) : status
             status = (status.length == 0 && topup != null) ? Constant.transstatus.filter(index => index.id == topup.status) : status
 
+            let statusnumber    = pyTranPool != null ? pyTranPool.status : null
+            statusnumber              = (statusnumber == null && posTranPool != null) ?  posTranPool.status : statusnumber
+            statusnumber              = (statusnumber == null && TranPool != null) ? TranPool.status : statusnumber
+            statusnumber              = (statusnumber == null && topup != null) ?  topup.status : statusnumber
             
             let amount = pyTranPool != null                     ? pyTranPool.amount : 0
             amount     = (amount == 0 && posTranPool != null)   ?  posTranPool.amount : amount
@@ -58,16 +60,16 @@ module.exports =
 
             let datarray = 
             {
-                "transaction_status"    : (status.length > 0 ? status[0].title : ""),
+                "transaction_status"    :   (status.length > 0 ? status[0].title : ""),
                 "orderid"               :   order_id,
-                "transaction_id"        : req.body.transid,
-                "address"               : (poolwallet != null ? poolwallet.address : ""),
-                "coin"                  : (networkDetails != null ? networkDetails.coin : ""),
-                "network"               : (networkDetails != null ? networkDetails.network : ""),
-                "crypto_amount"         :  amount,
-                // "invoicenumber"      :  (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
-             
-                "fiat_amount"           :  fiat_amount ,
+                "status"                : statusnumber, 
+                "transaction_id"        :   req.body.transid,
+                "address"               :   (poolwallet != null ? poolwallet.address : ""),
+                "coin"                  :   (networkDetails != null ? networkDetails.coin : ""),
+                "network"               :   (networkDetails != null ? networkDetails.network : ""),
+                "crypto_amount"         :   amount,
+                // "invoicenumber"      :   (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
+                "fiat_amount"           :   fiat_amount ,
                 // "currency"           :   currency   
                 
             }

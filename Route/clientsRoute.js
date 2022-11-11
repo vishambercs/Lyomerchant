@@ -147,14 +147,15 @@ router.post('/createIPNLink',                        Auth.is_merchant,ipnControl
 router.post('/getIPNLink',                           Auth.is_merchant,ipnController.get_IPN_Link);
 
 "============================Create Top UP==============================="
-router.post('/assigntopupMerchantWallet',               topupcontroller.create_top_payment);
+router.post('/assigntopupMerchantWallet',   topupcontroller.create_top_payment);
 router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
-router.post('/checkbalance',                 topupcontroller.checkbalance);
+router.post('/checkbalance',                topupcontroller.checkbalance);
+router.post('/verfiytranshash',             topupcontroller.verfiytranshash);
+router.post('/sendotp',                     topupcontroller.sendotp);
+router.post('/updatetrans',                 topupcontroller.updatetrans);
 
-// router.post('/updateQuickpayment',              topupcontroller.updateQuickpayment);
-// router.post('/getQuickNetwork',                 topupcontroller.allNetworkForClient);
 
 module.exports = router;
 
