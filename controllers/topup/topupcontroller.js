@@ -36,6 +36,7 @@ module.exports =
                 "apiredirecturl"    : req.body.apiredirecturl,
                 "errorurl"          : req.body.errorurl,
                 "amount"            : req.body.amount,
+                "transtype"         : "topup",
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
