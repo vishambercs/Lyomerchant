@@ -24,9 +24,7 @@ module.exports =
             },
            
         };
-
-         response = await axios(config)
-            .then(function (result) {
+        response = await axios(config).then(function (result) {
                 return JSON.stringify(result.data);
             })
             .catch(function (error) {
@@ -44,6 +42,7 @@ module.exports =
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
             const connection        = request.accept(null, request.origin);
+            
             var index               = Constant.topupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
             if(index == -1)
             {
