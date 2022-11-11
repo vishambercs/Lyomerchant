@@ -20,7 +20,8 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
             let jsondata        =  JSON.parse(message.utf8Data)
             let transData       = {} 
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transkey)
-             
+            console.log("jsondata",jsondata)
+            console.log("index",index)
             if(index != -1 )
             {
                 transData = Constant.topupTransList[index]
@@ -34,7 +35,7 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transkey);
             }
-            if((jsondata.amountstatus == 4 ) && index != -1)
+            else if((jsondata.amountstatus == 4 ) && index != -1)
             {
                 let response        = { amountstatus: jsondata.amountstatus,"paid_in_usd":jsondata.paid_in_usd, "paid": jsondata.paid, status: 200, message: "Transcation Expired" };
                 transData.connection.sendUTF(JSON.stringify(response));
