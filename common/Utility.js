@@ -7,6 +7,8 @@ var stringify             = require('json-stringify-safe');
 var cornJobs              = require('./cornJobs');
 const transcationLog      = require('../Models/transcationLog');
 const transactionPools    = require('../Models/transactionPool');
+const FixedTopupMultiProcess    = require('./FixedTopupMultiProcess');
+
 const clients             = require('../Models/clients');
 var clientsController     = require('../controllers/clientsController');
 var crypto                = require("crypto");
@@ -363,23 +365,53 @@ module.exports =
             }
             connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
             
-            let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount)
+            let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
             if(index == -1)
             {
                 let response        = { transkey:queryvariable.transkey,amountstatus: 0, "paid_in_usd": 0, "paid": 0, status: 200, message: "We are checking. Please Wait" };
                 let balanceResponse = JSON.stringify(response)
                 connection.sendUTF(balanceResponse);
             }
-
-
-
-            // Constant.interval  = setInterval(commonFunction.get_data_of_topup_transcation, 10000);
-            // connection.on('message', function (message) {
-            // if(index == -1)
-            // {
-            //     connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
-            // }
-            // })
+        }
+        else
+        {
+            return request.reject(null, request.origin);
+        }
+        }
+        catch (error) {
+            console.log(error)
+            return null
+        }
+    },
+    async fixedtopupWebScokect(request) {
+        try {
+            let uniqueKey           = crypto.randomBytes(20).toString('hex')
+            let url_paremeters      = url.parse(request.httpRequest.url);
+            let queryvariable       = querystring.parse(url_paremeters.query)
+            var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            let getTranscationData  = await commonFunction.get_Fixed_Transcation_topup(queryvariable.transkey,queryvariable.apikey)
+            if(getTranscationData.length > 0)
+            {
+            const connection        = request.accept(null, request.origin);
+            var index = Constant.fixedTopupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            if(index == -1)
+            {
+            let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
+            Constant.fixedTopupTransList.push(client_object)
+            }
+            else
+            {
+                Constant.fixedTopupTransList[index]["connection"] = connection
+            }
+            connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            
+            let data = FixedTopupMultiProcess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
+            if(index == -1)
+            {
+                let response        = { transkey:queryvariable.transkey,amountstatus: 0, "paid_in_usd": 0, "paid": 0, status: 200, message: "We are checking. Please Wait" };
+                let balanceResponse = JSON.stringify(response)
+                connection.sendUTF(balanceResponse);
+            }
         }
         else
         {

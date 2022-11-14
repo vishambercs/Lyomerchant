@@ -7,6 +7,7 @@ const payLink    = require('../../Models/payLink');
 const invoice    = require('../../Models/invoice');
 const topups      = require('../../Models/topup');
 const Constant   = require('../../common/Constant');
+const Fixedtopups      = require('../../Models/Fixedtopup');
 const { getBalance } = require('bitcoin-core/src/methods');
 const Web3 = require('web3');
 const { concat } = require('lodash');
@@ -24,10 +25,15 @@ module.exports =
             let posTranPool     = await posTransactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
             let TranPool        = await transactionPool.findOne({ "id": id, "api_key": req.headers.authorization })
             let topup           = await topups.findOne({ "id": id, "api_key": req.headers.authorization })
+            let Fixedtopup      = await Fixedtopups.findOne({ "id": id, "api_key": req.headers.authorization })
+
+
             let poolwallet = pyTranPool != null ? await poolWallets.findOne({ id: pyTranPool.poolwalletID }) : null
             poolwallet = (poolwallet == null && posTranPool != null) ? await poolWallets.findOne({ id: posTranPool.poolwalletID }) : poolwallet
             poolwallet = (poolwallet == null && TranPool != null) ? await poolWallets.findOne({ id: TranPool.poolwalletID }) : poolwallet
             poolwallet = (poolwallet == null && topup != null) ? await poolWallets.findOne({ id: topup.poolwalletID }) : poolwallet
+            poolwallet = (poolwallet == null && Fixedtopup != null) ? await poolWallets.findOne({ id: Fixedtopup.poolwalletID }) : poolwallet
+            
             let payLink_data = pyTranPool != null ? await payLink.findOne({ id: pyTranPool.payLinkId}) : null
             let invoice_data = payLink_data != null ? await invoice.findOne({ id: payLink_data.invoice_id}) : null
             let networkDetails = poolwallet != null ? await network.findOne({ id: poolwallet.network_id}) : null
@@ -36,38 +42,46 @@ module.exports =
             status = (status.length == 0 && posTranPool != null) ? Constant.transstatus.filter(index => index.id == posTranPool.status) : status
             status = (status.length == 0 && TranPool != null) ? Constant.transstatus.filter(index => index.id == TranPool.status) : status
             status = (status.length == 0 && topup != null) ? Constant.transstatus.filter(index => index.id == topup.status) : status
+            status = (status.length == 0 && Fixedtopup != null) ? Constant.transstatus.filter(index => index.id == Fixedtopup.status) : status
 
             let statusnumber    = pyTranPool != null ? pyTranPool.status : null
             statusnumber              = (statusnumber == null && posTranPool != null) ?  posTranPool.status : statusnumber
             statusnumber              = (statusnumber == null && TranPool != null) ? TranPool.status : statusnumber
             statusnumber              = (statusnumber == null && topup != null) ?  topup.status : statusnumber
+            statusnumber              = (statusnumber == null && Fixedtopup != null) ?  Fixedtopup.status : statusnumber
+            
+
             
             let amount = pyTranPool != null                     ? pyTranPool.amount : 0
             amount     = (amount == 0 && posTranPool != null)   ?  posTranPool.amount : amount
             amount     = (amount == 0 && TranPool != null)      ? TranPool.amount : amount
             amount     = (amount == 0 && topup != null)         ? topup.amount : amount
-            
+            amount     = (amount == 0 && Fixedtopup != null)         ? Fixedtopup.amount : amount
+
             let currency = pyTranPool != null                   ? pyTranPool.currency : 0
             currency     = (amount == 0 && posTranPool != null) ? posTranPool.currency : currency
             currency     = (amount == 0 && TranPool != null)    ? TranPool.currency : currency
             currency     = (amount == 0 && topup != null)       ? topup.currency : currency
+            currency     = (amount == 0 && Fixedtopup != null)       ? Fixedtopup.currency : currency
             
             let fiat_amount = topup != null  ? topup.fiat_amount : 0
-          
+           fiat_amount = Fixedtopup != null  ? Fixedtopup.fiat_amount : fiat_amount
 
-            let order_id = topup != null  ? topup.orderid : ""
+            let order_id = topup != null   ? topup.orderid : ""
+            order_id = Fixedtopup != null  ? Fixedtopup.orderid : order_id
+
             // let invoiceNumber = pyTranPool != null ? pyTranPool.invoiceNumber : ""
 
             let datarray = 
             {
-                "transaction_status"    :   (status.length > 0 ? status[0].title : ""),
-                "orderid"               :   order_id,
-                "status"                : statusnumber, 
-                "transaction_id"        :   req.body.transid,
-                "address"               :   (poolwallet != null ? poolwallet.address : ""),
-                "coin"                  :   (networkDetails != null ? networkDetails.coin : ""),
-                "network"               :   (networkDetails != null ? networkDetails.network : ""),
-                "crypto_amount"         :   amount,
+                "transaction_status"    :    (status.length > 0 ? status[0].title : ""),
+                "orderid"               :    order_id,
+                "status"                :    statusnumber, 
+                "transaction_id"        :    req.body.transid,
+                "address"               :    (poolwallet != null ? poolwallet.address : ""),
+                "coin"                  :    (networkDetails != null ? networkDetails.coin : ""),
+                "network"               :    (networkDetails != null ? networkDetails.network : ""),
+                "crypto_amount"         :    amount,
                 // "invoicenumber"      :   (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
                 "fiat_amount"           :   fiat_amount ,
                 // "currency"           :   currency   

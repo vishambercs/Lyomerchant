@@ -3,7 +3,7 @@ require("dotenv").config()
 const topupUtility     = require('./topupUtility');
 const Constant        = require('./Constant');
 
-function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount) {
+function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount,details,walletdetails) {
     var client = new WebSocketClient();
     client.on('connectFailed', function (error) {
         console.log('Connect Error: ' + error.toString());
@@ -18,7 +18,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             console.log('Connection closed!');
         });
         connection.on('message', async function (message) {
-            console.log("message",message)         
+            // console.log("message",message)       
             let jsondata        = JSON.parse(message.utf8Data)
             let transData       = Constant.topupTransList[index]
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
@@ -26,7 +26,6 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             {
                 transData       = Constant.topupTransList[index]
             }
-
             if((jsondata.status == 1 || jsondata.status == 3 ) && index != -1)
             {
                 let responseapi     = await topupUtility.verifyTheBalance(jsondata.transid)
@@ -36,6 +35,17 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
             
+            }
+            if(jsondata.status == 2  && index != -1)
+            {
+                console.log("partaial",message)   
+                let responseapi     = await topupUtility.partialTopupBalance(jsondata.transid)
+                let responseapijson = JSON.parse(responseapi)
+                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paid_in_usd":responseapi.paid_in_usd, "paid": responseapi.paid, status: jsondata.balancedata.status, message: "Success" };
+                transData.connection.sendUTF(JSON.stringify(response));
+          
+               
+
             }
             // else if (jsondata.time > 10 && index != -1)
             // {
@@ -60,7 +70,6 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
     url += "&network_id="+network_id
     url += "&amount="+amount
     url += "&transid="+transid
-   
     client.connect(url, '', "");
 
 }

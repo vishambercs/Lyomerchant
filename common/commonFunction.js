@@ -5,6 +5,7 @@ const Web3  = require('web3');
 var stringify           = require('json-stringify-safe');
 const transcationLog    = require('../Models/transcationLog');
 const quickpayment      = require('../Models/quickpayment');
+const Fixedtopup      = require('../Models/Fixedtopup');
 const network = require('../Models/network');
 var qs = require('qs');
 const axios = require('axios')
@@ -431,8 +432,7 @@ async function transfer_amount_to_hot_wallet(poolwalletID, merchant_trans_id, ac
 
 module.exports =
 {
-    
-    async Get_Transcation_List(address, trans_id, network_id) {
+     async Get_Transcation_List(address, trans_id, network_id) {
         response = {}
         let network_details = await network.findOne({ id: network_id })
         var URL = network_details.transcationurl
@@ -888,14 +888,7 @@ module.exports =
                         as: "networkDetails"// output array field
                     }
                 },
-                // {
-                //     $lookup: {
-                //         from: "clients", // collection to join
-                //         localField: "api_key",//field from the input documents
-                //         foreignField: "api_key",//field from the documents of the "from" collection
-                //         as: "clientdetails"// output array field
-                //     }
-                // },
+
                 {
                     "$project":
                     {
@@ -914,7 +907,6 @@ module.exports =
             ])
         return pooldata
     },
-
     async get_data_of_topup_transcation() 
     {
         if (Constant.topupIndex < Constant.topupTransList.length) 
@@ -941,4 +933,44 @@ module.exports =
             Constant.topupIndex = 0;
         }
     },
+    async get_Fixed_Transcation_topup(transkey,api_key) {
+
+        let pooldata = await Fixedtopup.aggregate(
+            [
+                { $match: { id: transkey,api_key:api_key, $or: [{ status: 0 }, { status: 2 }] } },
+                {
+                    $lookup: {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "poolWallet"// output array field
+                    },
+                }, {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "poolWallet.network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "networkDetails"// output array field
+                    }
+                },
+
+                {
+                    "$project":
+                    {
+                        "poolWallet.privateKey": 0,
+                        "poolWallet.id": 0,
+                        "poolWallet._id": 0,
+                        "poolWallet.status": 0,
+                        "poolWallet.__v": 0,
+                        "networkDetails.__v": 0,
+                        "networkDetails.created_by": 0,
+                        "networkDetails.createdAt": 0,
+                        "networkDetails.updatedAt": 0,
+                        "networkDetails._id": 0
+                    }
+                }
+            ])
+        return pooldata
+    },
+
 }
