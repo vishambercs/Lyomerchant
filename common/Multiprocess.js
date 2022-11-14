@@ -8,7 +8,7 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
         console.log('Connect Error: ' + error.toString());
     });
     client.on('connect', function (connection) {
-        console.log('Connection established!');
+        // console.log('Connection established!');
         connection.on('error', function (error) {
             console.log("Connection error: " + error.toString());
         });
@@ -17,14 +17,14 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
         });
         connection.on('message', async function (message) 
         {
-            let jsondata        =  JSON.parse(message.utf8Data)
-          
-            let transData       = {} 
-            var index               = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transkey)
            
+            let jsondata        =  JSON.parse(message.utf8Data)
+            let transData       = {} 
+            var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transkey)
+             
             if(index != -1 )
             {
-                transData       = Constant.topupTransList[index]
+                transData = Constant.topupTransList[index]
             }
            
             if((jsondata.amountstatus == 1 || jsondata.amountstatus == 3 ) && index != -1)
@@ -54,7 +54,7 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
     let url = process.env.NODE_WEB_SCOKECT
     url += "transkey="+transkey
     url += "&apikey="+apikey
-    console.log("============url============",url)
+    // console.log("============url============",url)
     client.connect(url, '', "");
 
 }

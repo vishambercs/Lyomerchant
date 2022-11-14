@@ -140,7 +140,94 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async verfiythebalance(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/verfiythebalance"
+            let parameters          =  
+            {
+                "id"       : req.body.id,
+            }
+            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            console.log("response",response)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async verfiytranshash(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/verfiytranshash"
+            let parameters          =  
+            {
+                "id"                : req.body.id,
+                "transhash"         : req.body.transhash,
+            } 
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
+    async sendotp(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/sendotp"
+            let parameters          =  
+            {
+                "id"                : req.body.id,
+            } 
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async updatetrans(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/updatetrans"
+            let parameters          =  
+            {
+                "id"                : req.body.id,
+                "transhash"         : req.body.transhash,
+                "amount"            : req.body.amount,
+                "otp"               : req.body.otp,
+            } 
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+ 
 }
+
+
+
+
+
+
+
+
 
 
 
