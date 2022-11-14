@@ -9,6 +9,7 @@ module.exports =
     async pluginallNetworks(req, res) {
         try {
             var merchantKey = req.headers.authorization
+            
             const url      =  process.env.API_URL+"/v1/fixedpluginallNetworks"
             let headers  =  {}
             let response =  await Utility.Post_Request_By_Axios(url,headers,merchantKey)
@@ -52,13 +53,14 @@ module.exports =
     },
     async fixedgettransdataoftopup(req, res) {
         try {
-            var merchantKey         =  req.headers.authorization
+            var merchantKey         =  ""
             const url               =  process.env.API_URL+"/v1/fixedgettransdataoftopup"
             let parameters          =  
             {
                 "id"       : req.body.id,
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
