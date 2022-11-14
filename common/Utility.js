@@ -43,6 +43,8 @@ module.exports =
             let timestamp              = new Date().getTime()
             const connection           = request.accept(null, request.origin);
             var index                  = Constant.topupTransList.findIndex(translist => translist.transid == queryvariable.transid)
+            const tup                  = await topup.findOne({id:queryvariable.transid});
+            let topitem                = await topup.findOneAndUpdate({id:queryvariable.transid},{$set:{ is_check : true, comes_at : new Date().toString() }})
             const details              = await Network.findOne({id:queryvariable.network_id});
             const walletdetails        = await poolWallet.findOne({network_id:queryvariable.network_id ,address : queryvariable.transkey});
             const forked_child_process = childProcess.fork('./worker-pool.js');
@@ -53,6 +55,7 @@ module.exports =
                 "timestamp"         : timestamp,
                 "uniqueKey"         : uniqueKey,  
                 "connection"        : connection,  
+                "transtype"         : tup.transtype,
                 "transkey"          : queryvariable.transkey,  
                 "apikey"            : queryvariable.apikey,
                 "network_id"        : queryvariable.network_id,
@@ -64,6 +67,7 @@ module.exports =
                {  
                 "details"       : details, 
                 "walletdetails" : walletdetails,
+                "transtype"     : tup.transtype,
                 "transid"       : queryvariable.transid,
                 "amount"        : queryvariable.amount,
                 "network_id"    : queryvariable.network_id,
@@ -74,6 +78,7 @@ module.exports =
             }
             else
             {
+                
                 Constant.topupTransList[index]["connection"]    = connection
                 Constant.topupTransList[index]["timestamp"]     = timestamp
             }
@@ -101,7 +106,13 @@ module.exports =
                 transelement.connection.sendUTF(JSON.stringify(balancedata));
                 transelement.connection.close(1000)
                 Constant.topupTransList =  Constant.topupTransList.filter(translist => translist.transid != balancedata.transid);
-            }}
+            }
+            else if (index != -1)
+            {
+                transelement.connection.sendUTF(JSON.stringify(balancedata));
+            }
+        
+        }
             });
             connection.on('message', function (message) {
             console.log("Data",message)

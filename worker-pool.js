@@ -15,7 +15,7 @@ process.on("message",async (parameters) => {
   let balance          = {}
   const previousdate  = new Date(parseInt(parameters.timestamp));
 
-  while(minutes < process.env.SOCKET_TIME && status == 0)
+  while(minutes < process.env.SOCKET_TIME && ( status == 0 || status == 2) )
   {
 
   let balancedata      = await checkbalance(parameters.address,parameters.details,parameters.walletdetails);
@@ -25,7 +25,16 @@ process.on("message",async (parameters) => {
     "balancedata" : balancedata , 
     "address"     : parameters.address,  
   }
+  if(parameters.transtype == 1)
+  {
   status              =  balancedata.format_balance > 0 ? 1 : 0
+  }
+  else if(parameters.transtype == 2) 
+  {
+    status              =  balancedata.format_balance == parameters.amount  ? 1 : 0
+    status              =  (balancedata.format_balance < parameters.amount && balancedata.format_balance > 0)  ? 2 :status
+    status              =  (balancedata.format_balance > parameters.amount && balancedata.format_balance > 0)  ? 3 :status
+  }
   const currentdate   = new Date().getTime()
   var diff            = currentdate - previousdate.getTime();
   minutes             = (diff / 60000)
@@ -52,10 +61,7 @@ async function checkbalance(address,details,walletdetails)
   }
   
   let checkadd = await CheckAddress(details.nodeUrl, details.libarayType,details.cointype, address, details.contractAddress, "")
-   if(checkadd.balance > 0)
-   {
-    console.log("Web3 checkadd========================================",checkadd)
-   }
+   
    return checkadd;
 }
 async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "", privateKey = "") {
@@ -101,7 +107,7 @@ async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "
         let status    = btcaddress.errorCode == 0 ? 200 : 400
         let message    = btcaddress.errorCode == 0 ? "sucess" : "error"
         balanceData = { message:message,status: status, "balance": bal, "format_balance": bal, "native_balance": bal, "format_native_balance": bal }
-        console.log(balanceData)
+      
         }
         else{
           balanceData = { message:"Error",status: balance.status, "balance": 0, "format_balance": 0, "native_balance": 0, "format_native_balance": 0 }

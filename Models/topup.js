@@ -79,20 +79,29 @@ const topupschema = new mongoose.Schema({
         type: Number,
         required: false,
     },
+    transtype : 
+    {
+        type: Number,
+        required: false,
+        default: "",
+    },
     is_check: {
         type: Boolean,
         default: true,
     },
     is_check_at: {
         type: String,
+        required: false,
         default: false,
     },
     comes_at: {
         type: String,
+        required: false,
         default: false,
     },
     expire_at: {
         type: String,
+        required: false,
         default: false,
     },
 },
