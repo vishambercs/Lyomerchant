@@ -6,7 +6,6 @@ router.post('/assigntopupMerchantWallet',           fixedtopupcontroller.assignt
 router.post('/fixedgettransdataoftopup',            fixedtopupcontroller.fixedgettransdataoftopup);
 router.post('/fixedallCurrency',                    fixedtopupcontroller.fixedallCurrency);
 router.post('/fixedpriceConversitionChanges',       fixedtopupcontroller.fixedpriceConversitionChanges);
-
 router.post('/getTransStatus',                      fixedtopupcontroller.getTransStatus);
 router.post('/canceltopup',                         fixedtopupcontroller.canceltopup);
 router.post('/checkbalance',                        fixedtopupcontroller.checkbalance);
