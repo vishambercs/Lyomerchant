@@ -6,6 +6,7 @@ const transactionPool = require('../../Models/transactionPool');
 const payLink    = require('../../Models/payLink');
 const invoice    = require('../../Models/invoice');
 const topups      = require('../../Models/topup');
+const Fixedtopups      = require('../../Models/Fixedtopup');
 const Constant   = require('../../common/Constant');
 const Fixedtopups      = require('../../Models/Fixedtopup');
 const { getBalance } = require('bitcoin-core/src/methods');
