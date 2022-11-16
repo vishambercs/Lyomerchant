@@ -420,9 +420,7 @@ async function fetchpostRequest(URL, parameters,id) {
                 response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
             })
         }
-        else{
-            console.log("webhooklog",webhooklog)
-        }
+        
         return response;
    
         //     if(webhookcall == null)
