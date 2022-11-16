@@ -18,9 +18,9 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             console.log('Connection closed!');
         });
         connection.on('message', async function (message) {
-            // console.log("message",message)       
+                
             let jsondata        = JSON.parse(message.utf8Data)
-            let transData       = Constant.topupTransList[index]
+            let transData       = {}
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
             if(index != -1 )
             {

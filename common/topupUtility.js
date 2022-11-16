@@ -10,6 +10,7 @@ const Constant = require('./Constant');
 const transferUtility = require('./transferUtility');
 const Utility = require('./Utility');
 const clientWallets = require('../Models/clientWallets');
+const webHookCall = require('../Models/webHookCall');
 const poolWallets = require('../Models/poolWallet');
 const clients = require('../Models/clients');
 const hotWallets = require('../Models/hotWallets');
@@ -185,8 +186,6 @@ async function Get_RequestByAxios(URL, parameters, headers) {
     return response;
 }
 async function CheckAddress(Nodeurl, Type, cointype, Address, ContractAddress = "", privateKey = "") {
-
-
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
@@ -240,21 +239,24 @@ async function CheckAddress(Nodeurl, Type, cointype, Address, ContractAddress = 
             return { status: status, data: balanceData, message: message }
         }
         else {
-            const HttpProvider = TronWeb.providers.HttpProvider;
-            const fullNode = new HttpProvider(Nodeurl);
-            const solidityNode = new HttpProvider(Nodeurl);
-            const eventServer = new HttpProvider(Nodeurl);
-            const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
-            let contract = await tronWeb.contract().at(ContractAddress);
-            native_balance = await tronWeb.trx.getBalance(Address)
-            token_balance = await contract.balanceOf(Address).call();
-            format_token_balance = tronWeb.toBigNumber(token_balance)
-            format_token_balance = tronWeb.toDecimal(format_token_balance)
-            format_token_balance = tronWeb.fromSun(format_token_balance)
-            format_native_balance = tronWeb.toBigNumber(native_balance)
-            format_native_balance = tronWeb.toDecimal(format_native_balance)
-            format_native_balance = tronWeb.fromSun(format_native_balance)
-            let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
+            const HttpProvider      = TronWeb.providers.HttpProvider;
+            const fullNode          = new HttpProvider(Nodeurl);
+            const solidityNode      = new HttpProvider(Nodeurl);
+            const eventServer       = new HttpProvider(Nodeurl);
+            const tronWeb           = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+            let contract            = await tronWeb.contract().at(ContractAddress);
+            native_balance          = await tronWeb.trx.getBalance(Address)
+            token_balance           = await contract.balanceOf(Address).call();
+            let decimals            = await contract.decimals().call();
+            format_token_balance    = tronWeb.toBigNumber(token_balance)
+            format_token_balance    = tronWeb.toDecimal(format_token_balance)
+            let newformat_balance  = parseFloat(format_token_balance)/parseFloat(`1e${decimals}`)
+            format_token_balance = newformat_balance
+            let newformat_token_balance         = parseInt(format_token_balance)/parseFloat(`1e${decimals}`)
+            format_native_balance               = tronWeb.toBigNumber(native_balance)
+            format_native_balance               = tronWeb.toDecimal(format_native_balance)
+            format_native_balance               = tronWeb.fromSun(format_native_balance)
+            let balanceData                     = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
 
@@ -385,14 +387,53 @@ async function getTimeprice(time, coin) {
         return 1;
     }
 }
-async function fetchpostRequest(URL, parameters) {
+
+let savingIds = [];
+async function fetchpostRequest(URL, parameters,id) {
     try {
-        await fetch(URL, {
-            method: 'POST',
-            body: JSON.stringify(parameters),
-            headers: { 'Content-Type': 'application/json' }
-        }).then(res => console.log(res))
-            .then(json => console.log(json));
+        let webhooklog = await webHookCall.findOne({trans_id : id})
+        let response = {}
+        if((webhooklog == null) && (!savingIds.includes(id))){
+            savingIds.push(id);
+        await axios.post(URL,
+            qs.stringify(parameters),
+            { headers: {} })
+            .then(async (res) => {
+                var stringify_response = stringify(res)
+                let webhook = await webHookCall.insertMany({
+                    id: mongoose.Types.ObjectId(),
+                    trans_id:id,
+                    status:200,
+                    response : stringify_response,
+                    created_at: new Date().toString()
+                })
+                savingIds.splice(savingIds.indexOf(id), 1);
+                response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+            }).catch(async (error) => {
+                var stringify_response = stringify(error)
+                let webhook = await webHookCall.insertMany({
+                    trans_id:id,
+                    status:400,
+                    response : error,
+                    created_at: new Date().toString()
+                })
+                response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+            })
+        }
+        else{
+            console.log("webhooklog",webhooklog)
+        }
+        return response;
+   
+        //     if(webhookcall == null)
+    //     {
+    //     await fetch(URL,  {
+    //         method: 'POST',
+    //         body: JSON.stringify(parameters),
+    //         headers: { 'Content-Type': 'application/json' }
+    //     }).then(res => console.log(res))
+    //         .then(json => console.log(json));
+    // }
     }
     catch (error) {
         console.log("======================================== fetchpostRequest", error)
@@ -571,7 +612,8 @@ async function verifyTheBalance(transkey) {
         let paymentData = { "remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.amount }
         let trans_data = await getTranscationDataForClient(addressObject.id)
         let logData = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
-        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData)
+        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
         // await updateOtherAPI(1,
         //     addressObject.id,
@@ -701,6 +743,7 @@ async function verifyFixedTheBalance(transkey, status) {
         let remain = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
         let paymentData = { "remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.amount }
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
+        
         response = { amountstatus: 0, "paid_in_use": pricecal, "paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "success" };
         return JSON.stringify(response)
     }
