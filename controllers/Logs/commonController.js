@@ -2,9 +2,11 @@ const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionP
 const posTransactionPool = require('../../Models/posTransactionPool');
 const network = require('../../Models/network');
 const poolWallets = require('../../Models/poolWallet');
+
 const transactionPool = require('../../Models/transactionPool');
 const payLink = require('../../Models/payLink');
 const invoice = require('../../Models/invoice');
+const clients = require('../../Models/clients');
 
 const topups = require('../../Models/topup');
 const Constant = require('../../common/Constant');
@@ -788,8 +790,126 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
-
+    async getTransForAdminNew(req, res) {
+        try {
+            const queryOptions = {};
+            if (Object.keys(req.body).indexOf("merchantemail") != -1) 
+            {
+                var customeremail = req.body.merchantemail
+                queryOptions["clientDetails.email"] = customeremail
+            }
+            // if (Object.keys(req.body).indexOf("networkid") != -1) 
+            // {
+            //     var networkid = req.body.networkid
+            //     queryOptions["clientDetails.email"] = networkid
+            // }
+            let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
+            let skip = req.body.skip == "" || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
+            let type = req.body.type == "" || req.body.type == undefined ? "Api-Plugin" : req.body.type;
+            
+            if (req.body?.merchantemail) {
+                const client = await clients
+                .findOne({ email: req.body.merchantemail }, "api_key email _id")
+                .lean();
+                if (client?.api_key) 
+                {
+                    queryOptions["api_key"] = client.api_key;
+                }
+            }
+            let transactionPoolData = [];
+            if (type == "Api-Plugin") {
+                transactionPoolData = await topups
+                    .find(queryOptions, { callbackURL: 0 })
+                    .lean(true)
+                    .skip(skip)
+                    .sort({createdAt : -1})
+                    .limit(limit);
+            }
+            let formatTransactionPoolData = [...transactionPoolData];
+            for (transactionIndex in transactionPoolData) {
+                const clientQ = clients
+                    .find(
+                        {
+                            api_key: transactionPoolData[transactionIndex].api_key,
+                        },
+                        {
+                            token: 0,
+                            secret: 0,
+                            qrcode: 0,
+                            hash: 0,
+                            emailstatus: 0,
+                            loginstatus: 0,
+                            emailtoken: 0,
+                            status: 0,
+                            two_fa: 0,
+                            password: 0,
+                            authtoken: 0,
+                            kycLink: 0,
+                        }
+                    )
+                    .lean(true);
+                const poolWalletQ = poolWallets
+                    .findOne(
+                        {
+                            id: transactionPoolData[transactionIndex].poolwalletID,
+                        },
+                        {
+                            _id: 0,
+                            status: 0,
+                            __v: 0,
+                            privateKey: 0,
+                        }
+                    )
+                    .lean(true);
+                const results = await Promise.allSettled([clientQ, poolWalletQ]);
+                formatTransactionPoolData[transactionIndex]["clientDetails"] =
+                    results[0].value ? results[0].value : [];
+                formatTransactionPoolData[transactionIndex]["poolwalletDetails"] =
+                    results[1].value ? [results[1].value] : [];
+                const networkQ = await network
+                    .find(
+                        {
+                            id: results[1].value.network_id,
+                        },
+                        {
+                            __v: 0,
+                            nodeUrl: 0,
+                            withdrawflag: 0,
+                            withdrawfee: 0,
+                            fixedfee: 0,
+                            native_currency_id: 0,
+                            kyt_network_id: 0,
+                            created_by: 0,
+                            libarayType: 0,
+                            contractAddress: 0,
+                            contractABI: 0,
+                            apiKey: 0,
+                            transcationurl: 0,
+                            scanurl: 0,
+                            status: 0,
+                            gaspriceurl: 0,
+                            latest_block_number: 0,
+                            processingfee: 0,
+                            transferlimit: 0,
+                            deleted_by: 0,
+                            updatedAt: 0,
+                            updatedAt: 0,
+                            _id: 0,
+                        }
+                    )
+                    .lean(true);
+                formatTransactionPoolData[transactionIndex]["networkDetails"] =
+                    networkQ ?? [];
+            }
+            const data = [...transactionPoolData];
+            return res.status(200).json({
+                status: 200,
+                data: data,
+            });
+        } catch (error) {
+            return res.status(500).json({ code: "500", msg: error.message });
+        }
+    },
     async getAllTranscationOfMerchant(req, res) {
         try {
 
@@ -1177,7 +1297,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-
     async getallusdc(req, res) {
         try {
 

@@ -13,6 +13,16 @@ const withdrawSchema = new mongoose.Schema
             type: String,
             required: true,
         },
+        networkFee: 
+        {
+            type: String,
+            required: true,
+        },
+        processingfee: 
+        {
+            type: String,
+            required: true,
+        },
         network_id: 
         {
             type: String,

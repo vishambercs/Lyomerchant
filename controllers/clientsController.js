@@ -49,24 +49,25 @@ async function Get_Request_By_Axios(URL, parameters, headers) {
     return response;
 }
 async function priceNewConversition(currencyid) {
-    try 
-    {
-        console.log(currencyid)
-        let parameters            = `ids=${currencyid}&vs_currencies=usd`
-        let COINGECKO_URL         =  process.env.COINGECKO+parameters
-        let axiosGetData          =  await Get_Request_By_Axios(COINGECKO_URL,{},{})
-        var stringify_response    = JSON.parse(axiosGetData.data)
-        let native_currency       = stringify_response.data 
-        let pricenative_currency  = native_currency[currencyid]
-        let price                 = pricenative_currency["usd"] 
+    // try 
+    // {
         
-        return price
-    }
-    catch (error) 
-    {
-        console.log(error)
-       return {  }
-    }
+        
+    //     let parameters            = `ids=${currencyid}&vs_currencies=usd`
+    //     let COINGECKO_URL         =  process.env.COINGECKO+parameters
+    //     let axiosGetData          =  await Get_Request_By_Axios(COINGECKO_URL,{},{})
+    //     var stringify_response    = JSON.parse(axiosGetData.data)
+    //     let native_currency       = stringify_response.data 
+    //     let pricenative_currency  = native_currency[currencyid]
+    //     let price                 = pricenative_currency["usd"] 
+       
+    //     return price
+    // }
+    // catch (error) 
+    // {
+    //     console.log(error)
+    //    return {  }
+    // }
 }
 async function updateClientWallet(client_api_key, networkid, merchantbalance) {
     try{
@@ -899,7 +900,7 @@ module.exports =
                             as: "pooldetailswallets"// output array field
                         }
                     },
-                    { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+                    { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount'  } } },
                 ])
             let withdrawdata = await withdrawLog.aggregate([
                 { $match: { api_key: req.headers.authorization, status: 3 } },
@@ -930,8 +931,6 @@ module.exports =
                     }
                 }
             ])
-
-
             // clientwallet
             clientwallet.forEach(async function(element) 
             {
@@ -978,7 +977,14 @@ module.exports =
                         network_data_index == -1 ? network_data.push(clientwallet[clientindex]) : network_data[network_data_index] = clientwallet[clientindex]
             })
           
-            
+            // network_data.forEach(async function(element) 
+            // {
+            //     let network_data_index = network_data.findIndex(translist => translist.id  == element.id)
+            //     if(network_data_index != -1){
+            //     network_data[network_data_index]["fait_amount_net_amount"] = await priceNewConversition(element.NetworkDetails[0].currencyid.toLowerCase())
+            //     }
+            // })
+
             res.json({ status: 200,  data: network_data, message: "Success" })
         }
         catch (error) {
@@ -1075,7 +1081,7 @@ module.exports =
     },
     async allMerchant(req, res) {
         try {
-            await clients.find({}, { email: 1, status: 1, loginstatus: 1, disablestatus: 1, disable_remarks: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
+            await clients.find({}, { createdAt:1,email: 1, status: 1, loginstatus: 1, disablestatus: 1, disable_remarks: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "All Merchant", data: val })
             }).catch(error => {
                 console.log(error)
