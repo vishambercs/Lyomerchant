@@ -137,9 +137,10 @@ router.get('/allMerchantStore',                                 Auth.is_admin,me
 
 
 "=============All Deposit Transcation==========================================="
-
 router.get('/alldeposittranscation',  Auth.is_admin,commonController.getAllTranscation);
 
+router.post('/clientimpersonate',  Auth.is_admin,adminController.clientimpersonate);
 
+router.post('/getClientWalletsForAdmin',  Auth.is_admin,clientsController.getClientWalletsForAdmin);
 
 module.exports = router;

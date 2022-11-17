@@ -1,6 +1,7 @@
-const admins = require('../Models/admin');
+const admins         = require('../Models/admin');
+const clients        = require('../Models/clients');
 const transcationLog = require('../Models/transcationLog');
-const cornJobs = require('../common/cornJobs');
+const cornJobs       = require('../common/cornJobs');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
 var Utility = require('../common/Utility');
@@ -14,6 +15,7 @@ const transactionPools = require('../Models/transactionPool');
 const { authenticator } = require('otplib')
 const QRCode = require('qrcode')
 const network = require('../Models/network');
+const impersonatelog = require('../Models/impersonatelog');
 var mongoose = require('mongoose');
 const axios = require('axios')
 var stringify = require('json-stringify-safe');
@@ -291,6 +293,38 @@ module.exports =
                 })
         }
         catch (error) {
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+    async clientimpersonate(req, res) {
+        try {
+            let email = req.body.email;
+            let client = await clients.findOne({email:email})
+            if(client == null)
+            {
+                return res.json({ status: 200, data: {}, message: "Invalid Email" })
+            }
+            let token = await Utility.Get_JWT_Token(client.id)
+            client = await clients.findOneAndUpdate({email:email},{$set : {
+                adminauthtoken : token
+            }},{'returnDocument' : 'after'})
+           
+           
+            let impersonat = await impersonatelog.insertMany({
+                id  : mongoose.Types.ObjectId(),
+                customerapi : client.api_key,
+                adminapi    : req.headers.authorization,
+                createdat   : new Date().toString()
+            })
+            let response = {
+                email           :  email,
+                token           :  token,
+                client_api_key  :  client.adminauthtoken,
+            } 
+            res.json({ status: 200, data: response, message: "Success" })
+        }
+        catch (error) {
+            console.log("error",error)
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },

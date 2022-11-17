@@ -903,9 +903,18 @@ module.exports =
                     { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount'  } } },
                 ])
             let withdrawdata = await withdrawLog.aggregate([
-                { $match: { api_key: req.headers.authorization, status: 3 } },
-                { $group: { _id: "$network_id", balance: { $sum: '$amount' } } },
+                { $match: { api_key: req.headers.authorization, status: { $in : [3,4] } }},
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "NetworkDetails"// output array field
+                    }
+                },
+                { $group: { _id: "$NetworkDetails.id", balance: { $sum: '$amount' } } },
             ])
+            console.log("withdrawdata",withdrawdata)
             let clientwallet = await clientWallets.aggregate([
                 { $match: { client_api_key: req.headers.authorization } },
                 {
@@ -1375,5 +1384,129 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
+    async getClientWalletsForAdmin(req, res) {
+        try {
+            let network_data = []
+            let client = await clients.findOne({ email : req.body.email })
+            if(client == null){
+                return  res.json({ status: 400, data: {}, message: "Invalid Email" })
+            } 
 
+            let datatopup = await topup.aggregate([
+                    { $match: { api_key: client.api_key, status: 1 } },
+                    {
+                        $lookup: 
+                        {
+                            from: "poolwallets", // collection to join
+                            localField: "poolwalletID",//field from the input documents
+                            foreignField: "id",//field from the documents of the "from" collection
+                            as: "pooldetailswallets"// output array field
+                        }
+                    },
+                    { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount'  } } },
+                ])
+
+            let withdrawdata = await withdrawLog.aggregate([
+                // { $match: { api_key: client.api_key,  status :   3 } },
+                // { $group: { _id: "$network_id", balance: { $sum: '$amount' } } },
+                { $match: { api_key:client.api_key, status: { $in : [3,4] } }},
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "NetworkDetails"// output array field
+                    }
+                },
+                { $group: { _id: "$NetworkDetails.id", balance: { $sum: '$amount' } } },
+            ])
+
+            
+
+            let clientwallet = await clientWallets.aggregate([
+                { $match: { client_api_key: client.api_key } },
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "NetworkDetails"// output array field
+                    }
+
+                },
+                {
+                    "$project": {
+                        "id": 1,
+                        "balance": 1,
+                        "address": 1,
+                        "network_id": 1,
+                        "NetworkDetails.network": 1,
+                        "NetworkDetails.coin": 1,
+                        "NetworkDetails.cointype": 1,
+                        "NetworkDetails.icon": 1,
+                        "NetworkDetails.currencyid": 1,
+                    }
+                }
+            ])
+            // clientwallet
+            clientwallet.forEach(async function(element) 
+            {
+                        let index = datatopup.findIndex(translist => translist["_id"][0]            == element.network_id)
+                        let clientindex = clientwallet.findIndex(translist => translist.id          == element.id)
+                        let network_data_index = network_data.findIndex(translist => translist.network_id  == element.network_id)
+
+                        if(index != -1)
+                        { 
+                            clientwallet[clientindex]["total"]   = datatopup[index]["balance"] 
+                            clientwallet[clientindex]["balance"] = datatopup[index]["balance"]
+                            updateClientWallet(client.api_key, element.network_id, datatopup[index]["balance"])
+                            
+                        }
+                        else
+                        {
+                            clientwallet[clientindex]["total"]   = 0 
+                            clientwallet[clientindex]["balance"] = 0
+                            updateClientWallet(req.headers.authorization, element.network_id, 0)
+                        }
+                        network_data_index == -1 ? network_data.push(clientwallet[clientindex]) : network_data[network_data_index] = clientwallet[clientindex]
+            })
+            // withdrawdata
+            clientwallet.forEach( async function(element) 
+            {
+                        let clientindex = clientwallet.findIndex(translist => translist.id == element.id)
+                        let index       = withdrawdata.findIndex(translist => translist["_id"] == element.network_id)
+                        let network_data_index = network_data.findIndex(translist => translist.network_id  == element.network_id)
+                        if(index != -1)
+                        { 
+                            clientwallet[clientindex]["withdraw"]  = withdrawdata[index]["balance"] 
+                            clientwallet[clientindex]["netamount"] = clientwallet[clientindex]["total"] - withdrawdata[index]["balance"] 
+                            clientwallet[clientindex]["fait_amount_net_amount"] =  0
+                            updateClientWallet(client.api_key, element.network_id, clientwallet[clientindex]["netamount"])
+                        }
+                        else
+                        {
+                            clientwallet[clientindex]["withdraw"] = 0 
+                            clientwallet[clientindex]["netamount"] = clientwallet[clientindex]["total"] - 0
+                            clientwallet[clientindex]["fait_amount_net_amount"] = 0
+                            updateClientWallet(client.api_key, element.network_id, clientwallet[clientindex]["netamount"])
+                            
+                        }
+                        network_data_index == -1 ? network_data.push(clientwallet[clientindex]) : network_data[network_data_index] = clientwallet[clientindex]
+            })
+          
+            // network_data.forEach(async function(element) 
+            // {
+            //     let network_data_index = network_data.findIndex(translist => translist.id  == element.id)
+            //     if(network_data_index != -1){
+            //     network_data[network_data_index]["fait_amount_net_amount"] = await priceNewConversition(element.NetworkDetails[0].currencyid.toLowerCase())
+            //     }
+            // })
+
+            res.json({ status: 200,  data: network_data, message: "Success" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Invalid" })
+        }
+    },
 }

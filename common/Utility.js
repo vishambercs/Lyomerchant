@@ -179,10 +179,10 @@ module.exports =
             let uniqueKey      =  crypto.randomBytes(20).toString('hex')
             let url_paremeters = url.parse(request.httpRequest.url);
             let queryvariable  = querystring.parse(url_paremeters.query)
-            console.log("getTranscationData =====================================",queryvariable);
+           
             var hash           = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await commonFunction.get_Transcation_Data(queryvariable.transkey)
-            console.log("getTranscationData =====================================",getTranscationData);
+          
             if(getTranscationData.length > 0)
             {
             const connection = request.accept(null, request.origin);
@@ -224,9 +224,7 @@ module.exports =
             let queryvariable   = querystring.parse(url_paremeters.query)
             var hash            =  CryptoJS.MD5(queryvariable.api_key + process.env.BASE_WORD_FOR_HASH)
             let getTranscationData = await clients.findOne({ api_key : queryvariable.api_key , status : false})
-            console.log("getTranscationData =====================================",getTranscationData);
-            console.log(hash);
-            console.log(queryvariable.hash);
+
 
             if( getTranscationData != null)
             {
