@@ -88,7 +88,7 @@ router.post('/cancelClientRequest',                  Auth.is_merchant,merchantca
 
 "============================ WEB PLUGIN ==============================="
 
-router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
+router.post('/assignMerchantWallet',                 Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
 router.post('/pluginallCurrency',                    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
 router.post('/pluginpriceConversition',              Auth.checkaccess,CurrencyController.priceConversitionChanges);
 

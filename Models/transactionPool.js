@@ -66,11 +66,11 @@ const transactionPoolSchema = new mongoose.Schema({
     },
     apiredirectURL: {
         type: String,
-        required: true,
+        required: false,
     },
     errorurl: {
         type: String,
-        required: true,
+        required: false,
     },
     status: {
         type: Number,

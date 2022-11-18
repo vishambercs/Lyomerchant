@@ -124,12 +124,8 @@ module.exports =
             const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
             let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
             let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
-            // if (prevwithdrawLog != null) 
-            // {
-            //    return res.json({ status: 200, data: {}, message: "You already have pending withdrawal request " })
-            // }
-
-            if (req.body.amount <= (network.transferlimit / coinprice)) {
+         
+            if (req.body.amount < (network.transferlimit / coinprice)) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
 
@@ -701,115 +697,7 @@ module.exports =
                     },
                     message: "Fee Details"
                 })
-
-            // }
-            // else if(network.withdrawflag == 2)
-            // {
-
-            //     transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  network.fixedfee
-
-            // }
-
-            // else if(network.withdrawflag == 3)
-            // {
-            //     transfer_fee =  ((amount / network.transferlimit ) + network.processingfee) *  (amount * network.withdrawfee )
-            // }
-
-
-            // let native_currency      = {}
-            // let pricenative_currency = {}
-            // let price                = 0
-            // let netamount            = 0
-            // let tokenprice           = 0
-            // let token_currency       = {}
-            // let pricetoken_currency  = {}
-
-
-            // if(network.cointype == "Native")
-            // {
-            //     native_currency       = await priceConversition(network.native_currency_id, current_currency)
-            //     pricenative_currency  = native_currency[network.native_currency_id]
-            //     price                 = pricenative_currency[current_currency]  * transfer_fee
-            //     pricetoken_currency   = native_currency[network.native_currency_id]
-            //     netamount             = amount - price
-            //     tokenprice            = price
-            // }
-            // else
-            // {
-            //  native_currency       = await priceConversition(network.native_currency_id, current_currency)
-            //  pricenative_currency  = native_currency[network.native_currency_id]
-            //  price                 = pricenative_currency[current_currency]  * transfer_fee
-            //  token_currency        = await priceConversition(network.currencyid, current_currency)
-            //  pricetoken_currency   = token_currency[network.currencyid]
-            //  tokenprice            = (pricetoken_currency[current_currency]  * price)
-            //  netamount             = amount - tokenprice
-            // }
-
-            // return res.json
-            //    ({
-            //      status     : 200, 
-            //      data       : 
-            //      {    
-            //         "limit"             : network.transferlimit,
-            //         "currency"          : current_currency, 
-            //         "withdraw_amount"   : parseFloat(req.body.amount),
-            //         "native_price"      : pricenative_currency[current_currency],
-            //         "token_price"       : pricetoken_currency[current_currency],
-            //         "fee_in_native"     : transfer_fee ,
-            //         "Network"           : network.network, 
-            //         "coin"              : network.coin, 
-            //         "fee_in_token"      : tokenprice, 
-            //         "netamount"         : netamount 
-            //      }, 
-            //      message                : "Fee Details" 
-            //    })
-
-
-            // if (balance.balance >= amount) {
-            //     if (amount >= data) {
-            //         networkid = balance.network_id
-            //         settings = await withdrawSettings.find();
-            //         if (settings[0].merchantWithdrawLimit >= amount) {
-            //             res.json({ status: 200, data: { "balance": balance.balance, "minimum required to withdraw": settings[0].merchantWithdrawLimit }, message: "clientBalance" })
-            //         }
-            //         else if (settings[0].merchantWithdrawMode == "percentage") {
-            //             fee = ((settings[0].merchantWithdrawFeePercentage) / 100) * amount
-            //             withdrawable = amount - fee
-            //             res.json({ status: 200, data: { "balance": balance.balance, "fee": fee, "withdrawable": withdrawable }, message: "clientBalance" })
-            //         }
-            //         else if (settings[0].merchantWithdrawMode == "limit") {
-            //             try {
-            //                 let netwokDetails = await network.findOne({ "id": networkid })
-            //                 if (netwokDetails.libarayType == 'Web3') {
-            //                     response = {}
-            //                     let URL = netwokDetails.gaspriceurl + "?module=gastracker&action=gasoracle&apikey=" + netwokDetails.apiKey
-            //                     console.log("URL", URL)
-            //                     let resaxios = await axios.get(URL);
-            //                     let gasPrice = resaxios.data.result.FastGasPrice
-            //                     let gwei = 21000 * gasPrice
-            //                     console.log(gwei)
-            //                     ethPrice = gwei * 0.000000001
-            //                 }
-            //                 else {
-            //                 }
-            //             }
-            //             catch (error) {
-            //                 console.log(error)
-            //                 res.json({ status: 400, data: error, message: "Error" })
-            //             }
-            //             console.log(balance.balance / settings[0].pooltohotLimit, ethPrice)
-            //             fee = ((amount / settings[0].pooltohotLimit) + 1) * ethPrice
-            //             console.log("fee", fee)
-            //             withdrawable = amount - fee
-            //             res.json({ status: 200, data: { "balance": balance.balance, "fee": fee, "withdrawable": withdrawable }, message: "clientBalance" })
-            //         }
-
-
-            //     }
-            //     else res.json({ status: 400, data: balance.balance, message: "Amount shoud be greater than minimum Withdrawal limit" })
-            // }
-            // else res.json({ status: 200, data: balance.balance, message: "Amount shoud be less than or equal to balance" })
-        }
+            }
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: 'null', mewssage: "Some error happened" })
