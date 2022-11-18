@@ -33,7 +33,6 @@ module.exports =
     async Verfiy_Merchant(req, res, next) {
         try {
             let api_key = req.headers.authorization;
-            console.log("api_key",api_key)
             let token = req.headers.token;
             client.find({ 'token': token, 'api_key': api_key, status: true,disablestatus : false }).then(val => {
                 if (val != null) {

@@ -1,6 +1,7 @@
 const topup = require('../../Models/topup');
 const poolWallet = require('../../Models/poolWallet');
 const networks = require('../../Models/network');
+const clients = require('../../Models/clients');
 const Constant = require('../../common/Constant');
 var otpGenerator = require('otp-generator')
 var mongoose = require('mongoose');
@@ -289,13 +290,17 @@ module.exports =
             var merchantKey = req.headers.authorization
             var networkType = req.body.networkType
             var orderid = req.body.orderid
-            // var transtype = req.body.transtype
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             let account = await poolwalletController.getPoolWalletID(networkType)
+            let network_details = await networks.findOne({ 'id': networkType })
+            let client = await clients.findOne({ 'api_key': req.headers.authorization })
             let amount = Object.keys(req.body).indexOf("amount") == -1 ?  0 : parseFloat(req.body.amount)
             const transactionPool = new topup({
                 id  : mongoose.Types.ObjectId(),
+                pwid : account._id,
+                nwid : network_details._id,
+                clientdetail : client._id,
                 api_key: req.headers.authorization,
                 poolwalletID: account.id,
                 amount: amount,
@@ -408,6 +413,7 @@ module.exports =
                 ) 
                
             let statusdata =   Constant.transstatus.filter(index => index.id ==transactionPool.status)
+            
             let data =
             {
                 transactionID   : transactionPool.id,
@@ -424,6 +430,8 @@ module.exports =
                 network         : network.network,
                 coin            : network.coin,
                 balance         : balance,
+                fait_amount     : transactionPool.fiat_amount,
+                
             }
             res.json({ status: 200, message: "Get The Data", data: data })
             
