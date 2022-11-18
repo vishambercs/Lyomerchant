@@ -2,8 +2,8 @@ const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionP
 const posTransactionPool = require('../../Models/posTransactionPool');
 const network = require('../../Models/network');
 const poolWallets = require('../../Models/poolWallet');
-
 const transactionPool = require('../../Models/transactionPool');
+
 const payLink = require('../../Models/payLink');
 const invoice = require('../../Models/invoice');
 const clients = require('../../Models/clients');
@@ -837,23 +837,41 @@ module.exports =
                 let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
                 let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
                 let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
-                let transactionPoolData = await topups.find(queryOptions, { callbackURL: 0 })
-                    .populate([
-                        { path: "pwid",         select: "network_id id balance address remarks _id" },
-                        { path: "nwid",         select: "id coin network _id" },
-                        { path: "clientdetail", select: "id email   first_name last_name type _id" },
-                    ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                return res.status(200).json({
-                    status: 200,
-                    data: transactionPoolData,
-                });
+                let transactionPoolData = [];
+                if(req.body?.type == "Topup"){
+                    transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
+                            { path: "pwid",         select: "network_id id balance address remarks _id" },
+                            { path: "nwid",         select: "id coin network _id" },
+                            { path: "clientdetail", select: "id email first_name last_name type _id" },
+                        ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                    return res.status(200).json({ status: 200, data : transactionPoolData, });
+                    }
+                    else if(req.body?.type == "POS")
+                    {
+                        transactionPoolData  = await posTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                            { path: "pwid",         select: "network_id id balance address remarks _id" },
+                            { path: "nwid",         select: "id coin network _id" },
+                            { path: "clientdetail", select: "id email first_name last_name type _id" },
+                        ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                        return res.status(200).json({ status: 200, data : transactionPoolData, });
+                    }
+                    else if(req.body?.type == "Pay-Link")
+            {
+                transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+                    return res.status(200).json({ status: 200, data : transactionPoolData, });
     
             } catch (error) {
                 console.log(error)
                 return res.status(500).json({ status: 400, message:"Error" });
             }
         
-        },
+    },
     async getAllTranscationOfMerchant(req, res) {
         try {
             const queryOptions              = {};
@@ -865,7 +883,10 @@ module.exports =
                 return res.status(400).json({ status: 400, message:"Invalid Request" });
             }
             queryOptions["clientdetail"]    = client._id
-           
+            if(req.body?.networkid)
+                {
+                    queryOptions["nwid"] =  req.body.networkid
+            }
             if (Object.keys(req.body).indexOf("fromdate") != -1) {
                 var fromdate = req.body.fromdate
                 var fromdated = new Date(fromdate)
@@ -885,7 +906,6 @@ module.exports =
             }
             if (Object.keys(req.body).indexOf("status") != -1) 
             {
-               
                 if(req.body.status == 1)
                 {
                     queryOptions["status"] =  { $in: [ 1,3 ] }
@@ -895,21 +915,39 @@ module.exports =
                     queryOptions["status"] =   req.body.status
                 }
             }
-      
+          
             let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
             let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
             let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
-            let transactionPoolData = await topups.find(queryOptions, { callbackURL: 0 })
-                .populate([
+            let transactionPoolData = [];
+            if(req.body?.type == "Topup"){
+            transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-            return res.status(200).json({
-                status: 200,
-                data: transactionPoolData,
-            });
-
+            return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+            else if(req.body?.type == "POS")
+            {
+                transactionPoolData  = await posTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+            else if(req.body?.type == "Pay-Link")
+            {
+                transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+            
+            return res.status(200).json({ status: 200, data : transactionPoolData, });
         } catch (error) {
             console.log(error)
             return res.status(500).json({ status: 400, message:"Error" });

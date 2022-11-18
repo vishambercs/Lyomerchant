@@ -914,7 +914,7 @@ module.exports =
                 },
                 { $group: { _id: "$NetworkDetails.id", balance: { $sum: '$amount' } } },
             ])
-            console.log("withdrawdata",withdrawdata)
+           
             let clientwallet = await clientWallets.aggregate([
                 { $match: { client_api_key: req.headers.authorization } },
                 {
@@ -932,6 +932,7 @@ module.exports =
                         "balance": 1,
                         "address": 1,
                         "network_id": 1,
+                        "NetworkDetails._id": 1,
                         "NetworkDetails.network": 1,
                         "NetworkDetails.coin": 1,
                         "NetworkDetails.cointype": 1,

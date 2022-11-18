@@ -4,6 +4,8 @@ const transaction = require("../transcationpoolController")
 const fastPaymentCode = require('../../Models/fastPaymentCode');
 const merchantStore = require('../../Models/merchantstore');
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
+const clients            = require('../../Models/clients');
+const networks            = require('../../Models/network');
 const poolWallet = require('../../Models/poolWallet');
 var crypto = require("crypto");
 var mongoose = require('mongoose');
@@ -229,6 +231,8 @@ module.exports =
         {
             var networkType = req.body.networkType
             let account = await poolwalletController.getPoolWalletID(networkType)
+            let network_details = await networks.findOne({ 'id': networkType })
+            let client = await clients.findOne({ 'api_key':  req.headers.authorization })
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             const newRecord = new paymentLinkTransactionPool({
@@ -245,7 +249,11 @@ module.exports =
                 clientToken     : req.body.token,
                 status          : 0,
                 walletValidity  : currentDate,
-                timestamps      : new Date().getTime()
+                timestamps      : new Date().getTime(),
+                clientdetail    : client._id,
+                pwid            : account._id,
+                nwid            : network_details._id,
+
             });
             newRecord.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })

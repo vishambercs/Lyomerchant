@@ -1,22 +1,22 @@
-const withdrawLogs      = require('../Models/withdrawLog');
-const cornJobs          = require('../common/cornJobs');
-const networks          = require('../Models/network');
-var CryptoJS            = require('crypto-js')
-var crypto              = require("crypto");
-var Utility             = require('../common/Utility');
-const bcrypt            = require('bcrypt');
-const Web3              = require('web3');
-const axios             = require('axios')
-const clientWallets     = require('../Models/clientWallets');
-const client            = require('../Models/clients');
-const withdrawSettings  = require('../Models/withdrawSettings')
-const currencies        = require('../Models/Currency')
-const network           = require('../Models/network')
-const kytlogs           = require('../Models/kytlogs')
+const withdrawLogs = require('../Models/withdrawLog');
+const cornJobs = require('../common/cornJobs');
+const networks = require('../Models/network');
+var CryptoJS = require('crypto-js')
+var crypto = require("crypto");
+var Utility = require('../common/Utility');
+const bcrypt = require('bcrypt');
+const Web3 = require('web3');
+const axios = require('axios')
+const clientWallets = require('../Models/clientWallets');
+const client = require('../Models/clients');
+const withdrawSettings = require('../Models/withdrawSettings')
+const currencies = require('../Models/Currency')
+const network = require('../Models/network')
+const kytlogs = require('../Models/kytlogs')
 
-var mongoose            = require('mongoose');
-var qs                  = require('qs');
-var FormData            = require('form-data');
+var mongoose = require('mongoose');
+var qs = require('qs');
+var FormData = require('form-data');
 require("dotenv").config()
 
 
@@ -52,213 +52,191 @@ async function postRequest(id, asset, address_to, cryptoamount, cryptousdamount,
 }
 
 async function priceConversition(currencyid, currency) {
-    try 
-    {
-        let parameters      = `ids=${currencyid}&vs_currencies=${currency}`
-        let COINGECKO_URL   =  process.env.COINGECKO+parameters
-        let axiosGetData    =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
+    try {
+        let parameters = `ids=${currencyid}&vs_currencies=${currency}`
+        let COINGECKO_URL = process.env.COINGECKO + parameters
+        let axiosGetData = await Utility.Get_Request_By_Axios(COINGECKO_URL, {}, {})
         var stringify_response = JSON.parse(axiosGetData.data)
 
-        
-        
-        return stringify_response.data 
+
+
+        return stringify_response.data
     }
-    catch (error) 
-    {
+    catch (error) {
         console.log(error)
-       return {  }
+        return {}
     }
 }
 
 async function priceNewConversition(currencyid) {
-    try 
-    {
-        let parameters            = `ids=${currencyid}&vs_currencies=usd`
-        let COINGECKO_URL         =  process.env.COINGECKO+parameters
-        let axiosGetData          =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
-        var stringify_response    = JSON.parse(axiosGetData.data)
-        let native_currency       = stringify_response.data 
-        let pricenative_currency  = native_currency[currencyid]
-        let price                 = pricenative_currency["usd"] 
-        
+    try {
+        let parameters = `ids=${currencyid}&vs_currencies=usd`
+        let COINGECKO_URL = process.env.COINGECKO + parameters
+        let axiosGetData = await Utility.Get_Request_By_Axios(COINGECKO_URL, {}, {})
+        var stringify_response = JSON.parse(axiosGetData.data)
+        let native_currency = stringify_response.data
+        let pricenative_currency = native_currency[currencyid]
+        let price = pricenative_currency["usd"]
+
         return price
     }
-    catch (error) 
-    {
+    catch (error) {
         console.log(error)
-       return {  }
+        return {}
     }
 }
 
 
 async function Network_Fee_Calculation(network) {
-    try 
-    {
+    try {
 
-        if(network.libarayType == "Web3")
-        {
-        const WEB3              = new Web3(new Web3.providers.HttpProvider(network.nodeUrl))
-        const gasprice          = await WEB3.eth.getGasPrice()
-        const gaspriceether     = await WEB3.utils.fromWei(gasprice,'ether')
-        return { status: 200, data: {"gasprice":gasprice, "gaspriceether" : gaspriceether}, message: "GasPrice" }
+        if (network.libarayType == "Web3") {
+            const WEB3 = new Web3(new Web3.providers.HttpProvider(network.nodeUrl))
+            const gasprice = await WEB3.eth.getGasPrice()
+            const gaspriceether = await WEB3.utils.fromWei(gasprice, 'ether')
+            return { status: 200, data: { "gasprice": gasprice, "gaspriceether": gaspriceether }, message: "GasPrice" }
         }
-        else if(network.libarayType == "btcnetwork")
-        {
-            let netfee = ((189 * 1) / 100000000) 
+        else if (network.libarayType == "btcnetwork") {
+            let netfee = ((189 * 1) / 100000000)
             console.log(netfee)
-            return { status: 200, data: {"gasprice":netfee, "gaspriceether" : netfee}, message: "GasPrice" }
+            return { status: 200, data: { "gasprice": netfee, "gaspriceether": netfee }, message: "GasPrice" }
         }
-        else
-        {  
-            
-            return { status: 200, data: {"gasprice":10, "gaspriceether" : 10}, message: "GasPrice" }
+        else {
+
+            return { status: 200, data: { "gasprice": 10, "gaspriceether": 10 }, message: "GasPrice" }
         }
 
     }
-    catch (error) 
-    {
-       console.log("Network_Fee_Calculation",error)
-       return { status: 400, data: {"gasprice":0, "gaspriceether" : 0}, message: "Error" }
+    catch (error) {
+        console.log("Network_Fee_Calculation", error)
+        return { status: 400, data: { "gasprice": 0, "gaspriceether": 0 }, message: "Error" }
     }
 }
 
 module.exports =
 {
-    
+
     async save_withdraw(req, res) {
         try {
-           
-            const network               = await networks.findOne({ id: req.body.network_id })
-            const prevwithdrawLog       = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
-            const clientWallet          = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
-            let coinprice   = await priceNewConversition(network.currencyid.toLocaleLowerCase())
+
+            const network = await networks.findOne({ id: req.body.network_id })
+            const prevwithdrawLog = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
+            const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
+            let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
             let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
             // if (prevwithdrawLog != null) 
             // {
             //    return res.json({ status: 200, data: {}, message: "You already have pending withdrawal request " })
             // }
 
-            if (req.body.amount <= (network.transferlimit/coinprice)) 
-            {
+            if (req.body.amount <= (network.transferlimit / coinprice)) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
 
-            if (req.body.amount >= clientWallet.balance) 
-            {
+            if (req.body.amount >= clientWallet.balance) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
 
-            if (network == null) 
-            {
+            if (network == null) {
                 return res.json({ status: 400, data: {}, message: "Unsupported Network " })
             }
-            let amount           = parseFloat(req.body.amount)
+            let amount = parseFloat(req.body.amount)
 
-       
-        let ethPrice         = 0;
-        let withdrawable     = 0;
-        let fee              = 0;
-        let networkid        = ''
-        let settings         = ''
-        let data             = 100
-      
-        let current_currency = "usd"
-        
-   
-            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid , "client_api_key":req.headers.authorization })
-            
-            if( req.body.currencyid  != undefined && req.body.currencyid  != ""  )
-            {
-                const currency   = await currencies.findOne({ "id": req.body.currencyid, status:1 })
 
-            if (currency == null ) 
-            {
-               return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
-            }
-            else
-            {
-                current_currency = currency != null ?  currency.title.toLowerCase() : current_currency
-            }
+            let ethPrice = 0;
+            let withdrawable = 0;
+            let fee = 0;
+            let networkid = ''
+            let settings = ''
+            let data = 100
+
+            let current_currency = "usd"
+
+
+            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
+
+            if (req.body.currencyid != undefined && req.body.currencyid != "") {
+                const currency = await currencies.findOne({ "id": req.body.currencyid, status: 1 })
+
+                if (currency == null) {
+                    return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
+                }
+                else {
+                    current_currency = currency != null ? currency.title.toLowerCase() : current_currency
+                }
 
             }
-            if (balance == null ) 
-            {
-               return res.json({ status: 400, data: null, message: "Wallet did not find" })
+            if (balance == null) {
+                return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
             // const network   = await networks.findOne({ id: balance.network_id })
-          
-       
 
-            let transfer_fee      = 0;
-            let networkFee        = null;
-            let tokencurrency     = amount * coinprice
-            let cryptoprice       = 0;
-            networkFee            = await Network_Fee_Calculation(network,amount)
-            let token_data        = 0;
-            let network_fee       = 0;
 
-            if(network.cointype == "Token")
-            {
+
+            let transfer_fee = 0;
+            let networkFee = null;
+            let tokencurrency = amount * coinprice
+            let cryptoprice = 0;
+            networkFee = await Network_Fee_Calculation(network, amount)
+            let token_data = 0;
+            let network_fee = 0;
+
+            if (network.cointype == "Token") {
                 console.log(nativeprice)
                 console.log(network.cointype)
-                token_data =    ( networkFee.data.gaspriceether * nativeprice  )
+                token_data = (networkFee.data.gaspriceether * nativeprice)
             }
-            else
-            {
-                token_data =    ( networkFee.data.gaspriceether * coinprice  )
-            } 
-            transfer_fee          = ((tokencurrency / network.transferlimit ) * network.withdrawfee) +  token_data
-            network_fee           = amount * (1/100)
-            cryptoprice           = transfer_fee / coinprice
-         
-           
+            else {
+                token_data = (networkFee.data.gaspriceether * coinprice)
+            }
+            transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data
+            network_fee = amount * (1 / 100)
+            cryptoprice = transfer_fee / coinprice
+
+
             const withdrawLog = new withdrawLogs({
-                    id               : crypto.randomBytes(20).toString('hex'),
-                    api_key          : req.headers.authorization,
-                    network_id       : req.body.network_id,
-                    amount           : req.body.amount,
-                    networkFee       : network_fee,
-                    fee              : (cryptoprice+network_fee) ,
-                    processingfee    : cryptoprice ,
-                    netamount        : (req.body.amount - (cryptoprice + network_fee)),
-                    address_to       : req.body.address_to,
-                    address_from     : " ",
-                    transcation_hash : " ",
-                    timestamps       : new Date().getTime(),
-                    status           : 0
-                });
-                withdrawLog.save().then(async (val) => 
-                {
-                    let kytdata             = await postRequest(val.id, network.kyt_network_id, val.address_to, val.amount, val.amount, val.createdAt)
-                    let external_response   = kytdata.status == 200 ? kytdata.data.data.externalId : ""
-                    let withdrawlog         = await withdrawLogs.findOneAndUpdate({ id: val.id }, { $set: { external_id: external_response, queue_type: 0 } })
-                    console.log("withdrawlog",withdrawlog)
-                    let kycurl              = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", external_response)
-                    console.log("kycurl",kycurl)
-                    // let response            = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
-                    // let status              = Object.keys(response.data.body).length > 0 ? 2 : 3
-                    let status              = 3
-                    let withdrawdata        = await withdrawLogs.findOneAndUpdate({ id : withdrawlog.id }, { $set: { status : status , queue_type  :  status }},{ returnDocument: 'after' })
-                    let kytlog              = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(kytdata.data.data), withdraw_id: val.id}])
-              
-                    if(status == 3 )
-                    {
-                    let prevbalance         = parseFloat(clientWallet.balance) -  parseFloat(req.body.amount)
-                    let newclientWallet        = await clientWallets.findOneAndUpdate({ id : clientWallet.id }, { $set: { balance: prevbalance } } , {returnDocument : 'after'})
+                id: crypto.randomBytes(20).toString('hex'),
+                api_key: req.headers.authorization,
+                network_id: req.body.network_id,
+                amount: req.body.amount,
+                networkFee: network_fee,
+                fee: (cryptoprice + network_fee),
+                processingfee: cryptoprice,
+                netamount: (req.body.amount - (cryptoprice + network_fee)),
+                address_to: req.body.address_to,
+                address_from: " ",
+                transcation_hash: " ",
+                timestamps: new Date().getTime(),
+                status: 0
+            });
+            withdrawLog.save().then(async (val) => {
+                let kytdata = await postRequest(val.id, network.kyt_network_id, val.address_to, val.amount, val.amount, val.createdAt)
+                let external_response = kytdata.status == 200 ? kytdata.data.data.externalId : ""
+                let withdrawlog = await withdrawLogs.findOneAndUpdate({ id: val.id }, { $set: { external_id: external_response, queue_type: 0 } })
+                console.log("withdrawlog", withdrawlog)
+                let kycurl = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", external_response)
+                console.log("kycurl", kycurl)
+                // let response            = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
+                // let status              = Object.keys(response.data.body).length > 0 ? 2 : 3
+                let status = 3
+                let withdrawdata = await withdrawLogs.findOneAndUpdate({ id: withdrawlog.id }, { $set: { status: status, queue_type: status } }, { returnDocument: 'after' })
+                let kytlog = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(kytdata.data.data), withdraw_id: val.id }])
+
+                if (status == 3) {
+                    let prevbalance = parseFloat(clientWallet.balance) - parseFloat(req.body.amount)
+                    let newclientWallet = await clientWallets.findOneAndUpdate({ id: clientWallet.id }, { $set: { balance: prevbalance } }, { returnDocument: 'after' })
                     return res.json({ status: 200, message: "Saved Successfully", data: val })
-                    }
-                    if(status == 2 )
-                    {
-                        await client.findOneAndUpdate({ api_key : clientWallet.client_api_key }, { $set: { authtoken : "",disablestatus:true,disable_remarks:"Due to KYT did not approved", disable_date : new Date().toString()} } , {returnDocument : 'after'})
-                        return res.json({ status: 400, message: "Your Account Has Disabled. Kindly Contact Customer Support", data: {} })
-                    }
-                    
-                }).catch( error => 
-                {
-                    console.log(error)
-                    res.json({ status: 400, data: {}, message: "Invalid" })
-                })
-          }
+                }
+                if (status == 2) {
+                    await client.findOneAndUpdate({ api_key: clientWallet.client_api_key }, { $set: { authtoken: "", disablestatus: true, disable_remarks: "Due to KYT did not approved", disable_date: new Date().toString() } }, { returnDocument: 'after' })
+                    return res.json({ status: 400, message: "Your Account Has Disabled. Kindly Contact Customer Support", data: {} })
+                }
+
+            }).catch(error => {
+                console.log(error)
+                res.json({ status: 400, data: {}, message: "Invalid" })
+            })
+        }
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Invalid" })
@@ -277,24 +255,21 @@ module.exports =
                         transcation_hash: req.body.transcation_hash
                     }
                 }, { returnDocument: 'after' }).then(async (withdraw) => {
-                    if (withdraw == null) 
-                    {
+                    if (withdraw == null) {
                         return res.json({ status: 400, message: "KYT has not finished", data: {} })
                     }
-                    else if (req.body.status == 4) 
-                    {
+                    else if (req.body.status == 4) {
 
                         res.json({ status: 200, message: "Successfully", data: withdraw })
                     }
-                    else if (req.body.status == 5) 
-                    {
+                    else if (req.body.status == 5) {
                         // let val          = await clientWallets.findOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id })
                         // let clientWallet = await clientWallets.updateOne({ client_api_key: withdraw.api_key, network_id: withdraw.network_id }, { $set: { balance: (val.balance + withdraw.amount) } })
                         res.json({ status: 200, message: "Successfully", data: withdraw })
                     }
 
-                   
-                   
+
+
 
                 }).catch(
                     error => {
@@ -320,7 +295,7 @@ module.exports =
                     },
                     {
                         "$project": {
-                            "api_key" : 0,
+                            "api_key": 0,
                             "networkDetails.libarayType": 0,
                             "networkDetails.contractAddress": 0,
                             "networkDetails.contractABI": 0,
@@ -547,7 +522,7 @@ module.exports =
                     },
                     {
                         "$project": {
-                            "api_key" : 0,
+                            "api_key": 0,
                             "networkDetails.__v": 0,
                             "networkDetails.__v": 0,
                             "networkDetails.id": 0,
@@ -579,8 +554,8 @@ module.exports =
             let networkid = ''
             let settings = ''
             let balance = await clientWallets.findOne({ "id": req.body.clientWalletid })
-            if(balance == null){
-                return res.json({ status: 400, data: { }, message: "Invalid Balance" })
+            if (balance == null) {
+                return res.json({ status: 400, data: {}, message: "Invalid Balance" })
             }
             networkid = balance.network_id
             settings = await withdrawSettings.find();
@@ -622,116 +597,124 @@ module.exports =
         catch (error) { console.log(error) }
     },
     async withdrawBalance(req, res) {
-        let ethPrice         = 0;
-        let withdrawable     = 0;
-        let fee              = 0;
-        let networkid        = ''
-        let settings         = ''
-        let data             = 100
-        let amount           = parseFloat(req.body.amount)
+        let ethPrice = 0;
+        let withdrawable = 0;
+        let fee = 0;
+        let networkid = ''
+        let settings = ''
+        let data = 100
+        let amount = parseFloat(req.body.amount)
         let current_currency = "usd"
-        
+
         try {
-            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid , "client_api_key":req.headers.authorization })
-           
-            if( req.body.currencyid  != undefined && req.body.currencyid  != ""  )
-            {
-                const currency   = await currencies.findOne({ "id": req.body.currencyid, status:1 })
+            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
 
-            if (currency == null ) 
-            {
-               return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
-            }
-            else
-            {
-                current_currency = currency != null ?  currency.title.toLowerCase() : current_currency
-            }
+            if (req.body.currencyid != undefined && req.body.currencyid != "") {
+                const currency = await currencies.findOne({ "id": req.body.currencyid, status: 1 })
+
+                if (currency == null) {
+                    return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
+                }
+                else {
+                    current_currency = currency != null ? currency.title.toLowerCase() : current_currency
+                }
 
             }
-            if (balance == null ) 
-            {
-               return res.json({ status: 400, data: null, message: "Wallet did not find" })
+            if (balance == null) {
+                return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
-            const network   = await networks.findOne({ id: balance.network_id })
-            let coinprice   = await priceNewConversition(network.currencyid.toLocaleLowerCase())
-            console.log("coinprice",coinprice)
+            const network = await networks.findOne({ id: balance.network_id })
+            let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
+
             let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
-            if (amount <= (network.transferlimit/coinprice) ) 
-            {  
-                return   res.json({
-                 status: 200, 
-                 data: 
-                {
-                    "withdraw_amount"   : req.body.amount ,
-                    "transcationfee"    : 0 , 
-                    "limit"             : network.transferlimit/coinprice, 
-                    "netamount"         : req.body.amount 
-                }, 
-                 message: "Amount shoud be greater than or equal to minimum Withdrawal limit" }
-                )
-            }
 
-            let transfer_fee      = 0;
-            let networkFee        = null;
-            let tokencurrency     = amount * coinprice
-            console.log(tokencurrency)
-            let cryptoprice       = 0;
-            networkFee            = await Network_Fee_Calculation(network,amount)
-            let token_data        = 0;
-            let network_fee       = 0;
 
-            if(network.cointype == "Token")
-            {
+            let transfer_fee = 0;
+            let networkFee = null;
+            let tokencurrency = amount * coinprice
+
+            let cryptoprice = 0;
+            networkFee = await Network_Fee_Calculation(network, amount)
+            let token_data = 0;
+            let network_fee = 0;
+
+            if (network.cointype == "Token") {
                 console.log(nativeprice)
                 console.log(network.cointype)
-                token_data =    ( networkFee.data.gaspriceether * nativeprice  )
+                token_data = (networkFee.data.gaspriceether * nativeprice)
             }
-            else
-            {
-                token_data =    ( networkFee.data.gaspriceether * coinprice  )
-            } 
-            transfer_fee          = ((tokencurrency / network.transferlimit ) * network.withdrawfee) +  token_data
+            else {
+                token_data = (networkFee.data.gaspriceether * coinprice)
+            }
+            transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data
             console.log(transfer_fee)
-            network_fee           = amount * (1/100)
-            cryptoprice           = transfer_fee / coinprice
-         
+            network_fee = amount * (1 / 100)
+            cryptoprice = transfer_fee / coinprice
+      
+            if (amount < (network.transferlimit / coinprice)) {
+                return res.json({
+                    status : 200,
+                    data   :
+                    {
+                        "price": coinprice,
+                        "currency": current_currency,
+                        "limit": (network.transferlimit / coinprice),
+                        "withdraw_amount_in_crypto": parseFloat(req.body.amount),
+                        "fee_in_crypto": (transfer_fee / coinprice),
+                        "network_fee_in_crypto": network_fee,
+                        "crypto_fee": network_fee + (transfer_fee / coinprice),
+                        "net_amount_in_crypto": parseFloat(req.body.amount) - ((transfer_fee / coinprice) + network_fee),
+                        "withdraw_amount_in_fiat": coinprice * parseFloat(req.body.amount),
+                        "network_fee_in_fiat": network_fee * coinprice,
+                        "fee_in_fiat": transfer_fee,
+                        "fee_fiat": (network_fee * coinprice) + (transfer_fee),
+                        "net_amount_in_fiat": (coinprice * parseFloat(req.body.amount)) - (transfer_fee + (network_fee * coinprice)),
+                        "Network": network.network,
+                        "coin": network.coin,
+                        "enable" : false
+                    },
+                    message: "Amount shoud be greater than or equal to minimum Withdrawal limit"
+                }
+                )
+            }
             res.json
                 ({
-                  status                            : 200, 
-                  data                              : 
-                  {                                                     
-                     "price"                        : coinprice, 
-                     "currency"                     : current_currency, 
-                     "limit"                        : (network.transferlimit/coinprice),
-                     "withdraw_amount_in_crypto"    : parseFloat(req.body.amount),
-                     "fee_in_crypto"                : (transfer_fee / coinprice),
-                     "network_fee_in_crypto"        : network_fee,
-                     "crypto_fee"                   : network_fee + (transfer_fee / coinprice),
-                     "net_amount_in_crypto"         : parseFloat(req.body.amount) - ((transfer_fee / coinprice) + network_fee),
-                     "withdraw_amount_in_fiat"      : coinprice * parseFloat(req.body.amount) ,
-                     "network_fee_in_fiat"          : network_fee * coinprice,
-                     "fee_in_fiat"                  : transfer_fee ,
-                     "fee_fiat"                     :  (network_fee * coinprice) + ( transfer_fee),
-                     "net_amount_in_fiat"           : (coinprice * parseFloat(req.body.amount)) - (transfer_fee + (network_fee * coinprice)) ,
-                     "Network"                      : network.network, 
-                     "coin"                         : network.coin, 
-                  }, 
-                  message                           : "Fee Details" 
+                    status: 200,
+                    data:
+                    {
+                        "price": coinprice,
+                        "currency": current_currency,
+                        "limit": (network.transferlimit / coinprice),
+                        "withdraw_amount_in_crypto": parseFloat(req.body.amount),
+                        "fee_in_crypto": (transfer_fee / coinprice),
+                        "network_fee_in_crypto": network_fee,
+                        "crypto_fee": network_fee + (transfer_fee / coinprice),
+                        "net_amount_in_crypto": parseFloat(req.body.amount) - ((transfer_fee / coinprice) + network_fee),
+                        "withdraw_amount_in_fiat": coinprice * parseFloat(req.body.amount),
+                        "network_fee_in_fiat": network_fee * coinprice,
+                        "fee_in_fiat": transfer_fee,
+                        "fee_fiat": (network_fee * coinprice) + (transfer_fee),
+                        "net_amount_in_fiat": (coinprice * parseFloat(req.body.amount)) - (transfer_fee + (network_fee * coinprice)),
+                        "Network": network.network,
+                        "coin": network.coin,
+                        "enable" : true
+                    },
+                    message: "Fee Details"
                 })
-            
+
             // }
             // else if(network.withdrawflag == 2)
             // {
-               
+
             //     transfer_fee          =  ((amount / network.transferlimit ) + network.processingfee) *  network.fixedfee
-            
+
             // }
 
             // else if(network.withdrawflag == 3)
             // {
             //     transfer_fee =  ((amount / network.transferlimit ) + network.processingfee) *  (amount * network.withdrawfee )
             // }
-           
+
 
             // let native_currency      = {}
             // let pricenative_currency = {}
@@ -740,7 +723,7 @@ module.exports =
             // let tokenprice           = 0
             // let token_currency       = {}
             // let pricetoken_currency  = {}
-         
+
 
             // if(network.cointype == "Native")
             // {
@@ -761,7 +744,7 @@ module.exports =
             //  tokenprice            = (pricetoken_currency[current_currency]  * price)
             //  netamount             = amount - tokenprice
             // }
-           
+
             // return res.json
             //    ({
             //      status     : 200, 

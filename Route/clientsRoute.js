@@ -90,7 +90,7 @@ router.post('/cancelClientRequest',                  Auth.is_merchant,merchantca
 
 router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
 router.post('/pluginallCurrency',                    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
-router.post('/pluginpriceConversition',              Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
+router.post('/pluginpriceConversition',              Auth.checkaccess,CurrencyController.priceConversitionChanges);
 
 
 "============================ Withdraw  ==============================="
@@ -126,7 +126,7 @@ router.post('/getIPNLink',                           Auth.is_merchant,ipnControl
 
 "============================Create Top UP==============================="
 router.post('/assigntopupMerchantWallet',   topupcontroller.create_top_payment);
-router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
+router.post('/pluginallNetworks',           Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
 

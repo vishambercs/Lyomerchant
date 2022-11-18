@@ -53,7 +53,7 @@ module.exports =
         try {
 
             let api_key = req.headers.authorization;
-            console.log(api_key)
+            
             let user = await merchantcategory.findOne({ clientapikey: api_key , status: 1 });
             
             if (user != null) {
@@ -293,11 +293,14 @@ module.exports =
     },
     async check_Store_Device_Access(req, res, next) {
         try {
-            let token           = req.headers.authorization;
-            let devicetoken     = req.headers.devicetoken;
-            let merchantstore   = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
-            let storeDevice     = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-            let client          = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+            let token            = req.headers.authorization;
+            let devicetoken      = req.headers.devicetoken;
+            let merchantstore    = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
+            let storeDevice      = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
+            let client           = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+            let clientdetail    = await clients.findOne({  api_key: merchantstore.clientapikey  });
+            req.body["clientid"] = clientdetail._id
+
             if (merchantstore != null && storeDevice != null && client == null) 
             {
                 next()
