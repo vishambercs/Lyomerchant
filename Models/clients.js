@@ -40,6 +40,11 @@ const clientsSchema = new mongoose.Schema({
         required: false,
         
     },
+    adminauthtoken:
+    {
+        type: String,
+        required: false,
+    },
     token:
     {
         type: String,

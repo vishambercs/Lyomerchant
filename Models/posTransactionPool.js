@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-
+const PoolWallet = require('./poolWallet');
+const Network = require('./network');
+const Clients = require('./clients');
 
 const posTransactionPoolSchema = new mongoose.Schema({
     id:
@@ -13,7 +15,25 @@ const posTransactionPoolSchema = new mongoose.Schema({
     {
         type: String,
         required: true,
-    },
+    }, 
+    pwid: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : PoolWallet,
+		default : null,
+	},
+    nwid: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Network,
+		default : null,
+	},
+    clientdetail: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Clients,
+		default : null,
+	},
     poolwalletID:
     {
         type: String,

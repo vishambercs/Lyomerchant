@@ -3,6 +3,7 @@ const poolWallet = require('../../Models/poolWallet');
 const networks = require('../../Models/network');
 var otpGenerator = require('otp-generator')
 var mongoose = require('mongoose');
+const clients = require('../../Models/clients');
 var poolwalletController = require('../poolwalletController');
 module.exports =
 {
@@ -15,21 +16,27 @@ module.exports =
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             let account = await poolwalletController.getPoolWalletID(networkType)
-
+            let network_details = await networks.findOne({ 'id': networkType })
+            let client = await clients.findOne({ 'api_key': req.headers.authorization })
+            let amount = Object.keys(req.body).indexOf("amount") == -1 ?  0 : parseFloat(req.body.amount)
             const transactionPool = new topup({
-                id: mongoose.Types.ObjectId(),
-                api_key: req.headers.authorization,
-                poolwalletID: account.id,
-                amount: 0,
-                currency: req.body.currency,
-                callbackURL: req.body.callbackurl,
-                apiredirectURL: req.body.apiredirecturl,
-                errorurl: req.body.errorurl,
-                orderid: req.body.orderid,
-                status: 0,
-                walletValidity: currentDate,
-                remarks: req.body.remarks,
-                timestamps: new Date().getTime()
+                id             : mongoose.Types.ObjectId(),
+                pwid           : account._id,
+                nwid           : network_details._id,
+                clientdetail   : client._id,
+                api_key        : req.headers.authorization,
+                poolwalletID   : account.id,
+                amount         : amount,
+                currency       : req.body.currency,
+                callbackURL    : req.body.callbackurl,
+                apiredirectURL : req.body.apiredirecturl,
+                errorurl       : req.body.errorurl,
+                orderid        : req.body.orderid,
+                status         : 0,
+                walletValidity : currentDate,
+                transtype      : amount > 0 ? 2 : 1,
+                remarks        : req.body.remarks,
+                timestamps     : new Date().getTime()
             });
             transactionPool.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })

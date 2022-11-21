@@ -191,7 +191,10 @@ async function getBalance(transdata, transData) {
                 let previouspoolwallet          = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
                 let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
                 let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4,balance: totalBalnce } })
-                let get_addressObject = await postRequest(addressObject.callbackURL, logData, {})
+                let get_addressObject = await postRequest(addressObject.callbackURL, logData, 
+                {  
+                    'Content-Type': 'application/json'
+                },)
                 let balanceTransfer = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
                 let hot_wallet_transcation = await transferUtility.transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
                 var emailTemplateName = 
@@ -301,7 +304,7 @@ async function postRequest(URL, parameters, headers) {
     let response = {}
 
     await axios.post(URL,
-        qs.stringify(parameters),
+        parameters,
         { headers: headers })
         .then(res => {
             var stringify_response = stringify(res)

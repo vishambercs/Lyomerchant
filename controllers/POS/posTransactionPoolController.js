@@ -1,5 +1,6 @@
 const posTransactionPools = require('../../Models/posTransactionPool');
 const poolWallet            = require('../../Models/poolWallet');
+const networks            = require('../../Models/network');
 const transactionPools = require('../../Models/transactionPool');
 const transcationLog = require('../../Models/transcationLog');
 const storeDevices = require('../../Models/storeDevices');
@@ -17,16 +18,18 @@ module.exports =
 {
     async assignPosMerchantWallet(req, res) {
         try {
+            
             var merchantKey   = req.headers.authorization
             var networkType   = req.body.networkType
             var callbackURL   = req.body.callbackURL
             var securityHash  = req.body.securityHash
             var orderid       = req.body.orderid
             var security_hash = (merchantKey + networkType + callbackURL + process.env.BASE_WORD_FOR_HASH)
+            let network_details = await networks.findOne({ 'id': networkType })
             var hash          = CryptoJS.MD5(security_hash).toString();
             let devicetoken   = req.headers.devicetoken;
             let storeDevice   = await storeDevices.findOne({ $and: [ { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-   
+           
             if(storeDevice == null)
             {
                 return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
@@ -37,19 +40,22 @@ module.exports =
                 let currentDateTemp = Date.now();
                 let currentDate = parseInt((currentDateTemp / 1000).toFixed());
                 const posTransactionPool = new posTransactionPools({
-                    id: crypto.randomBytes(20).toString('hex'),
-                    api_key: req.headers.authorization,
-                    poolwalletID: account.id,
-                    amount: req.body.amount,
-                    currency: req.body.currency,
-                    callbackURL: req.body.callbackURL,
-                    orderid: req.body.orderid,
-                    clientToken: req.body.token,
-                    status: 0,
-                    deviceid : storeDevice.deviceid,
-                    // deviceid :"asdasd",
-                    walletValidity: currentDate,
-                    timestamps : new Date().getTime()
+                    id              : crypto.randomBytes(20).toString('hex'),
+                    api_key         : req.headers.authorization,
+                    poolwalletID    : account.id,
+                    clientdetail    : req.body.clientid,
+                    pwid            : account._id,
+                    nwid            : network_details._id,
+                    amount          : req.body.amount,
+                    currency        : req.body.currency,
+                    callbackURL     : req.body.callbackURL,
+                    orderid         : req.body.orderid,
+                    clientToken     : req.body.token,
+                    status          : 0,
+                    deviceid        : storeDevice.deviceid,
+                    walletValidity  : currentDate,
+                    timestamps      : new Date().getTime()
+                 
                 });
                 posTransactionPool.save().then(async (val) => {
                     await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })

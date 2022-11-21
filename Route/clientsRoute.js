@@ -88,15 +88,14 @@ router.post('/cancelClientRequest',                  Auth.is_merchant,merchantca
 
 "============================ WEB PLUGIN ==============================="
 
-router.post('/assignMerchantWallet',                 Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
+router.post('/assignMerchantWallet',                 Auth.plugin_have_access,transcationpoolController.assignMerchantWallet);
 router.post('/pluginallCurrency',                    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
-router.post('/pluginpriceConversition',              Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
+router.post('/pluginpriceConversition',              Auth.checkaccess,CurrencyController.priceConversitionChanges);
 
 
 "============================ Withdraw  ==============================="
 
 router.post('/merchantBalance',                      Auth.is_merchant,withdrawController.merchantBalance);
-
 router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 // router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 
@@ -126,138 +125,13 @@ router.post('/createIPNLink',                        Auth.is_merchant,ipnControl
 router.post('/getIPNLink',                           Auth.is_merchant,ipnController.get_IPN_Link);
 
 "============================Create Top UP==============================="
-router.post('/assigntopupMerchantWallet',               topupcontroller.create_top_payment);
-router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
+router.post('/assigntopupMerchantWallet',   topupcontroller.create_top_payment);
+router.post('/pluginallNetworks',           Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
-router.post('/getallusdc',                 commonController.getallusdc);
 
 
 
-// router.post('/updateQuickpayment',              topupcontroller.updateQuickpayment);
-// router.post('/getQuickNetwork',                 topupcontroller.allNetworkForClient);
-
-
-const transactionPool = require("../Models/topup");
-const clients = require("../Models/clients");
-const network = require("../Models/network");
-const poolWallet = require("../Models/poolWallet");
-router.get("/transactions", async (req, res) => {
-    try {
-        let limit =
-            req.body.limit == "" || req.body.limit == undefined
-                ? 25
-                : parseInt(req.body.limit);
-        let skip =
-            req.body.skip == "" || req.body.skip == undefined
-                ? 0
-                : parseInt(req.body.skip);
-        let type =
-            req.body.type == "" || req.body.type == undefined
-                ? "Api-Plugin"
-                : req.body.type;
-        const queryOptions = {};
-        if (req.body?.merchantemail) {
-            const client = clients
-                .findOne({ email: req.body.merchantemail }, "api_key email _id")
-                .lean();
-            if (client?.api_key) {
-                queryOptions["api_key"] = client.api_key;
-            }
-        }
-        let transactionPoolData = [];
-        if (type == "Api-Plugin") {
-            transactionPoolData = await transactionPool
-                .find(queryOptions, { callbackURL: 0 })
-                .lean(true)
-                .skip(skip)
-                .limit(limit);
-        }
-        let formatTransactionPoolData = [...transactionPoolData];
-        for (transactionIndex in transactionPoolData) {
-            const clientQ = clients
-                .find(
-                    {
-                        api_key: transactionPoolData[transactionIndex].api_key,
-                    },
-                    {
-                        token: 0,
-                        secret: 0,
-                        qrcode: 0,
-                        hash: 0,
-                        emailstatus: 0,
-                        loginstatus: 0,
-                        emailtoken: 0,
-                        status: 0,
-                        two_fa: 0,
-                        password: 0,
-                        authtoken: 0,
-                        kycLink: 0,
-                    }
-                )
-                .lean(true);
-            const poolWalletQ = poolWallet
-                .findOne(
-                    {
-                        id: transactionPoolData[transactionIndex].poolwalletID,
-                    },
-                    {
-                        _id: 0,
-                        status: 0,
-                        __v: 0,
-                        privateKey: 0,
-                    }
-                )
-                .lean(true);
-            const results = await Promise.allSettled([clientQ, poolWalletQ]);
-            formatTransactionPoolData[transactionIndex]["clientDetails"] =
-                results[0].value ? results[0].value : [];
-            formatTransactionPoolData[transactionIndex]["poolwalletDetails"] =
-                results[1].value ? [results[1].value] : [];
-            const networkQ = await network
-                .find(
-                    {
-                        id: results[1].value.network_id,
-                    },
-                    {
-                        __v: 0,
-                        nodeUrl: 0,
-                        withdrawflag: 0,
-                        withdrawfee: 0,
-                        fixedfee: 0,
-                        native_currency_id: 0,
-                        kyt_network_id: 0,
-                        created_by: 0,
-                        libarayType: 0,
-                        contractAddress: 0,
-                        contractABI: 0,
-                        apiKey: 0,
-                        transcationurl: 0,
-                        scanurl: 0,
-                        status: 0,
-                        gaspriceurl: 0,
-                        latest_block_number: 0,
-                        processingfee: 0,
-                        transferlimit: 0,
-                        deleted_by: 0,
-                        updatedAt: 0,
-                        updatedAt: 0,
-                        _id: 0,
-                    }
-                )
-                .lean(true);
-            formatTransactionPoolData[transactionIndex]["networkDetails"] =
-                networkQ ?? [];
-        }
-        const data = [...transactionPoolData];
-        return res.status(200).json({
-            code: "200",
-            data: data,
-        });
-    } catch (error) {
-        return res.status(500).json({ code: "500", msg: error.message });
-    }
-});
 module.exports = router;
 
 

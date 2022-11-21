@@ -20,10 +20,18 @@ module.exports =
     async Verfiy_Merchant(req, res, next) {
         try {
             let api_key = req.headers.authorization;
-            console.log("api_key",api_key)
+           
             let token = req.headers.token;
-            client.find({ 'token': token, 'api_key': api_key, status: true,disablestatus : false }).then(val => {
-                if (val != null) {
+            client.find({  'api_key': api_key, status: true,disablestatus : false }).then(val => {
+              
+                if (val.authtoken == token) {
+                    let profile = jwt.verify(token, process.env.AUTH_KEY)
+                    req.user = profile
+                    next()
+                }
+                else if (val.adminauthtoken == token) {
+                    let profile = jwt.verify(token, process.env.AUTH_KEY)
+                    req.user = profile
                     next()
                 }
                 else {
@@ -31,6 +39,7 @@ module.exports =
                 }
 
             }).catch(error => {
+
                 res.json({ status: 400, data: {}, message: "Unauthorize Access" })
             })
 
@@ -44,7 +53,7 @@ module.exports =
         try {
 
             let api_key = req.headers.authorization;
-            console.log(api_key)
+            
             let user = await merchantcategory.findOne({ clientapikey: api_key , status: 1 });
             
             if (user != null) {
@@ -184,7 +193,18 @@ module.exports =
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await clients.findOne({ authtoken:token });
+            let user = await clients.findOne({  $or: [ { authtoken:token }, { adminauthtoken: token } ] }   );
+            // if (val.authtoken == token) {
+            //     let profile = jwt.verify(token, process.env.AUTH_KEY)
+            //     req.user = profile
+            //     next()
+            // }
+            // else if (val.adminauthtoken == token) {
+            //     let profile = jwt.verify(token, process.env.AUTH_KEY)
+            //     req.user = profile
+            //     next()
+            // }
+            
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
@@ -204,7 +224,18 @@ module.exports =
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await clients.findOne({ api_key: authorization,authtoken:token });
+            let user = await clients.findOne({ 
+                $and:[
+                    {
+                        $or: [ { authtoken:token }, { adminauthtoken: token } ]
+                    },
+                    {
+                        api_key: authorization,
+                    }
+                ]
+                }
+                );
+       
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
@@ -262,11 +293,14 @@ module.exports =
     },
     async check_Store_Device_Access(req, res, next) {
         try {
-            let token           = req.headers.authorization;
-            let devicetoken     = req.headers.devicetoken;
-            let merchantstore   = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
-            let storeDevice     = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-            let client          = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+            let token            = req.headers.authorization;
+            let devicetoken      = req.headers.devicetoken;
+            let merchantstore    = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
+            let storeDevice      = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
+            let client           = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
+            let clientdetail    = await clients.findOne({  api_key: merchantstore.clientapikey  });
+            req.body["clientid"] = clientdetail._id
+
             if (merchantstore != null && storeDevice != null && client == null) 
             {
                 next()

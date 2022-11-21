@@ -1,8 +1,9 @@
 const clients            = require('../Models/clients');
 const poolWallet         = require('../Models/poolWallet');
+
 const transactionPools   = require('../Models/transactionPool');
-const paymentlinktxpools= require('../Models/paymentLinkTransactionPool');
-const posTransactionPool= require('../Models/posTransactionPool');
+const paymentlinktxpools = require('../Models/paymentLinkTransactionPool');
+const posTransactionPool = require('../Models/posTransactionPool');
 const transcationLog     = require('../Models/transcationLog');
 const cornJobs           = require('../common/cornJobs');
 var CryptoJS             = require('crypto-js')
@@ -12,7 +13,7 @@ var commonFunction       = require('../common/commonFunction');
 const bcrypt             = require('bcrypt');
 const Web3               = require('web3');
 var crypto               = require("crypto");
-const networks         = require('../Models/network');
+const networks           = require('../Models/network');
 var poolwalletController = require('./poolwalletController');
 var topups = require('../Models/topup');
 
@@ -34,20 +35,26 @@ module.exports =
                 let currentDateTemp     = Date.now();
                 let currentDate         = parseInt((currentDateTemp / 1000).toFixed());
                 let account             = await poolwalletController.getPoolWalletID(networkType) 
+                let network_details     = await networks.findOne({ 'id': networkType })
+                let client              = await clients.findOne({ 'api_key': req.headers.authorization })
                 const transactionPool = new transactionPools({
                     id: crypto.randomBytes(20).toString('hex'),
                     api_key         : req.headers.authorization,
                     poolwalletID    : account.id,
+                    pwid            : account._id,
+                    nwid            : network_details._id,
+                    clientdetail    : client._id,
                     amount          : req.body.amount,
                     currency        : req.body.currency,
                     callbackURL     : req.body.callbackURL,
                     orderid         : req.body.orderid,
                     clientToken     : req.body.token,
-                    errorurl        : " ",
-                    apiredirectURL  : " ",
+                    errorurl        : "",
+                    apiredirectURL  : "",
                     status          : 0,
                     walletValidity  : currentDate,
                     timestamps      : new Date().getTime()
+
                 });
                 transactionPool.save().then(async (val) => {
                     

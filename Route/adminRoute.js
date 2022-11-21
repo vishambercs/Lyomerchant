@@ -64,7 +64,7 @@ router.post('/signupadmin',                                    Auth.is_admin,Aut
 router.post('/adminlogin',                                     Auth.verify_admin_Login,adminController.Login);
 router.post('/admingoogleauth',                                Auth.verify_Verfiy_Google_Auth,adminController.Verfiy_Google_Auth);
 router.post('/customerstatus',                                 Auth.is_admin,clientsController.customerstatus);
-router.post('/getTransForAdmin',                               Auth.is_admin, commonController.getTransForAdmin);
+router.post('/getTransForAdmin',                               Auth.is_admin, commonController.getTransForAdminNew);
 router.post('/get_admin_withdraw',                             Auth.is_admin, withdrawController.get_admin_wihdraw);
 router.post('/allAdmin',                                       Auth.is_admin,adminController.allAdmin);
 router.post('/transcationListByNetworkID',                     Auth.is_admin,transcationpoolController.get_Trans_by_Network_ID_For_Admin);
@@ -137,9 +137,10 @@ router.get('/allMerchantStore',                                 Auth.is_admin,me
 
 
 "=============All Deposit Transcation==========================================="
-
 router.get('/alldeposittranscation',  Auth.is_admin,commonController.getAllTranscation);
 
+router.post('/clientimpersonate',  Auth.is_admin,adminController.clientimpersonate);
 
+router.post('/getClientWalletsForAdmin',  Auth.is_admin,clientsController.getClientWalletsForAdmin);
 
 module.exports = router;

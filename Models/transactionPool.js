@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const mongoosePaginate = require("mongoose-paginate-v2");
-
+const PoolWallet = require('./poolWallet');
+const Network = require('./network');
+const Clients = require('./clients');
 const transactionPoolSchema = new mongoose.Schema({
     id:
     {
@@ -14,6 +16,24 @@ const transactionPoolSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    pwid: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : PoolWallet,
+		default : null,
+	},
+    nwid: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Network,
+		default : null,
+	},
+    clientdetail: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Clients,
+		default : null,
+	},
     poolwalletID:
     {
         type: String,
@@ -46,11 +66,11 @@ const transactionPoolSchema = new mongoose.Schema({
     },
     apiredirectURL: {
         type: String,
-        required: true,
+        required: false,
     },
     errorurl: {
         type: String,
-        required: true,
+        required: false,
     },
     status: {
         type: Number,

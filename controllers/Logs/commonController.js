@@ -3,8 +3,10 @@ const posTransactionPool = require('../../Models/posTransactionPool');
 const network = require('../../Models/network');
 const poolWallets = require('../../Models/poolWallet');
 const transactionPool = require('../../Models/transactionPool');
+
 const payLink = require('../../Models/payLink');
 const invoice = require('../../Models/invoice');
+const clients = require('../../Models/clients');
 
 const topups = require('../../Models/topup');
 const Constant = require('../../common/Constant');
@@ -788,396 +790,169 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
-
+    async getTransForAdminNew(req, res) {
+            try {
+                const queryOptions    = {};
+                const network_option  = {};
+                let   poolWalletIds   = [];
+                if(req.body?.networkid)
+                {
+                    queryOptions["nwid"] =  req.body.networkid
+                }
+                if (Object.keys(req.body).indexOf("merchantemail") != -1) 
+                {
+                    var customeremail = req.body.merchantemail
+                    queryOptions["clientdetail"] = customeremail
+                }
+                if (Object.keys(req.body).indexOf("fromdate") != -1) {
+                    var fromdate = req.body.fromdate
+                    var fromdated = new Date(fromdate)
+                    queryOptions["createdAt"] = { $gte: fromdated }
+                }
+                if (Object.keys(req.body).indexOf("todate") != -1) 
+                {
+                    var fromdate = Object.keys(req.body).indexOf("fromdate") != -1 ? req.body.fromdate : null
+                    var todate = req.body.todate
+                    var todateed = new Date(todate)
+                    todateed.setDate(todateed.getDate() + 1);
+                    var inputtodateed = new Date(todateed.toISOString());
+                    var fromdated = new Date(fromdate)
+                    var inputfromdated = new Date(fromdated.toISOString());
+                    let dateRange = fromdate != null ? { $gte: inputfromdated, $lte: inputtodateed } : { $lte: inputtodateed }
+                    queryOptions["createdAt"] = dateRange
+                }
+                if (Object.keys(req.body).indexOf("status") != -1) 
+                {
+                   
+                    if(req.body.status == 1)
+                    {
+                        queryOptions["status"] =  { $in: [ 1,3 ] }
+                    }
+                    else
+                    {
+                        queryOptions["status"] =   req.body.status
+                    }
+                }
+          
+                let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
+                let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
+                let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
+                let transactionPoolData = [];
+                if(req.body?.type == "Topup"){
+                    transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
+                            { path: "pwid",         select: "network_id id balance address remarks _id" },
+                            { path: "nwid",         select: "id coin network _id" },
+                            { path: "clientdetail", select: "id email first_name last_name type _id" },
+                        ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                    return res.status(200).json({ status: 200, data : transactionPoolData, });
+                    }
+                    else if(req.body?.type == "POS")
+                    {
+                        transactionPoolData  = await posTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                            { path: "pwid",         select: "network_id id balance address remarks _id" },
+                            { path: "nwid",         select: "id coin network _id" },
+                            { path: "clientdetail", select: "id email first_name last_name type _id" },
+                        ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                        return res.status(200).json({ status: 200, data : transactionPoolData, });
+                    }
+                    else if(req.body?.type == "Pay-Link")
+            {
+                transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+                    return res.status(200).json({ status: 200, data : transactionPoolData, });
+    
+            } catch (error) {
+                console.log(error)
+                return res.status(500).json({ status: 400, message:"Error" });
+            }
+        
+    },
     async getAllTranscationOfMerchant(req, res) {
         try {
-
-            let filter = {}
-            let index = -1
-            let type = ""
-            let transtype = ["POS", "Website", "Paylink"]
-            var limit = isEmpty(req.body.limit) == true ? 25 : parseInt(req.body.limit)
-            var skip = isEmpty(req.body.skip) == true ? 0 : parseInt(req.body.skip)
-
+            const queryOptions              = {};
+            const network_option            = {};
+            let   poolWalletIds             = [];
+            let client                      = await clients.findOne({api_key : req.headers.authorization})
+           
+            if(client == null){
+                return res.status(400).json({ status: 400, message:"Invalid Request" });
+            }
+            queryOptions["clientdetail"]    = client._id
+            if(req.body?.networkid)
+                {
+                    queryOptions["nwid"] =  req.body.networkid
+            }
             if (Object.keys(req.body).indexOf("fromdate") != -1) {
                 var fromdate = req.body.fromdate
                 var fromdated = new Date(fromdate)
-                filter["createdAt"] = { $gte: fromdated }
+                queryOptions["createdAt"] = { $gte: fromdated }
             }
-
-            if (Object.keys(req.body).indexOf("todate") != -1) {
+            if (Object.keys(req.body).indexOf("todate") != -1) 
+            {
                 var fromdate = Object.keys(req.body).indexOf("fromdate") != -1 ? req.body.fromdate : null
                 var todate = req.body.todate
                 var todateed = new Date(todate)
                 todateed.setDate(todateed.getDate() + 1);
-
                 var inputtodateed = new Date(todateed.toISOString());
                 var fromdated = new Date(fromdate)
                 var inputfromdated = new Date(fromdated.toISOString());
                 let dateRange = fromdate != null ? { $gte: inputfromdated, $lte: inputtodateed } : { $lte: inputtodateed }
-                filter["createdAt"] = dateRange
+                queryOptions["createdAt"] = dateRange
             }
-            filter["api_key"] = req.headers.authorization
-            let transactionPoolData = await transactionPool.aggregate([
+            if (Object.keys(req.body).indexOf("status") != -1) 
+            {
+                if(req.body.status == 1)
                 {
-                    $lookup: {
-                        from: "poolwallets",
-                        localField: "poolwalletID",
-                        foreignField: "id",
-                        as: "poolwalletDetails"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "clients",
-                        localField: "api_key",
-                        foreignField: "api_key",
-                        as: "clientDetails"
-                    }
-                },
-                {
-                    $lookup:
-                    {
-                        from: "networks",
-                        localField: "poolwalletDetails.network_id",
-                        foreignField: "id",
-                        as: "networkDetails"
-                    }
-                },
-                { $match: { "api_key": req.headers.authorization } },
-                {
-                    "$project": {
-                        "callbackURL": 0,
-                        "clientDetails.token": 0,
-                        "clientDetails.secret": 0,
-                        "clientDetails.qrcode": 0,
-                        "clientDetails.hash": 0,
-                        "clientDetails.emailstatus": 0,
-                        "clientDetails.loginstatus": 0,
-                        "clientDetails.emailtoken": 0,
-                        "clientDetails.status": 0,
-                        "clientDetails.two_fa": 0,
-                        "clientDetails.password": 0,
-                        "clientDetails.authtoken": 0,
-                        "clientDetails.kycLink": 0,
-                        "poolwalletDetails._id": 0,
-                        "poolwalletDetails.status": 0,
-                        "poolwalletDetails.__v": 0,
-                        "poolwalletDetails.privateKey": 0,
-                        "networkDetails.__v": 0,
-                        "networkDetails.nodeUrl": 0,
-                        "networkDetails.withdrawflag": 0,
-                        "networkDetails.withdrawfee": 0,
-                        "networkDetails.fixedfee": 0,
-                        "networkDetails.native_currency_id": 0,
-                        "networkDetails.kyt_network_id": 0,
-                        "networkDetails.created_by": 0,
-                        "networkDetails.libarayType": 0,
-                        "networkDetails.contractAddress": 0,
-                        "networkDetails.contractABI": 0,
-                        "networkDetails.apiKey": 0,
-                        "networkDetails.transcationurl": 0,
-                        "networkDetails.scanurl": 0,
-                        "networkDetails.status": 0,
-                        "networkDetails.gaspriceurl": 0,
-                        "networkDetails.latest_block_number": 0,
-                        "networkDetails.processingfee": 0,
-                        "networkDetails.transferlimit": 0,
-                        "networkDetails.deleted_by": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails._id": 0
-
-                    }
+                    queryOptions["status"] =  { $in: [ 1,3 ] }
                 }
-            ]).sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-            let posTransactionPoolData = await posTransactionPool.aggregate([
+                else
                 {
-                    $lookup: {
-                        from: "poolwallets",
-                        localField: "poolwalletID",
-                        foreignField: "id",
-                        as: "poolwalletDetails"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "merchantstores",
-                        localField: "api_key",
-                        foreignField: "storeapikey",
-                        as: "storesDetails"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "clients",
-                        localField: "storesDetails.clientapikey",
-                        foreignField: "api_key",
-                        as: "clientDetails"
-                    }
-                },
-                {
-                    $lookup:
-                    {
-                        from: "networks",
-                        localField: "poolwalletDetails.network_id",
-                        foreignField: "id",
-                        as: "networkDetails"
-                    }
-                },
-                {
-                    $match: filter,
-                },
-                {
-                    "$project": {
-                        "clientDetails.token": 0,
-                        "clientDetails.secret": 0,
-                        "clientDetails.qrcode": 0,
-                        "clientDetails.hash": 0,
-                        "clientDetails.emailstatus": 0,
-                        "clientDetails.loginstatus": 0,
-                        "clientDetails.emailtoken": 0,
-                        "clientDetails.status": 0,
-                        "clientDetails.two_fa": 0,
-                        "clientDetails.password": 0,
-                        "clientDetails.kycLink": 0,
-                        "poolwalletDetails._id": 0,
-                        "poolwalletDetails.status": 0,
-                        "poolwalletDetails.__v": 0,
-                        "poolwalletDetails.privateKey": 0,
-                        "networkDetails.__v": 0,
-                        "networkDetails.nodeUrl": 0,
-                        "networkDetails.withdrawflag": 0,
-                        "networkDetails.withdrawfee": 0,
-                        "networkDetails.fixedfee": 0,
-                        "networkDetails.native_currency_id": 0,
-                        "networkDetails.kyt_network_id": 0,
-                        "networkDetails.created_by": 0,
-                        "networkDetails.libarayType": 0,
-                        "networkDetails.contractAddress": 0,
-                        "networkDetails.contractABI": 0,
-                        "networkDetails.apiKey": 0,
-                        "networkDetails.transcationurl": 0,
-                        "networkDetails.scanurl": 0,
-                        "networkDetails.status": 0,
-                        "networkDetails.gaspriceurl": 0,
-                        "networkDetails.latest_block_number": 0,
-                        "networkDetails.processingfee": 0,
-                        "networkDetails.transferlimit": 0,
-                        "networkDetails.deleted_by": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails._id": 0
-
-                    }
+                    queryOptions["status"] =   req.body.status
                 }
-            ]).sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-
-            let pyLinkTransPools = await paymentLinkTransactionPool.aggregate([
-                {
-                    $lookup: {
-                        from: "poolwallets",
-                        localField: "poolwalletID",
-                        foreignField: "id",
-                        as: "poolwalletDetails"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "clients",
-                        localField: "api_key",
-                        foreignField: "api_key",
-                        as: "clientDetails"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "paylinkpayments",
-                        localField: "payLinkId",
-                        foreignField: "id",
-                        as: "paylinkDetails"
-                    }
-                },
-                {
-                    $lookup:
-                    {
-                        from: "invoices",
-                        localField: "paylinkDetails.invoice_id",
-                        foreignField: "id",
-                        as: "invoicesDetails"
-                    }
-                },
-                {
-                    $lookup:
-                    {
-                        from: "fastpaymentcodes",
-                        localField: "payLinkId",
-                        foreignField: "id",
-                        as: "fastpaymentdetails"
-                    }
-                },
-                {
-                    $lookup:
-                    {
-                        from: "networks",
-                        localField: "poolwalletDetails.network_id",
-                        foreignField: "id",
-                        as: "networkDetails"
-                    }
-                },
-                {
-                    $match: filter,
-                },
-                {
-                    "$project": {
-
-                        "clientDetails.token": 0,
-                        "clientDetails.secret": 0,
-                        "clientDetails.qrcode": 0,
-                        "clientDetails.hash": 0,
-                        "clientDetails.emailstatus": 0,
-                        "clientDetails.loginstatus": 0,
-                        "clientDetails.emailtoken": 0,
-                        "clientDetails.authtoken": 0,
-                        "clientDetails.updatedAt": 0,
-                        "clientDetails.status": 0,
-                        "clientDetails.two_fa": 0,
-                        "clientDetails.password": 0,
-                        "clientDetails.kycLink": 0,
-                        "poolwalletDetails._id": 0,
-                        "poolwalletDetails.status": 0,
-                        "poolwalletDetails.__v": 0,
-                        "poolwalletDetails.privateKey": 0,
-                        "networkDetails.__v": 0,
-                        "networkDetails.nodeUrl": 0,
-                        "networkDetails.withdrawflag": 0,
-                        "networkDetails.withdrawfee": 0,
-                        "networkDetails.fixedfee": 0,
-                        "networkDetails.native_currency_id": 0,
-                        "networkDetails.kyt_network_id": 0,
-                        "networkDetails.created_by": 0,
-                        "networkDetails.libarayType": 0,
-                        "networkDetails.contractAddress": 0,
-                        "networkDetails.contractABI": 0,
-                        "networkDetails.apiKey": 0,
-                        "networkDetails.transcationurl": 0,
-                        "networkDetails.scanurl": 0,
-                        "networkDetails.status": 0,
-                        "networkDetails.gaspriceurl": 0,
-                        "networkDetails.latest_block_number": 0,
-                        "networkDetails.processingfee": 0,
-                        "networkDetails.transferlimit": 0,
-                        "networkDetails.deleted_by": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails.hotwallettranscationstatus": 0,
-                        "networkDetails._id": 0
-                    }
-                }
-            ]).sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-
-            let topupPools = await topups.aggregate([
-                {
-                    $lookup: {
-                        from: "poolwallets",
-                        localField: "poolwalletID",
-                        foreignField: "id",
-                        as: "poolwalletDetails"
-                    }
-                },
-                {
-                    $lookup: {
-                        from: "clients",
-                        localField: "api_key",
-                        foreignField: "api_key",
-                        as: "clientDetails"
-                    }
-                },
-                {
-                    $lookup:
-                    {
-                        from: "networks",
-                        localField: "poolwalletDetails.network_id",
-                        foreignField: "id",
-                        as: "networkDetails"
-                    }
-                },
-
-                {
-                    $match: filter,
-                },
-                {
-                    "$project": {
-
-                        "clientDetails.token": 0,
-                        "clientDetails.secret": 0,
-                        "clientDetails.qrcode": 0,
-                        "clientDetails.hash": 0,
-                        "clientDetails.emailstatus": 0,
-                        "clientDetails.loginstatus": 0,
-                        "clientDetails.emailtoken": 0,
-                        "clientDetails.authtoken": 0,
-                        "clientDetails.updatedAt": 0,
-                        "clientDetails.status": 0,
-                        "clientDetails.two_fa": 0,
-                        "clientDetails.password": 0,
-                        "clientDetails.kycLink": 0,
-                        "poolwalletDetails._id": 0,
-                        "poolwalletDetails.status": 0,
-                        "poolwalletDetails.__v": 0,
-                        "poolwalletDetails.privateKey": 0,
-                        "networkDetails.__v": 0,
-                        "networkDetails.nodeUrl": 0,
-                        "networkDetails.withdrawflag": 0,
-                        "networkDetails.withdrawfee": 0,
-                        "networkDetails.fixedfee": 0,
-                        "networkDetails.native_currency_id": 0,
-                        "networkDetails.kyt_network_id": 0,
-                        "networkDetails.created_by": 0,
-                        "networkDetails.libarayType": 0,
-                        "networkDetails.contractAddress": 0,
-                        "networkDetails.contractABI": 0,
-                        "networkDetails.apiKey": 0,
-                        "networkDetails.transcationurl": 0,
-                        "networkDetails.scanurl": 0,
-                        "networkDetails.status": 0,
-                        "networkDetails.gaspriceurl": 0,
-                        "networkDetails.latest_block_number": 0,
-                        "networkDetails.processingfee": 0,
-                        "networkDetails.transferlimit": 0,
-                        "networkDetails.deleted_by": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails.updatedAt": 0,
-                        "networkDetails.hotwallettranscationstatus": 0,
-                        "networkDetails._id": 0
-                    }
-                }
-            ]).sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-            res.json({
-                status: 200, message: "All Transcation", data: {
-
-                    "transactionPool": transactionPoolData,
-                    "posTransactionPool": posTransactionPoolData,
-                    "pyLinkTransPool": pyLinkTransPools,
-                    "topupPools": topupPools,
-                }
-            })
-        }
-        catch (error) {
-            console.log("error", error)
-            res.json({ status: 400, data: {}, message: "Invalid Request" })
+            }
+          
+            let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
+            let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
+            let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
+            let transactionPoolData = [];
+            if(req.body?.type == "Topup"){
+            transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+            return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+            else if(req.body?.type == "POS")
+            {
+                transactionPoolData  = await posTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+            else if(req.body?.type == "Pay-Link")
+            {
+                transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                return res.status(200).json({ status: 200, data : transactionPoolData, });
+            }
+            
+            return res.status(200).json({ status: 200, data : transactionPoolData, });
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ status: 400, message:"Error" });
         }
     },
-
     async getallusdc(req, res) {
         try {
 
