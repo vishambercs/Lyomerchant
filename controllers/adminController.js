@@ -328,4 +328,14 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
+    async get_kyc_level(req, res) {
+        try {
+            let response = await Utility.get_KYC_Level()
+            res.json({ status: 200, data: response, message: "Success" })
+        }
+        catch (error) {
+            console.log("error",error)
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
 }

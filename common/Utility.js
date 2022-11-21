@@ -1,14 +1,9 @@
-var nodemailer            = require('nodemailer');
-const ejs                 = require('ejs');
-const fs                  = require('fs');
+
 const Web3                = require('web3');
 const axios               = require('axios')
 var stringify             = require('json-stringify-safe');
-var cornJobs              = require('./cornJobs');
-const transcationLog      = require('../Models/transcationLog');
 const transactionPools    = require('../Models/transactionPool');
 const clients             = require('../Models/clients');
-var clientsController     = require('../controllers/clientsController');
 var crypto                = require("crypto");
 const jwt                 = require('jsonwebtoken');
 const url                 = require('url')
@@ -35,11 +30,25 @@ async function Get_RequestByAxios(URL, parameters, headers) {
         })
     return response;
 }
-
+async function get_KYC_Level(){
+    try{
+    let url = process.env.KYC_URL+process.env.KYC_URL_LEVEL
+    let headers = {'Authorization' : process.env.KYC_URL_TOKEN}
+    let response = await Get_RequestByAxios(url,{},headers)
+    let json_response = JSON.parse(response.data)
+    let levels = json_response.data.body.levels
+    return levels
+    }
+    catch (error) {
+        console.log("get_KYC_Level error", error);
+        return null
+    }
+}
 var CryptoJS            = require('crypto-js')
 module.exports =
 {
-    Get_RequestByAxios : Get_RequestByAxios,
+    Get_RequestByAxios  : Get_RequestByAxios,
+    get_KYC_Level       : get_KYC_Level,
     async generateKey() {
        let key =  await crypto.randomBytes(20).toString('hex')
        return key ;

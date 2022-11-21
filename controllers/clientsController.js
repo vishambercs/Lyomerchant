@@ -1,6 +1,5 @@
 const clients = require('../Models/clients');
 const kycWebHookLogs = require('../Models/kycWebHookLog');
-
 const withdrawLog = require('../Models/withdrawLog');
 const admins = require('../Models/admin');
 const topup = require('../Models/topup');
@@ -8,13 +7,11 @@ const emailSending = require('../common/emailSending');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
 var Utility = require('../common/Utility');
-
 var commonFunction = require('../common/commonFunction');
 const bcrypt = require('bcrypt');
 const Web3 = require('web3');
 const clientWallets = require('../Models/clientWallets');
 const poolWallet = require('../Models/poolWallet');
-
 const { authenticator } = require('otplib')
 const QRCode = require('qrcode')
 const network = require('../Models/network');
@@ -159,11 +156,11 @@ module.exports =
         }
     },
     async create_merchant(req, res) {
-        var api_key = crypto.randomBytes(20).toString('hex');
-        var email = req.body.email
+        var api_key  = crypto.randomBytes(20).toString('hex');
+        var email    = req.body.email
         var password = req.body.password
-        var hash = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
-        const salt = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
+        var hash     = CryptoJS.MD5(email + password + process.env.BASE_WORD_FOR_HASH).toString();
+        const salt   = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(password, salt);
 
         var otp = otpGenerator.generate(6, { upperCase: false, specialChars: false });
@@ -194,7 +191,7 @@ module.exports =
             });
             client.save().then(async (val) => {
                 var url = process.env.SIGN_UP_URL
-                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": "", "url": url } }
+                var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": val.email, "subject": "Email Verfication Token", "templateData": { "password": otp, "url": url } }
                 let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
                 let response = { "type": val.type, "first_name": val.first_name, "last_name": val.last_name, "email": val.email, "companyname": val.companyname }
                 res.json({ status: 200, message: "We sent token to your Email", data: response })
@@ -273,15 +270,21 @@ module.exports =
     async Create_Kyc_Link(req, res) {
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
-                if (val != null) {
-                    let kycurl = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path2
-                    let kyclevelurl = process.env.KYC_URL + Constant.KYC_URL_LEVEL
-                    let kyc_level = await commonFunction.Get_Request(kyclevelurl, { "Authorization": process.env.KYC_URL_TOKEN })
-                    let kyc_link = null
-                    let postRequests = await commonFunction.Post_Request(kycurl, { "levelName": "LyoMerchant_Client" }, { "Authorization": process.env.KYC_URL_TOKEN })
+                if (val != null) 
+                {
+                    let type          = val.type == "Individual" ? 0    : -1
+                    type              = val.type == "Company"    ? 1    : type
+                    let kyc_levels    = await Utility.get_KYC_Level()
+                    let kyc_level     = kyc_levels != null && kyc_levels.length > 0 ? kyc_levels[type]  : null
+                    if(kyc_level == null){
+                       return res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+                    }
+                    let kycurl        = process.env.KYC_URL + Constant.kyc_path1 + val.api_key + Constant.kyc_path2
+                    let postRequests  = await commonFunction.Post_Request(kycurl, { "levelName": kyc_level }, { "Authorization": process.env.KYC_URL_TOKEN })
                     let json_response = JSON.parse(postRequests.data)
 
-                    if (json_response.status == 200) {
+                    if (json_response.status == 200) 
+                    {
                         if (json_response.data.body.length != 0) {
                             let KYC_ID = json_response.data.body.kyc_link.split("/");
                             kyc_link = process.env.KYC_URL_APPROVE + KYC_ID[1];
