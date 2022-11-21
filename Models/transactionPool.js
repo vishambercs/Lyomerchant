@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const mongoosePaginate = require("mongoose-paginate-v2");
-const PoolWallet = require('./poolWallet');
-const Network = require('./network');
-const Clients = require('./clients');
+const mongoose              = require('mongoose');
+const validator             = require('validator');
+const mongoosePaginate      = require("mongoose-paginate-v2");
+const PoolWallet            = require('./poolWallet');
+const Network               = require('./network');
+const Clients               = require('./clients');
 const transactionPoolSchema = new mongoose.Schema({
     id:
     {
