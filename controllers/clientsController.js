@@ -270,7 +270,6 @@ module.exports =
                 res.json({ status: 400, data: {}, message: error.message })
             });
     },
-
     async Create_Kyc_Link(req, res) {
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
@@ -311,7 +310,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid" })
         }
     },
-
     async get_clients_data(req, res) {
         try {
             let token = req.headers.authorization;
@@ -582,7 +580,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async get_client_Balance(req, res) {
         try {
             poolWallet.aggregate(
@@ -758,29 +755,19 @@ module.exports =
                 network_data_index == -1 ? network_data.push(clientwallet[clientindex]) : network_data[network_data_index] = clientwallet[clientindex]
             })
 
-            // network_data.forEach(async function (element) {
-
-            //     let price = await priceNewConversition(element.NetworkDetails[0].currencyid.toLowerCase())
-            //     console.log(price)
-            //     let network_data_index = network_data.findIndex(translist => translist.network_id == element.network_id)
-            //     network_data[network_data_index]["fait_amount_net_amount"] = network_data[network_data_index]["netamount"] * price
-            //     console.log(network_data[network_data_index])
-            // })
-
-            for (i= 0 ; i<network_data.length; i++){
+            let total = 0;
+            for (i = 0; i < network_data.length; i++) {
                 let price = await priceNewConversition(network_data[i].NetworkDetails[0].currencyid.toLowerCase())
                 network_data[i]["fait_amount_net_amount"] = network_data[i]["netamount"] * price
+                total += network_data[i]["netamount"] * price
             }
-
-
-            res.json({ status: 200, data: network_data, message: "Success" })
+            res.json({ status: 200, data: network_data, "total": total, message: "Success" })
         }
         catch (error) {
             console.log(error)
-            res.json({ status: 400, data: {}, message: "Invalid" })
+            res.json({ status: 400, data: {}, message: "Invalid", "total": 0 })
         }
     },
-
     async kyc_status(req, res) {
         response = {}
         let network_details = await network.findOne({ id: req.body.network_id })
@@ -926,7 +913,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Customer did not find" })
         }
     },
-
     async forgotPassword(req, res) {
         try {
 
@@ -1268,21 +1254,18 @@ module.exports =
                 }
                 network_data_index == -1 ? network_data.push(clientwallet[clientindex]) : network_data[network_data_index] = clientwallet[clientindex]
             })
-            
-            let total = 0 ;
-               for (i= 0 ; i<network_data.length; i++){
+
+            let total = 0;
+            for (i = 0; i < network_data.length; i++) {
                 let price = await priceNewConversition(network_data[i].NetworkDetails[0].currencyid.toLowerCase())
                 network_data[i]["fait_amount_net_amount"] = network_data[i]["netamount"] * price
-
                 total += network_data[i]["netamount"] * price
             }
-
-
-            res.json({ status: 200, data: network_data,"total":total ,message: "Success" })
+            res.json({ status: 200, data: network_data, "total": total, message: "Success" })
         }
         catch (error) {
             console.log(error)
-            res.json({ status: 400, data: {}, message: "Invalid" , total : 0 })
+            res.json({ status: 400, data: {}, message: "Invalid", total: 0 })
         }
     },
 }
