@@ -21,6 +21,7 @@ const clientapicontroller           = require('../controllers/Masters/clientapic
 const commonController              = require('../controllers/Logs/commonController');
 const ipnController                 = require('../controllers/Masters/ipnController');
 const topupcontroller               = require('../controllers/topup/topupcontroller');
+const paylinkController               = require('../controllers/PaymentLinks/paylinkController');
 
 router.post('/signUpMerchant',                       Auth.verify_create_merchant_auth,clientsController.create_merchant);
 router.post('/resendingemail',                       Auth.is_merchant,Auth.verify_resendingemail,clientsController.resendingemail);
@@ -113,9 +114,7 @@ router.post('/ipntesting',                           PaymentHostedController.IPN
 router.post('/getTransStatus',                       Auth.checkaccess,commonController.getTransStatus);
 router.get('/getalltranscationofmerchant',           Auth.is_merchant,commonController.getAllTranscationOfMerchant);
 
-
 "============================ Assign Top up Merchant Wallet  ==============================="
-
 // router.post('/assigntopupMerchantWallet', Auth.Verfiy_Merchant,Auth.plugin_have_access,transcationpoolController.assignMerchantWalletForTopUP);
 // router.post('/getTranscationDataofTopup', transcationpoolController.getTranscationDataofTopup);
 // router.post('/canceltopup',transcationpoolController.cancelpaymentLink);
@@ -130,7 +129,7 @@ router.post('/pluginallNetworks',           Auth.checkaccess,networkController.a
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
 
-
+router.post('/updatestoreInvoice',          paylinkController.updatestoreInvoice);
 
 
 

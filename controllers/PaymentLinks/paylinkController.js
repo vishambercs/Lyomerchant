@@ -51,7 +51,6 @@ module.exports =
         ]).sort({ createdAt: -1 }).limit(limit).skip(skip).lean();
         res.status(200).json({ status: 200, data: transactionPoolData, });
     },
-
     async storeInvoice(req, res) {
         let invoiceObject = req.body
         let invoiceid = ''
@@ -93,28 +92,7 @@ module.exports =
         }
         res.json({ status: status, data: { "invoiceid": invoiceid }, message: message })
     },
-
-    async updatestoreInvoice(req, res) {
-        try {
-            const invoices = await invoice.find({});
-            console.log("====client===", invoices.length)
-            invoices.forEach(async (element) => {
-                const client = await clients.findOne({ api_key: element.merchantapikey })
-
-                if (client != null) {
-                    console.log("====client===", client._id)
-                    const invoiceData = await invoice.updateMany({ merchantapikey: element.merchantapikey }, { $set: { clientdetails: client._id } }, { 'returnDocument': 'after' })
-                    console.log("====invoiceData===", invoiceData)
-                }
-            });
-
-            res.json({ status: 200, data: { "invoices": invoices }, message: "" })
-        }
-        catch (error) {
-            res.json({ status: 400, data: { "invoices": "" }, message: error })
-        }
-    },
-
+   
     async deleteInvoice(req, res) {
         try {
             await invoice.updateOne({ 'id': req.body.id },
@@ -142,18 +120,19 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async getPaymentLink(req, res) {
         let responseObj = ''
         try {
             var merchantKey = req.headers.authorization
+            let invoicedata = invoice.findOne({id : req.body.invoiceid})
             let new_record = new paylinkPayment({
-                id: mongoose.Types.ObjectId(),
-                invoice_id: req.body.invoiceid,
-                timestamps: new Date().getTime(),
-                status: 0
+                id              : mongoose.Types.ObjectId(),
+                invoicedetails  : invoicedata._id,
+                invoice_id      : req.body.invoiceid,
+                timestamps      : new Date().getTime(),
+                status          : 0
             })
-            console.log(new_record)
+            
             let response = await new_record.save()
             responseObj = response.id
             message = "payment initiated"
@@ -164,7 +143,7 @@ module.exports =
             message = error.message
             status = 400
         }
-        res.json({ status: status, data: { "paymentId": responseObj }, message: message })
+        res.json({ status: status, data: { "paymentId": responseObj }, message: "Error" })
     },
 
 
@@ -184,7 +163,6 @@ module.exports =
 
         res.json({ status: status, data: response, message: "get all invoices" })
     },
-
     async verifyPaymentLink(req, res) {
         try {
 
@@ -266,7 +244,6 @@ module.exports =
         }
 
     },
-
     async cancelpaymentLink(req, res) {
         try {
             let paylinks = await paylinkPayment.findOneAndUpdate({ 'id': req.body.paymentId }, { $set: { status: 1 } }, { returnDocument: 'after' })
@@ -283,6 +260,8 @@ module.exports =
             let account = await poolwalletController.getPoolWalletID(networkType)
             let network_details = await networks.findOne({ 'id': networkType })
             let client = await clients.findOne({ 'api_key': req.headers.authorization })
+            let payLink = await paylinkPayment.findOne({ 'id': req.body.payLinkId })
+            
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             const newRecord = new paymentLinkTransactionPool({
@@ -303,7 +282,7 @@ module.exports =
                 clientdetail: client._id,
                 pwid: account._id,
                 nwid: network_details._id,
-
+                paymentdetails: payLink._id,
             });
             newRecord.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
@@ -317,6 +296,26 @@ module.exports =
         catch (error) {
             console.log(error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async updatestoreInvoice(req, res) {
+        try {
+            const paylinkPayments = await paymentLinkTransactionPool.find({});
+            console.log("====client===", paylinkPayments.length)
+            paylinkPayments.forEach(async (element) => {
+                // const clientinvoices = await invoice.findOne({ id: element.invoice_id })
+                const payLink = await paylinkPayment.findOne({ 'id': element.payLinkId })
+                if (payLink != null) {
+                    console.log("====client===", payLink._id)
+                    const invoiceData = await paymentLinkTransactionPool.updateMany({ payLinkId: element.payLinkId }, { $set: { paymentdetails: payLink._id } }, { 'returnDocument': 'after' })
+                    console.log("====invoiceData===", invoiceData)
+                }
+            });
+
+            res.json({ status: 200, data: { "invoices": paylinkPayments }, message: "" })
+        }
+        catch (error) {
+            res.json({ status: 400, data: { "invoices": "" }, message: error })
         }
     },
     async getPaymentLinkTransList(req, res) {

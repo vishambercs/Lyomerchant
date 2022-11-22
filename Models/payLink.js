@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose  = require('mongoose');
 const validator = require('validator');
-
+const Invoice   = require('./invoice');
 
 const payLinkSchema = new mongoose.Schema({
     id:
@@ -8,6 +8,12 @@ const payLinkSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique:true,
+    },
+    invoicedetails:
+    {
+        type    : mongoose.Schema.Types.ObjectId,
+		ref     : Invoice,
+		default : null,
     },
     invoice_id:
     {

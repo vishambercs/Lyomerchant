@@ -3,7 +3,7 @@ const validator = require('validator');
 const PoolWallet = require('./poolWallet');
 const Network = require('./network');
 const Clients = require('./clients');
-
+const payLink = require('./payLink');
 const paymentLinkTransactionPoolSchema = new mongoose.Schema({
     id:
     {
@@ -27,6 +27,12 @@ const paymentLinkTransactionPoolSchema = new mongoose.Schema({
 		ref     : PoolWallet,
 		default : null,
 	},
+    pwid: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : PoolWallet,
+		default : null,
+	},
     nwid: 
     {
 		type    : mongoose.Schema.Types.ObjectId,
@@ -37,6 +43,12 @@ const paymentLinkTransactionPoolSchema = new mongoose.Schema({
     {
 		type    : mongoose.Schema.Types.ObjectId,
 		ref     : Clients,
+		default : null,
+	},
+    paymentdetails: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : payLink,
 		default : null,
 	},
     poolwalletID:

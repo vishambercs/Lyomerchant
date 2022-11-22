@@ -4,13 +4,13 @@ const network                    = require('../../Models/network');
 const poolWallets                = require('../../Models/poolWallet');
 const transactionPool            = require('../../Models/transactionPool');
 const payLink                    = require('../../Models/payLink');
-const invoice                   = require('../../Models/invoice');
-const clients             = require('../../Models/clients');
-const topups              = require('../../Models/topup');
-const Constant            = require('../../common/Constant');
-const { getBalance }      = require('bitcoin-core/src/methods');
-const Web3                = require('web3');
-const { concat, isEmpty } = require('lodash');
+const invoice                    = require('../../Models/invoice');
+const clients                    = require('../../Models/clients');
+const topups                     = require('../../Models/topup');
+const Constant                   = require('../../common/Constant');
+const { getBalance }             = require('bitcoin-core/src/methods');
+const Web3                       = require('web3');
+const { concat, isEmpty }        = require('lodash');
 require("dotenv").config()
 
 
@@ -835,6 +835,12 @@ module.exports =
                 {
                     queryOptions["storedetails"] =  req.body.storedetail
                 }
+                let paymentdetails = {}
+                if(req.body?.paymentdetails)
+                {
+                    paymentdetails["invoice_id"] =  req.body.paymentdetails
+                }
+                
                 let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
                 let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
                 let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
@@ -844,6 +850,8 @@ module.exports =
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
                             { path: "nwid",         select: "id coin network _id" },
                             { path: "clientdetail", select: "id email first_name last_name type _id" },
+
+                            
                         ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                     return res.status(200).json({ status: 200, data : transactionPoolData, });
                     }
@@ -860,9 +868,14 @@ module.exports =
                     else if(req.body?.type == "Pay-Link")
             {
                 transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
-                    { path: "pwid",         select: "network_id id balance address remarks _id" },
-                    { path: "nwid",         select: "id coin network _id" },
-                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                    { path: "pwid",           select: "network_id id balance address remarks _id" },
+                    { path: "nwid",           select: "id coin network _id" },
+                    { path: "clientdetail",   select: "id email first_name last_name type _id" },
+                    { path: "paymentdetails", select:"id invoice_id ", match:  paymentdetails,
+                     populate :[
+                        { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
+                     ]},
+              
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                 return res.status(200).json({ status: 200, data : transactionPoolData, });
             }
@@ -931,7 +944,11 @@ module.exports =
                 }
             }
           
-
+            let paymentdetails = {}
+            if(req.body?.paymentdetails)
+            {
+                paymentdetails["invoice_id"] =  req.body.paymentdetails
+            }
 
 
             let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
@@ -962,7 +979,10 @@ module.exports =
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
-                  
+                    { path: "paymentdetails", select:"id invoice_id ", match:  paymentdetails,
+                    populate :[
+                       { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
+                    ]},
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                 return res.status(200).json({ status: 200, data : transactionPoolData, });
             }
@@ -972,6 +992,12 @@ module.exports =
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
+                    { path: "paymentdetails", select:"id invoice_id ",
+                    populate :[
+                       { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
+                    ]
+               
+               },
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                 return res.status(200).json({ status: 200, data : transactionPoolData, });
             }
