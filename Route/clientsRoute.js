@@ -74,7 +74,7 @@ const fixedtopupcontroller          = require('../controllers/topup/fixedtopupco
 // router.post('/posallNetworks',                       Auth.check_Store_Device_Access,networkController.allNetworkForPOSClient);
 // router.post('/posGetTransByDeviceID',                Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
 // "============================ Currency Master ==============================="
-// router.get('/allCurrency',                           CurrencyController.allCurrency);
+  router.get('/allCurrency',                           CurrencyController.allCurrency);
 // router.post('/priceConversition',                    CurrencyController.priceConversition);
 
 // "============================ NETWORK Master ==============================="
@@ -128,21 +128,26 @@ const fixedtopupcontroller          = require('../controllers/topup/fixedtopupco
 
 // "============================Create Top UP==============================="
 
-router.post('/assigntopupMerchantWallet',   topupcontroller.create_top_payment);
+// router.post('/assigntopupMerchantWallet',   topupcontroller.create_top_payment);
+router.post('/assigntopupMerchantWallet',   topupcontroller.create_top_payment_withPoolWallet);
+
 router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
 router.post('/checkbalance',                topupcontroller.checkbalance);
 router.post('/verfiytranshash',             topupcontroller.verfiytranshash);
 router.post('/sendotp',                     topupcontroller.sendotp);
-router.post('/updatetrans',                 topupcontroller.updatetrans);
+// router.post('/updatetrans',                 topupcontroller.updatetrans);
 router.post('/getTransStatus',              commonController.getTransStatus);
+router.post('/updatetransbycallback',       topupcontroller.updatetransbycallback);
+
 "============================Create Fixed Top UP==============================="
 router.post('/fixedassigntopupMerchantWallet',   fixedtopupcontroller.create_top_payment);
 router.post('/fixedpluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/fixedgettransdataoftopup',         fixedtopupcontroller.get_top_payment_data);
 router.post('/fixedallCurrency',                 Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.allCurrency);
 router.post('/fixedpriceConversitionChanges',    Auth.Verfiy_Merchant,Auth.checkaccess,CurrencyController.priceConversitionChanges);
+
 
 
 // router.post('/fixedcheckbalance',                fixedtopupcontroller.checkbalance);

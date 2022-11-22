@@ -144,7 +144,7 @@ async function pricecalculation(coinid, balance) {
                 response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
             })
             var stringify_response = JSON.parse(response.data)
-            console.log("stringify_response", stringify_response)
+          
             let pricedata = stringify_response.data
             console.log("pricedata", pricedata)
             let pricedatacurrency = pricedata[networktitle]
@@ -154,16 +154,15 @@ async function pricecalculation(coinid, balance) {
                 alreadySetCurrency.splice(alreadySetCurrency.indexOf(networktitle), 1);
             }, 10000);
         }
-        console.log("pricecalculation", priceflag[networktitle])
+        
         let price = parseFloat(priceflag[networktitle]) * parseFloat(balance)
-        console.log("pricecalculation", balance)
-        console.log("pricecalculation", price)
+  
 
         return price;
 
     }
     catch (error) {
-        console.log("pricecalculation", error)
+        console.log("pricecalculation", error.message)
         return 1;
 
     }
@@ -391,8 +390,8 @@ async function fetchpostRequest(URL, parameters) {
             method: 'POST',
             body: JSON.stringify(parameters),
             headers: { 'Content-Type': 'application/json' }
-        }).then(res => console.log(res))
-            .then(json => console.log(json));
+        }).then(res => console.log("fetchpostRequest"))
+            .then(json => console.log("fetchpostRequest"));
     }
     catch (error) {
         console.log("======================================== fetchpostRequest", error)
@@ -595,6 +594,60 @@ async function verifyTheBalance(transkey) {
     }
 }
 
+async function verifyTheBalancebyWebsocket(transkey,amount,transhash) {
+    try {
+        let transdata = await get_Transcation_topup(transkey)
+        let addressObject = transdata[0]
+        let response = {}
+        var amountstatus = 0
+        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, amount)
+        var status = 0
+        if (addressObject.transtype == 1) {
+            status = 1
+            let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
+                {
+                    $set: {
+                        status: 1,
+                        "amount":amount,
+                        "transhash" : transhash, 
+                        "fiat_amount": pricecal,
+                        "response_at": new Date().toString(),
+                    }
+                }, { returnDocument: 'after' })
+        }
+        else if (addressObject.transtype == 2) 
+        {
+            status =  amount == addressObject.amount ? 1 : status ;
+            status =  amount < addressObject.amount && amount > 0 ? 2 : status ;
+            status =  amount > addressObject.amount && amount > 0 ? 3 : status ;
+            let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
+                {
+                    $set: 
+                    {
+                        status          : status,
+                        "crypto_paid"   : amount,
+                        "transhash"     : transhash, 
+                        "fiat_amount"   : pricecal,
+                        "response_at"   : new Date().toString(),
+                    }
+                }, { returnDocument: 'after' })
+        }
+        let remain            = parseFloat(addressObject.amount) - parseFloat(amount)
+        let paymentData       = { "remain": remain, "paid": amount, "required": addressObject.amount }
+        let trans_data        = await getTranscationDataForClient(addressObject.id)
+        let ClientWallet      = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, amount)
+        let logData           = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
+        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData)
+        response              = { amountstatus: status, "paid_in_usd": pricecal, "paid": amount, status: 200, message: "success" };
+        return JSON.stringify(response)
+    }
+    catch (error) {
+        console.log("Message %s sent: %s", error);
+        response = { amountstatus: 0, "paid": 0, status: 400, message: "error" };
+        return JSON.stringify(response)
+    }
+}
+
 async function partialTopupBalance(transkey) {
     try {
         console.log("partialTopupBalance",transkey)   
@@ -750,6 +803,8 @@ async function partialFixedTheBalance(transkey) {
 }
 module.exports =
 {
+    pricection    : pricecalculation,
+    verifyTheBalancebyWebsocket :verifyTheBalancebyWebsocket,
     get_Transcation_topup: get_Transcation_topup,
     getTrasnsBalance: getTrasnsBalance,
     verifyTheBalance: verifyTheBalance,

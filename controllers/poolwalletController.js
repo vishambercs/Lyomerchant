@@ -361,5 +361,25 @@ module.exports =
             res.json({ status: 400, data: {}, message: error })
         }
     },
+    async savePoolWallet(network_id,address) 
+    {
+        try {
+        
+            const poolWalletItem  = new poolWallet({ 
+                remarks: "Created at Run Time: " + (new Date().toString()), 
+                id: crypto.randomBytes(20).toString('hex'), 
+                network_id: network_id, 
+                address: address, 
+                privateKey: " ", });
+           let  val     = await poolWalletItem.save()
+            
+           return val
+           
+        }
+        catch (error) {
+            console.log(error)
+            return null
+        }
+    },
 
 }

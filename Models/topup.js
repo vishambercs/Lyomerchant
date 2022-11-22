@@ -37,6 +37,7 @@ const topupschema = new mongoose.Schema({
     orderid: {
         type: String,
         required: true,
+        unique: true,
     },
     callbackURL: {
         type: String,
@@ -128,7 +129,11 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
-
+    response_at: {
+        type: String,
+        required: false,
+        default: false,
+    },
 },
    
     { timestamps: true }

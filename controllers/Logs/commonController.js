@@ -8,7 +8,6 @@ const invoice    = require('../../Models/invoice');
 const topups      = require('../../Models/topup');
 const Fixedtopups      = require('../../Models/Fixedtopup');
 const Constant   = require('../../common/Constant');
-const Fixedtopups      = require('../../Models/Fixedtopup');
 const { getBalance } = require('bitcoin-core/src/methods');
 const Web3 = require('web3');
 const { concat } = require('lodash');

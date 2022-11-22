@@ -1,11 +1,13 @@
-const topup = require('../../Models/topup');
-const poolWallet = require('../../Models/poolWallet');
-const networks = require('../../Models/network');
-const Constant = require('../../common/Constant');
-var otpGenerator = require('otp-generator')
-var mongoose = require('mongoose');
-var poolwalletController = require('../poolwalletController');
-const clientWallets = require('../../Models/clientWallets');
+const topup                  = require('../../Models/topup');
+const poolWallet             = require('../../Models/poolWallet');
+const networks               = require('../../Models/network');
+const ApiCall                = require('../../common/Api_Call');
+const Constant               = require('../../common/Constant');
+const topupUtility           = require('../../common/topupUtility');
+var otpGenerator             = require('otp-generator')
+var mongoose                 = require('mongoose');
+var poolwalletController     = require('../poolwalletController');
+const clientWallets          = require('../../Models/clientWallets');
 const Web3 = require('web3');
 const TronWeb = require('tronweb')
 require('dotenv').config()
@@ -281,6 +283,8 @@ async function getTimeprice(time, coin)  {
 
 
 
+
+
 module.exports =
 {
     async create_top_payment(req, res) {
@@ -289,7 +293,6 @@ module.exports =
             var merchantKey = req.headers.authorization
             var networkType = req.body.networkType
             var orderid = req.body.orderid
-            // var transtype = req.body.transtype
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             let account = await poolwalletController.getPoolWalletID(networkType)
@@ -325,9 +328,62 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async create_top_payment_withPoolWallet(req, res) {
+        try 
+        {
+            var merchantKey         = req.headers.authorization
+            var networkType         = req.body.networkType
+            var orderid             = req.body.orderid
+            let currentDateTemp     = Date.now();
+            let currentDate         = parseInt((currentDateTemp / 1000).toFixed());
+            let network             = await networks.findOne({id : networkType})
+            let url                 = process.env.WALLET_CREATION_URL+network.network
+           
+            let WALLET_CALLBACK_URL = process.env.WALLET_CALLBACK_URL+"/updatetransbycallback"
+            let parameters          = { callBackUrl: WALLET_CALLBACK_URL }
+            let response            = await ApiCall.callPoolWalletAPI(url,parameters,{})
+          
+            if(response.status == 400)
+            {
+               return res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+            }
+
+            let account =  await poolwalletController.savePoolWallet(networkType,response.data.address)
+            let amount = Object.keys(req.body).indexOf("amount") == -1 ?  0 : parseFloat(req.body.amount)
+            const transactionPool = new topup({
+                id  : mongoose.Types.ObjectId(),
+                api_key: req.headers.authorization,
+                poolwalletID: account.id,
+                amount: amount,
+                currency: req.body.currency,
+                callbackURL: req.body.callbackurl,
+                apiredirectURL: req.body.apiredirecturl,
+                errorurl: req.body.errorurl,
+                orderid: req.body.orderid,
+                status: 0,
+                walletValidity  : currentDate,
+                transtype       : amount > 0 ? 2 : 1,
+                remarks: req.body.remarks,
+                timestamps: new Date().getTime()
+            });
+            transactionPool.save().then(async (val) => {
+                await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
+                let url = process.env.TOP_UP_URL + val.id
+                let data = { url: url }
+                res.json({ status: 200, message: "Assigned Merchant Wallet Successfully", data: data })
+            }).catch(error => {
+                console.log("error", error)
+                res.json({ status: 400, data: {}, message: "Please Contact Admin" })
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
     async get_top_payment_data(req, res) {
         try {
-            let transactionPool = await topup.findOne({ id: req.body.id , status : 0 })
+            let transactionPool = await topup.findOne({ id: req.body.id , status:{ $in: [ 0, 2 ] } })
            
             if (transactionPool == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
@@ -350,7 +406,8 @@ module.exports =
                 errorurl        : transactionPool.errorurl,
                 orderid         : transactionPool.orderid,
                 network         : network.network,
-                coin            : network.coin
+                coin            : network.coin,
+                status            : transactionPool.status,
             }
             res.json({ status: 200, message: "Get The Data", data: data })
 
@@ -481,7 +538,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verfiytranshash(req, res) 
     {
         try 
@@ -534,62 +590,57 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     }, 
-    
-    async updatetrans(req, res) 
+    async updatetransbycallback(req, res) 
     {
         try 
         {
-            if(req.body.amount == 0  ||req.body.amount  == undefined  )
+           let status           = 0 
+           let address          = req.body.address;
+           let amount           = parseFloat(req.body.amount);
+           let transhash        = req.body.transhash;
+           let polwallet        = await poolWallet.findOne({ 'address': address , status: 1 } )
+           let tpup             = await topup.findOne({ 'poolwalletID': polwallet.id , status:{ $in: [ 0, 2 ] } } )
+           if(tpup.transtype == 2)
+           {
+            status               =  (amount + tpup.crypto_paid) == tpup.amount ? 1 : status ;
+            status               =  (amount + tpup.crypto_paid) < tpup.amount && amount > 0 ? 2 : status ;
+            status               =  (amount + tpup.crypto_paid) > tpup.amount && amount > 0 ? 3 : status ;
+           }
+           else
             {
-                return res.json({ status: 400, message: "Invalid Amount", data: {} })
-            }
-            
-            let transactionPool = await topup.findOneAndUpdate(
-                {id: req.body.id , otp:req.body.otp , status : 0 },
-                {$set : {
-                    status          : 1,
-                    transhash       : req.body.transhash,
-                    amount          : req.body.amount,
-                    updated_at      : new Date().toString(),
-                }},
-                {'returnDocument' : 'after'}
-                )
-            
-                if (transactionPool == null) 
-            {
-                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
-            }
+            status               =  amount > 0 ? 1 : status ;
+           }
+
            
-
-            let transWallet = await poolWallet.findOne({ id: transactionPool.poolwalletID })
-            if (transWallet == null) {
-                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
-            }
-            let network     = await networks.findOne({ id: transWallet.network_id })
-            let price = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
-            let faitprice = price * req.body.amount
-            console.log("faitprice",faitprice)
-            await topup.findOneAndUpdate( {id: req.body.id }, { $set : { fiat_amount :  faitprice } })
-            
-            await updateOtherAPI(1, 
-                req.body.transhash, 
-                transactionPool.id ,
-                req.body.transhash, 
-                transactionPool.orderid,
-                network.coin,
-                transactionPool.amount,
-                faitprice,network.id,transWallet.address,faitprice,
-                network.network,
-                new Date().toString(),transactionPool.timestamps)
-
-            res.json({ status: 200, message: "Get The Data", data: "" })
-            
+         
+           let responseapi      = await topupUtility.verifyTheBalancebyWebsocket(tpup.id,amount,transhash)
+           let response         = {transkey:tpup.id ,amountstatus: status,"paid_in_usd":responseapi.paid_in_usd, "paid": responseapi.paid, status: 200, message: "Success" };
+           let responseapijson  = JSON.parse(responseapi)
+           var index     = Constant.topupTransList.findIndex(translist => translist.transkey == tpup.id)
+        
+           if(status == 1 || status == 3)
+           {
+           
+            Constant.topupTransList[index].connection.sendUTF(JSON.stringify(response));
+            Constant.topupTransList[index].connection.close(1000)
+            Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != tpup.id);
+            let url                 = process.env.FREE_ADDRESS_URL+address
+            let response_get_api    = await ApiCall.callGetAPI(url,{},{})
+            let updatedpoolWallet   = await poolWallet.findOneAndUpdate({  id: polwallet.id },{ $set : { status : 0 }} )
+            console.log("response_get_api",response_get_api)
+           }
+           else
+           {
+            Constant.topupTransList[index].connection.sendUTF(JSON.stringify(response));
+           }
+           res.json({ status: 200, data: {}, message: "Done" })
         }
         catch (error) {
             console.log("checkbalance",error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     }, 
+   
 
     
 }
