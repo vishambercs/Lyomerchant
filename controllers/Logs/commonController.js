@@ -843,7 +843,7 @@ module.exports =
                     transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
                             { path: "nwid",         select: "id coin network _id" },
-                            { path: "clientdetail", select: "id email first_name last_name type _id" },
+                            { path: "clientdetail", select: "id email first_name last_name type _id"  },
                         ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                     return res.status(200).json({ status: 200, data : transactionPoolData, });
                     }
@@ -853,7 +853,7 @@ module.exports =
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
                             { path: "nwid",         select: "id coin network _id" },
                             { path: "clientdetail", select: "id email first_name last_name type _id" },
-                            { path: "storedetails", select: "id storename storeprofile storeaddress storephone _id" },
+                            { path: "storedetails", select: "id storename storeprofile storeaddress storephone _id" ,  options: {strictPopulate: false} },
                         ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                         return res.status(200).json({ status: 200, data : transactionPoolData, });
                     }
@@ -948,7 +948,7 @@ module.exports =
             }
             else if(req.body?.type == "POS")
             {
-                transactionPoolData  = await transactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                transactionPoolData  = await posTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
