@@ -43,6 +43,12 @@ const topupschema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    fixed_amount : 
+    {
+        type: Number,
+        required: false,
+        default: 0,
+    },
     fiat_amount: {
         type: Number,
         required: false,
@@ -124,6 +130,7 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: 0,
     },
+    
     transtype : 
     {
         type: Number,

@@ -601,45 +601,34 @@ async function verifyTheBalance(transkey) {
                     $set: 
                     {
                         status          : BalanceOfAddress.data.format_token_balance == addressObject.amount ? 1 : 3,
-                        "crypto_paid"   : BalanceOfAddress.data.format_token_balance,
+                        "amount"        : BalanceOfAddress.data.format_token_balance,
                         "fiat_amount"   : pricecal,
                     }
                 }, { returnDocument: 'after' })
         }
-        let remain = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
-        let paymentData = { "remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.amount }
-        let trans_data = await getTranscationDataForClient(addressObject.id)
-        let logData = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
-        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
-        
-        let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
-        // await updateOtherAPI(1,
-        //     addressObject.id,
-        //     addressObject.id, "",
-        //     addressObject.orderid,
-        //     addressObject.networkDetails[0].coin,
-        //     BalanceOfAddress.data.format_token_balance,
-        //     pricecal,
-        //     addressObject.networkDetails[0].id,
-        //     addressObject.poolWallet[0].address, pricecal,
-        //     addressObject.networkDetails[0].network,
-        //     new Date().toString(),
-        //     addressObject.timestamps)
-        response = { amountstatus: 0, "paid_in_use": pricecal, "paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "success" };
+
+        let remain       = parseFloat(addressObject.fixed_amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+
+       
+        let trans_data          = await getTranscationDataForClient(addressObject.id)
+        let logData             = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
+        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
+        let paymentData         = { "paid_in_usd" :pricecal ,"remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.fixed_amount }
+        response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
         return JSON.stringify(response)
     }
     catch (error) {
         console.log("Message %s sent: %s", error);
-        response = { amountstatus: 0, "paid": 0, status: 400, message: "error" };
+        let paymentData         = { "pricecal" :0 ,"remain": 0, "paid": 0, "required": 0 }
+        response                = { amountstatus: 0,"paymentData":paymentData, status: 400, message: "Error" };
         return JSON.stringify(response)
     }
 }
 
 async function partialTopupBalance(transkey) {
     try {
-        console.log("partialTopupBalance",transkey)   
         let transdata = await get_Transcation_topup(transkey)
-        console.log("transdata",transdata)   
         let addressObject = transdata[0]
         let response = {}
         var amountstatus = 0
@@ -657,20 +646,20 @@ async function partialTopupBalance(transkey) {
             {
                 $set: {
                     status: 2,
-                    "crypto_paid": BalanceOfAddress.data.format_token_balance,
+                    "amount": BalanceOfAddress.data.format_token_balance,
                     "fiat_amount": pricecal,
                 }
             }, { returnDocument: 'after' })
-        console.log("transactionpool",transactionpool)   
-        let remain = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
-        let paymentData = { "remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.amount }
+        let remain = parseFloat(addressObject.fixed_amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
-        response = { amountstatus: 0, "paid_in_use": pricecal, "paid": BalanceOfAddress.data.format_token_balance, status: 200, message: "success" };
+        let paymentData         = { "paid_in_usd" :pricecal ,"remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.fixed_amount }
+        response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
         return JSON.stringify(response)
     }
     catch (error) {
         console.log("Message %s sent: %s", error);
-        response = { amountstatus: 0, "paid": 0, status: 400, message: "error" };
+        let paymentData         = { "pricecal" :0 ,"remain": 0, "paid": 0, "required": 0 }
+        response                = { amountstatus: 0,"paymentData":paymentData, status: 400, message: "Error" };
         return JSON.stringify(response)
     }
 }

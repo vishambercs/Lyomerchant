@@ -303,7 +303,8 @@ module.exports =
                 clientdetail : client._id,
                 api_key: req.headers.authorization,
                 poolwalletID: account.id,
-                amount: amount,
+                amount: 0,
+                fixed_amount:amount,
                 currency: req.body.currency,
                 callbackURL: req.body.callbackurl,
                 apiredirectURL: req.body.apiredirecturl,
@@ -332,7 +333,7 @@ module.exports =
     },
     async get_top_payment_data(req, res) {
         try {
-            let transactionPool = await topup.findOne({ id: req.body.id , status : 0 })
+            let transactionPool = await topup.findOne({ id: req.body.id , status : { $in :  [0,2] } })
            
             if (transactionPool == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
@@ -355,7 +356,8 @@ module.exports =
                 errorurl        : transactionPool.errorurl,
                 orderid         : transactionPool.orderid,
                 network         : network.network,
-                coin            : network.coin
+                coin            : network.coin,
+                fixed_amount   : transactionPool.fixed_amount
             }
             res.json({ status: 200, message: "Get The Data", data: data })
 

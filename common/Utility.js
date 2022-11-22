@@ -363,12 +363,13 @@ module.exports =
             {
                 Constant.topupTransList[index]["connection"] = connection
             }
-            connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, amountstatus:0,paymentData:{"paid_in_usd":0,"remain":0,"paid":0,"required":0} , message: "Api Data" }));
             
-            let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
+            
+            let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].fixed_amount)
             if(index == -1)
             {
-                let response        = { transkey:queryvariable.transkey,amountstatus: 0, "paid_in_usd": 0, "paid": 0, status: 200, message: "We are checking. Please Wait" };
+                let response        = { transkey:queryvariable.transkey,amountstatus:0,paymentData:{"paid_in_usd":0,"remain":0,"paid":0,"required":0}, status: 200, message: "We are checking. Please Wait" };
                 let balanceResponse = JSON.stringify(response)
                 connection.sendUTF(balanceResponse);
             }
