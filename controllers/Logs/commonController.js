@@ -1,17 +1,15 @@
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
-const posTransactionPool = require('../../Models/posTransactionPool');
-const network = require('../../Models/network');
-const poolWallets = require('../../Models/poolWallet');
-const transactionPool = require('../../Models/transactionPool');
-
-const payLink = require('../../Models/payLink');
-const invoice = require('../../Models/invoice');
-const clients = require('../../Models/clients');
-
-const topups = require('../../Models/topup');
-const Constant = require('../../common/Constant');
-const { getBalance } = require('bitcoin-core/src/methods');
-const Web3 = require('web3');
+const posTransactionPool         = require('../../Models/posTransactionPool');
+const network                    = require('../../Models/network');
+const poolWallets                = require('../../Models/poolWallet');
+const transactionPool            = require('../../Models/transactionPool');
+const payLink                    = require('../../Models/payLink');
+const invoice                   = require('../../Models/invoice');
+const clients             = require('../../Models/clients');
+const topups              = require('../../Models/topup');
+const Constant            = require('../../common/Constant');
+const { getBalance }      = require('bitcoin-core/src/methods');
+const Web3                = require('web3');
 const { concat, isEmpty } = require('lodash');
 require("dotenv").config()
 
@@ -833,7 +831,10 @@ module.exports =
                         queryOptions["status"] =   req.body.status
                     }
                 }
-          
+                if(req.body?.storedetail)
+                {
+                    queryOptions["storedetails"] =  req.body.storedetail
+                }
                 let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
                 let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
                 let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
@@ -852,6 +853,7 @@ module.exports =
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
                             { path: "nwid",         select: "id coin network _id" },
                             { path: "clientdetail", select: "id email first_name last_name type _id" },
+                            { path: "storedetails", select: "id storename storeprofile storeaddress storephone _id" },
                         ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                         return res.status(200).json({ status: 200, data : transactionPoolData, });
                     }
@@ -878,14 +880,18 @@ module.exports =
             const network_option            = {};
             let   poolWalletIds             = [];
             let client                      = await clients.findOne({api_key : req.headers.authorization})
-           
             if(client == null){
                 return res.status(400).json({ status: 400, message:"Invalid Request" });
             }
             queryOptions["clientdetail"]    = client._id
-            if(req.body?.networkid)
+            if(req.body?.storedetail)
                 {
-                    queryOptions["nwid"] =  req.body.networkid
+                    queryOptions["storedetails"] =  req.body.storedetail
+                }
+
+            if(req.body?.networkid)
+            {
+                queryOptions["nwid"] =  req.body.networkid
             }
             if (Object.keys(req.body).indexOf("fromdate") != -1) {
                 var fromdate = req.body.fromdate
@@ -916,6 +922,9 @@ module.exports =
                 }
             }
           
+
+
+
             let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
             let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
             let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
@@ -934,6 +943,7 @@ module.exports =
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
+                    { path: "storedetails", select: "id storename storeprofile storeaddress storephone _id" },
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                 return res.status(200).json({ status: 200, data : transactionPoolData, });
             }
@@ -943,6 +953,7 @@ module.exports =
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
+                  
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                 return res.status(200).json({ status: 200, data : transactionPoolData, });
             }
@@ -1022,8 +1033,4 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-
-
-
-    
 }

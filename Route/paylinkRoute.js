@@ -17,5 +17,4 @@ router.post('/deleteInvoice',                       Auth.paylink_have_access,pay
 router.post('/assignPaymentLinkMerchantWallet',     Auth.public_paylink_access,payLinkController.assignPaymentLinkMerchantWallet)
 router.post('/assignFastCodeMerchantWallet',        Auth.fastpay_have_access,payLinkController.assignPaymentLinkMerchantWallet)
 router.post('/cancelpaymentLink',                   payLinkController.cancelpaymentLink);
-
 module.exports = router;

@@ -1,18 +1,20 @@
-const posTransactionPools = require('../../Models/posTransactionPool');
+const posTransactionPools   = require('../../Models/posTransactionPool');
 const poolWallet            = require('../../Models/poolWallet');
-const networks            = require('../../Models/network');
-const transactionPools = require('../../Models/transactionPool');
-const transcationLog = require('../../Models/transcationLog');
-const storeDevices = require('../../Models/storeDevices');
-const cornJobs = require('../../common/cornJobs');
-var CryptoJS = require('crypto-js')
-var crypto = require("crypto");
-var Utility = require('../../common/Utility');
-var commonFunction = require('../../common/commonFunction');
-var poolwalletController = require('../poolwalletController');
-const bcrypt = require('bcrypt');
-const Web3 = require('web3');
-var crypto = require("crypto");
+const networks              = require('../../Models/network');
+const transactionPools      = require('../../Models/transactionPool');
+const transcationLog        = require('../../Models/transcationLog');
+const storeDevices          = require('../../Models/storeDevices');
+const merchantstore         = require('../../Models/merchantstore');
+const clients         = require('../../Models/clients');
+const cornJobs              = require('../../common/cornJobs');
+var CryptoJS                = require('crypto-js')
+var crypto                  = require("crypto");
+var Utility                 = require('../../common/Utility');
+var commonFunction          = require('../../common/commonFunction');
+var poolwalletController    = require('../poolwalletController');
+const bcrypt                = require('bcrypt');
+const Web3                  = require('web3');
+var crypto                  = require("crypto");
 require("dotenv").config()
 module.exports =
 {
@@ -29,7 +31,7 @@ module.exports =
             var hash          = CryptoJS.MD5(security_hash).toString();
             let devicetoken   = req.headers.devicetoken;
             let storeDevice   = await storeDevices.findOne({ $and: [ { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-           
+            let merchantstoredata =  await merchantstore.findOne({storeapikey : merchantKey});
             if(storeDevice == null)
             {
                 return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
@@ -42,6 +44,7 @@ module.exports =
                 const posTransactionPool = new posTransactionPools({
                     id              : crypto.randomBytes(20).toString('hex'),
                     api_key         : req.headers.authorization,
+                    storedetails    : merchantstoredata._id,
                     poolwalletID    : account.id,
                     clientdetail    : req.body.clientid,
                     pwid            : account._id,
@@ -322,7 +325,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async getTranscationDetailsByStoreID(req, res) {
         try {
         
@@ -444,4 +446,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+
+    
 }

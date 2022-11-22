@@ -11,6 +11,7 @@ var withdrawRoute   = require('./Route/withdrawRoute');
 var adminRoute      = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
+const listEndpoints = require('express-list-endpoints')
 const fs = require('fs');
 var path = require('path');
 const Web3 = require('web3');
@@ -53,25 +54,10 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 
-// cron.schedule('1 * * * * *', async() => {
-//     let response = await cornJobs.Balance_Cron_Job()
-//     console.log('running a task every minute',response);
-// });
-
-// cron.schedule('5 * * * * *', async() => {
-//     let response = await cornJobs.Check_KYT_Address()
-//     console.log('running a task every minute',response);
-// });
-
-// cron.schedule('1 * * * * *', async() => {
-//     let response = await cornJobs.Check_KYT_Address()
-//     console.log('running a task every minute',response);
-// });
 
 app.listen(process.env.SERVER_PORT, function () {
+    console.log(listEndpoints(app));
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
-
-   
 });
 
 var server = https.createServer().listen(process.env.SCOKECT_PORT, () => {

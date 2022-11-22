@@ -3,7 +3,7 @@ const validator = require('validator');
 const PoolWallet = require('./poolWallet');
 const Network = require('./network');
 const Clients = require('./clients');
-
+const Merchantstore = require('./merchantstore');
 const posTransactionPoolSchema = new mongoose.Schema({
     id:
     {
@@ -16,6 +16,12 @@ const posTransactionPoolSchema = new mongoose.Schema({
         type: String,
         required: true,
     }, 
+    storedetails: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Merchantstore,
+		default : null,
+	},
     pwid: 
     {
 		type    : mongoose.Schema.Types.ObjectId,

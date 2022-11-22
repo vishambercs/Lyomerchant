@@ -15,10 +15,9 @@ const quickpaymentmodelSchema = new mongoose.Schema({
     },
     type:
     {
-        type: String,
-        enum : ['Deposit','Coins'],
-        required: true,
-
+        type        : String,
+        enum        : ['Deposit','Coins'],
+        required    : true,
     },
     code:
     {

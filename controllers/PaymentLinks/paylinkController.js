@@ -4,8 +4,8 @@ const transaction = require("../transcationpoolController")
 const fastPaymentCode = require('../../Models/fastPaymentCode');
 const merchantStore = require('../../Models/merchantstore');
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
-const clients            = require('../../Models/clients');
-const networks            = require('../../Models/network');
+const clients = require('../../Models/clients');
+const networks = require('../../Models/network');
 const poolWallet = require('../../Models/poolWallet');
 var crypto = require("crypto");
 var mongoose = require('mongoose');
@@ -16,10 +16,47 @@ let status = ''
 const jwt = require('jsonwebtoken');
 module.exports =
 {
+    
+    async get_All_Invoice_For_Admin(req, res) {
+        let queryOptions = {}
+        if (Object.keys(req.body).indexOf("merchantemail") != -1) {
+            var customeremail = req.body.merchantemail
+            queryOptions["clientdetails"] = customeremail
+        }
+        if (Object.keys(req.body).indexOf("fromdate") != -1) {
+            var fromdate = req.body.fromdate
+            var fromdated = new Date(fromdate)
+            queryOptions["createdAt"] = { $gte: fromdated }
+        }
+        if (Object.keys(req.body).indexOf("todate") != -1) {
+            var fromdate = Object.keys(req.body).indexOf("fromdate") != -1 ? req.body.fromdate : null
+            var todate = req.body.todate
+            var todateed = new Date(todate)
+            todateed.setDate(todateed.getDate() + 1);
+            var inputtodateed = new Date(todateed.toISOString());
+            var fromdated = new Date(fromdate)
+            var inputfromdated = new Date(fromdated.toISOString());
+            let dateRange = fromdate != null ? { $gte: inputfromdated, $lte: inputtodateed } : { $lte: inputtodateed }
+            queryOptions["createdAt"] = dateRange
+        }
+        if (Object.keys(req.body).indexOf("status") != -1) 
+        {
+             queryOptions["status"] = req.body.status
+        }
+
+        let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
+        let skip = req.body.skip == "" || req.body.skip == undefined ? 0 : parseInt(req.body.skip);
+        let transactionPoolData = await invoice.find(queryOptions).populate([
+            { path: "clientdetails", select: "id email first_name last_name type _id" },
+        ]).sort({ createdAt: -1 }).limit(limit).skip(skip).lean();
+        res.status(200).json({ status: 200, data: transactionPoolData, });
+    },
+
     async storeInvoice(req, res) {
         let invoiceObject = req.body
         let invoiceid = ''
         var merchantKey = req.headers.authorization
+        const client = await clients.findOne({ api_key: merchantKey })
         const duedate = new Date(req.body.duedate);
         const currentdate = new Date();
         if (duedate <= currentdate) {
@@ -29,6 +66,7 @@ module.exports =
             let new_record = new invoice({
                 id: mongoose.Types.ObjectId(),
                 invoiceNumber: invoiceObject.invoiceNumber,
+                clientdetails: client._id,
                 merchantapikey: merchantKey,
                 Items: invoiceObject.Items,
                 customerName: req.body.customerName,
@@ -46,7 +84,7 @@ module.exports =
             message = "Invoice created"
             status = 200
         }
-        
+
         catch (error) {
             console.log("new invoice error", error)
             invoiceid = ''
@@ -54,6 +92,27 @@ module.exports =
             status = 400
         }
         res.json({ status: status, data: { "invoiceid": invoiceid }, message: message })
+    },
+
+    async updatestoreInvoice(req, res) {
+        try {
+            const invoices = await invoice.find({});
+            console.log("====client===", invoices.length)
+            invoices.forEach(async (element) => {
+                const client = await clients.findOne({ api_key: element.merchantapikey })
+
+                if (client != null) {
+                    console.log("====client===", client._id)
+                    const invoiceData = await invoice.updateMany({ merchantapikey: element.merchantapikey }, { $set: { clientdetails: client._id } }, { 'returnDocument': 'after' })
+                    console.log("====invoiceData===", invoiceData)
+                }
+            });
+
+            res.json({ status: 200, data: { "invoices": invoices }, message: "" })
+        }
+        catch (error) {
+            res.json({ status: 400, data: { "invoices": "" }, message: error })
+        }
     },
 
     async deleteInvoice(req, res) {
@@ -91,7 +150,7 @@ module.exports =
             let new_record = new paylinkPayment({
                 id: mongoose.Types.ObjectId(),
                 invoice_id: req.body.invoiceid,
-                timestamps  : new Date().getTime(),
+                timestamps: new Date().getTime(),
                 status: 0
             })
             console.log(new_record)
@@ -114,9 +173,8 @@ module.exports =
         let response = ''
         let invoiceNumber = ''
         let status = 200;
-        try 
-        {
-            let findResult = await invoice.find({ merchantapikey: merchantKey, status: { $ne: 5 } },{callbackURL : 0 , errorURL:0 , merchantapikey:0});
+        try {
+            let findResult = await invoice.find({ merchantapikey: merchantKey, status: { $ne: 5 } }, { callbackURL: 0, errorURL: 0, merchantapikey: 0 });
             response = findResult
         }
         catch (error) {
@@ -129,9 +187,9 @@ module.exports =
 
     async verifyPaymentLink(req, res) {
         try {
-            
+
             let paylinksData = await paylinkPayment.aggregate([
-                { $match: { id: req.body.paymentId  } },
+                { $match: { id: req.body.paymentId } },
                 {
                     $lookup: {
                         from: "invoices", // collection to join
@@ -139,7 +197,7 @@ module.exports =
                         foreignField: "id",//field from the documents of the "from" collection
                         as: "invoicesDetails"// output array field
                     }
-                    
+
                 },
                 {
                     $lookup: {
@@ -148,9 +206,9 @@ module.exports =
                         foreignField: "api_key",//field from the documents of the "from" collection
                         as: "clientsdetails"// output array field
                     }
-                    
+
                 },
-                {   
+                {
                     "$project":
                     {
                         "clientsdetails.api_key": 0,
@@ -170,40 +228,35 @@ module.exports =
                         "clientsdetails.manual_approved_at": 0,
                         "clientsdetails.deleted_by": 0,
                         "clientsdetails.deleted_at": 0,
-                       
+
                     }
                 }
 
             ])
 
-            if (paylinksData[0].status == 1 ) 
-            {
-               return res.json({ status: 400, data: {}, message: "Paylink is expired" })
+            if (paylinksData[0].status == 1) {
+                return res.json({ status: 400, data: {}, message: "Paylink is expired" })
             }
 
-            if (paylinksData[0].status != 0 ) 
-            {
-               return res.json({ status: 200, data: paylinksData, message: "Success" })
+            if (paylinksData[0].status != 0) {
+                return res.json({ status: 200, data: paylinksData, message: "Success" })
             }
 
-            if (paylinksData[0].status != 0 ) 
-            {
-               return res.json({ status: 200, data: paylinksData, message: "Success" })
+            if (paylinksData[0].status != 0) {
+                return res.json({ status: 200, data: paylinksData, message: "Success" })
             }
 
-           
-            if (paylinksData[0].timestamps == undefined) 
-            {
-               return res.json({ status: 400, data: [], message: "This Link is expired." })
+
+            if (paylinksData[0].timestamps == undefined) {
+                return res.json({ status: 400, data: [], message: "This Link is expired." })
             }
 
             const previousdate = new Date(parseInt(paylinksData[0].timestamps));
             const currentdate = new Date().getTime()
             var diff = currentdate - previousdate.getTime();
             var minutes = (diff / 60000)
-            if (minutes > 10) 
-            {
-               return res.json({ status: 400, data: [], message: "This Link is expired." })
+            if (minutes > 10) {
+                return res.json({ status: 400, data: [], message: "This Link is expired." })
             }
             res.json({ status: 200, data: paylinksData, message: "Successfully Done" })
         }
@@ -214,11 +267,9 @@ module.exports =
 
     },
 
-    async cancelpaymentLink(req, res) 
-    {
-        try 
-        { 
-            let paylinks = await paylinkPayment.findOneAndUpdate({ 'id':req.body.paymentId  }, { $set: { status : 1 } } ,{ returnDocument: 'after' })
+    async cancelpaymentLink(req, res) {
+        try {
+            let paylinks = await paylinkPayment.findOneAndUpdate({ 'id': req.body.paymentId }, { $set: { status: 1 } }, { returnDocument: 'after' })
             res.json({ status: 200, data: paylinks, message: "Successfully Done" })
         }
         catch (error) {
@@ -227,32 +278,31 @@ module.exports =
         }
     },
     async assignPaymentLinkMerchantWallet(req, res) {
-        try 
-        {
+        try {
             var networkType = req.body.networkType
             let account = await poolwalletController.getPoolWalletID(networkType)
             let network_details = await networks.findOne({ 'id': networkType })
-            let client = await clients.findOne({ 'api_key':  req.headers.authorization })
+            let client = await clients.findOne({ 'api_key': req.headers.authorization })
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             const newRecord = new paymentLinkTransactionPool({
-                id              : mongoose.Types.ObjectId(), 
-                api_key         : req.headers.authorization,
-                paymenttype     : req.body.paymenttype,
-                poolwalletID    : account.id,
-                amount          : req.body.amount,
-                currency        : req.body.currency,
-                callbackURL     : req.body.callbackURL,
-                errorURL        : req.body.errorURL,
-                payLinkId       : req.body.payLinkId,
-                orderType       : req.body.orderType,
-                clientToken     : req.body.token,
-                status          : 0,
-                walletValidity  : currentDate,
-                timestamps      : new Date().getTime(),
-                clientdetail    : client._id,
-                pwid            : account._id,
-                nwid            : network_details._id,
+                id: mongoose.Types.ObjectId(),
+                api_key: req.headers.authorization,
+                paymenttype: req.body.paymenttype,
+                poolwalletID: account.id,
+                amount: req.body.amount,
+                currency: req.body.currency,
+                callbackURL: req.body.callbackURL,
+                errorURL: req.body.errorURL,
+                payLinkId: req.body.payLinkId,
+                orderType: req.body.orderType,
+                clientToken: req.body.token,
+                status: 0,
+                walletValidity: currentDate,
+                timestamps: new Date().getTime(),
+                clientdetail: client._id,
+                pwid: account._id,
+                nwid: network_details._id,
 
             });
             newRecord.save().then(async (val) => {
@@ -386,14 +436,12 @@ module.exports =
         }
     },
     async verifyFastPayment(req, res) {
-        try 
-        {
-        let findResult = await fastPaymentCode.findOne({ "storeid": req.body.businessName, "status": 1})
-        res.json({ status: 200, data: findResult, message: "verify fast code" })
+        try {
+            let findResult = await fastPaymentCode.findOne({ "storeid": req.body.businessName, "status": 1 })
+            res.json({ status: 200, data: findResult, message: "verify fast code" })
         }
-        catch (error) 
-        {
-            console.log("verifyFastPayment error",error)        
+        catch (error) {
+            console.log("verifyFastPayment error", error)
             res.json({ status: 400, data: findResult, message: "error" })
         }
     },
@@ -408,7 +456,7 @@ module.exports =
             // let findResult = await fastPaymentCode.find({ "fastcodes": req.body.fastCode })
             let findResult = await fastPaymentCode.aggregate(
                 [
-                    { $match: { "fastcodes": req.body.fastCode,status: 1 } },
+                    { $match: { "fastcodes": req.body.fastCode, status: 1 } },
                     {
                         $lookup: {
                             from: "merchantstores", // collection to join
@@ -432,17 +480,17 @@ module.exports =
         var merchantKey = req.headers.authorization
         let dataResponse = ''
         let fastCodeObject = []
-       
+
         try {
-           
-            
+
+
             // const fastPayCode = new fastPaymentCode({
             //     id       : mongoose.Types.ObjectId(),
             //     storeid  : req.body.storeid,
             //     fastcodes: Math.floor(Math.random() * 100000),
             //     status: 1,
             // })
-            await fastPaymentCode.updateMany({storeid: req.body.storeid}, {$set : {status: 0 } } )
+            await fastPaymentCode.updateMany({ storeid: req.body.storeid }, { $set: { status: 0 } })
 
             const fastPayCode = new fastPaymentCode({
                 id: mongoose.Types.ObjectId(),
@@ -451,7 +499,7 @@ module.exports =
                 status: 1,
             })
             let val = await fastPayCode.save()
-            
+
             message = "Fast Code Created Successfully"
             status = 200
             dataResponse = val

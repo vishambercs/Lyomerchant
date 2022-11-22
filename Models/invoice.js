@@ -1,9 +1,10 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose      = require('mongoose');
+const validator     = require('validator');
 var uniqueValidator = require('mongoose-unique-validator');
-
+const Clients       = require('./clients');
 const invoiceSchema = new mongoose.Schema({
-    id: {
+    id: 
+    {
         type: String,
         required: true,
         unique: true,
@@ -13,6 +14,12 @@ const invoiceSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    clientdetails: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Clients,
+		default : null,
+	},
     merchantapikey :
     {
         type: String,
