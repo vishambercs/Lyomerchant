@@ -20,7 +20,7 @@ module.exports =
     async Verfiy_Merchant(req, res, next) {
         try {
             let api_key = req.headers.authorization;
-            console.log("api_key",api_key)
+           
             let token = req.headers.token;
             client.find({ 'token': token, 'api_key': api_key, status: true,disablestatus : false }).then(val => {
                 if (val != null) {
@@ -44,7 +44,7 @@ module.exports =
         try {
 
             let api_key = req.headers.authorization;
-            console.log(api_key)
+           
             let user = await merchantcategory.findOne({ clientapikey: api_key , status: 1 });
             
             if (user != null) {
@@ -199,7 +199,6 @@ module.exports =
         }
         
     },
-
     async is_merchant(req, res, next) {
         try {
             let token = req.headers.token;
@@ -403,8 +402,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
-
     async verify_variables(req, res, next) {
         try {
             const validationRule = {
@@ -441,7 +438,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verify_forgotPassword(req, res, next) {
         try {
             const validationRule = {
@@ -466,7 +462,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verify_checkTheTokenAndUpdate(req, res, next) {
         try {
             const validationRule = {
@@ -493,7 +488,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verify_create_merchant_auth(req, res, next) {
         try {
             const validationRule = {
@@ -838,7 +832,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verify_signup_admin_api(req, res, next) {
         try {
             const validationRule = 
@@ -945,6 +938,8 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
+
+    
 }
 
 
