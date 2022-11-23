@@ -13,9 +13,7 @@ module.exports =
             const url      =  process.env.API_URL+"/v1/pluginallNetworks"
             let headers  =  {}
             let response =  await Utility.Post_Request_By_Axios(url,headers,merchantKey)
-            console.log(response)
             var stringify_response  = JSON.parse(response)
-          
             res.json(stringify_response)
          }
         catch (error) {
@@ -74,7 +72,9 @@ module.exports =
                 "transid"       : req.body.id,
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            
             var stringify_response  = JSON.parse(response)
+
             res.json(stringify_response)
          }
         catch (error) {
@@ -106,7 +106,6 @@ module.exports =
                 title: "loren impsum doloris",
                 completed: false
             };
-            
             fetch('https://webhook.site/14cbc65f-b1a6-42c2-bb38-0faeb7b4dc9d', {
                 method: 'POST',
                 body: JSON.stringify(todo),
@@ -130,7 +129,7 @@ module.exports =
                 "id"       : req.body.id,
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
-            console.log("response",response)
+            
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -149,7 +148,7 @@ module.exports =
                 "id"       : req.body.id,
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
-            console.log("response",response)
+           
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -177,7 +176,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async sendotp(req, res) {
         try 
         {

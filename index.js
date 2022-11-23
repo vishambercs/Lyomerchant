@@ -165,7 +165,7 @@ const privateKey   = fs.readFileSync('/etc/letsencrypt/live/cpgapi.pulseworld.co
 const certificate  = fs.readFileSync('/etc/letsencrypt/live/cpgapi.pulseworld.com/cert.pem',     'utf8');
 const ca           = fs.readFileSync('/etc/letsencrypt/live/cpgapi.pulseworld.com/fullchain.pem',    'utf8');
 
-// app.get('/', function (req, res) { res.send('Welcome '); });
+app.get('/', function (req, res) { res.send('Welcome '); });
 app.use('/', client);
 
 
