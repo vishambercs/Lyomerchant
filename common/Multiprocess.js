@@ -27,7 +27,7 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
             {
                 transData = Constant.topupTransList[index]
             }
-            
+         
             if((jsondata.amountstatus == 1 || jsondata.amountstatus == 3 ) && index != -1 && jsondata.status == 200)
             {
 

@@ -48,7 +48,7 @@ module.exports =
   
     async getTranscationDataofTopup(req, res) {
         try {
-            var merchantKey         =  req.headers.authorization
+            var merchantKey         =  ""
             const url               =  process.env.API_URL+"/v1/getTranscationDataofTopup"
             let parameters          =  
             {
