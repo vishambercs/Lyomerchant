@@ -23,6 +23,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             console.log("jsondata=========",jsondata)
             let transData       = {}
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
+            console.log("index=========",index)
             if(index != -1 )
             {
                 transData       = Constant.topupTransList[index]

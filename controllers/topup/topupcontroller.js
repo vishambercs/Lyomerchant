@@ -427,7 +427,7 @@ module.exports =
                 let jsonresponse = JSON.parse(response)
                 var index = Constant.topupTransList.findIndex(translist => translist.transkey == tpup.id)
                 
-                if (jsonresponse.amountstatus == 1 || jsonresponse.amountstatus == 3 ) 
+                if ((jsonresponse.amountstatus == 1 || jsonresponse.amountstatus == 3) && index != -1 ) 
                 {
                     Constant.topupTransList[index].connection.sendUTF(response);
                     Constant.topupTransList[index].connection.close(1000)
@@ -437,11 +437,17 @@ module.exports =
                     let updatedpoolWallet = await poolWallet.findOneAndUpdate({ id: polwallet.id }, { $set: { status: 0 } })
                     console.log("response_get_api", response_get_api)
                 }
-                else  
+
+                else if (index != -1)
                 {
                     console.log(index)
                     console.log(response)
-                    Constant.topupTransList[index].connection.sendUTF(response);
+                    let transData       = Constant.topupTransList[index]
+                    transData.connection.sendUTF(response); 
+                }
+                else  
+                {
+                    
                 }
                 return res.json({ status: 200, data: {}, message: "Data Recieved" })
             }

@@ -361,14 +361,17 @@ module.exports =
             {
             let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
             Constant.topupTransList.push(client_object)
-            }
+            
+        }
             else
             {
                 Constant.topupTransList[index]["connection"] = connection
                 let response        = { transkey:queryvariable.transkey,amountstatus:0,paymentData:{"paid_in_usd":0,"remain":0,"paid":0,"required":0}, status: 200, message: "We are checking. Please Wait" };
                 let balanceResponse = JSON.stringify(response)
                 connection.sendUTF(balanceResponse);
+                
             }
+            //let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
             if(index == -1)
             {
                 
