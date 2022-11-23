@@ -20,7 +20,7 @@ const commonFunction      = require('./commonFunction');
 const Multiprocess        = require('./Multiprocess');
 const { generateAccount } = require('tron-create-address')
 require("dotenv").config()
-
+var CryptoJS            = require('crypto-js')
 async function Get_RequestByAxios(URL, parameters, headers) {
     response = {}
     await axios.get(URL, {
@@ -38,7 +38,7 @@ async function Get_RequestByAxios(URL, parameters, headers) {
     return response;
 }
 
-var CryptoJS            = require('crypto-js')
+
 module.exports =
 {
     Get_RequestByAxios : Get_RequestByAxios,
@@ -349,7 +349,10 @@ module.exports =
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
             var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
+            
             let getTranscationData  = await commonFunction.get_Transcation_topup(queryvariable.transkey,queryvariable.apikey)
+         
+              
             if(getTranscationData.length > 0)
             {
             const connection        = request.accept(null, request.origin);
@@ -362,20 +365,39 @@ module.exports =
             else
             {
                 Constant.topupTransList[index]["connection"] = connection
+                let response        = { transkey:queryvariable.transkey,amountstatus:0,paymentData:{"paid_in_usd":0,"remain":0,"paid":0,"required":0}, status: 200, message: "We are checking. Please Wait" };
+                let balanceResponse = JSON.stringify(response)
+                connection.sendUTF(balanceResponse);
             }
-            connection.sendUTF(JSON.stringify({  "transkey":queryvariable.transkey,status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
-            
-            //let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
             if(index == -1)
             {
-                let response        = { transkey:queryvariable.transkey,amountstatus: 0, "paid_in_usd": 0, "paid": 0, status: 200, message: "We are checking. Please Wait" };
+                
+                let response        = 
+                { 
+                    transkey:queryvariable.transkey,
+                    amountstatus:0,
+                    paymentData:{"paid_in_usd":0,"remain":0,"paid":0,"required":0}, 
+                    status: 200, 
+                    message: "We are checking. Please Wait" 
+                };
                 let balanceResponse = JSON.stringify(response)
                 connection.sendUTF(balanceResponse);
             }
         }
         else
         {
-            return request.reject(null, request.origin);
+            const connection        = request.accept(null, request.origin);
+            let response            = 
+            { 
+                transkey        :   queryvariable.transkey,
+                amountstatus    :   0, 
+                paymentData     :   {"paid_in_usd":0,"remain":0,"paid":0,"required":0},
+                status          :   400, 
+                message         :   "Invalid Transhash" 
+            };
+            let balanceResponse     = JSON.stringify(response)
+            connection.sendUTF(balanceResponse);
+            return connection.close(1000);
         }
         }
         catch (error) {

@@ -1,6 +1,7 @@
 const Validator         = require('validatorjs');
-const networks           = require('../Models/network');
+const networks          = require('../Models/network');
 const perferedNetwork   = require('../Models/perferedNetwork');
+const topup             = require('../Models/topup');
 const Currency          = require('../Models/Currency');
 const Models            = require("../Models/clients");
 
@@ -92,5 +93,20 @@ Validator.registerAsync('currencyexist', function(value,  attribute, req, passes
     })
     
 });
+
+Validator.registerAsync('orderidexist', function(value,  attribute, req, passes) 
+{
+    let msg =  `${value} has already been taken `
+    topup.findOne({ "orderid" : value }).then((result) => {
+        if(result != null )
+        {
+            passes(false, msg); // return false if value exists
+            return;
+        }
+        passes();
+    })
+    
+});
+
 
 module.exports = validator;

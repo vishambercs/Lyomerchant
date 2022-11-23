@@ -15,10 +15,10 @@ const clients = require('../Models/clients');
 require("dotenv").config()
 module.exports =
 {
-  async Verfiy_WebHook(req, res, next) {
+    async Verfiy_WebHook(req, res, next) {
         try {
             let api_key = req.headers.authorization;
-            if (api_key == "UPd34b73f4ab3ba08fae12e39c4660f746dad5dbe7TOP"){
+            if (api_key == "UPd34b73f4ab3ba08fae12e39c4660f746dad5dbe7TOP") {
                 next()
             }
             else {
@@ -33,9 +33,8 @@ module.exports =
     async Verfiy_Merchant(req, res, next) {
         try {
             let api_key = req.headers.authorization;
-            console.log("api_key",api_key)
             let token = req.headers.token;
-            client.find({ 'token': token, 'api_key': api_key, status: true,disablestatus : false }).then(val => {
+            client.find({ 'token': token, 'api_key': api_key, status: true, disablestatus: false }).then(val => {
                 if (val != null) {
                     next()
                 }
@@ -52,13 +51,12 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async checkaccess(req, res, next) {
         try {
 
             let api_key = req.headers.authorization;
-            let user = await merchantcategory.findOne({ clientapikey: api_key , status: 1 });
-            
+            let user = await merchantcategory.findOne({ clientapikey: api_key, status: 1 });
+
             if (user != null) {
                 next()
             }
@@ -141,9 +139,8 @@ module.exports =
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await admins.findOne({ admin_api_key: authorization ,token :token,  status :true });
-            if (user != null) 
-            {
+            let user = await admins.findOne({ admin_api_key: authorization, token: token, status: true });
+            if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
                 next()
@@ -196,7 +193,7 @@ module.exports =
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await clients.findOne({ authtoken:token });
+            let user = await clients.findOne({ authtoken: token });
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
@@ -209,14 +206,14 @@ module.exports =
         catch (error) {
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
-        
+
     },
 
     async is_merchant(req, res, next) {
         try {
             let token = req.headers.token;
             let authorization = req.headers.authorization;
-            let user = await clients.findOne({ api_key: authorization,authtoken:token });
+            let user = await clients.findOne({ api_key: authorization, authtoken: token });
             if (user != null) {
                 let profile = jwt.verify(token, process.env.AUTH_KEY)
                 req.user = profile
@@ -229,18 +226,16 @@ module.exports =
         catch (error) {
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
-        
+
     },
     async has_Pos_Access(req, res, next) {
         try {
             let token = req.headers.authorization;
             let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "306d04e5ccf554ffcaebe1b929a6dbc27bc04a3b" }, { status: 1 }] });
-            if (user != null) 
-            {
+            if (user != null) {
                 next()
             }
-            else 
-            {
+            else {
                 res.json({ status: 400, data: {}, message: "You have not pos access. Please create the service request." })
             }
         }
@@ -274,22 +269,19 @@ module.exports =
     },
     async check_Store_Device_Access(req, res, next) {
         try {
-            let token           = req.headers.authorization;
-            let devicetoken     = req.headers.devicetoken;
-            let merchantstore   = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
-            let storeDevice     = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
-            let client          = await clients.findOne({  api_key: merchantstore.clientapikey , disablestatus : true });
-            if (merchantstore != null && storeDevice != null && client == null) 
-            {
+            let token = req.headers.authorization;
+            let devicetoken = req.headers.devicetoken;
+            let merchantstore = await merchantstores.findOne({ $and: [{ storeapikey: token }, { status: { $eq: 0 } }] });
+            let storeDevice = await storeDevices.findOne({ $and: [{ storeapikey: token }, { devicetoken: devicetoken }, { status: { $eq: 1 } }] });
+            let client = await clients.findOne({ api_key: merchantstore.clientapikey, disablestatus: true });
+            if (merchantstore != null && storeDevice != null && client == null) {
                 next()
             }
-            else if (client != null) 
-            {
+            else if (client != null) {
                 return res.json({ status: 400, data: {}, message: "Your Account is disabled. Please Contact Admin" })
             }
-            else 
-            {
-                return   res.json({ status: 400, data: {}, message: "This device could not identify. Please regsiter this device" })
+            else {
+                return res.json({ status: 400, data: {}, message: "This device could not identify. Please regsiter this device" })
             }
         }
         catch (error) {
@@ -300,17 +292,17 @@ module.exports =
     async paylink_have_access(req, res, next) {
         try {
             let token = req.headers.authorization;
-            let client      = await clients.findOne({  api_key: token , disablestatus : true });
+            let client = await clients.findOne({ api_key: token, disablestatus: true });
             let user = await merchantcategory.findOne({ clientapikey: token, categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
             if (user != null && client == null) {
                 next()
             }
 
-            else if (client != null ) {
+            else if (client != null) {
                 return res.json({ status: 400, data: {}, message: "Your Account is disabled." })
             }
             else {
-                return  res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
+                return res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
             }
         }
         catch (error) {
@@ -338,12 +330,11 @@ module.exports =
                 return res.json({ status: 400, data: {}, message: "Payment link is expired." })
             }
             let user = await merchantcategory.findOne({ clientapikey: invoiceData.merchantapikey, categoryid: "b7d272aa12e19c8add57354239645c6788e2e1a9", status: 1 });
-            let client      = await clients.findOne({  api_key: invoiceData.merchantapikey , disablestatus : true });
+            let client = await clients.findOne({ api_key: invoiceData.merchantapikey, disablestatus: true });
             if (user != null && client == null) {
                 next()
             }
-            else if (client != null ) 
-            {
+            else if (client != null) {
                 res.json({ status: 400, data: {}, message: "Your account is disabled" })
             }
             else {
@@ -386,17 +377,16 @@ module.exports =
 
             let token = req.headers.authorization;
 
-            let user        = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8" }, { status: 1 }] });
-            let client      = await clients.findOne({  api_key : token , disablestatus : true });
-            if (user != null && client == null) 
-            {
+            let user = await merchantcategory.findOne({ $and: [{ clientapikey: token }, { categoryid: "202449155183a71b5c0f620ebe4af26f8ce226f8" }, { status: 1 }] });
+            let client = await clients.findOne({ api_key: token, disablestatus: true });
+            if (user != null && client == null) {
                 next()
             }
-            else if(client != null){
+            else if (client != null) {
                 return res.json({ status: 400, data: {}, message: "Your account is disabled." })
             }
             else {
-               return res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
+                return res.json({ status: 400, data: {}, message: "You have not access to this service. Please apply for this service" })
             }
         }
         catch (error) {
@@ -457,7 +447,7 @@ module.exports =
     async verify_forgotPassword(req, res, next) {
         try {
             const validationRule = {
-                "email"         : "required|email",
+                "email": "required|email",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -482,9 +472,9 @@ module.exports =
     async verify_checkTheTokenAndUpdate(req, res, next) {
         try {
             const validationRule = {
-                "email"         : "required|email",
-                "newpassword"   : "required|string|strict",
-                "emailtoken"    : "required|string",
+                "email": "required|email",
+                "newpassword": "required|string|strict",
+                "emailtoken": "required|string",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -509,11 +499,11 @@ module.exports =
     async verify_create_merchant_auth(req, res, next) {
         try {
             const validationRule = {
-                "email"         : "required|email|exist",
-                "password"      : "required|string|strict",
-                "first_name"    : "required|string",
-                "last_name"     : "required|string",
-                 "type" : ['required', { 'in': ['Individual','Company'] }],
+                "email": "required|email|exist",
+                "password": "required|string|strict",
+                "first_name": "required|string",
+                "last_name": "required|string",
+                "type": ['required', { 'in': ['Individual', 'Company'] }],
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -537,10 +527,10 @@ module.exports =
     async verify_ResetPassword(req, res, next) {
         try {
             const validationRule = {
-                "email"            : "required|email",
-                "password"         : "required|string",
-                "newpassword"      : "required|string|strict",
-                
+                "email": "required|email",
+                "password": "required|string",
+                "newpassword": "required|string|strict",
+
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -564,10 +554,10 @@ module.exports =
     async verify_updateMerchantProfileImage(req, res, next) {
         try {
             const validationRule = {
-                "profileimage"        : "required|string",
-                "companyname"         : "required|string",
-               
-                
+                "profileimage": "required|string",
+                "companyname": "required|string",
+
+
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -591,8 +581,8 @@ module.exports =
     async verify_Login(req, res, next) {
         try {
             const validationRule = {
-                "email"         : "required|email",
-                "password"      : "required|string",
+                "email": "required|email",
+                "password": "required|string",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -616,8 +606,8 @@ module.exports =
     async verify_MerchantAuth(req, res, next) {
         try {
             const validationRule = {
-                "email"         : "required|email",
-                "code"          : "required|string",
+                "email": "required|email",
+                "code": "required|string",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -640,7 +630,7 @@ module.exports =
     },
     async verify_getclientkey(req, res, next) {
         try {
-            const validationRule = { "email"  : "required|email" };
+            const validationRule = { "email": "required|email" };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
                     res.status(200)
@@ -662,11 +652,11 @@ module.exports =
     },
     async verify_withdraw(req, res, next) {
         try {
-            const validationRule = { 
-                
-                "network_id"  : "required|string", 
-                "amount"      : "required|decimal",
-                "address_to"  : "required|string" 
+            const validationRule = {
+
+                "network_id": "required|string",
+                "amount": "required|decimal",
+                "address_to": "required|string"
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -689,9 +679,9 @@ module.exports =
     },
     async verify_trans_by_network_id(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "networkid"  : "required|string", 
+            const validationRule =
+            {
+                "networkid": "required|string",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -714,9 +704,9 @@ module.exports =
     },
     async verify_resendingemail(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "email"  : "required|email", 
+            const validationRule =
+            {
+                "email": "required|email",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -739,11 +729,11 @@ module.exports =
     },
     async verify_createMerchantStore(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "storename"  : "required|string",
-               
-               
+            const validationRule =
+            {
+                "storename": "required|string",
+
+
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -766,14 +756,14 @@ module.exports =
     },
     async verify_updateMerchantStoreProfile(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "storeprofile"  : "required|isBase64",
-                "storename"     : "required|string",
-                "storeaddress"  : "required|string",
-                "storephone"    : "required|string",
-               
-               
+            const validationRule =
+            {
+                "storeprofile": "required|isBase64",
+                "storename": "required|string",
+                "storeaddress": "required|string",
+                "storephone": "required|string",
+
+
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -796,14 +786,14 @@ module.exports =
     },
     async verify_updateMerchantStoreProfile(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "storeprofile"  : "required|string",
-                "storename"     : "required|string",
-                "storeaddress"  : "required|string",
-                "storephone"    : "required|string",
-               
-               
+            const validationRule =
+            {
+                "storeprofile": "required|string",
+                "storename": "required|string",
+                "storeaddress": "required|string",
+                "storephone": "required|string",
+
+
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -826,10 +816,10 @@ module.exports =
     },
     async verify_verfiyemail(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "email"         : "required|email", 
-                "emailtoken"    : "required|string", 
+            const validationRule =
+            {
+                "email": "required|email",
+                "emailtoken": "required|string",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -850,13 +840,12 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verify_signup_admin_api(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "email"         : "required|email", 
-                "password"      : "required|string|strict", 
+            const validationRule =
+            {
+                "email": "required|email",
+                "password": "required|string|strict",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -879,10 +868,10 @@ module.exports =
     },
     async verify_admin_Login(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "email"         : "required|email", 
-                "password"      : "required|string", 
+            const validationRule =
+            {
+                "email": "required|email",
+                "password": "required|string",
             };
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
@@ -905,20 +894,19 @@ module.exports =
     },
     async verify_Verfiy_Google_Auth(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "email"         : "required|email", 
-                "code"          : "required|string", 
+            const validationRule =
+            {
+                "email": "required|email",
+                "code": "required|string",
             };
-            let authorization   = req.headers.authorization;
-            let user            = await admins.findOne({ admin_api_key: authorization, status : true  });
+            let authorization = req.headers.authorization;
+            let user = await admins.findOne({ admin_api_key: authorization, status: true });
             await Validator(req.body, validationRule, {}, (err, status) => {
-                if (!status) 
-                {
-                res.status(200).send({status: 400,success: false,message: 'Validation failed',data: err});
-                } 
-                else if(user == null){
-                res.status(200).send({status: 400,message: "Invalid User",data: {}});
+                if (!status) {
+                    res.status(200).send({ status: 400, success: false, message: 'Validation failed', data: err });
+                }
+                else if (user == null) {
+                    res.status(200).send({ status: 400, message: "Invalid User", data: {} });
                 }
                 else {
                     next();
@@ -932,20 +920,19 @@ module.exports =
     },
     async verify_priceConversitionPosChanges(req, res, next) {
         try {
-            const validationRule = 
-            { 
-                "coinid"            : "required|networkexist", 
-                "currenid"          : "required|currencyexist", 
+            const validationRule =
+            {
+                "coinid": "required|networkexist",
+                "currenid": "required|currencyexist",
             };
-            let authorization   = req.headers.authorization;
-            let user            = await admins.findOne({ admin_api_key: authorization, status : true  });
+            let authorization = req.headers.authorization;
+            let user = await admins.findOne({ admin_api_key: authorization, status: true });
             await Validator(req.body, validationRule, {}, (err, status) => {
-                if (!status) 
-                {
-                res.status(200).send({status: 400,success: false,message: 'Validation failed',data: err});
-                } 
-                else if(user == null){
-                res.status(200).send({status: 400,message: "Invalid User",data: {}});
+                if (!status) {
+                    res.status(200).send({ status: 400, success: false, message: 'Validation failed', data: err });
+                }
+                else if (user == null) {
+                    res.status(200).send({ status: 400, message: "Invalid User", data: {} });
                 }
                 else {
                     next();
@@ -957,6 +944,55 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
+    async verify_verifythedata(req, res, next) {
+        try {
+            const validationRule =
+            {
+                "networkType": "required|networkexist",
+                "orderid": "required|orderidexist",
+                "errorurl": "required",
+                "apiredirecturl": "required",
+                "callbackurl": "required",
+                "currency": "required",
+                "currency": "required",
+            };
+            await Validator(req.body, validationRule, {}, (err, status) => {
+                if (!status) {
+                    res.status(200).send({ status: 400, success: false, message: 'Validation failed', data: err });
+                }
+
+                else {
+                    next();
+                }
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
+    async Verfiy_WebHook(req, res, next) {
+        try {
+
+            let token = req.headers.authorization;
+
+
+            if (token != "29443d9be42dc1f0fc4f4771d9327e8f6ba57c8a") {
+                res.status(400).send({ status: 400, success: false, message: 'Validation failed', data: "" });
+            }
+            else {
+                next();
+            }
+
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
+
 }
 
 

@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 var uniqueValidator = require('mongoose-unique-validator');
+const PoolWallet = require('./poolWallet');
+const Network = require('./network');
+const Clients = require('./clients');
 const topupschema = new mongoose.Schema({
     id:
     {
@@ -13,18 +16,44 @@ const topupschema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    pwid: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : PoolWallet,
+		default : null,
+	},
+    nwid: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Network,
+		default : null,
+	},
+    clientdetail: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Clients,
+		default : null,
+	},
     poolwalletID:
     {
-        type: String,
-        required: true,
+        type        : String,
+        required    : false,
+        default     : "",
     },
     amount: {
         type: Number,
         required: true,
     },
+    fixed_amount : 
+    {
+        type: Number,
+        required: false,
+        default: 0,
+    },
     fiat_amount: {
         type: Number,
         required: false,
+        default: 0,
     },
     tx_hash: {
         type: String,
@@ -104,6 +133,7 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: 0,
     },
+    
     transtype : 
     {
         type: Number,
@@ -130,6 +160,11 @@ const topupschema = new mongoose.Schema({
         default: false,
     },
     response_at: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    get_address_at: {
         type: String,
         required: false,
         default: false,

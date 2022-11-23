@@ -1,5 +1,6 @@
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
-const posTransactionPool = require('../../Models/posTransactionPool');
+const posTransactionPool         = require('../../Models/posTransactionPool');
+const Topuptranshash             = require('../../Models/Topuptranshash');
 const network = require('../../Models/network');
 const poolWallets = require('../../Models/poolWallet');
 const transactionPool = require('../../Models/transactionPool');
@@ -27,7 +28,7 @@ module.exports =
             let topup           = await topups.findOne({ "id": id, "api_key": req.headers.authorization })
             let Fixedtopup      = await Fixedtopups.findOne({ "id": id, "api_key": req.headers.authorization })
 
-
+            
             let poolwallet = pyTranPool != null ? await poolWallets.findOne({ id: pyTranPool.poolwalletID }) : null
             poolwallet = (poolwallet == null && posTranPool != null) ? await poolWallets.findOne({ id: posTranPool.poolwalletID }) : poolwallet
             poolwallet = (poolwallet == null && TranPool != null) ? await poolWallets.findOne({ id: TranPool.poolwalletID }) : poolwallet
@@ -70,7 +71,11 @@ module.exports =
             let order_id = topup != null   ? topup.orderid : ""
             order_id = Fixedtopup != null  ? Fixedtopup.orderid : order_id
 
-            // let invoiceNumber = pyTranPool != null ? pyTranPool.invoiceNumber : ""
+
+            let Topuptranshashdata = topup != null   ? await Topuptranshash.find({topupdetails : topup._id}) : []
+
+
+           
 
             let datarray = 
             {
@@ -84,6 +89,9 @@ module.exports =
                 "crypto_amount"         :    amount,
                 // "invoicenumber"      :   (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
                 "fiat_amount"           :   fiat_amount ,
+
+                "payment_history"           :   Topuptranshashdata ,
+                // 
                 // "currency"           :   currency   
                 
             }

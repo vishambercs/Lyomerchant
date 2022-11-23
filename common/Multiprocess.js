@@ -3,7 +3,7 @@ require("dotenv").config()
 const topupUtility     = require('./topupUtility');
 const Constant        = require('./Constant');
 
-function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount,details,walletdetails) {
+function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount) {
     var client = new WebSocketClient();
     client.on('connectFailed', function (error) {
         console.log('Connect Error: ' + error.toString());
@@ -18,9 +18,10 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             console.log('Connection closed!');
         });
         connection.on('message', async function (message) {
-            // console.log("message",message)       
+                
             let jsondata        = JSON.parse(message.utf8Data)
-            let transData       = Constant.topupTransList[index]
+            console.log("jsondata=========",jsondata)
+            let transData       = {}
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
             if(index != -1 )
             {
@@ -30,7 +31,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             {
                 let responseapi     = await topupUtility.verifyTheBalance(jsondata.transid)
                 let responseapijson = JSON.parse(responseapi)
-                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paid_in_usd":responseapi.paid_in_usd, "paid": responseapi.paid, status: jsondata.balancedata.status, message: "Success" };
+                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paymentData":responseapijson.paymentData,  status: jsondata.balancedata.status, message: "Success" };
                 transData.connection.sendUTF(JSON.stringify(response));
                 transData.connection.close(1000)
                 Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
@@ -38,27 +39,21 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             }
             if(jsondata.status == 2  && index != -1)
             {
-                console.log("partaial",message)   
+                 
                 let responseapi     = await topupUtility.partialTopupBalance(jsondata.transid)
+                
                 let responseapijson = JSON.parse(responseapi)
-                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paid_in_usd":responseapi.paid_in_usd, "paid": responseapi.paid, status: jsondata.balancedata.status, message: "Success" };
+                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paymentData":responseapijson.paymentData, status: jsondata.balancedata.status, message: "Success" };
+                console.log("response",response)
                 transData.connection.sendUTF(JSON.stringify(response));
           
                
 
             }
-            // else if (jsondata.time > 10 && index != -1)
-            // {
-            //     let responseapi     = await topupUtility.expiredTheBalance(jsondata.transid)
-            //     let response        = {transkey:jsondata.transid ,amountstatus: 4 ,"paid_in_usd":responseapi.paid_in_usd, "paid": responseapi.paid, status: 200, message: "Transcation Expired" };
-            //     transData.connection.sendUTF(JSON.stringify(response));
-            //     transData.connection.close(1000)
-            //     Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
-            // }
             else if (index != -1)
             {
                 let transData       = Constant.topupTransList[index]
-                let response        = { transkey:jsondata.transid ,amountstatus: jsondata.status, "paid_in_usd": 0, "paid": jsondata.paid, status: jsondata.balancedata.status, message: "Success" };
+                let response        = { transkey:jsondata.transid ,amountstatus: jsondata.status, "paymentData": {}, status: jsondata.balancedata.status, message: "Success" };
                 let balanceResponse = JSON.stringify(response)
                 transData.connection.sendUTF(balanceResponse);
             }
