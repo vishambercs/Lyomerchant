@@ -53,7 +53,7 @@ module.exports =
             {
                 Constant.topupTransList[index]["connection"] = connection
             }
-            connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
+            // connection.sendUTF(JSON.stringify({ status: 200, result: true, data: {"uniqueKey": uniqueKey,"transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}, message: "Api Data" }));
             let data = Multiprocess.Create_Node_Sockect_Connection(queryvariable.transkey,queryvariable.apikey)
         }
         catch (error) {
