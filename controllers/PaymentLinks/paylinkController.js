@@ -1,8 +1,9 @@
-const invoice = require('../../Models/invoice');
-const paylinkPayment = require('../../Models/payLink');
-const transaction = require("../transcationpoolController")
-const fastPaymentCode = require('../../Models/fastPaymentCode');
-const merchantStore = require('../../Models/merchantstore');
+const invoice            = require('../../Models/invoice');
+const paylinkPayment     = require('../../Models/payLink');
+const transaction        = require("../transcationpoolController")
+const CurrencyController = require("../Masters/CurrencyController")
+const fastPaymentCode    = require('../../Models/fastPaymentCode');
+const merchantStore      = require('../../Models/merchantstore');
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
 const clients = require('../../Models/clients');
 const networks = require('../../Models/network');
@@ -124,7 +125,7 @@ module.exports =
         let responseObj = ''
         try {
             var merchantKey = req.headers.authorization
-            let invoicedata = invoice.findOne({id : req.body.invoiceid})
+            let invoicedata = await invoice.findOne({id : req.body.invoiceid})
             let new_record = new paylinkPayment({
                 id              : mongoose.Types.ObjectId(),
                 invoicedetails  : invoicedata._id,
@@ -132,7 +133,6 @@ module.exports =
                 timestamps      : new Date().getTime(),
                 status          : 0
             })
-            
             let response = await new_record.save()
             responseObj = response.id
             message = "payment initiated"
@@ -145,8 +145,6 @@ module.exports =
         }
         res.json({ status: status, data: { "paymentId": responseObj }, message: "Error" })
     },
-
-
     async getAllInvoices(req, res) {
         var merchantKey = req.headers.authorization
         let response = ''
@@ -256,12 +254,19 @@ module.exports =
     },
     async assignPaymentLinkMerchantWallet(req, res) {
         try {
-            var networkType = req.body.networkType
-            let account = await poolwalletController.getPoolWalletID(networkType)
+            var networkType     = req.body.networkType
+            let account         = await poolwalletController.getPoolWalletID(networkType)
             let network_details = await networks.findOne({ 'id': networkType })
-            let client = await clients.findOne({ 'api_key': req.headers.authorization })
-            let payLink = await paylinkPayment.findOne({ 'id': req.body.payLinkId })
+            let client          = await clients.findOne({ 'api_key': req.headers.authorization })
+            let payLink         = await paylinkPayment.findOne({ 'id': req.body.payLinkId })
+            let invoicedata     = await invoice.findOne({ 'id': payLink.invoice_id })
+            let pricedata       = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,invoicedata.currency,req.headers.authorization )
             
+            if(pricedata == 0){
+                return res.json({ status: 400, data: pricedata, message: "We do not support the currency"+invoicedata.currency })
+            }
+
+            let cryptoamount = parseFloat(invoicedata.totalAmount) / parseFloat(pricedata)
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
             const newRecord = new paymentLinkTransactionPool({
@@ -269,7 +274,7 @@ module.exports =
                 api_key: req.headers.authorization,
                 paymenttype: req.body.paymenttype,
                 poolwalletID: account.id,
-                amount: req.body.amount,
+                amount: cryptoamount,
                 currency: req.body.currency,
                 callbackURL: req.body.callbackURL,
                 errorURL: req.body.errorURL,

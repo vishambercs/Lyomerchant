@@ -185,5 +185,33 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
+    async priceConversitionChangesforpaymentlink(networkid,currenid,apikey) {
+        try 
+        {
+            let network                     = await networks.findOne({ 'id': networkid })
+            let networktitle                = network.currencyid.toLowerCase()
+            let Currency                    = await Currencies.findOne({ 'title': currenid })
+            let perferedNetwork             = await perferedNetworks.findOne({ networkid: networkid, clientapikey : apikey })
+            let pricemargin                 = perferedNetwork != null ? perferedNetwork.pricemargin : 0
+            let parameters                  = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
+            let COINGECKO_URL               = process.env.COINGECKO+parameters
+            let axiosGetData                = await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
+            var stringify_response          = JSON.parse(axiosGetData.data)
+            let pricedata                   = stringify_response.data 
+            let pricedatacurrency           = pricedata[networktitle]
+            let pricetitle                  = Currency.title.toLowerCase()
+            pricedatacurrency[pricetitle]   = pricedatacurrency[pricetitle] - pricemargin
+            pricedata[networktitle]         = pricedatacurrency[pricetitle]
+            return  pricedatacurrency[pricetitle]
+            // return { status: 200, data: pricedata, message: "Currency API Balance" }
+        }
+        catch (error) 
+        {
+            console.log("priceConversitionChangesforpaymentlink",error)
+            return 0
+            // return { status: 400, data: {}, message: "Error" }
+        }
+    },
 }
 
