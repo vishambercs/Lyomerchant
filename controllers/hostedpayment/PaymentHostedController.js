@@ -200,6 +200,36 @@ module.exports =
             res.json({ status: 400, data: {}, message: error.message })
         }
     },
+    async  balance_API(networkType, api_key, amount, currency, callbackURL, errorURL, payLinkId, orderType, token) {
+        try {
+            let account = await poolwalletController.getPoolWalletID(networkType)
+            let currentDateTemp = Date.now();
+            let currentDate = parseInt((currentDateTemp / 1000).toFixed());
+            const newRecord = new paymentLinkTransactionPool({
+                id: mongoose.Types.ObjectId(),
+                api_key: api_key,
+                poolwalletID: account.id,
+                amount: amount,
+                currency: currency,
+                callbackURL: callbackURL,
+                errorURL: errorURL,
+                payLinkId: payLinkId,
+                orderType: orderType,
+                clientToken: token,
+                status: 0,
+                walletValidity: currentDate,
+                timestamps: new Date().getTime()
+            });
+            let payment_link = await newRecord.save()
+            await poolWallet.findOneAndUpdate({ 'id': payment_link.poolwalletID }, { $set: { status: 1 } })
+            let data = { transactionID: payment_link.id, address: account.address, walletValidity: payment_link.walletValidity }
+            return { status: 200, data: data, message: "Successfully Data", }
+        }
+        catch (error) {
+            console.log("paymentHostedController assignPaymentLinkMerchantWallet", error)
+            return { status: 400, data: {}, message: error.message }
+        }
+    }
 }
 
 

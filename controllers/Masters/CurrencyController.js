@@ -39,7 +39,8 @@ module.exports =
     },
     async allCurrency(req, res) {
         try {
-            Currencies.find({  }).then(async (val) => {
+            
+            Currencies.find({ status: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "get", data: val })
             }).
                 catch(error => {

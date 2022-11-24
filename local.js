@@ -2,13 +2,13 @@ var express         = require('express');
 const mongoose      = require('mongoose');
 const bodyParser    = require('body-parser');
 var client          = require('./Route/clientsRoute');
-var poolRoute       = require('./Route/poolRoute');
-var networkRoute    = require('./Route/networkRoute');
-var walletRoute     = require('./Route/poolwalletRoute');
-var payLinkRoute    = require('./Route/paylinkRoute');
-var hotWalletRoute  = require('./Route/hotWalletRoute');
-var withdrawRoute   = require('./Route/withdrawRoute');
-var adminRoute      = require('./Route/adminRoute');
+// var poolRoute       = require('./Route/poolRoute');
+// var networkRoute    = require('./Route/networkRoute');
+// var walletRoute     = require('./Route/poolwalletRoute');
+// var payLinkRoute    = require('./Route/paylinkRoute');
+// var hotWalletRoute  = require('./Route/hotWalletRoute');
+// var withdrawRoute   = require('./Route/withdrawRoute');
+// var adminRoute      = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
@@ -37,13 +37,13 @@ app.use((req, res, next) => {
 app.get('/', function (req, res) { res.send('Welcome to Lyo Merchant'); });
 app.use('/v1', client);
 
-app.use('/admin/v1', poolRoute);
-app.use('/network/v1', networkRoute);
-app.use('/paymentlink/v1', payLinkRoute);
-app.use('/wallet/v1', walletRoute);
-app.use('/hotWallet/v1', hotWalletRoute);
-app.use('/withdraw/v1', withdrawRoute);
-app.use('/admin/v1', adminRoute);
+// app.use('/admin/v1', poolRoute);
+// app.use('/network/v1', networkRoute);
+// app.use('/paymentlink/v1', payLinkRoute);
+// app.use('/wallet/v1', walletRoute);
+// app.use('/hotWallet/v1', hotWalletRoute);
+// app.use('/withdraw/v1', withdrawRoute);
+// app.use('/admin', adminRoute);
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 
@@ -96,13 +96,15 @@ var posTranscationserver = https.createServer({
 const posTranscation = new webSocketServer({ httpServer: posTranscationserver });
 posTranscation.on('request', Utility.posTranscationWebScokect)
 
-var paymentLinkTranscationserver = https.createServer({
-}).listen(process.env.PAYMENT_LINK_PORT, () => {
-console.log(`Example app listening at ${process.env.PAYMENT_LINK_PORT}`);
+
+
+var fixedtotup = https.createServer({
+}).listen(process.env.FIXED_UP_PORT, () => {
+console.log(`Example app listening at ${process.env.FIXED_UP_PORT}`);
 })
 
-const paymentLinkTranscation = new webSocketServer({ httpServer: paymentLinkTranscationserver });
-paymentLinkTranscation.on('request', Utility.paymentLinkTranscationWebScokect)
+const fixedtotupdata = new webSocketServer({ httpServer: fixedtotup });
+fixedtotupdata.on('request', Utility.fixedtopupWebScokect)
 
 
 var topupserver = https.createServer({}).listen(process.env.TOP_UP_PORT, () => {
@@ -114,26 +116,4 @@ topupserverdata.on('request', Utility.topupWebScokect)
 
 
 
-// var client = new WebSocketClient();
-// client.on('connectFailed', function(error) {
-//     console.log('Connect Error: ' + error.toString());
-// });
-// client.on('connect', function(connection) {
-//     console.log('Connection established!');
-    
-//     connection.on('error', function(error) {
-//         console.log("Connection error: " + error.toString());
-//     });
-    
-//     connection.on('close', function() {
-//         console.log('Connection closed!');
-//     });
-    
-//     connection.on('message', function(message) {
-//         connection.send(message.utf8Data);
-//         console.log("Current time on server is: '" + message.utf8Data + "'");
-//     });
-// });
-
-// client.connect('ws://10.101.12.136:3011?transkey=0x0548f59fee79f8832c299e01dca5c76f034f558e&apikey=8541cf5816f284cbee0220659c2e4575a9d4d3f8&network_id=8541cf5816f284cbee0220659c2e4575a9d4d3f8&amount=1', '' ,"");
 
