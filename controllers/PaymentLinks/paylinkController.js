@@ -93,7 +93,6 @@ module.exports =
         }
         res.json({ status: status, data: { "invoiceid": invoiceid }, message: message })
     },
-   
     async deleteInvoice(req, res) {
         try {
             await invoice.updateOne({ 'id': req.body.id },
@@ -124,8 +123,13 @@ module.exports =
     async getPaymentLink(req, res) {
         let responseObj = ''
         try {
-            var merchantKey = req.headers.authorization
-            let invoicedata = await invoice.findOne({id : req.body.invoiceid})
+            var merchantKey          = req.headers.authorization
+            let invoicedata          = await invoice.findOne({id : req.body.invoiceid})
+            let paylink_data_Payment = await paylinkPayment.findOneAndUpdate({invoice_id : req.body.invoiceid}
+                ,{$set : {timestamps :  new Date().getTime() }}, { "returnDocument" : 'after' }
+                )
+            if(paylink_data_Payment == null )
+            {
             let new_record = new paylinkPayment({
                 id              : mongoose.Types.ObjectId(),
                 invoicedetails  : invoicedata._id,
@@ -137,13 +141,38 @@ module.exports =
             responseObj = response.id
             message = "payment initiated"
             status = 200
+            return res.json({ status: 200, data: { "paymentId": responseObj , "trans_details": null}, message: "Success" })
+            }    
+
+            
+            let payment_pooldata    = await paymentLinkTransactionPool.findOne({ payLinkId : paylink_data_Payment.id})
+         
+            if(payment_pooldata != null && paylink_data_Payment != null )
+            {
+                
+                let payment_pool_data    = await paymentLinkTransactionPool.findOneAndUpdate({ payLinkId : paylink_data_Payment.id}
+                    ,{$set : {timestamps :  new Date().getTime() }}, { "returnDocument" : 'after' } ).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                    { path: "paymentdetails", select:"id invoice_id ",
+                    populate :[
+                       { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
+                    ]},
+                ])
+                return  res.json({ status: 200, data: { "paymentId": paylink_data_Payment.id,"trans_details": payment_pool_data }, message: "Get the data" })
+            }
+          
+            return  res.json({ status: 200, data: { "paymentId": paylink_data_Payment.id,"trans_details": null}, message: "Get the data" })
+           
         }
         catch (error) {
             console.log("new invoice error", error)
             message = error.message
             status = 400
+            return  res.json({ status: status, data: { "paymentId" : null , "trans_details": null}, message: "Error" })
         }
-        res.json({ status: status, data: { "paymentId": responseObj }, message: "Error" })
+      
     },
     async getAllInvoices(req, res) {
         var merchantKey = req.headers.authorization
