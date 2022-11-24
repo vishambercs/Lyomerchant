@@ -1,14 +1,17 @@
 const invoice            = require('../../Models/invoice');
 const paylinkPayment     = require('../../Models/payLink');
+const admin              = require('../../Models/admin');
+const InvoiceUpdateLogs  = require('../../Models/InvoiceUpdateLogs');
 const transaction        = require("../transcationpoolController")
 const CurrencyController = require("../Masters/CurrencyController")
 const fastPaymentCode    = require('../../Models/fastPaymentCode');
 const merchantStore      = require('../../Models/merchantstore');
+
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
-const clients = require('../../Models/clients');
-const networks = require('../../Models/network');
-const poolWallet = require('../../Models/poolWallet');
-var crypto = require("crypto");
+const clients                    = require('../../Models/clients');
+const networks                   = require('../../Models/network');
+const poolWallet                 = require('../../Models/poolWallet');
+var crypto                       = require("crypto");
 var mongoose = require('mongoose');
 var CryptoJS = require('crypto-js')
 var poolwalletController = require('../poolwalletController');
@@ -57,6 +60,7 @@ module.exports =
         let invoiceid = ''
         var merchantKey = req.headers.authorization
         const client = await clients.findOne({ api_key: merchantKey })
+      
         const duedate = new Date(req.body.duedate);
         const currentdate = new Date();
         if (duedate <= currentdate) {
@@ -578,6 +582,54 @@ module.exports =
             dataResponse = 'null'
         }
         res.json({ status: status, data: dataResponse, message: message })
+    },
+
+    async updateInvoiceByAdmin(req, res) {
+        let message = ''
+        let status = 200
+        var adminkey = req.headers.authorization
+        var invoiceid = req.body.invoiceid
+        let dataResponse = ''
+        let fastCodeObject = []
+        try 
+        {
+           let invoiceData =  await invoice.findOneAndUpdate({ "id": invoiceid },{$set: { status : req.body.status } } , { returnDocument : 'after' })
+            
+           if(invoiceData == null)
+           {
+            return res.json({ status: 400, data: null, message: "Invalid invoice ID" })
+           }
+           
+           let paylinkdata =  await paylinkPayment.findOneAndUpdate({ "invoice_id": invoiceData.id },{$set:{status : req.body.status }} , { returnDocument : 'after' })
+           let paymentLinkdata = null
+           
+           if(paylinkdata != null)
+           {
+            paymentLinkdata =  await paymentLinkTransactionPool.findOneAndUpdate({ "payLinkId": paylinkdata.id },{$set:{status : req.body.status }} , { returnDocument : 'after' })
+           }
+
+           if(paymentLinkdata != null)
+           {
+           let datapoolWallet =  await poolWallet.findOneAndUpdate({ "id": paymentLinkdata.poolwalletID },{$set:{status : (req.body.status == 1 || req.body.status == 3) ? 0 : 1  }} , { returnDocument : 'after' })
+           }
+           
+           let admindata =  await admin.findOne({ "api_key": adminkey })
+           let InvoiceUpdateLog =  await InvoiceUpdateLogs.insertMany({ 
+            admindetails:admindata._id,
+            paymentlinktransactiondetails: paymentLinkdata != null ?  paymentLinkdata._id : null,
+            invoicedetails: invoiceData._id , 
+            paylinkdetails: paylinkdata != null ?  paylinkdata._id : null })
+           
+           res.json({ status: 200, data: invoiceData, message: "Updated" })
+
+
+        }
+     catch (error) 
+        {
+            console.log("updateInvoice",error)
+            res.json({ status: 400, data: null, message: "Error" })
+        }
+        
     }
 }
 

@@ -133,5 +133,7 @@ router.post('/getKycLevel',  Auth.is_admin,adminController.get_kyc_level);
 router.post('/get_all_invoice_for_admin',  Auth.is_admin,paylinkController.get_All_Invoice_For_Admin);
 
 
+router.post('/updateInvoiceByAdmin',  Auth.is_admin,paylinkController.updateInvoiceByAdmin);
+
 
 module.exports = router;

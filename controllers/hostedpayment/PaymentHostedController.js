@@ -3,6 +3,7 @@ const paylinkPayment = require('../../Models/payLink');
 const transaction = require("../transcationpoolController")
 const fastPaymentCode = require('../../Models/fastPaymentCode');
 const merchantStore = require('../../Models/merchantstore');
+const clients = require('../../Models/clients');
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
 const poolWallet = require('../../Models/poolWallet');
 var crypto = require("crypto");
@@ -18,10 +19,13 @@ var qs = require('qs');
 async function storeInvoice(invoiceNumber, merchantKey, Items, customerName, email, mobileNumber, duedate, additionalNotes, payment_reason, currency, totalAmount, orderId, callbackURL, errorURL) {
     try {
 
+
+        const client = await clients.findOne({ api_key: merchantKey })
         let new_record = new invoice({
             id: mongoose.Types.ObjectId(),
             invoiceNumber: invoiceNumber,
             merchantapikey: merchantKey,
+            clientdetails: client._id,
             Items: (Items != null && Items != "") ? Items : [{}],
             customerName: customerName,
             email: email,
@@ -114,7 +118,7 @@ module.exports =
             if (req.body.totalAmount != sum) {
                 return res.json({ status: 400, data: {}, message: "Invalid Total Amount" })
             }
-
+         
             let store_invoice = await storeInvoice(
                 invoiceObject.invoiceNumber,
                 merchantKey,

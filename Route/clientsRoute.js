@@ -129,7 +129,7 @@ router.post('/pluginallNetworks',           Auth.checkaccess,networkController.a
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
 
-router.post('/updatestoreInvoice',          paylinkController.updatestoreInvoice);
+// router.post('/updatestoreInvoice',          paylinkController.updatestoreInvoice);
 
 
 
