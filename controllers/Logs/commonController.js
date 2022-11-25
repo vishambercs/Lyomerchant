@@ -845,6 +845,7 @@ module.exports =
                 let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
                 let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
                 let transactionPoolData = [];
+                let total               = 0;
                 if(req.body?.type == "Topup"){
                     transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
@@ -853,17 +854,20 @@ module.exports =
 
                             
                         ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                    return res.status(200).json({ status: 200, data : transactionPoolData, });
+                        total  = await topups.find({}).count();
+                    return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });
                     }
                     else if(req.body?.type == "POS")
                     {
+
                         transactionPoolData  = await posTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
                             { path: "nwid",         select: "id coin network _id" },
                             { path: "clientdetail", select: "id email first_name last_name type _id" },
                             { path: "storedetails", select: "id storename storeprofile storeaddress storephone _id" ,  options: {strictPopulate: false} },
                         ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                        return res.status(200).json({ status: 200, data : transactionPoolData, });
+                        total  = await posTransactionPool.find({}).count();
+                        return res.status(200).json({ status: 200, data : transactionPoolData, "total":total });
                     }
                     else if(req.body?.type == "Pay-Link")
             {
@@ -877,18 +881,20 @@ module.exports =
                      ]},
               
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                return res.status(200).json({ status: 200, data : transactionPoolData, });
+                total  = await paymentLinkTransactionPool.find({}).count();
+                return res.status(200).json({ status: 200, data : transactionPoolData, "total":total });
             }
             else if(req.body?.type == "Api-Plugin")
             {
-                transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                transactionPoolData  = await transactionPool.find(queryOptions, { callbackURL: 0 }).populate([
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                return res.status(200).json({ status: 200, data : transactionPoolData, });
+                total  = await transactionPool.find({}).count();
+                return res.status(200).json({ status: 200, data : transactionPoolData, "total":total  });
             }
-            return res.status(200).json({ status: 200, data : transactionPoolData, });
+            return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });
     
             } catch (error) {
                 console.log(error)
@@ -955,13 +961,18 @@ module.exports =
             let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
             let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
             let transactionPoolData = [];
-            if(req.body?.type == "Topup"){
-            transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
+            let total               = 0;
+            if(req.body?.type == "Topup")
+            {
+                transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-            return res.status(200).json({ status: 200, data : transactionPoolData, });
+            
+                total  = await topups.find({clientdetail : client._id}).count();
+            
+            return res.status(200).json({ status: 200, data : transactionPoolData, "total":total });
             }
             else if(req.body?.type == "POS")
             {
@@ -971,7 +982,8 @@ module.exports =
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
                     { path: "storedetails", select: "id storename storeprofile storeaddress storephone _id" },
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                return res.status(200).json({ status: 200, data : transactionPoolData, });
+                total  = await posTransactionPool.find({clientdetail : client._id}).count();
+                return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });
             }
             else if(req.body?.type == "Pay-Link")
             {
@@ -984,24 +996,20 @@ module.exports =
                        { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
                     ]},
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                return res.status(200).json({ status: 200, data : transactionPoolData, });
+                total  = await paymentLinkTransactionPool.find({clientdetail : client._id}).count();
+                return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });
             }
             else if(req.body?.type == "Api-Plugin")
             {
-                transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                transactionPoolData  = await transactionPool.find(queryOptions, { callbackURL: 0 }).populate([
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
-                    { path: "paymentdetails", select:"id invoice_id ",
-                    populate :[
-                       { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
-                    ]
-               
-               },
-                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
-                return res.status(200).json({ status: 200, data : transactionPoolData, });
+                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+                total  = await transactionPool.find({clientdetail : client._id}).count();
+                return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });
             }
-            return res.status(200).json({ status: 200, data : transactionPoolData, });
+            return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });
         } catch (error) {
             console.log(error)
             return res.status(500).json({ status: 400, message:"Error" });
