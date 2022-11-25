@@ -13,9 +13,11 @@ const HotTransLogs              = require('../Models/HotTransLogs');
 const withDrawLog               = require('../Models/withdrawLog');
 const network                   = require('../Models/network');
 const kytlogs                   = require('../Models/kytlogs');
-const transferUtility = require('../common/transferUtility');
-const emailSending = require('../common/emailSending');
-var mongoose = require('mongoose');
+const topup                     = require('../Models/topup');
+const transferUtility           = require('../common/transferUtility');
+const Api_Call                  = require('./Api_Call');
+const emailSending              = require('../common/emailSending');
+var mongoose                    = require('mongoose');
 var qs = require('qs');
 
 require("dotenv").config()
@@ -413,6 +415,42 @@ async function Check_KYT_Address()
     }
 }
 
+
+async function get_Expired_Topup() 
+{
+    try 
+    {
+       
+       let threehours =  3 * ( 1000 * 60 * 60)
+      
+       let topupdata =  await topup.find( { pwid : {$ne : null},status : {$in : [0,2]} ,"timestamp": { $gte: (new Date().getTime() - threehours) } })
+       .populate([ { path: "pwid",         select: "address" },])
+         if(topupdata.length > 0){
+        let finalArray = topupdata.map(function (obj) {  return obj.pwid.address });
+        let url = process.env.FREE_ADDRESSES_URL
+        
+        let api_call_data = await Api_Call.callPoolWalletAPI(url,{addresses:finalArray},{ headers: { 'Content-Type': 'application/json'} })
+        if(api_call_data.status != 400)
+        {
+            let topupdataupdate =  await topup.updateMany( 
+             { pwid : {$ne : null}, status : {$in : [0,2]} ,"timestamp": { $gte: (new Date().getTime() - threehours) } } 
+            ,{ $set : { "status" : 4   } } )
+            console.log("topupdataupdate",topupdataupdate)
+            let poolWalletsupdate =  await poolWallets.updateMany( { status : {$in : finalArray} ,"status": 1 } ,{ $set : { "status" : 0   } } ) 
+            console.log("poolWalletsupdate",poolWalletsupdate)
+        }
+        console.log("api_call_data",api_call_data)
+
+        }
+         return JSON.stringify({ status: 200, data: topupdata.length, message: ""})
+    }
+    catch (error) 
+    {
+        console.log(error)
+        return JSON.stringify({ status: 400, data: {}, message: "Error"  })
+    }
+}
+
 module.exports =
 {
     address: address,
@@ -420,4 +458,5 @@ module.exports =
     index: index,
     Balance_Cron_Job    :   Balance_Cron_Job,
     Check_KYT_Address   :   Check_KYT_Address,
+    get_Expired_Topup   :   get_Expired_Topup,
 }

@@ -1,6 +1,7 @@
 const topup = require('../../Models/topup');
 const poolWallet = require('../../Models/poolWallet');
 const networks = require('../../Models/network');
+
 const ApiCall = require('../../common/Api_Call');
 const Constant = require('../../common/Constant');
 const Topuptranshash = require('../../Models/Topuptranshash');
@@ -423,6 +424,14 @@ module.exports =
                 let transhash   = req.body.transhash;
                 let polwallet   = await poolWallet.findOne({ 'address': address, status: 1 })
                 let tpup        = await topup.findOne({ 'poolwalletID': polwallet.id, status: { $in: [0, 2] } })
+
+                let Topuptransdata       = await Topuptranshash.findOne({ 'topupdetails': tpup._id, transhash:transhash })
+                
+                if(Topuptransdata != null)
+                {
+                    return  res.status(400).json({ status: 400, data: {}, message: "Invalid Data" })
+                }
+
                 let response = await topupUtility.verifyTheBalancebyWebsocket(tpup.id, amount, transhash)
                 let jsonresponse = JSON.parse(response)
                 var index = Constant.topupTransList.findIndex(translist => translist.transkey == tpup.id)
