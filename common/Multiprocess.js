@@ -42,14 +42,10 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             {
                  
                 let responseapi     = await topupUtility.partialTopupBalance(jsondata.transid)
-                
                 let responseapijson = JSON.parse(responseapi)
                 let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paymentData":responseapijson.paymentData, status: jsondata.balancedata.status, message: "Success" };
-                console.log("response",response)
                 transData.connection.sendUTF(JSON.stringify(response));
           
-               
-
             }
             else if (index != -1)
             {

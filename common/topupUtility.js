@@ -602,6 +602,7 @@ async function verifyTheBalance(transkey) {
                     {
                         status          : BalanceOfAddress.data.format_token_balance == addressObject.amount ? 1 : 3,
                         "amount"        : BalanceOfAddress.data.format_token_balance,
+                        "crypto_paid"   : BalanceOfAddress.data.format_token_balance,
                         "fiat_amount"   : pricecal,
                     }
                 }, { returnDocument: 'after' })
@@ -709,12 +710,12 @@ async function partialTopupBalance(transkey) {
             addressObject.poolWallet[0].privateKey
         )
         let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, BalanceOfAddress.data.format_token_balance)
-        console.log("pricecalculation===============", pricecal)
         let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
             {
                 $set: {
                     status: 2,
                     "amount": BalanceOfAddress.data.format_token_balance,
+                    "crypto_paid": BalanceOfAddress.data.format_token_balance,
                     "fiat_amount": pricecal,
                 }
             }, { returnDocument: 'after' })
@@ -753,6 +754,7 @@ async function expiredTheBalance(transkey) {
                 $set: {
                     status: 4,
                     "amount": BalanceOfAddress.data.format_token_balance,
+                    
                     "fiat_amount": pricecal,
                 }
             }, { returnDocument: 'after' })
