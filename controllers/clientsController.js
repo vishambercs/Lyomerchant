@@ -1241,7 +1241,7 @@ module.exports =
                 let index = withdrawdata.findIndex(translist => translist["_id"] == element.network_id)
                 let network_data_index = network_data.findIndex(translist => translist.network_id == element.network_id)
                 let price = await priceNewConversition(element.NetworkDetails[0].currencyid.toLowerCase())
-                console.log("priceNewConversition", price)
+               
                 if (index != -1) {
                     clientwallet[clientindex]["withdraw"] = withdrawdata[index]["balance"]
                     clientwallet[clientindex]["netamount"] = clientwallet[clientindex]["total"] - withdrawdata[index]["balance"]

@@ -838,7 +838,7 @@ module.exports =
                 let paymentdetails = {}
                 if(req.body?.paymentdetails)
                 {
-                    paymentdetails["invoice_id"] =  req.body.paymentdetails
+                    paymentdetails["_id"] =  req.body.paymentdetails
                 }
                 
                 let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
@@ -871,16 +871,29 @@ module.exports =
                     }
                     else if(req.body?.type == "Pay-Link")
             {
-                transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                // transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                //     { path: "pwid",           select: "network_id id balance address remarks _id" },
+                //     { path: "nwid",           select: "id coin network _id" },
+                //     { path: "clientdetail",   select: "id email first_name last_name type _id" },
+                //     { path: "paymentdetails", select:"id invoice_id ", match:  paymentdetails,
+                //      populate :
+                //      [
+                //         { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"   }
+                //      ]},
+              
+                // ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+
+                 transactionPoolData  = await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
                     { path: "pwid",           select: "network_id id balance address remarks _id" },
                     { path: "nwid",           select: "id coin network _id" },
                     { path: "clientdetail",   select: "id email first_name last_name type _id" },
-                    { path: "paymentdetails", select:"id invoice_id ", match:  paymentdetails,
-                     populate :[
-                        { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
-                     ]},
+
+                    { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"   },
+                    
+                    { path: "paymentdetails", select:"id invoice_id "},
               
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+
                 total  = await paymentLinkTransactionPool.find({}).count();
                 return res.status(200).json({ status: 200, data : transactionPoolData, "total":total });
             }
@@ -953,7 +966,7 @@ module.exports =
             let paymentdetails = {}
             if(req.body?.paymentdetails)
             {
-                paymentdetails["invoice_id"] =  req.body.paymentdetails
+                paymentdetails["_id"] =  req.body.paymentdetails
             }
 
 
@@ -991,10 +1004,8 @@ module.exports =
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
-                    { path: "paymentdetails", select:"id invoice_id ", match:  paymentdetails,
-                    populate :[
-                       { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"  }
-                    ]},
+                    { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"   },
+                    { path: "paymentdetails", select:"id invoice_id "},
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                 total  = await paymentLinkTransactionPool.find({clientdetail : client._id}).count();
                 return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });

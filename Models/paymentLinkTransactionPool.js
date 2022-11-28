@@ -4,6 +4,7 @@ const PoolWallet = require('./poolWallet');
 const Network = require('./network');
 const Clients = require('./clients');
 const payLink = require('./payLink');
+const invoice = require('./invoice');
 const paymentLinkTransactionPoolSchema = new mongoose.Schema({
     id:
     {
@@ -49,6 +50,12 @@ const paymentLinkTransactionPoolSchema = new mongoose.Schema({
     {
 		type    : mongoose.Schema.Types.ObjectId,
 		ref     : payLink,
+		default : null,
+	},
+    invoicedetails: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : invoice,
 		default : null,
 	},
     poolwalletID:

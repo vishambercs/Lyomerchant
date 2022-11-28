@@ -295,7 +295,8 @@ module.exports =
             let invoicedata     = await invoice.findOne({ 'id': payLink.invoice_id })
             let pricedata       = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,invoicedata.currency,req.headers.authorization )
             
-            if(pricedata == 0){
+            if(pricedata == 0)
+            {
                 return res.json({ status: 400, data: pricedata, message: "We do not support the currency"+invoicedata.currency })
             }
 
@@ -306,6 +307,7 @@ module.exports =
                 id: mongoose.Types.ObjectId(),
                 api_key: req.headers.authorization,
                 paymenttype: req.body.paymenttype,
+                invoicedetails:invoicedata._id,
                 poolwalletID: account.id,
                 amount: cryptoamount,
                 currency: req.body.currency,
@@ -343,9 +345,11 @@ module.exports =
             paylinkPayments.forEach(async (element) => {
                 // const clientinvoices = await invoice.findOne({ id: element.invoice_id })
                 const payLink = await paylinkPayment.findOne({ 'id': element.payLinkId })
+                const clientinvoices = await invoice.findOne({ id: payLink.invoice_id })
                 if (payLink != null) {
                     console.log("====client===", payLink._id)
-                    const invoiceData = await paymentLinkTransactionPool.updateMany({ payLinkId: element.payLinkId }, { $set: { paymentdetails: payLink._id } }, { 'returnDocument': 'after' })
+                    const invoiceData = await paymentLinkTransactionPool.updateMany({ id: element.id }, 
+                        { $set: { invoicedetails: clientinvoices._id } }, { 'returnDocument': 'after' })
                     console.log("====invoiceData===", invoiceData)
                 }
             });
@@ -583,7 +587,6 @@ module.exports =
         }
         res.json({ status: status, data: dataResponse, message: message })
     },
-
     async updateInvoiceByAdmin(req, res) {
         let message = ''
         let status = 200
