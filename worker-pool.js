@@ -117,21 +117,29 @@ async function CheckAddress(Nodeurl, Type,cointype, Address, ContractAddress = "
 
       else 
       {
-      const HttpProvider = TronWeb.providers.HttpProvider;
-      const fullNode = new HttpProvider("https://api.trongrid.io");
-      const solidityNode = new HttpProvider("https://api.trongrid.io");
-      const eventServer = new HttpProvider("https://api.trongrid.io");
-      const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, "50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78");
-          let contract = await tronWeb.contract().at(ContractAddress);
-          native_balance = await tronWeb.trx.getBalance(Address)
-          balance = await contract.balanceOf(Address).call();
-          format_balance = tronWeb.toBigNumber(balance)
-          format_balance = tronWeb.toDecimal(format_balance)
-          format_balance = tronWeb.fromSun(format_balance)
+      const HttpProvider        = TronWeb.providers.HttpProvider;
+      const fullNode            = new HttpProvider("https://api.trongrid.io");
+      const solidityNode        = new HttpProvider("https://api.trongrid.io");
+      const eventServer         = new HttpProvider("https://api.trongrid.io");
+      const tronWeb             = new TronWeb(fullNode, solidityNode, eventServer, "50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78");
+          let contract          = await tronWeb.contract().at(ContractAddress);
+          native_balance        = await tronWeb.trx.getBalance(Address)
+          balance               = await contract.balanceOf(Address).call();
+          let decimals          = await contract.decimals().call()
+         
+          
+          format_balance        = tronWeb.toBigNumber(balance)
+         
+          format_balance        = tronWeb.toDecimal(format_balance)
+          let newformat_balance  = parseFloat(format_balance)/parseFloat(`1e${decimals}`)
+          format_balance = newformat_balance
+          // console.log("newformat_balance",newformat_balance)
+          // format_balance        = tronWeb.fromSun(format_balance)
+          // console.log("format_balance fromSun",format_balance)
           format_native_balance = tronWeb.toBigNumber(native_balance)
           format_native_balance = tronWeb.toDecimal(format_native_balance)
           format_native_balance = tronWeb.fromSun(format_native_balance)
-          let balanceData = { status: 200, message: "sucess","balance": balance, "format_balance": format_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
+          let balanceData       = { status: 200, message: "sucess","balance": balance, "format_balance": format_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
           return balanceData
       }
 
