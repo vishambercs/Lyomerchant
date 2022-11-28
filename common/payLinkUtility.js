@@ -323,14 +323,21 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             return { status: 200, data: balanceData, message: "sucess" }
         }
         else {
-            const HttpProvider = TronWeb.providers.HttpProvider;
-            const fullNode = new HttpProvider(Nodeurl);
-            const solidityNode = new HttpProvider(Nodeurl);
-            const eventServer = new HttpProvider(Nodeurl);
-            const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
-            let contract = await tronWeb.contract().at(ContractAddress);
-            native_balance = await tronWeb.trx.getBalance(Address)
-            token_balance = await contract.balanceOf(Address).call();
+            console.log(Address)
+            console.log(ContractAddress)
+            const HttpProvider  = TronWeb.providers.HttpProvider;
+            const fullNode      = new HttpProvider(Nodeurl);
+            const solidityNode  = new HttpProvider(Nodeurl);
+            const eventServer   = new HttpProvider(Nodeurl);
+            // const tronWeb       = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+            const tronWeb       = new TronWeb({
+    fullHost: 'https://api.trongrid.io',
+    headers: { "TRON-PRO-API-KEY": '12c2276c-a9e9-4121-8721-31c8ffb4c1c7' },
+    privateKey: '50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78'
+});
+            let contract        = await tronWeb.contract().at(ContractAddress);
+            native_balance      = await tronWeb.trx.getBalance(Address)
+            token_balance       = await contract.balanceOf(Address).call();
 
             format_token_balance = tronWeb.toBigNumber(token_balance)
             format_token_balance = tronWeb.toDecimal(format_token_balance)
@@ -516,19 +523,25 @@ module.exports =
             var minutes = (diff / 60000)
 
 
-            console.log("previousdate   ================", previousdate)
-            console.log("currentdate    ================", currentdate)
-            console.log("minutes        ================", minutes)
+            
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
-                addressObject.poolWallet[0].address.toLowerCase(),
+                addressObject.poolWallet[0].addresswithdrawlog,
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
+            console.log("BalanceOfAddress libarayType",BalanceOfAddress)
             console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
-            console.log("BalanceOfAddress Success",     BalanceOfAddress)
+            console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
+            console.log("BalanceOfAddress address",     addressObject.poolWallet[0].address)
 
+            if(BalanceOfAddress.data.format_token_balance == 0){
+                BalanceOfAddress.data["format_token_balance"] = parseFloat(BalanceOfAddress.data.format_token_balance) + parseFloat(addressObject.poolWallet[0].balance)
+                console.log("BalanceOfAddress if",     BalanceOfAddress.data.format_token_balance)
+            }
+           
+           
             let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
             let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
 
