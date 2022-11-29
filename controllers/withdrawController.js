@@ -13,10 +13,14 @@ const withdrawSettings = require('../Models/withdrawSettings')
 const currencies = require('../Models/Currency')
 const network = require('../Models/network')
 const kytlogs = require('../Models/kytlogs')
-
+const topup = require('../Models/topup')
+const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool')
+const posTransactionPool = require('../Models/posTransactionPool')
+const transactionPool = require('../Models/transactionPool')
 var mongoose = require('mongoose');
 var qs = require('qs');
 var FormData = require('form-data');
+const { default: ObjectID } = require('bson-objectid');
 require("dotenv").config()
 
 
@@ -85,7 +89,96 @@ async function priceNewConversition(currencyid) {
         return {}
     }
 }
+async function creat_Total_Depossit(network_id ,api_key) {
+    try {
+        console.log("network_id",network_id)
+        console.log("api_key",api_key)
+        let datatopup = await  topup.aggregate([
+            { $match: { api_key: api_key, nwid : ObjectID(network_id),  status : { $in : [1,2,3]} } },
+            {
+                $lookup:
+                {
+                    from: "poolwallets", // collection to join
+                    localField: "poolwalletID",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "pooldetailswallets"// output array field
+                }
+            },
+            { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+        ])
+       
+        let paylinkdata = await  paymentLinkTransactionPool.aggregate([
+            { $match: { api_key: api_key, nwid : ObjectID(network_id), status : { $in : [1,2,3]} } },
+            {
+                $lookup:
+                {
+                    from: "poolwallets", // collection to join
+                    localField: "poolwalletID",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "pooldetailswallets"// output array field
+                }
+            },
+            { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+        ])
+           
+        let  posdata = await  posTransactionPool.aggregate([
+            { $match: { api_key: api_key, nwid : ObjectID(network_id), status : { $in : [1,2,3]} } },
+            {
+                $lookup:
+                {
+                    from: "poolwallets", // collection to join
+                    localField: "poolwalletID",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "pooldetailswallets"// output array field
+                }
+            },
+            { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+        ])
 
+        let apidata = await  transactionPool.aggregate([
+            { $match: { api_key: api_key, nwid : ObjectID(network_id), status : { $in : [1,2,3]} } },
+            {
+                $lookup:
+                {
+                    from: "poolwallets", // collection to join
+                    localField: "poolwalletID",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "pooldetailswallets"// output array field
+                }
+            },
+
+            { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+        ])
+        
+        let withdrawdata = await withdrawLogs.aggregate([
+            { $match: { api_key:  client.api_key,network_id:network_id ,status: { $in: [3, 4] } } },
+            {
+                $lookup: {
+                    from: "networks", // collection to join
+                    localField: "network_id",//field from the input documents
+                    foreignField: "id",//field from the documents of the "from" collection
+                    as: "NetworkDetails"// output array field
+                }
+            },
+
+            { $group: { _id: "$NetworkDetails.id", balance: { $sum: '$amount' } } },
+        ])
+
+        let total = datatopup.length > 0 ?  datatopup[0].balance : 0
+        total += paylinkdata.length > 0 ?  paylinkdata[0].balance : 0
+        total += posdata.length > 0 ?  posdata[0].balance : 0
+        total += apidata.length > 0 ?  apidata[0].balance : 0
+        let withdrawtotal = withdrawdata.length > 0 ?  withdrawdata[0].balance : 0
+        let nettotal = withdrawdata.length > 0 ?  total-withdrawdata[0].balance : total
+        
+
+        return { status: 200, data: { "total" : total ,"withdrawtotal" : withdrawtotal  ,"nettotal" : nettotal}, message: "Data" }
+    }
+    catch (error) {
+        console.log("Network_Fee_Calculation", error)
+        return { status: 400, data: {  "total" : 0 ,"withdrawtotal" : 0  ,"nettotal" : 0 }, message: "Error" }
+    }
+}
 
 async function Network_Fee_Calculation(network) {
     try {
@@ -118,17 +211,24 @@ module.exports =
 
     async save_withdraw(req, res) {
         try {
-            const network = await networks.findOne({ id: req.body.network_id })
-            const prevwithdrawLog = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
-            const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
-            let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
-            let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
-         
+            const network         = await networks.findOne({ _id : ObjectID(req.body.network_id) })
+            const prevwithdrawLog = await withdrawLogs.findOne({  api_key: req.headers.authorization, network_id: network.id, status: 0 })
+            // const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: network.id })
+            let totalData         = await creat_Total_Depossit(req.body.network_id ,req.headers.authorization)
+            const balance         = totalData.status == 200 ? totalData.nettotal : null
+            
+            if (balance == null) {
+                return res.json({ status: 400, data: null, message: "Wallet did not find" })
+            }
+            
+            let coinprice         = await priceNewConversition(network.currencyid.toLocaleLowerCase())
+            let nativeprice       = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
+           
             if (req.body.amount < (network.transferlimit / coinprice)) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
 
-            if (req.body.amount >= clientWallet.balance) {
+            if (req.body.amount >= balance) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
 
@@ -148,7 +248,7 @@ module.exports =
             let current_currency = "usd"
 
 
-            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
+            // const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
 
             if (req.body.currencyid != undefined && req.body.currencyid != "") {
                 const currency = await currencies.findOne({ "id": req.body.currencyid, status: 1 })
@@ -161,9 +261,7 @@ module.exports =
                 }
 
             }
-            if (balance == null) {
-                return res.json({ status: 400, data: null, message: "Wallet did not find" })
-            }
+            
             // const network   = await networks.findOne({ id: balance.network_id })
 
 
@@ -602,7 +700,12 @@ module.exports =
         let current_currency = "usd"
 
         try {
-            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
+        // const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
+
+           let totalresponse =   await creat_Total_Depossit(req.body.networkid ,req.headers.authorization)
+           console.log("===total===",totalresponse) 
+           const balance = totalresponse.status == 200 ? totalresponse.data.nettotal : null
+        //    return res.json({ status: 200, data: {}, message: "Not found" })
 
             if (req.body.currencyid != undefined && req.body.currencyid != "") {
                 const currency = await currencies.findOne({ "id": req.body.currencyid, status: 1 })
@@ -610,7 +713,8 @@ module.exports =
                 if (currency == null) {
                     return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
                 }
-                else {
+                else 
+                {
                     current_currency = currency != null ? currency.title.toLowerCase() : current_currency
                 }
 
@@ -618,7 +722,7 @@ module.exports =
             if (balance == null) {
                 return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
-            const network = await networks.findOne({ id: balance.network_id })
+            const network = await networks.findOne({ _id: ObjectID(req.body.networkid) })
             let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
 
             let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
@@ -629,8 +733,8 @@ module.exports =
             let tokencurrency = amount * coinprice
 
             let cryptoprice = 0;
-            networkFee = await Network_Fee_Calculation(network, amount)
-            let token_data = 0;
+            networkFee      = await Network_Fee_Calculation(network, amount)
+            let token_data  = 0;
             let network_fee = 0;
 
             if (network.cointype == "Token") {

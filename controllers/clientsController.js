@@ -1292,10 +1292,9 @@ module.exports =
             let paylink_Total_Balance = []
             let posdata_Total_Balance = []
             let api_Total_Balance = []
-        
-            
+            let withdra_Total_Balance = []
 
-            datatopup = await  topup.aggregate([
+            datatopup   = await  topup.aggregate([
                 { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
                 {
                     $lookup:
@@ -1308,7 +1307,6 @@ module.exports =
                 },
                 { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
             ])
-           
             paylinkdata = await  paymentLinkTransactionPool.aggregate([
                 { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
                 {
@@ -1322,8 +1320,7 @@ module.exports =
                 },
                 { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
             ])
-               
-            posdata = await  posTransactionPool.aggregate([
+            posdata     = await  posTransactionPool.aggregate([
                 { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
                 {
                     $lookup:
@@ -1336,8 +1333,7 @@ module.exports =
                 },
                 { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
             ])
-
-            apidata = await  transactionPool.aggregate([
+            apidata     = await  transactionPool.aggregate([
                 { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
                 {
                     $lookup:
@@ -1350,8 +1346,7 @@ module.exports =
                 },
                 { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
             ])
-   
-
+            
             let withdrawdata = await withdrawLog.aggregate([
                 { $match: { api_key:  client.api_key, status: { $in: [3, 4] } } },
                 {
@@ -1367,25 +1362,26 @@ module.exports =
 
             for(i=0; i<withdrawdata.length; i++){
                
-                let network_data = await network.findOne({id : withdrawdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
-                
+                let network_data = await network.findOne({id : withdrawdata[i]._id } , { currencyid:1, _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 if(network_data != null){
                 withdraw_Balance.push({
                     ...network_data._doc,
                     balance: withdrawdata[i].balance,
-                   
+                    coin_price : coin_price
                 })
             }
             }
 
             for(i=0; i<datatopup.length; i++){
                
-                let network_data = await network.findOne({id : datatopup[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
-                
+                let network_data = await network.findOne({id : datatopup[i]._id } , { currencyid:1,_id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 if(network_data != null){
                 Total_Balance.push({
                     ...network_data._doc,
                     balance: datatopup[i].balance,
+                    coin_price: coin_price
                    
                 })
             }
@@ -1393,29 +1389,36 @@ module.exports =
 
 
             for(i=0; i<paylinkdata.length; i++){
-                let network_data = await network.findOne({id : datatopup[i]._id  } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let network_data = await network.findOne({id : paylinkdata[i]._id  } , { currencyid:1,_id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = 0 ;
+                
+                coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
+             
                 paylink_Total_Balance.push({
                     ...network_data._doc,
                     balance: paylinkdata[i].balance,
+                    coin_price: coin_price
                    
                 })
             }
             
             for(i=0; i<posdata.length; i++){
-                let network_data = await network.findOne({id : posdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let network_data = await network.findOne({id : posdata[i]._id } , {currencyid:1, _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 posdata_Total_Balance.push({
                     ...network_data._doc,
                     balance: posdata[i].balance,
-                   
+                    coin_price: coin_price
                 })
             }
 
             for(i=0; i<apidata.length; i++){
-                let network_data = await network.findOne({id : apidata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let network_data = await network.findOne({id : apidata[i]._id } , { currencyid:1,_id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 api_Total_Balance.push({
                     ...network_data._doc,
                     balance: apidata[i].balance,
-                   
+                    coin_price: coin_price
                 })
             }
 
@@ -1510,50 +1513,55 @@ module.exports =
             ])
             for(i=0; i<withdrawdata.length; i++){
                
-                let network_data = await network.findOne({id : withdrawdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
-                
+                let network_data = await network.findOne({id : withdrawdata[i]._id } , { currencyid:1, _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 if(network_data != null){
                 withdraw_Balance.push({
                     ...network_data._doc,
                     balance: withdrawdata[i].balance,
-                   
+                    coin_price : coin_price
                 })
             }
             }
             for(i=0; i<datatopup.length; i++){
                
-                let network_data = await network.findOne({id : datatopup[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
-                
+                let network_data = await network.findOne({id : datatopup[i]._id } , {currencyid:1, _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 if(network_data != null){
                 Total_Balance.push({
                     ...network_data._doc,
                     balance: datatopup[i].balance,
-                   
+                    coin_price : coin_price
                 })
             }
             }
             for(i=0; i<paylinkdata.length; i++){
-                let network_data = await network.findOne({id : datatopup[i]._id  } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let network_data = await network.findOne({id : paylinkdata[i]._id  } , { currencyid:1, _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 paylink_Total_Balance.push({
                     ...network_data._doc,
                     balance: paylinkdata[i].balance,
+                    coin_price : coin_price
                    
                 })
             }
             for(i=0; i<posdata.length; i++){
-                let network_data = await network.findOne({id : posdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let network_data = await network.findOne({id : posdata[i]._id } , { currencyid:1,_id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 posdata_Total_Balance.push({
                     ...network_data._doc,
                     balance: posdata[i].balance,
+                    coin_price : coin_price
                    
                 })
             }
             for(i=0; i<apidata.length; i++){
-                let network_data = await network.findOne({id : apidata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let network_data = await network.findOne({id : apidata[i]._id } , { currencyid:1,_id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                let coin_price = await priceNewConversition(network_data.currencyid.toLowerCase())
                 api_Total_Balance.push({
                     ...network_data._doc,
                     balance: apidata[i].balance != undefined ? apidata[i].balance : 0,
-                   
+                    coin_price : coin_price
                 })
             }
             res.json({ status: 200, data: { 

@@ -293,8 +293,10 @@ module.exports =
             let client          = await clients.findOne({ 'api_key': req.headers.authorization })
             let payLink         = await paylinkPayment.findOne({ 'id': req.body.payLinkId })
             let invoicedata     = await invoice.findOne({ 'id': payLink.invoice_id })
-            let pricedata       = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,invoicedata.currency,req.headers.authorization )
             
+            console.log("invoicedata",invoicedata)
+            let pricedata       = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,invoicedata.currency,req.headers.authorization )
+            console.log("pricedata",pricedata)
             if(pricedata == 0)
             {
                 return res.json({ status: 400, data: pricedata, message: "We do not support the currency"+invoicedata.currency })

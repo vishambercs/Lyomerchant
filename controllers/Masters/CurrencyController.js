@@ -152,7 +152,9 @@ module.exports =
             let pricedata                   = stringify_response.data 
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
-            pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
+
+            // pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
+            pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
@@ -179,7 +181,8 @@ module.exports =
             let networktitle                = network.currencyid.toLowerCase()
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
-            pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
+            // pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
+            pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
@@ -211,7 +214,8 @@ module.exports =
             let pricedata                   = stringify_response.data 
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
-            pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
+            // pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
+            pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             return  pricedatacurrency[pricetitle]
             // return { status: 200, data: pricedata, message: "Currency API Balance" }
