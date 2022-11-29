@@ -5,11 +5,56 @@ const perferedNetworks              = require('../../Models/perferedNetwork');
 const Utility                       = require('../../common/Utility');
 var mongoose                        = require('mongoose');
 var crypto                          = require("crypto");
+var axios                          = require("axios");
 const TronWeb                       = require('tronweb')
 const { generateAccount }           = require('tron-create-address')
 const Web3 = require('web3');
 require("dotenv").config()
 var stringify           = require('json-stringify-safe');
+
+const getCoinPrice = async (coin) => {
+    if (["LYO", "LYO1"].includes(coin)) {
+        try {
+            const getBalanceRes = await axios.get(`https://openapi.lyotrade.com/sapi/v1/klines?symbol=LYO1USDT&interval=1min&limit=1`);
+            return getBalanceRes.data[0]['close'];
+         } catch(e) {
+            console.log(e);
+            return 1;
+         }
+    } else {
+        try {
+           const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=1m&limit=1`);
+           return getBalanceRes.data[0][4];
+        } catch(e) {
+           console.log(e);
+           return 1;
+        }
+    }
+}
+const getFiatRates = async (coin) => {
+    try {
+       const getBalanceRes = await axios.get(`https://www.binance.com/bapi/asset/v1/public/asset-service/product/currency`);
+       const rate = await getBalanceRes.data.data.find(element => element.pair.includes(coin)).rate;
+       return rate;
+    } catch(e) {
+       console.log(e);
+       return 1;
+    }
+}
+const getRate = async (crypto, fiat) => {
+    if (crypto === 'USDT') {
+        const fiatRate = await getFiatRates(fiat);
+        return (parseFloat(1)*parseFloat(fiatRate)).toFixed(4);
+    } else {
+        const getCryptoToUsdt = await getCoinPrice(crypto);
+        const fiatRate = await getFiatRates(fiat);
+        return (parseFloat(getCryptoToUsdt)*parseFloat(fiatRate)).toFixed(4);
+    }
+}
+
+
+
+
 module.exports =
 {
     async createCurrency(req, res) {
@@ -121,11 +166,12 @@ module.exports =
         {
             let network             = await networks.findOne({ 'id': req.body.coinid })
             let Currency            = await Currencies.findOne({ 'id': req.body.currenid })
-            let parameters          = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
-            let COINGECKO_URL       =  process.env.COINGECKO+parameters
-            let axiosGetData        =  await Utility.Get_Request_By_Axios(COINGECKO_URL,{},{})
-            var stringify_response  = JSON.parse(axiosGetData.data)
-            res.json({ status: 200, data: stringify_response.data, message: "Currency API Balance" })
+
+            let getRatedata         = await getRate(network.coin, Currency.title);
+           
+
+
+            res.json({ status: 200, data: getRatedata, message: "Currency API Balance" })
         }
         catch (error) 
         {
@@ -152,9 +198,9 @@ module.exports =
             let pricedata                   = stringify_response.data 
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
-
             // pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
-            pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
+            let getRatedata                 = await getRate(network.coin, Currency.title);
+            pricedatacurrency[pricetitle]   = getRatedata - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
@@ -182,7 +228,8 @@ module.exports =
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
             // pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
-            pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
+            let getRatedata                 = await getRate(network.coin, Currency.title);
+            pricedatacurrency[pricetitle]   = getRatedata - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
@@ -215,7 +262,8 @@ module.exports =
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
             // pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
-            pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
+            // pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
+            pricedatacurrency[pricetitle]   = getRatedata - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             return  pricedatacurrency[pricetitle]
             // return { status: 200, data: pricedata, message: "Currency API Balance" }
