@@ -41,7 +41,7 @@ router.post('/withdraw',                             Auth.is_merchant,Auth.verif
 router.post('/clientWihdrawLogs',                    Auth.is_merchant,withdrawController.get_client_wihdraw);
 router.post('/clientTotalWihdraw',                   Auth.is_merchant,withdrawController.get_client_wihdraw_total);
 router.post('/clientwithdrawnetworkid',              Auth.is_merchant,withdrawController.get_client_withdraw_with_network_id);
-router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
+ router.post('/getmerchantWallets',                   Auth.is_merchant,clientsController.getClientWallets);
 router.post('/newWallets',                           Auth.is_merchant,clientsController.gettotalbalance);
 router.post('/merchantNetworkTranscation',           Auth.is_merchant,Auth.verify_trans_by_network_id,transcationpoolController.get_Trans_by_Network_ID);
 router.post('/merchantsTranscation',                 Auth.is_merchant,transcationpoolController.getTrans);
@@ -128,6 +128,8 @@ router.post('/assigntopupMerchantWallet',   topupcontroller.create_top_payment);
 router.post('/pluginallNetworks',           Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
+router.post('/get_all_deposit_client',      Auth.is_merchant,clientsController.get_For_client);
+
 
 //router.post('/updatestoreInvoice',          paylinkController.updatestoreInvoice);
 

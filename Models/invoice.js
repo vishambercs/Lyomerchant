@@ -66,7 +66,7 @@ const invoiceSchema = new mongoose.Schema({
     payment_reason : 
     {
         type: String,
-        required: true,
+        required: false,
     },
     email: 
     {

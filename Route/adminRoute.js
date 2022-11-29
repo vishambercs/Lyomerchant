@@ -133,7 +133,10 @@ router.post('/getKycLevel',                 Auth.is_admin,adminController.get_ky
 router.post('/get_all_invoice_for_admin',  Auth.is_admin,paylinkController.get_All_Invoice_For_Admin);
 
 
-router.post('/updateInvoiceByAdmin',  Auth.is_admin,paylinkController.updateInvoiceByAdmin);
+router.post('/updateInvoiceByAdmin',            Auth.is_admin,paylinkController.updateInvoiceByAdmin);
+router.post('/get_all_deposit_client_by_admin', Auth.is_admin,clientsController.get_For_Admin);
+// router.post('/update_Stable_Coin_Flag',        networkController.update_Stable_Coin_Flag);
+
 
 
 module.exports = router;

@@ -16,6 +16,11 @@ const networkSchema = new mongoose.Schema
             type: String,
             required: true,
         },
+        stablecoin: {
+            type    : Boolean,
+            required: false,
+            default: false,
+        },
         currencyid: {
             type: String,
             required: true,

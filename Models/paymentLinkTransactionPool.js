@@ -67,6 +67,11 @@ const paymentLinkTransactionPoolSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    crypto_paid: {
+        type: Number,
+        required: false,
+        default: 0,
+    },
     balance: {
         type: Number,
         required: true,

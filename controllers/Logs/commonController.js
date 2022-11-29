@@ -838,7 +838,7 @@ module.exports =
                 let paymentdetails = {}
                 if(req.body?.paymentdetails)
                 {
-                    paymentdetails["_id"] =  req.body.paymentdetails
+                    queryOptions["invoicedetails"] =  req.body.paymentdetails
                 }
                 
                 let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
@@ -966,7 +966,7 @@ module.exports =
             let paymentdetails = {}
             if(req.body?.paymentdetails)
             {
-                paymentdetails["_id"] =  req.body.paymentdetails
+                queryOptions["invoicedetails"] =  req.body.paymentdetails
             }
 
 

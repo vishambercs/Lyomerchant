@@ -55,6 +55,8 @@ module.exports =
                     withdrawfee         : req.body.withdrawfee,
                     withdrawflag        : req.body.withdrawflag,
                     native_currency_id  : req.body.native_currency_id,
+                    stablecoin          : req.body.stablecoin,
+                    
                     
                 });
                 NetworkItem.save().then(async (val) => {
@@ -137,7 +139,7 @@ module.exports =
                             withdrawflag        : req.body.withdrawflag,
                             updated_by          : req.headers.authorization,
                             updated_at          : new Date().toString(),
-                      
+                            stablecoin          : req.body.stablecoin,
                         }
                     }).then(async (val) => {
                         if (val != null) {
@@ -484,5 +486,24 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-    
+    async update_Stable_Coin_Flag(req, res) {
+        try {
+            await Network.findOneAndUpdate({ 'id': req.body.id },
+                {
+                    stablecoin    : req.body.stablecoin,
+                },
+                { returnDocument: 'after' }
+                ).then(async (val) => 
+                {
+                    res.json({ status: 200, message: "get", data: val })
+                }).
+                catch(error => {
+                    res.json({ status: 400, data: {}, message: error })
+                })
+            }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }

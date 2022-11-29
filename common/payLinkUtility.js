@@ -527,11 +527,11 @@ module.exports =
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
-                addressObject.poolWallet[0].addresswithdrawlog,
+                addressObject.poolWallet[0].address,
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
-            console.log("BalanceOfAddress libarayType",BalanceOfAddress)
+            console.log("BalanceOfAddress libarayType", BalanceOfAddress)
             console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
             console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
             console.log("BalanceOfAddress address",     addressObject.poolWallet[0].address)
@@ -588,7 +588,7 @@ module.exports =
             {
                 let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
                 
-                let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
+                let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus , crypto_paid: BalanceOfAddress.data.format_token_balance } })
                
                 let logData = { "transcationDetails": [] }
                 if (amountstatus == 1 || amountstatus == 3) 

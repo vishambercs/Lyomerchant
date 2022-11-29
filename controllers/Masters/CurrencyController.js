@@ -140,6 +140,10 @@ module.exports =
             let networktitle                = network.currencyid.toLowerCase()
             let Currency                    = await Currencies.findOne({ 'id': req.body.currenid })
             let perferedNetwork             = await perferedNetworks.findOne({ networkid: req.body.coinid, clientapikey : req.headers.authorization })
+            if(perferedNetwork == null){
+                res.json({ status: 400, data: {}, message: "Error" })
+            }
+           
             let pricemargin                 = perferedNetwork != null ? perferedNetwork.pricemargin : 0
             let parameters                  = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
             let COINGECKO_URL               =  process.env.COINGECKO+parameters
@@ -148,7 +152,7 @@ module.exports =
             let pricedata                   = stringify_response.data 
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
-            pricedatacurrency[pricetitle]   = pricedatacurrency[pricetitle] - pricemargin
+            pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
@@ -175,7 +179,7 @@ module.exports =
             let networktitle                = network.currencyid.toLowerCase()
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
-            pricedatacurrency[pricetitle]   = pricedatacurrency[pricetitle] - pricemargin
+            pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             res.json({ status: 200, data: pricedata, message: "Currency API Balance" })
         }
@@ -193,6 +197,12 @@ module.exports =
             let networktitle                = network.currencyid.toLowerCase()
             let Currency                    = await Currencies.findOne({ 'title': currenid })
             let perferedNetwork             = await perferedNetworks.findOne({ networkid: networkid, clientapikey : apikey })
+            if(perferedNetwork == null){
+                return 0  
+            }
+            // if(perferedNetwork != null && network.stablecoin == true){
+            //     return 1  
+            // }
             let pricemargin                 = perferedNetwork != null ? perferedNetwork.pricemargin : 0
             let parameters                  = `ids=${network.currencyid}&vs_currencies=${Currency.title}`
             let COINGECKO_URL               = process.env.COINGECKO+parameters
@@ -201,7 +211,7 @@ module.exports =
             let pricedata                   = stringify_response.data 
             let pricedatacurrency           = pricedata[networktitle]
             let pricetitle                  = Currency.title.toLowerCase()
-            pricedatacurrency[pricetitle]   = pricedatacurrency[pricetitle] - pricemargin
+            pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             return  pricedatacurrency[pricetitle]
             // return { status: 200, data: pricedata, message: "Currency API Balance" }

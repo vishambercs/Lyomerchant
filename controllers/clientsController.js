@@ -1,8 +1,13 @@
-const clients = require('../Models/clients');
-const kycWebHookLogs = require('../Models/kycWebHookLog');
-const withdrawLog = require('../Models/withdrawLog');
-const admins = require('../Models/admin');
-const topup = require('../Models/topup');
+const clients            = require('../Models/clients');
+const kycWebHookLogs     = require('../Models/kycWebHookLog');
+const withdrawLog        = require('../Models/withdrawLog');
+const admins             = require('../Models/admin');
+const topup                 = require('../Models/topup');
+const paymentLinkTransactionPool                 = require('../Models/paymentLinkTransactionPool');
+const posTransactionPool                 = require('../Models/posTransactionPool');
+const transactionPool                 = require('../Models/transactionPool');
+
+
 const emailSending = require('../common/emailSending');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
@@ -1265,6 +1270,299 @@ module.exports =
                 total += network_data[i]["netamount"] * price
             }
             res.json({ status: 200, data: network_data, "total": total, message: "Success" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Invalid", total: 0 })
+        }
+    },
+    async get_For_Admin(req, res) {
+        try {
+            let network_data = []
+            let type = req.body.type
+            let client = await clients.findOne({ email: req.body.email })
+            if (client == null) {
+                return res.json({ status: 400, data: {}, message: "Invalid Email" })
+            }
+            let datatopup = null
+            let paylinkdata = null
+            let posdata = null
+            let apidata = null
+            let Total_Balance = []
+            let paylink_Total_Balance = []
+            let posdata_Total_Balance = []
+            let api_Total_Balance = []
+        
+            
+
+            datatopup = await  topup.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])
+           
+            paylinkdata = await  paymentLinkTransactionPool.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])
+               
+            posdata = await  posTransactionPool.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])
+
+            apidata = await  transactionPool.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])
+   
+
+            let withdrawdata = await withdrawLog.aggregate([
+                { $match: { api_key:  client.api_key, status: { $in: [3, 4] } } },
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "NetworkDetails"// output array field
+                    }
+                },
+                { $group: { _id: "$NetworkDetails.id", balance: { $sum: '$amount' } } },
+            ])
+
+            for(i=0; i<withdrawdata.length; i++){
+               
+                let network_data = await network.findOne({id : withdrawdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                
+                if(network_data != null){
+                withdraw_Balance.push({
+                    ...network_data._doc,
+                    balance: withdrawdata[i].balance,
+                   
+                })
+            }
+            }
+
+            for(i=0; i<datatopup.length; i++){
+               
+                let network_data = await network.findOne({id : datatopup[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                
+                if(network_data != null){
+                Total_Balance.push({
+                    ...network_data._doc,
+                    balance: datatopup[i].balance,
+                   
+                })
+            }
+            }
+
+
+            for(i=0; i<paylinkdata.length; i++){
+                let network_data = await network.findOne({id : datatopup[i]._id  } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                paylink_Total_Balance.push({
+                    ...network_data._doc,
+                    balance: paylinkdata[i].balance,
+                   
+                })
+            }
+            
+            for(i=0; i<posdata.length; i++){
+                let network_data = await network.findOne({id : posdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                posdata_Total_Balance.push({
+                    ...network_data._doc,
+                    balance: posdata[i].balance,
+                   
+                })
+            }
+
+            for(i=0; i<apidata.length; i++){
+                let network_data = await network.findOne({id : apidata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                api_Total_Balance.push({
+                    ...network_data._doc,
+                    balance: apidata[i].balance,
+                   
+                })
+            }
+
+            res.json({ status: 200, data: { "withdrawdata":withdrawdata,"apidata" : api_Total_Balance,"pos" : posdata_Total_Balance,"topup" : Total_Balance , "paylink" : paylink_Total_Balance },message: "Success" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Invalid", total: 0 })
+        }
+    },
+
+    async get_For_client(req, res) {
+        try {
+            let network_data = []
+            let type = req.body.type
+            let client = await clients.findOne({ api_key: req.headers.authorization })
+            if (client == null) {
+                return res.json({ status: 400, data: {}, message: "Invalid Email" })
+            }
+            let datatopup = null
+            let paylinkdata = null
+            let posdata = null
+            let apidata = null
+            let Total_Balance = []
+            let paylink_Total_Balance = []
+            let posdata_Total_Balance = []
+            let api_Total_Balance = []
+            let withdraw_Balance = []
+            datatopup = await  topup.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])       
+            paylinkdata = await  paymentLinkTransactionPool.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])           
+            posdata = await  posTransactionPool.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])
+            apidata = await  transactionPool.aggregate([
+                { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
+                {
+                    $lookup:
+                    {
+                        from: "poolwallets", // collection to join
+                        localField: "poolwalletID",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "pooldetailswallets"// output array field
+                    }
+                },
+                { $group: { _id: "$pooldetailswallets.network_id", balance: { $sum: '$amount' } } },
+            ])
+            let withdrawdata = await withdrawLog.aggregate([
+                { $match: { api_key:  client.api_key, status: { $in: [3, 4] } } },
+                {
+                    $lookup: {
+                        from: "networks", // collection to join
+                        localField: "network_id",//field from the input documents
+                        foreignField: "id",//field from the documents of the "from" collection
+                        as: "NetworkDetails"// output array field
+                    }
+                },
+                { $group: { _id: "$NetworkDetails.id", balance: { $sum: '$amount' } } },
+            ])
+            for(i=0; i<withdrawdata.length; i++){
+               
+                let network_data = await network.findOne({id : withdrawdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                
+                if(network_data != null){
+                withdraw_Balance.push({
+                    ...network_data._doc,
+                    balance: withdrawdata[i].balance,
+                   
+                })
+            }
+            }
+            for(i=0; i<datatopup.length; i++){
+               
+                let network_data = await network.findOne({id : datatopup[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                
+                if(network_data != null){
+                Total_Balance.push({
+                    ...network_data._doc,
+                    balance: datatopup[i].balance,
+                   
+                })
+            }
+            }
+            for(i=0; i<paylinkdata.length; i++){
+                let network_data = await network.findOne({id : datatopup[i]._id  } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                paylink_Total_Balance.push({
+                    ...network_data._doc,
+                    balance: paylinkdata[i].balance,
+                   
+                })
+            }
+            for(i=0; i<posdata.length; i++){
+                let network_data = await network.findOne({id : posdata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                posdata_Total_Balance.push({
+                    ...network_data._doc,
+                    balance: posdata[i].balance,
+                   
+                })
+            }
+            for(i=0; i<apidata.length; i++){
+                let network_data = await network.findOne({id : apidata[i]._id } , { _id : 1 ,icon:1, coin:1, id : 1 , libarayType:1 ,  network : 1 })
+                api_Total_Balance.push({
+                    ...network_data._doc,
+                    balance: apidata[i].balance != undefined ? apidata[i].balance : 0,
+                   
+                })
+            }
+            res.json({ status: 200, data: { 
+                "withdraw_Balance": withdraw_Balance,
+                "apidata" : api_Total_Balance,
+                "pos" : posdata_Total_Balance,
+                "topup" : Total_Balance , 
+                "paylink" : paylink_Total_Balance 
+            },message: "Success" })
         }
         catch (error) {
             console.log(error)
