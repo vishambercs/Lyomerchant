@@ -51,6 +51,7 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
             else if (index != -1 && jsondata.status == 200)
             {
                 let transData       = Constant.topupTransList[index]
+               
                 transData.connection.sendUTF(JSON.stringify(jsondata));
             }
         });
