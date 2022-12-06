@@ -13,9 +13,7 @@ module.exports =
             const url      =  process.env.API_URL+"/v1/fixedpluginallNetworks"
             let headers  =  {}
             let response =  await Utility.Post_Request_By_Axios(url,headers,merchantKey)
-           
             var stringify_response  = JSON.parse(response)
-          
             res.json(stringify_response)
          }
         catch (error) {
@@ -39,7 +37,7 @@ module.exports =
                 "apiredirecturl"    : req.body.apiredirecturl,
                 "errorurl"          : req.body.errorurl,
                 "amount"            : req.body.amount,
-                "transtype"         : "FXTC",
+                "transtype"         : "topup",
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
@@ -54,7 +52,7 @@ module.exports =
     async fixedgettransdataoftopup(req, res) {
         try {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/fixedgettransdataoftopup"
+            const url               =  process.env.API_URL+"/v1/getTranscationDataofTopup"
             let parameters          =  
             {
                 "id"       : req.body.id,
@@ -78,7 +76,9 @@ module.exports =
                 "transid"       : req.body.id,
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            
             var stringify_response  = JSON.parse(response)
+
             res.json(stringify_response)
          }
         catch (error) {
@@ -103,16 +103,56 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async hitwebhook(req, res) {
+        try {
+             let todo = {
+                userId: 123,
+                title: "loren impsum doloris",
+                completed: false
+            };
+            fetch('https://webhook.site/14cbc65f-b1a6-42c2-bb38-0faeb7b4dc9d', {
+                method: 'POST',
+                body: JSON.stringify(todo),
+                headers: { 'Content-Type': 'application/json' }
+            }).then(res => console.log(res))
+              .then(json => console.log(json));
+            
+              res.json(todo)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: error })
+        }
+    },
     async checkbalance(req, res) {
         try {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/fixedcheckbalance"
+            const url               =  process.env.API_URL+"/v1/checkbalance"
             let parameters          =  
             {
                 "id"       : req.body.id,
             }
             let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
-            console.log("response",response)
+            
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async verfiythebalance(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/verfiythebalance"
+            let parameters          =  
+            {
+                "id"       : req.body.id,
+            }
+            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+           
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
