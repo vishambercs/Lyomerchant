@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 var uniqueValidator = require('mongoose-unique-validator');
+const rolesdetails = require('./Roles');
 const adminSchema = new mongoose.Schema({
     admin_api_key: {
         type: String,
@@ -46,6 +47,13 @@ const adminSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
     },
+   
+    rolesdata: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : rolesdetails,
+		default : null,
+	},
     password: {
         type: String,
         required: true,

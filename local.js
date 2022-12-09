@@ -9,6 +9,7 @@ var payLinkRoute    = require('./Route/paylinkRoute');
 var hotWalletRoute  = require('./Route/hotWalletRoute');
 var withdrawRoute   = require('./Route/withdrawRoute');
 var adminRoute      = require('./Route/adminRoute');
+var Constant        = require('./common/Constant');
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const listEndpoints = require('express-list-endpoints')
@@ -56,7 +57,7 @@ mongoose.connection.once('open', function () {
 
 
 app.listen(process.env.SERVER_PORT, function () {
-    console.log(listEndpoints(app));
+    Constant.ALL_API = listEndpoints(app)
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });
 

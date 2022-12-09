@@ -207,7 +207,8 @@ module.exports =
             let network_details = await network.findOne({ 'id': network_id })
             console.log("========getPoolWalletID========",network_details) 
 
-            let account = await poolWallet.findOne({ network_id: network_id, status: 0 })
+            // let account = await poolWallet.findOne({ network_id: network_id, status: 0 })
+            let account = null
             console.log("========account========",account) 
           
             if (account == null) {
