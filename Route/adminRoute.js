@@ -1,44 +1,3 @@
-// var express                         = require('express');
-// var router                          = express.Router();
-// const adminController               = require('../controllers/adminController');
-// const transcationpoolController     = require('../controllers/transcationpoolController');
-// const withdrawController            = require('../controllers/withdrawController');
-// const networkController             = require('../controllers/networkController');
-// const categoryController            = require('../controllers/Masters/categoryController');
-// const merchantcategory              = require('../controllers/Masters/merchantcategoryController');
-// const clientsController             = require('../controllers/clientsController');
-// const orphanController              = require('../controllers/orphanTranscationController');
-// const CurrencyController            = require('../controllers/Masters/CurrencyController');
-// const Auth                          = require('../Validation/Auth');
-
-// router.post('/signupadmin',                                   adminController.signup_admin_api);
-// router.post('/adminlogin',                                    adminController.Login);
-// router.post('/admingoogleauth',                               adminController.Verfiy_Google_Auth);
-
-// router.post('/get_admin_withdraw',                            Auth.is_admin,withdrawController.get_admin_wihdraw);
-// router.post('/allAdmin',                                      Auth.is_admin,adminController.allAdmin);
-// router.post('/sendemail',                                     Auth.is_admin,adminController.sendEmail);
-// router.post('/transcationListByNetworkID',                    Auth.is_admin,transcationpoolController.get_Trans_by_Network_ID_For_Admin);
-// router.post('/savecategory',                                  Auth.is_admin,categoryController.savecategory);
-// router.get('/allcategory',                                    Auth.is_admin, categoryController.allcategory);
-// router.post('/createClientCategory',                          Auth.is_admin,merchantcategory.createClientCategory);
-// router.post('/forgetThePassword',                             Auth.is_admin, adminController.forgetThePassword);
-// router.post('/VerfiyTheCode',                                 Auth.is_admin,adminController.VerfiyTheCode);
-// router.post('/updatePassword',                                Auth.is_admin, adminController.updateThePassword);
-// router.post('/resettwofa',                                    Auth.is_admin,adminController.reset_two_fa);
-// router.post('/resetMerchantTwoFa',                            Auth.is_admin,clientsController.reset_merchant_two_fa);
-// router.post('/changeMerchantEmail',                           Auth.is_admin,clientsController.changeMerchantEmail);
-// // router.post('/changeMerchantPassword',                     clientsController.changeMerchantPassword);
-// router.post('/merchantImpersonation',                         Auth.is_admin,clientsController.merchantImpersonation);
-// "============================ Orphan Transcation ==============================="
-// router.post('/orphanPoolWallet',                              Auth.is_admin,orphanController.orphanTranscation);
-// "============================ Currency Master ==============================="
-// router.post('/createCurrency',                                Auth.is_admin,CurrencyController.createCurrency);
-// router.get('/allCurrency',                                    Auth.is_admin,CurrencyController.allCurrency);
-// router.post('/deleteCurrency',                                Auth.is_admin,CurrencyController.deleteCurrency);
-// router.post('/updateCurrency',                                Auth.is_admin,CurrencyController.updateCurrency);
-
-// module.exports = router;
 var express                         = require('express');
 var router                          = express.Router();
 const adminController               = require('../controllers/adminController');
@@ -57,9 +16,8 @@ const hotwallettranslogsController  = require('../controllers/hotwallettranslogs
 const merchantstoreController       = require('../controllers/POS/merchantstoreController');
 const commonController              = require('../controllers/Logs/commonController');
 const paylinkController             = require('../controllers/PaymentLinks/paylinkController');
-
-// router.post('/sendemail',                                      Auth.is_admin,adminController.sendEmail);
-// router.post('/merchantImpersonation',                          Auth.is_admin,clientsController.merchantImpersonation);
+const Rolescontroller               = require('../controllers/Roles/Rolescontroller');
+const clientHotWallets              = require('../controllers/Masters/clientHotWalletsController');
 
 router.post('/signupadmin',                                    Auth.is_admin,Auth.verify_signup_admin_api,adminController.signup_admin_api);
 router.post('/adminlogin',                                     Auth.verify_admin_Login,adminController.Login);
@@ -138,5 +96,16 @@ router.post('/get_all_deposit_client_by_admin', Auth.is_admin,clientsController.
 // router.post('/update_Stable_Coin_Flag',        networkController.update_Stable_Coin_Flag);
 
 
+"============= All Role Based ==================="
+router.post('/get_all_API',                       Auth.is_admin,Rolescontroller.get_all_all_API);
+router.post('/create_or_update_roles',            Auth.is_admin,Rolescontroller.create_or_update_roles);
+router.post('/create_or_update_roles_permission', Auth.is_admin,Rolescontroller.create_or_update_roles_permission);
+router.post('/get_all_roles',                     Auth.is_admin,Rolescontroller.get_all_roles);
+router.post('/update_role_Permisson',             Auth.is_admin,Rolescontroller.update_role_Permisson);
+
+
+"============= All Client Wallet API ==================="
+router.post('/create_or_update_clienthotwallets',   Auth.is_admin,clientHotWallets.create_or_update_clienthotwallets);
+router.post('/get_all_clienthotwallets',            Auth.is_admin,clientHotWallets.get_all_clienthotwallets);
 
 module.exports = router;

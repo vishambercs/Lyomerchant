@@ -13,6 +13,18 @@ const roles = new mongoose.Schema({
         required : true,
 
     },
+    created_by:
+    {
+        type     : String,
+        required : true,
+
+    },
+    updated_by:
+    {
+        type     : String,
+        required : false,
+
+    },
   },
     { timestamps: true }
 )

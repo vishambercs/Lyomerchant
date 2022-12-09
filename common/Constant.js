@@ -20,6 +20,7 @@ const paymenlinkIndex = 0
 const topupTransList = []
 const topupIndex = 0
 const addressBalance = []
+const ALL_API = []
 const transstatus = [
   { "id": 0, "title": "Pending" },
   { "id": 1, "title": "Completed" },
@@ -93,5 +94,6 @@ module.exports =
   transstatus: transstatus,
   topupTransList :topupTransList,
   topupIndex :topupIndex,
+  ALL_API : ALL_API,
 
 }
