@@ -1293,7 +1293,7 @@ module.exports =
             let posdata_Total_Balance = []
             let api_Total_Balance = []
             let withdra_Total_Balance = []
-
+            let withdraw_Balance = []
             datatopup   = await  topup.aggregate([
                 { $match: { api_key: client.api_key,  status : { $in : [1,2,3]} } },
                 {
