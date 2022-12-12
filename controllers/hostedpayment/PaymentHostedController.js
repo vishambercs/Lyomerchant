@@ -16,7 +16,7 @@ const jwt = require('jsonwebtoken');
 const axios = require('axios')
 var qs = require('qs');
 
-async function storeInvoice(invoiceNumber, merchantKey, Items, customerName, email, mobileNumber, duedate, additionalNotes, payment_reason, currency, totalAmount, orderId, callbackURL, errorURL) {
+async function storeInvoice(invoiceNumber, merchantKey, Items, customerName, email, mobileNumber, duedate, additionalNotes, payment_reason, currency, totalAmount, orderId, callbackURL, errorURL,tripId) {
     try {
 
 
@@ -38,7 +38,8 @@ async function storeInvoice(invoiceNumber, merchantKey, Items, customerName, ema
             orderId: orderId,
             callbackURL: callbackURL,
             errorURL: errorURL,
-            status: 0
+            status: 0,
+            tripId:tripId
         })
         let newrecord = await new_record.save()
         return { status: 200, data: newrecord, message: "Successfully Data", }
@@ -51,9 +52,11 @@ async function storeInvoice(invoiceNumber, merchantKey, Items, customerName, ema
 
 async function storepaylinkPayment(invoice_id) {
     try {
+        let inv = await invoice.findOne({id : invoice_id })
         let new_record = new paylinkPayment({
             id: mongoose.Types.ObjectId(),
             invoice_id: invoice_id,
+            invoicedetails : inv._id,
             timestamps: new Date().getTime(),
             status: 0
         })
@@ -104,6 +107,7 @@ module.exports =
             let invoiceObject = req.body
             let invoiceid = ''
             var merchantKey = req.headers.authorization
+            var tripId = req.body.tripId
             const duedate = new Date(req.body.duedate);
             const currentdate = new Date();
 
@@ -134,6 +138,7 @@ module.exports =
                 req.body.orderId,
                 req.body.callbackURL,
                 req.body.errorURL,
+                tripId
             )
             if (store_invoice.status != 200) {
                 return res.json(store_invoice)

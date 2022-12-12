@@ -129,6 +129,12 @@ const invoiceSchema = new mongoose.Schema({
         type     : String,
         required : false,
     },
+    tripId: {
+        type     : String,
+        required : false,
+    },
+
+    
 },
 
 { timestamps: true }
