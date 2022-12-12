@@ -294,7 +294,6 @@ module.exports =
             let payLink         = await paylinkPayment.findOne({ 'id': req.body.payLinkId })
             let invoicedata     = await invoice.findOne({ 'id': payLink.invoice_id })
             let pricedata       = 0
-            console.log("invoicedata",invoicedata)
             if(invoicedata != null)
             {
                 pricedata    = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,invoicedata.currency,req.headers.authorization )
@@ -310,6 +309,69 @@ module.exports =
             {
                 return res.json({ status: 400, data: pricedata, message: "We do not support the currency " + invoicedata.currency })
             }
+            let amount_total    = invoicedata != null ? invoicedata.totalAmount : req.body.amount
+            let cryptoamount    = parseFloat(amount_total) / parseFloat(pricedata)
+            let currentDateTemp = Date.now();
+            let currentDate     = parseInt((currentDateTemp / 1000).toFixed());
+            const newRecord     = new paymentLinkTransactionPool({
+                id: mongoose.Types.ObjectId(),
+                api_key: req.headers.authorization,
+                paymenttype: req.body.paymenttype,
+                invoicedetails:invoicedata._id,
+                poolwalletID: account.id,
+                amount: cryptoamount,
+                currency: req.body.currency,
+                callbackURL: req.body.callbackURL,
+                errorURL: req.body.errorURL,
+                payLinkId: req.body.payLinkId,
+                orderType: req.body.orderType,
+                clientToken: req.body.token,
+                status: 0,
+                walletValidity: currentDate,
+                timestamps: new Date().getTime(),
+                clientdetail: client._id,
+                pwid: account._id,
+                nwid: network_details._id,
+                paymentdetails: payLink._id,
+            });
+            newRecord.save().then(async (val) => {
+                await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
+                let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
+                res.json({ status: 200, message: "Payment Link Wallet Assigned Successfully", data: data })
+            }).catch(error => {
+                console.log("errorr", error)
+                res.json({ status: 401, data: {}, message: error })
+            })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async assignPaymentLinkMerchantWalletforcrypto(req, res) {
+        try {
+            var networkType     = req.body.networkType
+            let account         = await poolwalletController.getPoolWalletID(networkType)
+            let network_details = await networks.findOne({ 'id': networkType })
+            let client          = await clients.findOne({ 'api_key': req.headers.authorization })
+            let payLink         = await paylinkPayment.findOne({ 'id': req.body.payLinkId })
+            let invoicedata     = await invoice.findOne({ 'id': payLink.invoice_id })
+            let pricedata       = 0
+            // if(invoicedata != null)
+            // {
+            //     pricedata    = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,invoicedata.currency,req.headers.authorization )
+            // }
+            // else
+            // {
+            //     pricedata    = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,req.body.currency,req.headers.authorization )
+            // }
+
+            
+            // console.log("pricedata",pricedata)
+            // if(pricedata == 0)
+            // {
+            //     return res.json({ status: 400, data: pricedata, message: "We do not support the currency " + invoicedata.currency })
+            // }
             let amount_total    = invoicedata != null ? invoicedata.totalAmount : req.body.amount
             let cryptoamount    = parseFloat(amount_total) / parseFloat(pricedata)
             let currentDateTemp = Date.now();

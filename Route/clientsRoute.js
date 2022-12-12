@@ -108,6 +108,12 @@ router.post('/getPerferedNetwork',                   Auth.is_merchant,perferedNe
 "============================ HOSTRED PAYMENT  ==============================="
 
 router.post('/createHostePayment',                   Auth.paylink_have_access,Auth.verify_variables,PaymentHostedController.createHostePayment);
+
+
+
+
+
+
 router.post('/ipntesting',                           PaymentHostedController.IPN_Testing);
 
 "============================ Common Controller  ==============================="
