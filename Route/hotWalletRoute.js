@@ -17,7 +17,7 @@ const hotwalletController   = require('../controllers/hotwalletController');
 const Auth                  = require('../Validation/Auth');
 // router.post('/createHotWallets',                  Auth.is_admin, hotwalletController.createHotWallets);
 // router.post('/createHotWalletsAPI',              Auth.is_admin,  hotwalletController.createHotWalletsAPI);
-router.get('/allHotWallets',                        Auth.is_admin, hotwalletController.allHotWallets);
+router.get('/allHotWallets',                        Auth.is_admin, Auth.Verfiy_Role, hotwalletController.allHotWallets);
 // router.post('/hotwalletTranscation',              Auth.is_admin, hotwalletController.hotwalletTranscation);
 // router.post('/deletehotwallet',                   Auth.is_admin, hotwalletController.deleteHotWallets);
 // router.post('/updateHotWallet',                 Auth.is_admin,   hotwalletController.updateHotWallets);

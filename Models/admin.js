@@ -47,7 +47,6 @@ const adminSchema = new mongoose.Schema({
         type: Boolean,
         required: true,
     },
-   
     rolesdata: 
     {
 		type    : mongoose.Schema.Types.ObjectId,
