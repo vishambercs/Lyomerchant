@@ -1,9 +1,7 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
-const Roles = require('./Roles');
-
-
-const RolesPermisson = new mongoose.Schema({
+const mongoose        = require('mongoose');
+const validator       = require('validator');
+const Roles           = require('./Roles');
+const RolesPermisson  = new mongoose.Schema({
   roleid:
   {
     type: mongoose.Schema.Types.ObjectId,

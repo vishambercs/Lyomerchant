@@ -23,6 +23,7 @@ const Constant = require('../common/Constant');
 var otpGenerator = require('otp-generator')
 require("dotenv").config()
 const jwt = require('jsonwebtoken');
+const { default: ObjectID } = require('bson-objectid');
 module.exports =
 {
     async signup_admin_api(req, res) {
@@ -33,7 +34,6 @@ module.exports =
         const salt          = bcrypt.genSaltSync(parseInt(process.env.SALTROUNDS));
         const password_hash = bcrypt.hashSync(password, salt);
         let secret          = authenticator.generateSecret()
-        
         var otp             = otpGenerator.generate(6, { upperCase: false, specialChars: false });
         if (hash == req.body.hash) {
             QRCode.toDataURL(authenticator.keyuri(req.body.email, process.env.GOOGLE_SECERT_ADMIN, secret)).then(async (url) => {
@@ -101,10 +101,10 @@ module.exports =
             let email = req.body.email
             let code = req.body.code
             let data = await admins.findOne({ 'email': email }, {
-                email:1,
-                token:1,
-                admin_api_key:1,
-                status:1
+                email         : 1,
+                token         : 1,
+                admin_api_key : 1,
+                status        : 1
                 
             })
 
@@ -332,6 +332,18 @@ module.exports =
         try {
             let response = await Utility.get_KYC_Level()
             res.json({ status: 200, data: response, message: "Success" })
+        }
+        catch (error) {
+            console.log("error",error)
+            res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+    async updateadminrole(req, res) {
+        try {
+            let admin = await admins.findOneAndUpdate({ 'admin_api_key': req.headers.authorization }, 
+            { $set: { rolesdata : req.body.roleid } }, 
+            { returnDocument : 'after' })
+            res.json({ status: 200, data: admin, message: "Success" })
         }
         catch (error) {
             console.log("error",error)

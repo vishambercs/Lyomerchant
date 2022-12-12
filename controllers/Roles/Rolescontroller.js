@@ -23,10 +23,10 @@ const axios                 = require('axios')
 var stringify               = require('json-stringify-safe');
 const Constant              = require('../../common/Constant');
 var otpGenerator            = require('otp-generator')
-require("dotenv").config()
-const jwt = require('jsonwebtoken');
-const listEndpoints = require('express-list-endpoints');
 const { default: ObjectID } = require('bson-objectid');
+require("dotenv").config()
+const jwt                   = require('jsonwebtoken');
+const listEndpoints         = require('express-list-endpoints');
 module.exports =
 {
     async get_all_all_API(req, res) 
@@ -39,7 +39,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async create_or_update_roles(req, res) 
     {
         try 
@@ -61,7 +60,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async get_all_roles(req, res) 
     {
         try 
@@ -85,7 +83,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async get_all_roles_with_permission(req, res) 
     {
         try 
