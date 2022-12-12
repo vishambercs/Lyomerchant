@@ -1,5 +1,6 @@
 var express = require('express');
 const mongoose = require('mongoose');
+var Constant        = require('./common/Constant');
 const bodyParser = require('body-parser');
 var client = require('./Route/clientsRoute');
 var poolRoute = require('./Route/poolRoute');
@@ -12,12 +13,13 @@ var payLinkRoute = require('./Route/paylinkRoute');
 var cornJobs = require('./common/cornJobs');
 const fileUpload = require('express-fileupload');
 const fs                = require('fs');
+const listEndpoints = require('express-list-endpoints')
 var path = require('path');
 const Web3 = require('web3');
 var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
 var app = express();
-// const https              = require('https');
+// const https = require('https');
 // const https = require('http');
 const https             = require('https');
 const Utility = require('./common/Utility');
@@ -67,6 +69,7 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 app.listen(process.env.SERVER_PORT, function () {
+    Constant.ALL_API = listEndpoints(app)
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });
 

@@ -99,10 +99,10 @@ router.post('/get_all_deposit_client_by_admin', Auth.is_admin,clientsController.
 "============= All Role Based ==================="
 router.post('/get_all_API',                       Auth.is_admin,Rolescontroller.get_all_all_API);
 router.post('/create_or_update_roles',            Auth.is_admin,Rolescontroller.create_or_update_roles);
-router.post('/create_or_update_roles_permission', Auth.is_admin,Rolescontroller.create_or_update_roles_permission);
+router.post('/create_roles_permission', Auth.is_admin,Rolescontroller.create_or_update_roles_permission);
 router.post('/get_all_roles',                     Auth.is_admin,Rolescontroller.get_all_roles);
 router.post('/update_role_Permisson',             Auth.is_admin,Rolescontroller.update_role_Permisson);
-
+router.post('/get_all_roles_with_permission',             Auth.is_admin,Rolescontroller.get_all_roles_with_permission);
 
 "============= All Client Wallet API ==================="
 router.post('/create_or_update_clienthotwallets',   Auth.is_admin,clientHotWallets.create_or_update_clienthotwallets);
