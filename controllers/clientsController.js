@@ -1422,7 +1422,7 @@ module.exports =
                 })
             }
 
-            res.json({ status: 200, data: { "withdrawdata":withdrawdata,"apidata" : api_Total_Balance,"pos" : posdata_Total_Balance,"topup" : Total_Balance , "paylink" : paylink_Total_Balance },message: "Success" })
+            res.json({ status: 200, data: { "withdrawdata":withdraw_Balance,"apidata" : api_Total_Balance,"pos" : posdata_Total_Balance,"topup" : Total_Balance , "paylink" : paylink_Total_Balance },message: "Success" })
         }
         catch (error) {
             console.log(error)
