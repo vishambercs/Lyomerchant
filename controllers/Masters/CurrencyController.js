@@ -263,6 +263,7 @@ module.exports =
             let pricetitle                  = Currency.title.toLowerCase()
             // pricedatacurrency[pricetitle]   = network.stablecoin == true ? ( 1 - pricemargin) : pricedatacurrency[pricetitle] - pricemargin
             // pricedatacurrency[pricetitle]   =  pricedatacurrency[pricetitle] - pricemargin
+            let getRatedata                 = await getRate(network.coin, Currency.title);
             pricedatacurrency[pricetitle]   = getRatedata - pricemargin
             pricedata[networktitle]         = pricedatacurrency[pricetitle]
             return  pricedatacurrency[pricetitle]
