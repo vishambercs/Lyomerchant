@@ -81,6 +81,14 @@ module.exports =
             let limit        = req.body.limit == ""   || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
             let skip         = req.body.skip   == ""   || req.body.skip  == undefined  ? 0 : parseInt(req.body.skip);
             let queryOptions = {}
+            if(req.body?.status)
+            {
+                queryOptions["status"] =  req.body.status
+            }
+            else
+            {
+                queryOptions["status"] =  1
+            }
             let clienthotwalletsData  = await clienthotwallets.find(queryOptions, ).populate([ 
                 { path: "networkdetails",         select: "id coin network _id" },
                 { path: "clientdetail", select: "id email first_name last_name type _id" },
