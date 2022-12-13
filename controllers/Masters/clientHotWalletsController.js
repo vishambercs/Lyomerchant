@@ -1,7 +1,5 @@
 
-
 const clienthotwallets      = require('../../Models/clienthotwallets');
-
 const RolesPermisson        = require('../../Models/RolesPermisson');
 const cornJobs              = require('../../common/cornJobs');
 var CryptoJS                = require('crypto-js')
@@ -14,6 +12,7 @@ const Web3                  = require('web3');
 const getMerchantWallets    = require('../../Models/clientWallets');
 const poolWallet            = require('../../Models/poolWallet');
 const transactionPools      = require('../../Models/transactionPool');
+const clients               = require('../../Models/clients');
 const { authenticator }     = require('otplib')
 const QRCode                = require('qrcode')
 const network               = require('../../Models/network');
@@ -35,18 +34,23 @@ module.exports =
     {
         try 
         {
+
+            let client  = await clients.findOne({_id :  req.body.clientdetail })
+
             if(req.body.id == "")
             {
-                let clienthotwallet = await clienthotwallets.insertMany({
+
+                const clienthotwallet = new clienthotwallets({
                     address         : req.body.address,
                     networkdetails  : req.body.networkdetails, 
                     clientdetail    : req.body.clientdetail,
                     status          : req.body.status,
-                    api_key         : req.body.api_key,
+                    api_key         : client.api_key,
                     created_by      : req.headers.authorization
-                
                 })
-                return res.json({ status: 200, data: clienthotwallet, message: "Success" })
+                let clientdata = await clienthotwallet.save()
+                console.log("clientdata",clientdata) 
+                res.json({ status: 200, data: clientdata, message: "Success" })
             }
             else
             {
@@ -56,7 +60,7 @@ module.exports =
                     networkdetails  : req.body.networkdetails, 
                     clientdetail    : req.body.clientdetail,
                     status          : req.body.status,
-                    api_key         : req.body.api_key,
+                    api_key         : client.api_key,
                     updated_by      : req.headers.authorization 
                 
                 }}, { returnDocument:'after' })

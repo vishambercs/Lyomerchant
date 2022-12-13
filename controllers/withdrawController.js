@@ -252,7 +252,7 @@ module.exports =
             // const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
 
             if (req.body.currencyid != undefined && req.body.currencyid != "") {
-                const currency = await currencies.findOne({ "id": req.body.currencyid, status: 1 })
+                const currency = await currencies.findOne({ "id" : req.body.currencyid, status : 1 })
 
                 if (currency == null) {
                     return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
@@ -307,9 +307,9 @@ module.exports =
                 let kytdata = await postRequest(val.id, network.kyt_network_id, val.address_to, val.amount, val.amount, val.createdAt)
                 let external_response = kytdata.status == 200 ? kytdata.data.data.externalId : ""
                 let withdrawlog = await withdrawLogs.findOneAndUpdate({ id: val.id }, { $set: { external_id: external_response, queue_type: 0 } })
-                console.log("withdrawlog", withdrawlog)
+               
                 let kycurl = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", external_response)
-                console.log("kycurl", kycurl)
+             
                 // let response            = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
                 // let status              = Object.keys(response.data.body).length > 0 ? 2 : 3
                 let status = 3
