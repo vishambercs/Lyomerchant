@@ -211,23 +211,24 @@ module.exports =
 
     async save_withdraw(req, res) {
         try {
-            const network         = await networks.findOne({ _id : ObjectID(req.body.network_id) })
+            const network         = await networks.findOne({ id : req.body.network_id })
             const prevwithdrawLog = await withdrawLogs.findOne({  api_key: req.headers.authorization, network_id: network.id, status: 0 })
             // const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: network.id })
-            let totalData         = await creat_Total_Depossit(req.body.network_id ,req.headers.authorization)
-            const balance         = totalData.status == 200 ? totalData.nettotal : null
-            
+            let totalData         = await creat_Total_Depossit(network._id ,req.headers.authorization)
+            const balance         = totalData.status == 200 ? totalData.data.nettotal : null
+            console.log("balance",totalData)
+            console.log("balance",balance)
             if (balance == null) {
                 return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
             
             let coinprice         = await priceNewConversition(network.currencyid.toLocaleLowerCase())
             let nativeprice       = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
-           
+            console.log("balance",req.body.amount < (network.transferlimit / coinprice))
             if (req.body.amount < (network.transferlimit / coinprice)) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
-
+            console.log("balance",req.body.amount >= balance)
             if (req.body.amount >= balance) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
@@ -316,8 +317,8 @@ module.exports =
                 let kytlog = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(kytdata.data.data), withdraw_id: val.id }])
 
                 if (status == 3) {
-                    let prevbalance = parseFloat(clientWallet.balance) - parseFloat(req.body.amount)
-                    let newclientWallet = await clientWallets.findOneAndUpdate({ id: clientWallet.id }, { $set: { balance: prevbalance } }, { returnDocument: 'after' })
+                    let prevbalance = parseFloat(balance) - parseFloat(req.body.amount)
+                    let newclientWallet = await clientWallets.findOneAndUpdate({network_id:network.id ,client_api_key: req.headers.authorization }, { $set: { balance: prevbalance } }, { returnDocument: 'after' })
                     return res.json({ status: 200, message: "Saved Successfully", data: val })
                 }
                 if (status == 2) {
@@ -921,127 +922,127 @@ module.exports =
             res.json({ status: 400, data: error, message: "Error" })
         }
     },
-    async save_withdraw(req, res) {
-        try {
-            const network = await networks.findOne({ id: req.body.network_id })
-            const prevwithdrawLog = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
-            const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
-            let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
-            let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
+    // async save_withdraw(req, res) {
+    //     try {
+    //         const network = await networks.findOne({ id: req.body.network_id })
+    //         const prevwithdrawLog = await withdrawLogs.findOne({ api_key: req.headers.authorization, network_id: req.body.network_id, status: 0 })
+    //         const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: req.body.network_id })
+    //         let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
+    //         let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
          
-            if (req.body.amount < (network.transferlimit / coinprice)) {
-                return res.json({ status: 200, data: {}, message: "Invalid Amount" })
-            }
+    //         if (req.body.amount < (network.transferlimit / coinprice)) {
+    //             return res.json({ status: 200, data: {}, message: "Invalid Amount" })
+    //         }
 
-            if (req.body.amount >= clientWallet.balance) {
-                return res.json({ status: 200, data: {}, message: "Invalid Amount" })
-            }
+    //         if (req.body.amount >= clientWallet.balance) {
+    //             return res.json({ status: 200, data: {}, message: "Invalid Amount" })
+    //         }
 
-            if (network == null) {
-                return res.json({ status: 400, data: {}, message: "Unsupported Network " })
-            }
-            let amount = parseFloat(req.body.amount)
-
-
-            let ethPrice = 0;
-            let withdrawable = 0;
-            let fee = 0;
-            let networkid = ''
-            let settings = ''
-            let data = 100
-
-            let current_currency = "usd"
+    //         if (network == null) {
+    //             return res.json({ status: 400, data: {}, message: "Unsupported Network " })
+    //         }
+    //         let amount = parseFloat(req.body.amount)
 
 
-            const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
+    //         let ethPrice = 0;
+    //         let withdrawable = 0;
+    //         let fee = 0;
+    //         let networkid = ''
+    //         let settings = ''
+    //         let data = 100
 
-            if (req.body.currencyid != undefined && req.body.currencyid != "") {
-                const currency = await currencies.findOne({ "id": req.body.currencyid, status: 1 })
-
-                if (currency == null) {
-                    return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
-                }
-                else {
-                    current_currency = currency != null ? currency.title.toLowerCase() : current_currency
-                }
-
-            }
-            if (balance == null) {
-                return res.json({ status: 400, data: null, message: "Wallet did not find" })
-            }
-            // const network   = await networks.findOne({ id: balance.network_id })
+    //         let current_currency = "usd"
 
 
+    //         const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
 
-            let transfer_fee = 0;
-            let networkFee = null;
-            let tokencurrency = amount * coinprice
-            let cryptoprice = 0;
-            networkFee = await Network_Fee_Calculation(network, amount)
-            let token_data = 0;
-            let network_fee = 0;
+    //         if (req.body.currencyid != undefined && req.body.currencyid != "") {
+    //             const currency = await currencies.findOne({ "id": req.body.currencyid, status: 1 })
 
-            if (network.cointype == "Token") {
-                console.log(nativeprice)
-                console.log(network.cointype)
-                token_data = (networkFee.data.gaspriceether * nativeprice)
-            }
-            else {
-                token_data = (networkFee.data.gaspriceether * coinprice)
-            }
-            transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data
-            network_fee = amount * (1 / 100)
-            cryptoprice = transfer_fee / coinprice
+    //             if (currency == null) {
+    //                 return res.json({ status: 400, data: null, message: "Invalid Currency ID" })
+    //             }
+    //             else {
+    //                 current_currency = currency != null ? currency.title.toLowerCase() : current_currency
+    //             }
+
+    //         }
+    //         if (balance == null) {
+    //             return res.json({ status: 400, data: null, message: "Wallet did not find" })
+    //         }
+    //         // const network   = await networks.findOne({ id: balance.network_id })
 
 
-            const withdrawLog = new withdrawLogs({
-                id: crypto.randomBytes(20).toString('hex'),
-                api_key: req.headers.authorization,
-                network_id: req.body.network_id,
-                amount: req.body.amount,
-                networkFee: network_fee,
-                fee: (cryptoprice + network_fee),
-                processingfee: cryptoprice,
-                netamount: (req.body.amount - (cryptoprice + network_fee)),
-                address_to: req.body.address_to,
-                address_from: " ",
-                transcation_hash: " ",
-                timestamps: new Date().getTime(),
-                status: 0
-            });
-            withdrawLog.save().then(async (val) => {
-                let kytdata = await postRequest(val.id, network.kyt_network_id, val.address_to, val.amount, val.amount, val.createdAt)
-                let external_response = kytdata.status == 200 ? kytdata.data.data.externalId : ""
-                let withdrawlog = await withdrawLogs.findOneAndUpdate({ id: val.id }, { $set: { external_id: external_response, queue_type: 0 } })
-                console.log("withdrawlog", withdrawlog)
-                let kycurl = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", external_response)
-                console.log("kycurl", kycurl)
-                // let response            = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
-                // let status              = Object.keys(response.data.body).length > 0 ? 2 : 3
-                let status = 3
-                let withdrawdata = await withdrawLogs.findOneAndUpdate({ id: withdrawlog.id }, { $set: { status: status, queue_type: status } }, { returnDocument: 'after' })
-                let kytlog = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(kytdata.data.data), withdraw_id: val.id }])
 
-                if (status == 3) {
-                    let prevbalance = parseFloat(clientWallet.balance) - parseFloat(req.body.amount)
-                    let newclientWallet = await clientWallets.findOneAndUpdate({ id: clientWallet.id }, { $set: { balance: prevbalance } }, { returnDocument: 'after' })
-                    return res.json({ status: 200, message: "Saved Successfully", data: val })
-                }
-                if (status == 2) {
-                    await client.findOneAndUpdate({ api_key: clientWallet.client_api_key }, { $set: { authtoken: "", disablestatus: true, disable_remarks: "Due to KYT did not approved", disable_date: new Date().toString() } }, { returnDocument: 'after' })
-                    return res.json({ status: 400, message: "Your Account Has Disabled. Kindly Contact Customer Support", data: {} })
-                }
+    //         let transfer_fee = 0;
+    //         let networkFee = null;
+    //         let tokencurrency = amount * coinprice
+    //         let cryptoprice = 0;
+    //         networkFee = await Network_Fee_Calculation(network, amount)
+    //         let token_data = 0;
+    //         let network_fee = 0;
 
-            }).catch(error => {
-                console.log(error)
-                res.json({ status: 400, data: {}, message: "Invalid" })
-            })
-        }
-        catch (error) {
-            console.log(error)
-            res.json({ status: 400, data: {}, message: "Invalid" })
-        }
-    },
+    //         if (network.cointype == "Token") {
+    //             console.log(nativeprice)
+    //             console.log(network.cointype)
+    //             token_data = (networkFee.data.gaspriceether * nativeprice)
+    //         }
+    //         else {
+    //             token_data = (networkFee.data.gaspriceether * coinprice)
+    //         }
+    //         transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data
+    //         network_fee = amount * (1 / 100)
+    //         cryptoprice = transfer_fee / coinprice
+
+
+    //         const withdrawLog = new withdrawLogs({
+    //             id: crypto.randomBytes(20).toString('hex'),
+    //             api_key: req.headers.authorization,
+    //             network_id: req.body.network_id,
+    //             amount: req.body.amount,
+    //             networkFee: network_fee,
+    //             fee: (cryptoprice + network_fee),
+    //             processingfee: cryptoprice,
+    //             netamount: (req.body.amount - (cryptoprice + network_fee)),
+    //             address_to: req.body.address_to,
+    //             address_from: " ",
+    //             transcation_hash: " ",
+    //             timestamps: new Date().getTime(),
+    //             status: 0
+    //         });
+    //         withdrawLog.save().then(async (val) => {
+    //             let kytdata = await postRequest(val.id, network.kyt_network_id, val.address_to, val.amount, val.amount, val.createdAt)
+    //             let external_response = kytdata.status == 200 ? kytdata.data.data.externalId : ""
+    //             let withdrawlog = await withdrawLogs.findOneAndUpdate({ id: val.id }, { $set: { external_id: external_response, queue_type: 0 } })
+    //             console.log("withdrawlog", withdrawlog)
+    //             let kycurl = process.env.KYC_URL + process.env.KYT_URL_ALERTS.replace("id", external_response)
+    //             console.log("kycurl", kycurl)
+    //             // let response            = await axios({ method: 'get', url: kycurl, headers: { 'Authorization': process.env.KYC_URL_TOKEN ,}})
+    //             // let status              = Object.keys(response.data.body).length > 0 ? 2 : 3
+    //             let status = 3
+    //             let withdrawdata = await withdrawLogs.findOneAndUpdate({ id: withdrawlog.id }, { $set: { status: status, queue_type: status } }, { returnDocument: 'after' })
+    //             let kytlog = await kytlogs.insertMany([{ id: mongoose.Types.ObjectId(), logs: JSON.stringify(kytdata.data.data), withdraw_id: val.id }])
+
+    //             if (status == 3) {
+    //                 let prevbalance = parseFloat(clientWallet.balance) - parseFloat(req.body.amount)
+    //                 let newclientWallet = await clientWallets.findOneAndUpdate({ id: clientWallet.id }, { $set: { balance: prevbalance } }, { returnDocument: 'after' })
+    //                 return res.json({ status: 200, message: "Saved Successfully", data: val })
+    //             }
+    //             if (status == 2) {
+    //                 await client.findOneAndUpdate({ api_key: clientWallet.client_api_key }, { $set: { authtoken: "", disablestatus: true, disable_remarks: "Due to KYT did not approved", disable_date: new Date().toString() } }, { returnDocument: 'after' })
+    //                 return res.json({ status: 400, message: "Your Account Has Disabled. Kindly Contact Customer Support", data: {} })
+    //             }
+
+    //         }).catch(error => {
+    //             console.log(error)
+    //             res.json({ status: 400, data: {}, message: "Invalid" })
+    //         })
+    //     }
+    //     catch (error) {
+    //         console.log(error)
+    //         res.json({ status: 400, data: {}, message: "Invalid" })
+    //     }
+    // },
 
 
 }

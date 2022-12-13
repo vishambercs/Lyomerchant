@@ -4,6 +4,9 @@ const transaction = require("../transcationpoolController")
 const fastPaymentCode = require('../../Models/fastPaymentCode');
 const merchantStore = require('../../Models/merchantstore');
 const clients = require('../../Models/clients');
+const networks = require('../../Models/network');
+
+
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
 const poolWallet = require('../../Models/poolWallet');
 var crypto = require("crypto");
@@ -100,6 +103,7 @@ async function assignPaymentLinkMerchantWallet(networkType, api_key, amount, cur
     }
 }
 
+
 module.exports =
 {
     async createHostePayment(req, res) {
@@ -166,7 +170,102 @@ module.exports =
     },
 
 
+    async createHostePaymentwithcrypto(req, res) {
+        try {
+            let invoiceObject = req.body
+            let invoiceid = ''
+            var merchantKey = req.headers.authorization
+            var tripId = req.body.tripId
+            const duedate = new Date(req.body.duedate);
+            const currentdate = new Date();
 
+            if (duedate <= currentdate) {
+                return res.json({ status: 400, data: {}, message: "Invalid Date" })
+            }
+          
+            const sum = (req.body.items != null && req.body.items != "") ? req.body.items.reduce((accumulator, object) => {
+                return accumulator + object.amount;
+            }, 0) : req.body.totalAmount;
+
+            if (req.body.totalAmount != sum) {
+                return res.json({ status: 400, data: {}, message: "Invalid Total Amount" })
+            }
+         
+            let store_invoice = await storeInvoice(
+                invoiceObject.invoiceNumber,
+                merchantKey,
+                invoiceObject.items,
+                req.body.customerName,
+                req.body.email,
+                req.body.mobileNumber,
+                req.body.duedate,
+                req.body.additionalNotes,
+                req.body.payment_reason,
+                req.body.currency,
+                req.body.totalAmount,
+                req.body.orderId,
+                req.body.callbackURL,
+                req.body.errorURL,
+                tripId
+            )
+            if (store_invoice.status != 200) {
+                return res.json(store_invoice)
+            }
+
+            let storepaylink = await storepaylinkPayment(store_invoice.data.id)
+            if (storepaylink.status != 200) {
+                return res.json(storepaylink)
+            }
+
+            let paylinkID       = storepaylink.data.id
+            var networkType     = req.body.networkType
+            let account         = await poolwalletController.getPoolWalletID(networkType)
+            let network_details = await networks.findOne({ 'id': networkType })
+            let client          = await clients.findOne({ 'api_key': req.headers.authorization })
+            let payLink         = await paylinkPayment.findOne({ 'id': paylinkID })
+            let invoicedata     = await invoice.findOne({ 'id': payLink.invoice_id })
+            let pricedata       = 0
+            let amount_total    = invoicedata != null ? invoicedata.totalAmount : req.body.totalAmount
+            // let cryptoamount    = parseFloat(amount_total) / parseFloat(pricedata)
+            let currentDateTemp = Date.now();
+            let currentDate     = parseInt((currentDateTemp / 1000).toFixed());
+            const newRecord     = new paymentLinkTransactionPool({
+                id: mongoose.Types.ObjectId(),
+                api_key: req.headers.authorization,
+                paymenttype: req.body.paymenttype,
+                invoicedetails:invoicedata._id,
+                poolwalletID: account.id,
+                amount: amount_total,
+                currency: req.body.currency,
+                callbackURL: req.body.callbackURL,
+                errorURL: req.body.errorURL,
+                payLinkId: paylinkID,
+                orderType: req.body.orderType,
+                clientToken: req.body.token,
+                status: 0,
+                walletValidity: currentDate,
+                timestamps: new Date().getTime(),
+                clientdetail: client._id,
+                pwid: account._id,
+                nwid: network_details._id,
+                paymentdetails: payLink._id,
+            });
+            newRecord.save().then(async (val) => {
+                await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
+                let data = {"paylinkid" :payLink.id ,"invoiceid" :invoicedata.id  ,transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
+                
+                res.json({ status: 200, message: "Payment Link Wallet Assigned Successfully", data: data })
+            }).catch(error => {
+                console.log("errorr", error)
+                res.json({ status: 401, data: {}, message: error })
+            })
+
+        }
+        catch (error) {
+            console.log("paymentHostedController createHostePayment", error)
+            return { status: 400, data: {}, message: "Error" }
+        }
+    },
 
     async IPN_Testing(req, res) {
         try {

@@ -16,6 +16,6 @@ router.post('/deleteFastCode',                      Auth.paylink_have_access,pay
 router.post('/deleteInvoice',                       Auth.paylink_have_access,payLinkController.deleteInvoice);
 router.post('/assignPaymentLinkMerchantWallet',     Auth.public_paylink_access,payLinkController.assignPaymentLinkMerchantWallet)
 router.post('/assignFastCodeMerchantWallet',        Auth.fastpay_have_access,payLinkController.assignPaymentLinkMerchantWallet)
-router.post('/assignFastCodeMerchantWalletwithcrypto',        Auth.fastpay_have_access,payLinkController.assignPaymentLinkMerchantWalletforcrypto)
+// router.post('/assignFastCodeMerchantWalletwithcrypto',        Auth.fastpay_have_access,payLinkController.assignPaymentLinkMerchantWalletforcrypto)
 router.post('/cancelpaymentLink',                   payLinkController.cancelpaymentLink);
 module.exports = router;
