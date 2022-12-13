@@ -90,7 +90,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Invalid Request" })
         }
     },
-
     async plugin_have_access(req, res, next) {
         try {
 
@@ -109,7 +108,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "You have not plugin access. Please create a request for this service." })
         }
     },
-
     async Verfiy_Kyc_Header(req, res, next) {
         try {
             console.log("Verfiy_Kyc_Header ===========", req.body)
