@@ -1004,7 +1004,7 @@ module.exports =
                     { path: "pwid",         select: "network_id id balance address remarks _id" },
                     { path: "nwid",         select: "id coin network _id" },
                     { path: "clientdetail", select: "id email first_name last_name type _id" },
-                    { path: "invoicedetails" , select:"id customerName payment_reason email mobileNumber duedate totalAmount  _id"   },
+                    { path: "invoicedetails" , select:"id tripId invoiceNumber customerName payment_reason email mobileNumber duedate totalAmount  _id"   },
                     { path: "paymentdetails", select:"id invoice_id "},
                 ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                 total  = await paymentLinkTransactionPool.find({clientdetail : client._id}).count();
