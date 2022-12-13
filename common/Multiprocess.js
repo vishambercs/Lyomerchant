@@ -20,10 +20,9 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
         connection.on('message', async function (message) {
                 
             let jsondata        = JSON.parse(message.utf8Data)
-            console.log("jsondata=========",jsondata)
             let transData       = {}
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
-            console.log("index=========",index)
+           
             if(index != -1 )
             {
                 transData       = Constant.topupTransList[index]
@@ -52,7 +51,9 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                 let transData       = Constant.topupTransList[index]
                 let response        = { transkey:jsondata.transid ,amountstatus: jsondata.status, "paymentData": {}, status: jsondata.balancedata.status, message: "Success" };
                 let balanceResponse = JSON.stringify(response)
+                if(transData != null){
                 transData.connection.sendUTF(balanceResponse);
+                }
             }
         });
     });

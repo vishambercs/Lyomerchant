@@ -128,8 +128,8 @@ const fixedtopupcontroller          = require('../controllers/topup/fixedtopupco
 
 // "============================Create Top UP==============================="
 
-//router.post('/assigntopupMerchantWallet',   Auth.verify_verifythedata,topupcontroller.create_top_payment);
-router.post('/assigntopupMerchantWallet',   Auth.verify_verifythedata,topupcontroller.create_top_payment_withPoolWallet);
+router.post('/assigntopupMerchantWallet',   Auth.verify_verifythedata,topupcontroller.create_top_payment);
+//router.post('/assigntopupMerchantWallet',   Auth.verify_verifythedata,topupcontroller.create_top_payment_withPoolWallet);
 router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
@@ -137,6 +137,8 @@ router.post('/checkbalance',                topupcontroller.checkbalance);
 router.post('/verfiytranshash',             topupcontroller.verfiytranshash);
 router.post('/sendotp',                     topupcontroller.sendotp);
 router.post('/getTransStatus',              commonController.getTransStatus);
+router.post('/updatetrans',                 topupcontroller.updatetrans);
+
 // router.post('/updatetransbycallback',       topupcontroller.updatetransbycallback);
 router.post('/updatetransbyid',              Auth.Verfiy_WebHook,topupcontroller.updatetransbyid);
 

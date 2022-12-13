@@ -290,6 +290,7 @@ module.exports =
 {
     async create_top_payment(req, res) {
         try {
+            console.log("create_top_payment",req.body)
             var merchantKey = req.headers.authorization
             var networkType = req.body.networkType
             var orderid = req.body.orderid
@@ -322,6 +323,12 @@ module.exports =
             transactionPool.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
                 let url = process.env.TOP_UP_URL + val.id
+                if(req.body.transtype == "wewe"){
+                    url = process.env.WEWE_UP_URL + val.id
+                }
+                else if(req.body.transtype == "fapi"){
+                    url = process.env.LYOMERCHANT_UP_URL + val.id
+                }
                 let data = { url: url }
                 res.json({ status: 200, message: "Assigned Merchant Wallet Successfully", data: data })
             }).catch(error => {
@@ -722,7 +729,61 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+    async updatetrans(req, res) 
+    {
+        try 
+        {
+            if(req.body.amount == 0  ||req.body.amount  == undefined  )
+            {
+                return res.json({ status: 400, message: "Invalid Amount", data: {} })
+            }
+            
+            let transactionPool = await topup.findOneAndUpdate(
+                {id: req.body.id , otp:req.body.otp , status : 0 },
+                {$set : {
+                    status          : 1,
+                    transhash       : req.body.transhash,
+                    amount          : req.body.amount,
+                    updated_at      : new Date().toString(),
+                }},
+                {'returnDocument' : 'after'}
+                )
+            
+                if (transactionPool == null) 
+            {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+           
 
+            let transWallet = await poolWallet.findOne({ id: transactionPool.poolwalletID })
+            if (transWallet == null) {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let network     = await networks.findOne({ id: transWallet.network_id })
+            let price       = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
+            let faitprice = price * req.body.amount
+            
+            await topup.findOneAndUpdate( {id: req.body.id }, { $set : { fiat_amount :  faitprice } })
+            
+            await updateOtherAPI(1, 
+                req.body.transhash, 
+                transactionPool.id ,
+                req.body.transhash, 
+                transactionPool.orderid,
+                network.coin,
+                transactionPool.amount,
+                faitprice,network.id,transWallet.address,faitprice,
+                network.network,
+                new Date().toString(),transactionPool.timestamps )
+
+            res.json({ status: 200, message: "Get The Data", data: "" })
+            
+        }
+        catch (error) {
+            console.log("checkbalance",error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    }, 
 
 
 }

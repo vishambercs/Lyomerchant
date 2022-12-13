@@ -418,37 +418,39 @@ async function Check_KYT_Address()
 
 async function get_Expired_Topup() 
 {
-    try 
-    {
+    // try 
+    // {
        
-       let threehours =  3 * ( 1000 * 60 * 60)
+    //    let threehours =  3 * ( 1000 * 60 * 60)
       
-       let topupdata =  await topup.find( { pwid : {$ne : null},status : {$in : [0,2]} ,"timestamp": { $gte: (new Date().getTime() - threehours) } })
-       .populate([ { path: "pwid",         select: "address" },])
-         if(topupdata.length > 0){
-        let finalArray = topupdata.map(function (obj) {  return obj.pwid.address });
-        let url = process.env.FREE_ADDRESSES_URL
+    //    let topupdata =  await topup.find( { pwid : {$ne : null},status : {$in : [0,2]} ,"createdAt": { $gte: new Date( new Date().getTime() - threehours ).toISOString() } })
+    //    .populate([ { path: "pwid",         select: "address" },])
+    //    console.log("Data",topupdata.length)  
+    //    if(topupdata.length > 0){
+    //     let finalArray = topupdata.map(function (obj) {  return obj.pwid.address });
+    //     let url = process.env.FREE_ADDRESSES_URL
         
-        let api_call_data = await Api_Call.callPoolWalletAPI(url,{addresses:finalArray},{ headers: { 'Content-Type': 'application/json'} })
-        if(api_call_data.status != 400)
-        {
-            let topupdataupdate =  await topup.updateMany( 
-             { pwid : {$ne : null}, status : {$in : [0,2]} ,"timestamp": { $gte: (new Date().getTime() - threehours) } } 
-            ,{ $set : { "status" : 4   } } )
-            console.log("topupdataupdate",topupdataupdate)
-            let poolWalletsupdate =  await poolWallets.updateMany( { status : {$in : finalArray} ,"status": 1 } ,{ $set : { "status" : 0   } } ) 
-            console.log("poolWalletsupdate",poolWalletsupdate)
-        }
-        console.log("api_call_data",api_call_data)
+    //     let api_call_data = await Api_Call.callPoolWalletAPI(url,{addresses:finalArray},{ headers: { 'Content-Type': 'application/json'} })
+    //     if(api_call_data.status != 400)
+    //     {
+    //         let topupdataupdate =  await topup.updateMany( 
+    //          { pwid : {$ne : null}, status : {$in : [0,2]} ,"createdAt": { $gte: new Date( new Date().getTime() - threehours ).toISOString() } } 
+    //         ,{ $set : { "status" : 4   } } )
+    //         console.log("topupdataupdate",topupdataupdate)
+    //         let poolWalletsupdate =  await poolWallets.updateMany( { status : {$in : finalArray} ,"status": 1 } ,{ $set : { "status" : 0   } } ) 
+    //         console.log("poolWalletsupdate",poolWalletsupdate)
+    //     }
+    //     console.log("api_call_data",api_call_data)
 
-        }
-         return JSON.stringify({ status: 200, data: topupdata.length, message: ""})
-    }
-    catch (error) 
-    {
-        console.log(error)
-        return JSON.stringify({ status: 400, data: {}, message: "Error"  })
-    }
+    //     }
+    //      return JSON.stringify({ status: 200, data: topupdata.length, message: ""})
+    // }
+    // catch (error) 
+    // {
+    //     console.log(error)
+    //     return JSON.stringify({ status: 400, data: {}, message: "Error"  })
+    // }
+    return JSON.stringify({ status: 200, data: {}, message: "Error"  })
 }
 
 module.exports =

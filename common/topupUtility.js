@@ -129,35 +129,87 @@ async function get_Fixed_Transcation_topup(transkey) {
         ])
     return pooldata
 }
+const getCoinPrice = async (coin) => {
+    if (["LYO", "LYO1"].includes(coin)) {
+        try {
+            const getBalanceRes = await axios.get(`https://openapi.lyotrade.com/sapi/v1/klines?symbol=LYO1USDT&interval=1min&limit=1`);
+            return getBalanceRes.data[0]['close'];
+         } catch(e) {
+            console.log(e);
+            return 1;
+         }
+    } 
+    if (["tUSDT"].includes(coin)) {
+        try {
+            const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=USDTUSDT&interval=1m&limit=1`);
+            return getBalanceRes.data[0]['close'];
+         } catch(e) {
+            console.log(e);
+            return 1;
+         }
+    }
+    
+    else {
+        try {
+           const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=1m&limit=1`);
+           return getBalanceRes.data[0][4];
+        } catch(e) {
+           console.log(e);
+           return 1;
+        }
+    }
+}
+const getFiatRates = async (coin) => {
+    try {
+       const getBalanceRes = await axios.get(`https://www.binance.com/bapi/asset/v1/public/asset-service/product/currency`);
+       const rate = await getBalanceRes.data.data.find(element => element.pair.includes(coin)).rate;
+       return rate;
+    } catch(e) {
+       console.log(e);
+       return 1;
+    }
+}
+const getRate = async (crypto, fiat) => {
+    if (crypto === 'USDT') {
+        const fiatRate = await getFiatRates(fiat);
+        return (parseFloat(1)*parseFloat(fiatRate)).toFixed(4);
+    } else {
+        const getCryptoToUsdt = await getCoinPrice(crypto);
+        const fiatRate = await getFiatRates(fiat);
+        return (parseFloat(getCryptoToUsdt)*parseFloat(fiatRate)).toFixed(4);
+    }
+}
 async function pricecalculation(coinid, balance) {
     try {
         let networks = await network.findOne({ 'id': coinid })
-        let networktitle = networks.currencyid.toLowerCase()
-        let parameters = `ids=${networktitle}&vs_currencies=usd`
-        let COINGECKO_URL = process.env.COINGECKO + parameters
-        response = {}
-        if (!alreadySetCurrency.includes(networktitle)) {
-            await axios.get(COINGECKO_URL, { params: {}, headers: {} }).then(res => {
-                var stringify_response = stringify(res)
-                response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
-            }).catch(error => {
-                console.error("Error", error)
-                var stringify_response = stringify(error)
-                response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
-            })
-            var stringify_response = JSON.parse(response.data)
-          
-            let pricedata = stringify_response.data
-            console.log("pricedata", pricedata)
-            let pricedatacurrency = pricedata[networktitle]
-            priceflag[networktitle] = pricedatacurrency["usd"];
-            alreadySetCurrency.push(networktitle);
-            setTimeout(() => {
-                alreadySetCurrency.splice(alreadySetCurrency.indexOf(networktitle), 1);
-            }, 10000);
-        }
-        
-        let price = parseFloat(priceflag[networktitle]) * parseFloat(balance)
+        // let networktitle = networks.currencyid.toLowerCase()
+        // let parameters = `ids=${networktitle}&vs_currencies=usd`
+        // let COINGECKO_URL = process.env.COINGECKO + parameters
+        // response = {}
+        // if (!alreadySetCurrency.includes(networktitle)) {
+        //     await axios.get(COINGECKO_URL, { params: {}, headers: {} }).then(res => {
+        //         var stringify_response = stringify(res)
+        //         response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+        //     }).catch(error => {
+        //         console.error("Error", error)
+        //         var stringify_response = stringify(error)
+        //         response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+        //     })
+        //     var stringify_response = JSON.parse(response.data)
+        //     let pricedata = stringify_response.data
+        //     let pricedatacurrency = pricedata[networktitle]
+        //     console.log("stablecoin",networks.stablecoin )
+        //     priceflag[networktitle] = networks.stablecoin == true ? 1 : pricedatacurrency["usd"];
+
+
+        //     alreadySetCurrency.push(networktitle);
+        //     setTimeout(() => 
+        //     {
+        //         alreadySetCurrency.splice(alreadySetCurrency.indexOf(networktitle), 1);
+        //     }, 10000);
+        // }
+        let getRatedata         = await getRate(networks.coin,"USD");
+        let price = parseFloat(getRatedata) * parseFloat(balance)
   
 
         return price;

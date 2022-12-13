@@ -406,7 +406,6 @@ module.exports =
         }
     },
 
-
     async verify_variables(req, res, next) {
         try {
             const validationRule = {
@@ -954,13 +953,18 @@ module.exports =
                 "apiredirecturl": "required",
                 "callbackurl": "required",
                 "currency": "required",
-                "currency": "required",
+
             };
+
+            let clientdata = await clients.findOne({ api_key: req.headers.authorization })
+
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
                     res.status(200).send({ status: 400, success: false, message: 'Validation failed', data: err });
                 }
-
+                else if (clientdata == null) {
+                    res.status(200).send({ status: 400, success: false, message: 'Invalid Data', data: err });
+                }
                 else {
                     next();
                 }
@@ -974,11 +978,11 @@ module.exports =
 
     async Verfiy_WebHook(req, res, next) {
         try {
-            console.log("Verfiy_WebHook",req.headers)
+            console.log("Verfiy_WebHook", req.headers)
 
             let token = req.headers.authorization;
-            console.log("Verfiy_WebHook",token)
-            console.log("Verfiy_WebHook",req.body)
+            console.log("Verfiy_WebHook", token)
+            console.log("Verfiy_WebHook", req.body)
 
             if (token != "29443d9be42dc1f0fc4f4771d9327e8f6ba57c8a") {
                 res.status(400).send({ status: 400, success: false, message: 'Validation failed', data: "" });
