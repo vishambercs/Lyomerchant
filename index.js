@@ -165,7 +165,7 @@ const privateKey   = fs.readFileSync('/etc/letsencrypt/live/cpgapi.pulseworld.co
 const certificate  = fs.readFileSync('/etc/letsencrypt/live/cpgapi.pulseworld.com/cert.pem',     'utf8');
 const ca           = fs.readFileSync('/etc/letsencrypt/live/cpgapi.pulseworld.com/fullchain.pem',    'utf8');
 
-// app.get('/', function (req, res) { res.send('Welcome '); });
+app.get('/', function (req, res) { res.send('Welcome '); });
 app.use('/', client);
 
 
@@ -189,8 +189,53 @@ var topupserver = https.createServer({
 }).listen(process.env.TOP_UP_PORT, () => {
 console.log(`Example app listening at ${process.env.TOP_UP_PORT}`);
 })
+
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.topupWebScokect)
+
+
+const weweprivateKey   = fs.readFileSync('/etc/letsencrypt/live/finapi.weweglobal.io/privkey.pem',  'utf8');
+const wewecertificate  = fs.readFileSync('/etc/letsencrypt/live/finapi.weweglobal.io/cert.pem',     'utf8');
+const weweca           = fs.readFileSync('/etc/letsencrypt/live/finapi.weweglobal.io/fullchain.pem',    'utf8');
+
+
+
+var weweserver = https.createServer({
+    key                 :  weweprivateKey,
+    cert                :  wewecertificate,  
+    ca                  :  weweca, 
+    requestCert         :  false, 
+    rejectUnauthorized  :  false
+
+}).listen(process.env.WEWE_PORT, () => {
+console.log(`Example app listening at ${process.env.WEWE_PORT}`);
+})
+
+const weweserverdata = new webSocketServer({ httpServer: weweserver });
+weweserverdata.on('request', Utility.topupWebScokect)
+
+
+
+const Topup_lyo_privateKey   = fs.readFileSync('/etc/letsencrypt/live/fapi.lyomerchant.com/privkey.pem',  'utf8');
+const Topup_lyo_certificate  = fs.readFileSync('/etc/letsencrypt/live/fapi.lyomerchant.com/cert.pem',     'utf8');
+const Topup_lyo_ca           = fs.readFileSync('/etc/letsencrypt/live/fapi.lyomerchant.com/fullchain.pem',    'utf8');
+
+
+
+var Topup_lyoserver     = https.createServer({
+    key                 :  Topup_lyo_privateKey,
+    cert                :  Topup_lyo_certificate,  
+    ca                  :  Topup_lyo_ca, 
+    requestCert         :  false, 
+    rejectUnauthorized  :  false
+
+}).listen(process.env.LYOMERCHANT_TOPUP_PORT, () => {
+console.log(`Example app listening at ${process.env.LYOMERCHANT_TOPUP_PORT}`);
+})
+
+const Topup_lyoserverdata = new webSocketServer({ httpServer: Topup_lyoserver });
+Topup_lyoserverdata.on('request', Utility.topupWebScokect)
+
 
 
 
