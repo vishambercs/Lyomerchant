@@ -272,7 +272,7 @@ async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, Co
         if (Type == "Web3") {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             gasPrice = await WEB3.eth.getGasPrice();
-            if (ContractAddress != "") 
+            if (!isEmpty(ContractAddress)) 
             {
                 const contract = new WEB3.eth.Contract(Constant.GAS_ABI, ContractAddress);
                 gasAmount = await contract.methods.transfer(toAddress,  amount).estimateGas({ from: fromAddress });
@@ -309,7 +309,6 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             
             if (!isEmpty(ContractAddress)) 
             {
-                console.log(ContractAddress, 'contract address');
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
                 token_balance = await contract.methods.balanceOf(Address.toLowerCase()).call();
                 let decimals = await contract.methods.decimals().call();
@@ -561,14 +560,15 @@ module.exports =
             amountstatus    = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
            
-            // let GasFee = await calculateGasFee
-            //     (
-            //         addressObject.networkDetails[0].nodeUrl, 
-            //         addressObject.networkDetails[0].libarayType,
-            //         addressObject.poolWallet[0].address,
-            //         hotWallet.address,
-            //         BalanceOfAddress.data.token_balance,
-            //         addressObject.networkDetails[0].contractAddress)
+            let GasFee = await calculateGasFee
+                (
+                    addressObject.networkDetails[0].nodeUrl, 
+                    addressObject.networkDetails[0].libarayType,
+                    addressObject.poolWallet[0].address,
+                    hotWallet.address,
+                    BalanceOfAddress.data.token_balance,
+                    addressObject.networkDetails[0].contractAddress,
+                )
 
 
                    
@@ -615,7 +615,7 @@ module.exports =
                     }
                     let poolwallet             = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
                     let balanceTransfer        = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
-                    // let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
+                    let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
                     
                     var emailTemplateName = 
                     { 
