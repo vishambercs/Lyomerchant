@@ -297,7 +297,7 @@ async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, Co
     }
 }
 async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
-    console.log(Address, Address.toLowerCase());
+    console.log(Address, Address.toLowerCase(), ContractAddress);
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
