@@ -30,6 +30,7 @@ const payLink = require('../Models/payLink');
 const invoice = require('../Models/invoice');
 const IPNS = require('../Models/IPN');
 const emailSending = require('./emailSending');
+const isEmpty = require('../Validation/isEmpty');
 
 async function amountCheck(previous, need, current) {
     var net_amount = current - previous
@@ -306,7 +307,7 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
         if (Type == "Web3") {
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             
-            if (ContractAddress != "") 
+            if (!isEmpty(ContractAddress)) 
             {
                 console.log(ContractAddress, 'contract address');
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
