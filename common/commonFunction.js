@@ -809,6 +809,7 @@ module.exports =
             let transData = Constant.paymenlinkTransList[Constant.paymenlinkIndex]
             let transcationData = await payLinkUtility.get_Transcation_Paylink_Data(transData.transkey)
             let balance_data    = await payLinkUtility.getTrasnsBalance(transcationData)
+            console.log(balance_data);
             let balanceResponse = JSON.parse(balance_data)
             console.log(balanceResponse);
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
