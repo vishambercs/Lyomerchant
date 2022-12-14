@@ -297,6 +297,7 @@ async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, Co
     }
 }
 async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privateKey = "") {
+    console.log(Address, Address.toLowerCase());
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
@@ -308,14 +309,14 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             if (ContractAddress != "") 
             {
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
-                token_balance = await contract.methods.balanceOf(Address).call();
+                token_balance = await contract.methods.balanceOf(Address.toLowerCase()).call();
                 let decimals = await contract.methods.decimals().call();
                 format_token_balance = token_balance / (1 * 10 ** decimals)
                 
             }
-            native_balance = await WEB3.eth.getBalance(Address)
+            native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
-            native_balance = await WEB3.eth.getBalance(Address)
+            native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
