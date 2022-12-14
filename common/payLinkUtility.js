@@ -288,8 +288,6 @@ async function calculateGasFee(Nodeurl, Type, fromAddress, toAddress, amount, Co
             }
         }
         else {
-          
-
             return { status: 200, data: { "fee": "2000000", "gasprice": gasPrice, "gasamount": gasAmount }, message: "sucess" }
         }
     }
@@ -323,21 +321,14 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             return { status: 200, data: balanceData, message: "sucess" }
         }
         else {
-            console.log(Address)
-            console.log(ContractAddress)
-            const HttpProvider  = TronWeb.providers.HttpProvider;
-            const fullNode      = new HttpProvider(Nodeurl);
-            const solidityNode  = new HttpProvider(Nodeurl);
-            const eventServer   = new HttpProvider(Nodeurl);
-            // const tronWeb       = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
-            const tronWeb       = new TronWeb({
-    fullHost: 'https://api.trongrid.io',
-    headers: { "TRON-PRO-API-KEY": '12c2276c-a9e9-4121-8721-31c8ffb4c1c7' },
-    privateKey: '50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78'
-});
-            let contract        = await tronWeb.contract().at(ContractAddress);
-            native_balance      = await tronWeb.trx.getBalance(Address)
-            token_balance       = await contract.balanceOf(Address).call();
+            const HttpProvider = TronWeb.providers.HttpProvider;
+            const fullNode = new HttpProvider(Nodeurl);
+            const solidityNode = new HttpProvider(Nodeurl);
+            const eventServer = new HttpProvider(Nodeurl);
+            const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
+            let contract = await tronWeb.contract().at(ContractAddress);
+            native_balance = await tronWeb.trx.getBalance(Address)
+            token_balance = await contract.balanceOf(Address).call();
 
             format_token_balance = tronWeb.toBigNumber(token_balance)
             format_token_balance = tronWeb.toDecimal(format_token_balance)
@@ -523,7 +514,9 @@ module.exports =
             var minutes = (diff / 60000)
 
 
-            
+            console.log("previousdate   ================", previousdate)
+            console.log("currentdate    ================", currentdate)
+            console.log("minutes        ================", minutes)
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
@@ -531,17 +524,9 @@ module.exports =
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
             )
-            console.log("BalanceOfAddress libarayType", BalanceOfAddress)
             console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
-            console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
-            console.log("BalanceOfAddress address",     addressObject.poolWallet[0].address)
+            console.log("BalanceOfAddress Success",     BalanceOfAddress)
 
-            if(BalanceOfAddress.data.format_token_balance == 0){
-                BalanceOfAddress.data["format_token_balance"] = parseFloat(BalanceOfAddress.data.format_token_balance) + parseFloat(addressObject.poolWallet[0].balance)
-                console.log("BalanceOfAddress if",     BalanceOfAddress.data.format_token_balance)
-            }
-           
-           
             let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
             let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
 
@@ -573,14 +558,14 @@ module.exports =
             amountstatus    = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
            
-            let GasFee = await calculateGasFee
-                (
-                    addressObject.networkDetails[0].nodeUrl, 
-                    addressObject.networkDetails[0].libarayType,
-                    addressObject.poolWallet[0].address,
-                    hotWallet.address,
-                    BalanceOfAddress.data.token_balance,
-                    addressObject.networkDetails[0].contractAddress)
+            // let GasFee = await calculateGasFee
+            //     (
+            //         addressObject.networkDetails[0].nodeUrl, 
+            //         addressObject.networkDetails[0].libarayType,
+            //         addressObject.poolWallet[0].address,
+            //         hotWallet.address,
+            //         BalanceOfAddress.data.token_balance,
+            //         addressObject.networkDetails[0].contractAddress)
 
 
                    
@@ -588,7 +573,7 @@ module.exports =
             {
                 let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
                 
-                let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus , crypto_paid: BalanceOfAddress.data.format_token_balance } })
+                let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
                
                 let logData = { "transcationDetails": [] }
                 if (amountstatus == 1 || amountstatus == 3) 
@@ -627,7 +612,7 @@ module.exports =
                     }
                     let poolwallet             = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4 } })
                     let balanceTransfer        = addressObject.networkDetails[0].libarayType == "Web3" ? BalanceOfAddress.data.format_native_balance : BalanceOfAddress.data.token_balance 
-                    let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
+                    // let hot_wallet_transcation = await transfer_amount_to_hot_wallet(addressObject.poolWallet[0].id, addressObject.id, balanceTransfer, BalanceOfAddress.data.native_balance,GasFee.data.fee)
                     
                     var emailTemplateName = 
                     { 
