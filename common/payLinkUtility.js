@@ -308,6 +308,7 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             
             if (ContractAddress != "") 
             {
+                console.log(ContractAddress, 'contract address');
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
                 token_balance = await contract.methods.balanceOf(Address.toLowerCase()).call();
                 let decimals = await contract.methods.decimals().call();
