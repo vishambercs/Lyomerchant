@@ -308,14 +308,14 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             if (ContractAddress != "") 
             {
                 const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
-                token_balance = await contract.methods.balanceOf(Address.toLowerCase()).call();
+                token_balance = await contract.methods.balanceOf(Address).call();
                 let decimals = await contract.methods.decimals().call();
                 format_token_balance = token_balance / (1 * 10 ** decimals)
                 
             }
-            native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
+            native_balance = await WEB3.eth.getBalance(Address)
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
-            native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
+            native_balance = await WEB3.eth.getBalance(Address)
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
