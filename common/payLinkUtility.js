@@ -317,8 +317,7 @@ async function CheckAddress(Nodeurl, Type, Address, ContractAddress = "", privat
             }
             native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
             format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
-            native_balance = await WEB3.eth.getBalance(Address.toLowerCase())
-            format_native_balance = await Web3.utils.fromWei(native_balance.toString(), 'ether')
+
             let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
             return { status: 200, data: balanceData, message: "sucess" }
         }
@@ -530,7 +529,11 @@ module.exports =
             console.log("BalanceOfAddress Success",     BalanceOfAddress)
 
             let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
-            let paymentData  = { "remain":remain , "paid" :BalanceOfAddress.data.format_token_balance , "required" : addressObject.amount }
+            let paymentData  = { 
+                "remain":remain , 
+                "paid" : parseFloat(BalanceOfAddress.data.format_token_balance) > 0 ? BalanceOfAddress.data.format_token_balance : BalanceOfAddress.data.format_native_balance , 
+                "required" : addressObject.amount 
+            }
 
             if (minutes > 180) 
             {
