@@ -528,10 +528,10 @@ module.exports =
             console.log("BalanceOfAddress libarayType", addressObject.networkDetails[0].libarayType)
             console.log("BalanceOfAddress Success",     BalanceOfAddress)
 
-            let remain       = parseFloat(addressObject.amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
+            let remain       = parseFloat(addressObject.amount) - (parseFloat(BalanceOfAddress.data.format_token_balance) > 0 ? parseFloat(BalanceOfAddress.data.format_token_balance) : parseFloat(BalanceOfAddress.data.format_native_balance))
             let paymentData  = { 
-                "remain":remain , 
-                "paid" : parseFloat(BalanceOfAddress.data.format_token_balance) > 0 ? BalanceOfAddress.data.format_token_balance : BalanceOfAddress.data.format_native_balance , 
+                "remain":remain, 
+                "paid" : parseFloat(BalanceOfAddress.data.format_token_balance) > 0 ? BalanceOfAddress.data.format_token_balance : BalanceOfAddress.data.format_native_balance, 
                 "required" : addressObject.amount 
             }
 
