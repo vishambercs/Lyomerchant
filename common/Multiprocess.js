@@ -19,8 +19,6 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
         {
            
             let jsondata        =  JSON.parse(message.utf8Data)
-            
-            
             let transData       = {} 
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transkey)
             if(index != -1 )
