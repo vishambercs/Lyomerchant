@@ -1,4 +1,5 @@
 const client = require('../Models/clients');
+const Apitoken = require('../Models/Apitoken');
 const admins = require('../Models/admin');
 const merchantstores = require('../Models/merchantstore');
 const merchantcategory = require('../Models/merchantcategory');
@@ -992,6 +993,25 @@ module.exports =
             }
 
         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 401, data: {}, message: "Unauthorize Access" })
+        }
+    },
+    async Verfiy_Auth_Token(req, res, next) {
+        try {
+           
+           let token = req.headers.token;
+           let api_token =  await Apitoken.findOne({token : token , status : 1})
+            if (api_token != null) 
+            {
+                req.headers["Authorization"] = api_token.api_key
+                next();
+            }
+            else {
+                res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+      }
         catch (error) {
             console.log(error)
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
