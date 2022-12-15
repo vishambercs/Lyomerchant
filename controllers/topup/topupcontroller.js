@@ -114,6 +114,22 @@ async function CheckAddress(Nodeurl, Type, cointype, Address, ContractAddress = 
     }
 }
 
+const HEX_PREFIX = '41';
+const hexAddressToBase58 = (tronWeb, hexAddress) => {
+    let retval = hexAddress;
+    try {
+        
+        if (hexAddress.startsWith("0x")) {
+            hexAddress = HEX_PREFIX + hexAddress.substring(2);
+        }
+        let bArr = tronWeb.utils['code'].hexStr2byteArray(hexAddress);
+        retval = tronWeb.utils['crypto'].getBase58CheckAddress(bArr);
+    } catch (e) {
+        //Handle
+    }
+    return retval;
+}
+
 async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, ContractAddress = "", privateKey = "") {
 
     let token_balance = 0
@@ -212,17 +228,21 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             const solidityNode = new HttpProvider(Nodeurl);
             const eventServer = new HttpProvider(Nodeurl);
             const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
-            let getConfirmedTransc = await tronWeb.trx.getConfirmedTransaction(tranxid);
+            let getConfirmedTransc = await tronWeb.getEventByTransactionID(tranxid);
             let tradata = null
-            let data = getConfirmedTransc.raw_data.contract[0].parameter
+            let data = getConfirmedTransc[0].result;
+
+            let format_native_balance = tronWeb.toBigNumber(data.value);
+            format_native_balance = tronWeb.toDecimal(format_native_balance);
+            format_native_balance = tronWeb.fromSun(format_native_balance);
 
             tradata = {
-                "amount": data.value.amount,
-                "formatedamount": data.value.amount,
-                "addressto": data.value.to_address,
+                "amount": parseFloat(data.value),
+                "formatedamount": parseFloat(format_native_balance),
+                "addressto": hexAddressToBase58(tronWeb, data.to),
                 "transhash": tranxid,
                 "transaddress": address.toLowerCase(),
-                "status": data.value.to_address == address.toLowerCase(),
+                "status": (hexAddressToBase58(tronWeb, data.to)).toLowerCase() == address.toLowerCase(),
             }
             return { status: 200, data: tradata, message: "sucess" }
         }

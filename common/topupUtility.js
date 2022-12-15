@@ -169,10 +169,12 @@ const getFiatRates = async (coin) => {
        return 1;
     }
 }
-const getRate = async (crypto, fiat) => {
-    if (crypto === 'USDT') {
+const getRate = async (stablecoin,crypto, fiat) => {
+    console.log("========getRate========",stablecoin,crypto, fiat)
+    if (stablecoin == true) {
         const fiatRate = await getFiatRates(fiat);
-        return (parseFloat(1)*parseFloat(fiatRate)).toFixed(4);
+        // return (parseFloat(1)*parseFloat(fiatRate)).toFixed(4);
+        return 1
     } else {
         const getCryptoToUsdt = await getCoinPrice(crypto);
         const fiatRate = await getFiatRates(fiat);
@@ -208,7 +210,7 @@ async function pricecalculation(coinid, balance) {
         //         alreadySetCurrency.splice(alreadySetCurrency.indexOf(networktitle), 1);
         //     }, 10000);
         // }
-        let getRatedata         = await getRate(networks.coin,"USD");
+        let getRatedata         = await getRate(networks.stablecoin,networks.coin,"USD");
         let price = parseFloat(getRatedata) * parseFloat(balance)
   
 
