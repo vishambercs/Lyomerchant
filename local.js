@@ -31,8 +31,6 @@ app.use('/', client);
 
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
-
-   
 });
 
 
