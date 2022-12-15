@@ -292,10 +292,11 @@ module.exports =
             let network_details = await networks.findOne({ 'id': networkType })
             let client          = await clients.findOne({ 'api_key': req.headers.authorization })
             let payLink         = await paylinkPayment.findOne({ 'id': req.body.payLinkId })
-            let invoicedata     = await invoice.findOne({ 'id': payLink.invoice_id })
+            let invoicedata     =  null 
             let pricedata       = 0
-            if(invoicedata != null)
+            if(payLink != null)
             {
+                invoicedata   =  await invoice.findOne({ 'id': payLink.invoice_id })
                 pricedata    = await CurrencyController.priceConversitionChangesforpaymentlink(network_details.id,invoicedata.currency,req.headers.authorization )
             }
             else
@@ -317,7 +318,7 @@ module.exports =
                 id: mongoose.Types.ObjectId(),
                 api_key: req.headers.authorization,
                 paymenttype: req.body.paymenttype,
-                invoicedetails:invoicedata._id,
+                invoicedetails:  invoicedata != null ? invoicedata._id : null,
                 poolwalletID: account.id,
                 amount: cryptoamount,
                 currency: req.body.currency,
@@ -332,7 +333,7 @@ module.exports =
                 clientdetail: client._id,
                 pwid: account._id,
                 nwid: network_details._id,
-                paymentdetails: payLink._id,
+                paymentdetails:  payLink != null ?  payLink._id : null,
             });
             newRecord.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
