@@ -1,9 +1,10 @@
 
-const Utility = require('../../common/Utility');
-var otpGenerator = require('otp-generator')
-var mongoose = require('mongoose');
+const Utility       = require('../../common/Utility');
+var otpGenerator    = require('otp-generator')
+var mongoose        = require('mongoose');
+const fetch         = require('node-fetch');
 require('dotenv').config()
-const fetch = require('node-fetch');
+
 module.exports =
 {
     
