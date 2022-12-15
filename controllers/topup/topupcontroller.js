@@ -310,7 +310,7 @@ module.exports =
 {
     async create_top_payment(req, res) {
         try {
-            console.log("create_top_payment",req.body)
+           
             var merchantKey = req.headers.authorization
             var networkType = req.body.networkType
             var orderid = req.body.orderid

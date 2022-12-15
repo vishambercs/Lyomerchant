@@ -56,6 +56,7 @@ module.exports =
         try {
 
             let api_key = req.headers.authorization;
+
             let user = await merchantcategory.findOne({ clientapikey: api_key, status: 1 });
 
             if (user != null) {
@@ -209,7 +210,6 @@ module.exports =
         }
 
     },
-
     async is_merchant(req, res, next) {
         try {
             let token = req.headers.token;
@@ -406,7 +406,6 @@ module.exports =
             res.json({ status: 401, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verify_variables(req, res, next) {
         try {
             const validationRule = {
@@ -1003,9 +1002,9 @@ module.exports =
            
            let token = req.headers.token;
            let api_token =  await Apitoken.findOne({token : token , status : 1})
-            if (api_token != null) 
+           if (api_token != null) 
             {
-                req.headers["Authorization"] = api_token.api_key
+                req.headers["authorization"] = api_token.api_key
                 next();
             }
             else {

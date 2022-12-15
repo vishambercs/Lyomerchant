@@ -19,6 +19,7 @@ const Constant            = require('./Constant');
 const commonFunction      = require('./commonFunction');
 const Multiprocess        = require('./Multiprocess');
 const { generateAccount } = require('tron-create-address')
+const Apitoken = require('../Models/Apitoken');
 require("dotenv").config()
 var CryptoJS            = require('crypto-js')
 async function Get_RequestByAxios(URL, parameters, headers) {
@@ -372,6 +373,90 @@ module.exports =
                 
             }
             let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,queryvariable.apikey,getTranscationData[0].networkDetails[0].id,getTranscationData[0].fixed_amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
+            if(index == -1)
+            {
+                
+                let response        = 
+                { 
+                    transkey:queryvariable.transkey,
+                    amountstatus:0,
+                    paymentData:{"paid_in_usd":0,"remain":0,"paid":0,"required":0}, 
+                    status: 200, 
+                    message: "We are checking. Please Wait" 
+                };
+                let balanceResponse = JSON.stringify(response)
+                connection.sendUTF(balanceResponse);
+            }
+        }
+        else
+        {
+            const connection        = request.accept(null, request.origin);
+            let response            = 
+            { 
+                transkey        :   queryvariable.transkey,
+                amountstatus    :   0, 
+                paymentData     :   {"paid_in_usd":0,"remain":0,"paid":0,"required":0},
+                status          :   400, 
+                message         :   "Invalid Transhash" 
+            };
+            let balanceResponse     = JSON.stringify(response)
+            connection.sendUTF(balanceResponse);
+            return connection.close(1000);
+        }
+        }
+        catch (error) {
+            console.log(error)
+            return null
+        }
+    },
+
+    async topupWebScokectWithToken(request) {
+        try {
+            let uniqueKey           = crypto.randomBytes(20).toString('hex')
+            let url_paremeters      = url.parse(request.httpRequest.url);
+            let queryvariable       = querystring.parse(url_paremeters.query)
+            var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.token +  process.env.BASE_WORD_FOR_HASH)
+            let Apitokendata        = await Apitoken.findOne({ token : queryvariable.token })
+            
+            if(Apitokendata == null)
+            {
+                const connection        = request.accept(null, request.origin);
+                let response            = 
+                { 
+                    transkey        :   queryvariable.transkey,
+                    amountstatus    :   0, 
+                    paymentData     :   {"paid_in_usd":0,"remain":0,"paid":0,"required":0},
+                    status          :   400, 
+                    message         :   "Invalid Token" 
+                };
+                let balanceResponse     = JSON.stringify(response)
+                connection.sendUTF(balanceResponse);
+                return connection.close(1000);
+            }
+        
+
+            let getTranscationData  = await commonFunction.get_Transcation_topup(queryvariable.transkey,Apitokendata.api_key)
+         
+              
+            if(getTranscationData.length > 0)
+            {
+            const connection        = request.accept(null, request.origin);
+            var index = Constant.topupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+            if(index == -1)
+            {
+            let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": Apitokendata.api_key}
+            Constant.topupTransList.push(client_object)
+            
+        }
+            else
+            {
+                Constant.topupTransList[index]["connection"] = connection
+                let response        = { transkey:queryvariable.transkey,amountstatus:0,paymentData:{"paid_in_usd":0,"remain":0,"paid":0,"required":0}, status: 200, message: "We are checking. Please Wait" };
+                let balanceResponse = JSON.stringify(response)
+                connection.sendUTF(balanceResponse);
+                
+            }
+            let data = Multiprocess.Create_Node_Sockect_Connection(getTranscationData[0].id,getTranscationData[0].poolWallet[0].address,Apitokendata.api_key,getTranscationData[0].networkDetails[0].id,getTranscationData[0].fixed_amount, getTranscationData[0].networkDetails[0],getTranscationData[0].poolWallet[0])
             if(index == -1)
             {
                 
