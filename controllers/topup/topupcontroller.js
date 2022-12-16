@@ -754,17 +754,41 @@ module.exports =
     {
         try 
         {
-            if(req.body.amount == 0  ||req.body.amount  == undefined  )
+            if(req.body.amount == 0  || req.body.amount  == undefined  )
             {
                 return res.json({ status: 400, message: "Invalid Amount", data: {} })
             }
             
+            let transactiondata = await topup.findOne(
+                {id: req.body.id , otp:req.body.otp , status : 0 },
+              )
+                
+
+            if (transactiondata == null) 
+            {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let transWallet = await poolWallet.findOne({ id: transactiondata.poolwalletID })
+            if (transWallet == null) {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let network     = await networks.findOne({ id: transWallet.network_id })
+            let balance = await Check_Trans_Hash(network.nodeUrl, network.libarayType, network.cointype, req.body.transhash, transWallet.address.toLowerCase(), network.contractAddress, transWallet.privateKey)
+            
+            if(balance.status == 400){
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            
+            if(Object.keys(balance.data).length  == 0 ){
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            
             let transactionPool = await topup.findOneAndUpdate(
                 {id: req.body.id , otp:req.body.otp , status : 0 },
-                {$set : {
+                { $set : {
                     status          : 1,
                     transhash       : req.body.transhash,
-                    amount          : req.body.amount,
+                    amount          : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
                     updated_at      : new Date().toString(),
                 }},
                 {'returnDocument' : 'after'}
@@ -776,11 +800,7 @@ module.exports =
             }
            
 
-            let transWallet = await poolWallet.findOne({ id: transactionPool.poolwalletID })
-            if (transWallet == null) {
-                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
-            }
-            let network     = await networks.findOne({ id: transWallet.network_id })
+         
             let price       = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
             let faitprice = price * req.body.amount
             
