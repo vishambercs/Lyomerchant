@@ -2,6 +2,7 @@ var express         = require('express');
 const mongoose      = require('mongoose');
 const bodyParser    = require('body-parser');
 var client          = require('./Route/clientsRoute');
+var clientTokenRoute          = require('./Route/clientTokenRoute');
 // var poolRoute       = require('./Route/poolRoute');
 // var networkRoute    = require('./Route/networkRoute');
 // var walletRoute     = require('./Route/poolwalletRoute');
@@ -36,14 +37,11 @@ app.use((req, res, next) => {
 
 app.get('/', function (req, res) { res.send('Welcome to Lyo Merchant'); });
 app.use('/v1', client);
+app.use('/v2', clientTokenRoute);
 
-// app.use('/admin/v1', poolRoute);
-// app.use('/network/v1', networkRoute);
-// app.use('/paymentlink/v1', payLinkRoute);
-// app.use('/wallet/v1', walletRoute);
-// app.use('/hotWallet/v1', hotWalletRoute);
-// app.use('/withdraw/v1', withdrawRoute);
-// app.use('/admin', adminRoute);
+
+
+
 
 mongoose.connect(process.env.MONGO_DB_URL, { useNewUrlParser: true });
 
@@ -53,20 +51,12 @@ mongoose.connection.once('open', function () {
     console.log('Error', err);
 })
 
-cron.schedule('1 * * * * *', async() => {
-    let response = await cornJobs.get_Expired_Topup()
-    console.log('running a task every minute',response);
-});
-
-// cron.schedule('5 * * * * *', async() => {
-//     let response = await cornJobs.Check_KYT_Address()
-//     console.log('running a task every minute',response);
-// });
-
 // cron.schedule('1 * * * * *', async() => {
-//     let response = await cornJobs.Check_KYT_Address()
+//     let response = await cornJobs.get_Expired_Topup()
 //     console.log('running a task every minute',response);
 // });
+
+
 
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
@@ -112,6 +102,14 @@ console.log(`Example app listening at ${process.env.TOP_UP_PORT}`);
 })
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.topupWebScokect)
+
+
+
+var Tokentopupserver = https.createServer({}).listen(process.env.TOKEN_TOP_UP_PORT, () => {
+    console.log(`Example app listening at ${process.env.TOKEN_TOP_UP_PORT}`);
+    })
+const Tokentopupserverdata = new webSocketServer({ httpServer: Tokentopupserver });
+Tokentopupserverdata.on('request', Utility.topupWebScokectWithToken)
 
 
 

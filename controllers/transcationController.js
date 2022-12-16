@@ -1,15 +1,16 @@
-const clients = require('../Models/clients');
-//const transactions = require('../Models/WalletAddress');
-const transactionPool = require('../Models/transactionPool');
-const transcationLog = require('../Models/transcationLog');
-const poolWallet = require('../Models/poolWallet');
-const cornJobs = require('../common/cornJobs');
-var CryptoJS = require('crypto-js')
-var crypto = require("crypto");
-var Utility = require('../common/Utility');
-const bcrypt = require('bcrypt');
+const clients           = require('../Models/clients');
+//const transactions    = require('../Models/WalletAddress');
+const transactionPool   = require('../Models/transactionPool');
+const transcationLog    = require('../Models/transcationLog');
+const poolWallet        = require('../Models/poolWallet');
+const cornJobs          = require('../common/cornJobs');
+var CryptoJS            = require('crypto-js')
+var crypto              = require("crypto");
+var Utility             = require('../common/Utility');
+const bcrypt            = require('bcrypt');
+const Web3              = require('web3');
 require("dotenv").config()
-const Web3 = require('web3');
+
 
 module.exports =
 {

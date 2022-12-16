@@ -177,7 +177,7 @@ module.exports =
                 res.json({ status: 400, data: {}, message: error.message })
             });
     },
- 
+
     async Create_Kyc_Link(req, res) {
         try {
             await clients.findOne({ api_key: req.headers.authorization }).then(async (val) => {
