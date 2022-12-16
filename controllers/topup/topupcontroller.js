@@ -211,7 +211,7 @@ module.exports =
                 "otp"               : req.body.otp,
             } 
             let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
-            console.log(error)
+            console.log(response)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
