@@ -2,6 +2,8 @@ var express         = require('express');
 const mongoose      = require('mongoose');
 const bodyParser    = require('body-parser');
 var client          = require('./Route/clientsRoute');
+var poolWallet      = require('./Models/poolWallet');
+var network         = require('./Models/network');
 var poolRoute       = require('./Route/poolRoute');
 var networkRoute    = require('./Route/networkRoute');
 var walletRoute     = require('./Route/poolwalletRoute');
@@ -10,13 +12,13 @@ var hotWalletRoute  = require('./Route/hotWalletRoute');
 var withdrawRoute   = require('./Route/withdrawRoute');
 var adminRoute      = require('./Route/adminRoute');
 var Constant        = require('./common/Constant');
-var cornJobs = require('./common/cornJobs');
-const fileUpload = require('express-fileupload');
+var cornJobs        = require('./common/cornJobs');
+const fileUpload    = require('express-fileupload');
 const listEndpoints = require('express-list-endpoints')
-const fs = require('fs');
-var path = require('path');
-const Web3 = require('web3');
-var cron = require('node-cron');
+const fs            = require('fs');
+var path            = require('path');
+const Web3          = require('web3');
+var cron            = require('node-cron');
 const webSocketServer = require('websocket').server;
 const WebSocketClient = require('websocket').client;
 var app = express();
@@ -56,7 +58,8 @@ mongoose.connection.once('open', function () {
 })
 
 
-app.listen(process.env.SERVER_PORT, function () {
+app.listen(process.env.SERVER_PORT, async function () {
+    
     Constant.ALL_API = listEndpoints(app)
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
 });

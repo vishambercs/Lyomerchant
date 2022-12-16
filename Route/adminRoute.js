@@ -108,4 +108,11 @@ router.post('/get_all_roles_with_permission',     Auth.is_admin,Auth.Verfiy_Role
 router.post('/create_or_update_clienthotwallets',   Auth.is_admin,Auth.Verfiy_Role,clientHotWallets.create_or_update_clienthotwallets);
 router.post('/get_all_clienthotwallets',            Auth.is_admin,Auth.Verfiy_Role,clientHotWallets.get_all_clienthotwallets);
 router.post('/updateadminrole',  adminController.updateadminrole);
+
+"============= All Pool Wallet ==================="
+router.post('/getAllPoolWallet', Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
+router.post('/getTranscationofPoolwallet', Auth.is_admin,Auth.Verfiy_Role,commonController.getTranscationofPoolwallet);
+
+
+// router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 module.exports = router;

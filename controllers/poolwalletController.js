@@ -32,6 +32,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+   
     async all_pool_wallet(req, res) {
         try {
             await poolWallet.aggregate([{
@@ -68,7 +69,14 @@ module.exports =
             let network_details = await network.findOne({ 'id': req.body.network_id })
             for (let i = 0; i < 10; i++) {
                 let account = await Utility.GetAddress(network_details.nodeUrl)
-                const poolWalletItem = new poolWallet({ id: crypto.randomBytes(20).toString('hex'), network_id: req.body.network_id, address: account.address, privateKey: account.privateKey, });
+                const poolWalletItem = new poolWallet({ 
+                id: crypto.randomBytes(20).toString('hex'), 
+                network_id: req.body.network_id, 
+
+                address: account.address, 
+                privateKey: account.privateKey, 
+            
+            });
                 poolWalletItem.save().then(async (val) => {
                     console.log("val", i, val)
                     // res.json({ status: 200, message: "Successfully", data: val })
@@ -203,7 +211,6 @@ module.exports =
         }
 
     },
-    
     async getPoolWalletID(network_id) {
         try {
         
@@ -217,14 +224,15 @@ module.exports =
             if (account == null) {
                 if (network_details.libarayType == "Web3") {
                     let account = await Utility.GetAddress(network_details.nodeUrl)
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
+                    const poolWalletItem = new poolWallet({ 
+                        networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
                     let val = await poolWalletItem.save()
                     return val
                 }
                 else if (network_details.libarayType == "Tronweb") {
                     const { address, privateKey } = generateAccount()
                     console.log("========account========", address, privateKey) 
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
+                    const poolWalletItem = new poolWallet({ networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
                     let val = await poolWalletItem.save()
                     return val
                 }
@@ -242,6 +250,7 @@ module.exports =
                     const poolWalletItem  = new poolWallet({ 
                         remarks: "Created at Run Time: " + (new Date().toString()), 
                         id: crypto.randomBytes(20).toString('hex'), 
+                        networkDetails : network_details._id,
                         network_id: network_id, 
                         address: address, 
                         privateKey: " ", });
@@ -262,9 +271,9 @@ module.exports =
     },
     async generateThePoolWalletAddress(req, res) {
         try {
-            let network_id = req.body.network_id;
+            let network_id      = req.body.network_id;
             let network_details = await network.findOne({ 'id': req.body.network_id })
-            let account = await poolWallet.findOne({ network_id: req.body.network_id, status: 0 })
+            let account         = await poolWallet.findOne({ network_id: req.body.network_id, status: 0 })
             if (account == null) {
                 if (network_details.libarayType == "Web3") 
                 {

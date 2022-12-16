@@ -3,6 +3,7 @@ const posTransactionPool         = require('../../Models/posTransactionPool');
 const network                    = require('../../Models/network');
 const poolWallets                = require('../../Models/poolWallet');
 const transactionPool            = require('../../Models/transactionPool');
+
 const payLink                    = require('../../Models/payLink');
 const invoice                    = require('../../Models/invoice');
 const clients                    = require('../../Models/clients');
@@ -1093,6 +1094,89 @@ module.exports =
         catch (error) {
             console.log("error", error)
             res.json({ status: 400, data: {}, message: "Invalid Request" })
+        }
+    },
+    async getAllPoolWallet(req, res) {
+        try {
+            const queryOptions              = {};
+            const network_option            = {};
+            let limit = req.body.limit      == ""   || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
+            let skip = req.body.skip        == ""   || req.body.skip  == undefined ? 0 : parseInt(req.body.skip);
+            let transactionPoolData = [];
+            let total               = 0;
+            if(req.body?.networkid)
+            {
+                queryOptions["networkDetails"] =  req.body.networkid
+            }
+            if (Object.keys(req.body).indexOf("fromdate") != -1) {
+                var fromdate = req.body.fromdate
+                var fromdated = new Date(fromdate)
+                queryOptions["createdAt"] = { $gte: fromdated }
+            }
+            if (Object.keys(req.body).indexOf("todate") != -1) 
+            {
+                var fromdate = Object.keys(req.body).indexOf("fromdate") != -1 ? req.body.fromdate : null
+                var todate = req.body.todate
+                var todateed = new Date(todate)
+                todateed.setDate(todateed.getDate() + 1);
+                var inputtodateed = new Date(todateed.toISOString());
+                var fromdated = new Date(fromdate)
+                var inputfromdated = new Date(fromdated.toISOString());
+                let dateRange = fromdate != null ? { $gte: inputfromdated, $lte: inputtodateed } : { $lte: inputtodateed }
+                queryOptions["createdAt"] = dateRange
+            }
+            if (Object.keys(req.body).indexOf("address") != -1) 
+            {
+                queryOptions["address"] = req.body.address
+            }
+            transactionPoolData  = await poolWallets.find(queryOptions, 
+                { privateKey: 0 }).populate
+                ([ { path: "networkDetails",         select: "id coin network _id" },
+                ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
+            
+                total  = await poolWallets.find().count();
+            
+            return res.status(200).json({ status: 200, data : transactionPoolData, "total":total });
+           
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({ status: 400, message:"Error" });
+        }
+    },
+
+    async getTranscationofPoolwallet(req, res) {
+        try {
+            const queryOptions  = {"pwid" : req.body.pwid };
+            let topupsdata = await topups.find(queryOptions, { callbackURL: 0 }).populate([
+                { path: "pwid",         select: "network_id id balance address remarks _id" },
+                { path: "nwid",         select: "id coin network _id" },
+                { path: "clientdetail", select: "id email first_name last_name type _id" },
+            ])
+            let posdata =   await posTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                { path: "pwid",         select: "network_id id balance address remarks _id" },
+                { path: "nwid",         select: "id coin network _id" },
+                { path: "clientdetail", select: "id email first_name last_name type _id" },
+                { path: "storedetails", select: "id storename storeprofile storeaddress storephone _id" },
+            ])
+
+            let paymentLinkdata =   await paymentLinkTransactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                { path: "pwid",         select: "network_id id balance address remarks _id" },
+                { path: "nwid",         select: "id coin network _id" },
+                { path: "clientdetail", select: "id email first_name last_name type _id" },
+                { path: "invoicedetails" , select:"id tripId invoiceNumber customerName payment_reason email mobileNumber duedate totalAmount  _id"   },
+                { path: "paymentdetails", select:"id invoice_id "},
+            ])
+
+            let transactionPooldata =  await transactionPool.find(queryOptions, { callbackURL: 0 }).populate([
+                    { path: "pwid",         select: "network_id id balance address remarks _id" },
+                    { path: "nwid",         select: "id coin network _id" },
+                    { path: "clientdetail", select: "id email first_name last_name type _id" },
+                 ])
+            res.status(200).json({ status: 200, data : {"transactionPooldata":transactionPooldata ,"paymentLinkdata":paymentLinkdata ,"posdata":posdata ,"topupsdata" : topupsdata }, "message":"Data" });
+           
+        } catch (error) {
+            console.log(error)
+            res.status(400).json({ status: 400, message:"Error" });
         }
     },
 }

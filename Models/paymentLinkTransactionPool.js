@@ -28,12 +28,6 @@ const paymentLinkTransactionPoolSchema = new mongoose.Schema({
 		ref     : PoolWallet,
 		default : null,
 	},
-    pwid: 
-    {
-		type    : mongoose.Schema.Types.ObjectId,
-		ref     : PoolWallet,
-		default : null,
-	},
     nwid: 
     {
 		type    : mongoose.Schema.Types.ObjectId,
