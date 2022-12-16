@@ -760,7 +760,7 @@ module.exports =
             }
             
             let transactionPool = await topup.findOneAndUpdate(
-                {id: req.body.id , otp:req.body.otp , status : 0 },
+                { id: req.body.id , otp:req.body.otp , status : 0 },
                 {$set : {
                     status          : 1,
                     transhash       : req.body.transhash,
@@ -781,7 +781,11 @@ module.exports =
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
             let network     = await networks.findOne({ id: transWallet.network_id })
-            let price       = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
+            let price  = 1
+            if(network.stablecoin == false)
+            {
+             price      = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
+            }
             let faitprice = price * req.body.amount
             
             await topup.findOneAndUpdate( {id: req.body.id }, { $set : { fiat_amount :  faitprice } })
