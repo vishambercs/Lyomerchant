@@ -785,16 +785,16 @@ module.exports =
             
             await topup.findOneAndUpdate( {id: req.body.id }, { $set : { fiat_amount :  faitprice } })
             
-            await updateOtherAPI(1, 
-                req.body.transhash, 
-                transactionPool.id ,
-                req.body.transhash, 
-                transactionPool.orderid,
-                network.coin,
-                transactionPool.amount,
-                faitprice,network.id,transWallet.address,faitprice,
-                network.network,
-                new Date().toString(),transactionPool.timestamps )
+            // await updateOtherAPI(1, 
+            //     req.body.transhash, 
+            //     transactionPool.id ,
+            //     req.body.transhash, 
+            //     transactionPool.orderid,
+            //     network.coin,
+            //     transactionPool.amount,
+            //     faitprice,network.id,transWallet.address,faitprice,
+            //     network.network,
+            //     new Date().toString(),transactionPool.timestamps )
 
             res.json({ status: 200, message: "Get The Data", data: "" })
             
