@@ -638,7 +638,7 @@ async function verifyTheBalance(transkey) {
             addressObject.networkDetails[0].contractAddress,
             addressObject.poolWallet[0].privateKey
         )
-        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, BalanceOfAddress.data.format_token_balance)
+        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance))
         if (addressObject.transtype == 1) {
             let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
                 {
@@ -655,8 +655,8 @@ async function verifyTheBalance(transkey) {
                     $set: 
                     {
                         status          : BalanceOfAddress.data.format_token_balance == addressObject.amount ? 1 : 3,
-                        "amount"        : BalanceOfAddress.data.format_token_balance,
-                        "crypto_paid"   : BalanceOfAddress.data.format_token_balance,
+                        "amount"        : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance),
+                        "crypto_paid"   : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance),
                         "fiat_amount"   : pricecal,
                     }
                 }, { returnDocument: 'after' })
@@ -763,14 +763,14 @@ async function partialTopupBalance(transkey) {
             addressObject.networkDetails[0].contractAddress,
             addressObject.poolWallet[0].privateKey
         )
-        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, BalanceOfAddress.data.format_token_balance)
+        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance))
         let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
             {
                 $set: {
                     status: 2,
-                    "amount": BalanceOfAddress.data.format_token_balance,
-                    "crypto_paid": BalanceOfAddress.data.format_token_balance,
-                    "fiat_amount": pricecal,
+                    "amount"        : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance),
+                    "crypto_paid"   : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance),
+                    "fiat_amount"   : pricecal,
                 }
             }, { returnDocument: 'after' })
         let remain = parseFloat(addressObject.fixed_amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
