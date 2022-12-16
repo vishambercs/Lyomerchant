@@ -1,5 +1,6 @@
-const mongoose = require('mongoose');
+const mongoose  = require('mongoose');
 const validator = require('validator');
+const Network   = require('./network');
 const poolWalletSchema = new mongoose.Schema({
     id:
     {
@@ -7,6 +8,12 @@ const poolWalletSchema = new mongoose.Schema({
         required: true,
         unique:true,
     },
+    networkDetails: 
+    {
+		type    : mongoose.Schema.Types.ObjectId,
+		ref     : Network,
+		default : null,
+	},
     network_id:
     {
         type: String,
@@ -43,7 +50,6 @@ const poolWalletSchema = new mongoose.Schema({
         default: " ",
     },
 },
-{ timestamps: true },
     {
         toJSON: {
             transform(doc, ret) {
@@ -52,6 +58,6 @@ const poolWalletSchema = new mongoose.Schema({
             },
         },
     },
-    
+    { timestamps: true }
 )
 module.exports = mongoose.model('poolWallet', poolWalletSchema)

@@ -35,6 +35,9 @@ router.post('/verfiytranshash',             topupcontroller.verfiytranshash);
 router.post('/sendotp',                     topupcontroller.sendotp);
 router.post('/getTransStatus',              commonController.getTransStatus);
 router.post('/updatetrans',                 topupcontroller.updatetrans);
+router.post('/updatetrans_with_network',    topupcontroller.updatetrans_with_network);
+
+
 router.post('/updatetransbyid',             Auth.Verfiy_WebHook,topupcontroller.updatetransbyid);
 
 "============================Create Fixed Top UP==============================="

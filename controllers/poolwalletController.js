@@ -213,13 +213,13 @@ module.exports =
             if (account == null) {
                 if (network_details.libarayType == "Web3") {
                     let account = await Utility.GetAddress(network_details.nodeUrl)
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
+                    const poolWalletItem = new poolWallet({  networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
                     let val = await poolWalletItem.save()
                     return val
                 }
                 else if (network_details.libarayType == "Tronweb") {
                     const { address, privateKey } = generateAccount()
-                    const poolWalletItem = new poolWallet({ remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
+                    const poolWalletItem = new poolWallet({  networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
                     let val = await poolWalletItem.save()
                     return val
                 }
@@ -239,6 +239,7 @@ module.exports =
                         id: crypto.randomBytes(20).toString('hex'), 
                         network_id: network_id, 
                         address: address, 
+                        networkDetails : network_details._id,
                         privateKey: " ", });
                     val     = await poolWalletItem.save()
                     }

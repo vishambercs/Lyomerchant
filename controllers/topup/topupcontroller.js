@@ -1,23 +1,23 @@
-const topup = require('../../Models/topup');
-const poolWallet = require('../../Models/poolWallet');
-const networks = require('../../Models/network');
-
-const ApiCall = require('../../common/Api_Call');
-const Constant = require('../../common/Constant');
-const Topuptranshash = require('../../Models/Topuptranshash');
-const topupUtility = require('../../common/topupUtility');
-const clients = require('../../Models/clients');
-var otpGenerator = require('otp-generator')
-var mongoose = require('mongoose');
+const topup              = require('../../Models/topup');
+const poolWallet         = require('../../Models/poolWallet');
+const networks           = require('../../Models/network');
+const ApiCall            = require('../../common/Api_Call');
+const Constant           = require('../../common/Constant');
+const Topuptranshash     = require('../../Models/Topuptranshash');
+const topupUtility       = require('../../common/topupUtility');
+const clients            = require('../../Models/clients');
+var otpGenerator         = require('otp-generator')
+var mongoose             = require('mongoose');
 var poolwalletController = require('../poolwalletController');
+const clientWallets      = require('../../Models/clientWallets');
+const Web3               = require('web3');
+const TronWeb            = require('tronweb')
+const axios              = require('axios')
+var stringify            = require('json-stringify-safe');
 
-
-const clientWallets = require('../../Models/clientWallets');
-const Web3 = require('web3');
-const TronWeb = require('tronweb')
 require('dotenv').config()
-const axios = require('axios')
-var stringify = require('json-stringify-safe');
+
+
 var otpGenerator = require('otp-generator')
 var commonFunction = require('../../common/commonFunction');
 
@@ -584,22 +584,23 @@ module.exports =
 
             let data =
             {
-                transactionID: transactionPool.id,
-                address: transWallet.address,
-                walletValidity: transactionPool.walletValidity,
-                amount: transactionPool.amount,
-                key: transactionPool.api_key,
-                status: transactionPool.status,
-                statustitle: statusdata,
-                apiredirecturl: transactionPool.apiredirectURL,
-                callbackURL: transactionPool.callbackURL,
-                errorurl: transactionPool.errorurl,
-                orderid: transactionPool.orderid,
-                network: network.network,
-                coin: network.coin,
-                balance: balance,
-                fait_amount: transactionPool.fiat_amount,
-
+                transactionID   : transactionPool.id,
+                address         : transWallet.address,
+                walletValidity  : transactionPool.walletValidity,
+                amount          : transactionPool.amount,
+                key             : transactionPool.api_key,
+                status          : transactionPool.status,
+                statustitle     : statusdata,
+                apiredirecturl  : transactionPool.apiredirectURL,
+                callbackURL     : transactionPool.callbackURL,
+                errorurl        : transactionPool.errorurl,
+                orderid         : transactionPool.orderid,
+                network         : network.network,
+                coin            : network.coin,
+                balance         : balance,
+                fait_amount     : transactionPool.fiat_amount,
+                createdAt       : transactionPool.createdAt,
+                updated_at      : transactionPool.updated_at,
             }
             res.json({ status: 200, message: "Get The Data", data: data })
 
@@ -804,7 +805,29 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     }, 
-
+    async updatetrans_with_network(req, res) 
+    {
+        try 
+        {
+            let transactionPool = await topup.findOneAndUpdate( {id: req.body.id }, {$set : { nwid  : req.body.nwid,}}, {'returnDocument' : 'after'})
+            
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let transWallet = await poolWallet.findOneAndUpdate({ id: transactionPool.poolwalletID }, {$set : { networkDetails  : req.body.nwid }}, {'returnDocument' : 'after'})
+            
+            if (transWallet == null) {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+           res.json({ status: 200, message: "Get The Data", data: "" })
+            
+        }
+        catch (error) {
+            console.log("updatetrans_with_network",error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    }, 
 
 }
 
