@@ -211,7 +211,27 @@ module.exports =
                 "otp"               : req.body.otp,
             } 
             let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
             console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async updatetrans_with_network(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/updatetrans_with_network"
+            let parameters          =  
+            {
+                "id"                : req.body.id,
+                "nwid"              : req.body.nwid,
+            } 
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
