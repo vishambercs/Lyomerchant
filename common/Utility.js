@@ -35,6 +35,31 @@ module.exports =
             return response;
     },
 
+    async Post_Request_By_Axios_Token(URL, parameters, headers) {
+        let response = {}
+        var config = {
+            method: 'post',
+            url: URL,
+            data: qs.stringify(parameters),
+            headers:
+            {
+                'Token': headers,
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+           
+        };
+        response = await axios(config).then(function (result) {
+
+            
+                return JSON.stringify(result.data);
+            })
+            .catch(function (error) {
+                // console.log(error);
+                return error
+            });
+           
+            return response;
+    },
     async topupWebScokect(request) {
         try 
         {

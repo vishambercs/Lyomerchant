@@ -2,6 +2,7 @@ var express             = require('express');
 const mongoose          = require('mongoose');
 const bodyParser        = require('body-parser');
 var client              = require('./Route/clientsRoute');
+var clientTokenRoute    = require('./Route/clientTokenRoute');
 var Utility             = require('./common/Utility');
 const fs                = require('fs');
 var path                = require('path');
@@ -26,7 +27,7 @@ app.use((req, res, next) => {
 
 app.get('/', function (req, res) { res.send('Welcome to Lyo Merchant'); });
 app.use('/', client);
-
+app.use('/topup', clientTokenRoute);
 
 
 app.listen(process.env.SERVER_PORT, function () {

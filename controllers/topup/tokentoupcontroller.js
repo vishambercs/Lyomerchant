@@ -10,10 +10,11 @@ module.exports =
     
     async pluginallNetworks(req, res) {
         try {
-            var merchantKey = req.headers.authorization
-            const url      =  process.env.API_URL+"/v1/pluginallNetworks"
+            var merchantKey = req.headers.token
+            const url      =  process.env.API_URL+"/v2/pluginallNetworks"
             let headers  =  {}
-            let response =  await Utility.Post_Request_By_Axios(url,headers,merchantKey)
+            let response =  await Utility.Post_Request_By_Axios_Token(url,headers,merchantKey)
+            console.log("response",response)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -26,8 +27,8 @@ module.exports =
     async assigntopupMerchantWallet(req, res) {
         try {
            
-            var merchantKey         =  req.headers.authorization
-            const url               =  process.env.API_URL+"/v1/assigntopupMerchantWallet"
+            var merchantKey         =  req.headers.token
+            const url               =  process.env.API_URL+"/v2/assigntopupMerchantWallet"
             let parameters          =  {
                 "networkType"       : req.body.networkType,
                 "orderid"           : req.body.orderid,
@@ -39,7 +40,7 @@ module.exports =
                 "transtype"         : Object.keys(req.body).includes("transtype") ? req.body.transtype : "topup" ,
                 
             }
-            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            =  await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -51,13 +52,13 @@ module.exports =
   
     async getTranscationDataofTopup(req, res) {
         try {
-            var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/getTranscationDataofTopup"
+            var merchantKey         =  req.headers.token
+            const url               =  process.env.API_URL+"/v2/getTranscationDataofTopup"
             let parameters          =  
             {
                 "id"       : req.body.id,
             }
-            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            =  await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -69,13 +70,13 @@ module.exports =
 
     async getTransStatus(req, res) {
         try {
-            var merchantKey         =  req.headers.authorization
-            const url               =  process.env.API_URL+"/v1/getTransStatus"
+            var merchantKey         =  req.headers.token
+            const url               =  process.env.API_URL+"/v2/getTransStatus"
             let parameters          =  
             {
                 "transid"       : req.body.id,
             }
-            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            =  await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
             
             var stringify_response  = JSON.parse(response)
 
@@ -88,13 +89,13 @@ module.exports =
     },
     async canceltopup(req, res) {
         try {
-            var merchantKey         =  req.headers.authorization
-            const url               =  process.env.API_URL+"/v1/canceltopup"
+            var merchantKey         =  req.headers.token
+            const url               =  process.env.API_URL+"/v2/canceltopup"
             let parameters          =  
             {
                 "id"       : req.body.id,
             }
-            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            =  await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -127,12 +128,12 @@ module.exports =
     async checkbalance(req, res) {
         try {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/checkbalance"
+            const url               =  process.env.API_URL+"/v2/checkbalance"
             let parameters          =  
             {
                 "id"       : req.body.id,
             }
-            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            =  await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
             
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
@@ -146,12 +147,12 @@ module.exports =
         try 
         {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/verfiythebalance"
+            const url               =  process.env.API_URL+"/v2/verfiythebalance"
             let parameters          =  
             {
                 "id"       : req.body.id,
             }
-            let response            =  await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            =  await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
            
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
@@ -165,13 +166,13 @@ module.exports =
         try 
         {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/verfiytranshash"
+            const url               =  process.env.API_URL+"/v2/verfiytranshash"
             let parameters          =  
             {
                 "id"                : req.body.id,
                 "transhash"         : req.body.transhash,
             } 
-            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            = await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -184,12 +185,12 @@ module.exports =
         try 
         {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/sendotp"
+            const url               =  process.env.API_URL+"/v2/sendotp"
             let parameters          =  
             {
                 "id"                : req.body.id,
             } 
-            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            let response            = await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -202,7 +203,7 @@ module.exports =
         try 
         {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/updatetrans"
+            const url               =  process.env.API_URL+"/v2/updatetrans"
             let parameters          =  
             {
                 "id"                : req.body.id,
@@ -210,8 +211,8 @@ module.exports =
                 "amount"            : req.body.amount,
                 "otp"               : req.body.otp,
             } 
-            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
-            
+            let response            = await Utility.Post_Request_By_Axios_Token(url,parameters,merchantKey)
+            console.log(error)
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
@@ -220,27 +221,21 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-    async updatetrans_with_network(req, res) {
+    async getapitoken(req, res) {
         try 
         {
-            var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/updatetrans_with_network"
-            let parameters          =  
-            {
-                "id"                : req.body.id,
-                "nwid"              : req.body.nwid,
-            } 
+            var merchantKey         = req.headers.token
+            const url               =  process.env.API_URL+"/v2/getapitoken"
+            let parameters          =  {} 
             let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
-            
             var stringify_response  = JSON.parse(response)
             res.json(stringify_response)
          }
         catch (error) {
-            console.log(error)
+            console.log("getapitoken",error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
- 
 }
 
 
