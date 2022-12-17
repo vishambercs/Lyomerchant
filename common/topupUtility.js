@@ -418,9 +418,10 @@ async function getTranscationDataForClient(transkey) {
             datarray.address = poolwalletData.address;
 
             const networkData = network.findOne({
-                id: poolwalletData.network_id,
-                status: 1,
+                _id: topupData.nwid,
             });
+
+            console.log(networkData._id, 'Find network');
 
             if (networkData) {
                 datarray.coin = networkData.coin;
