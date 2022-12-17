@@ -123,7 +123,7 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
                                     // });
                 
                                     // if (userAddressToSend) 
-                                    
+                                    console.log("wallet address",walletAddress, walletAddress.topup_id);
                                     const newTopuptranshash = new Topuptranshash;
                                     newTopuptranshash.address = walletAddress.address;
                                     newTopuptranshash.amount = amount;
@@ -137,6 +137,7 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
 
                         }
                     } catch(e) {
+                        console.log(e);
                         }
                     }
                 });

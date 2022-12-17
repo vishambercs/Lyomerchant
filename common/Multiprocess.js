@@ -10,49 +10,6 @@ const ercTxProvider = require('./ercProvider/ercTxProvider');
 const trcTxProvider = require('./trcProvider/trcTxProvider');
 const network = require('../Models/network');
 
-
-
-const addCheckAddressTx = async (transId) => {
-    const toupData = await Topup.findOne({
-        id: transId,
-    });
-    if (toupData) {
-        const poolWalletData = await PoolWallet.findOne({
-            _id: toupData.pwid,
-        });
-        if (poolWalletData) {
-            const networkData = await network.findOne({
-                _id: toupData.nwid,
-            });
-            if (networkData) {
-                if (networkData.coin === 'tUSDT') {
-                    bscTxTestProvider.addAddressToCheckBEP20({
-                        address: poolWalletData.address,
-                        topup_id: toupData._id,
-                    })
-                } else {
-                    if(['ERC20', 'ETH'].includes(networkData.network)) {
-                        ercTxProvider.addAddressToCheckERC20({
-                            address: poolWalletData.address,
-                            topup_id: toupData._id,
-                        });
-                    } else if(networkData.network === 'TRC20') {
-                        trcTxProvider.addAddressToCheckTRC20({
-                            address: poolWalletData.address,
-                            topup_id: toupData._id,
-                        })
-                    } else if (networkData.network === 'BSC') {
-                        bscTxProvider.addAddressToCheckBEP20({
-                            address: poolWalletData.address,
-                            topup_id: toupData._id,
-                        })
-                    }
-                }
-            }
-        }
-    }
-}
-
 const removeCheckAddressTx = async (transId) => {
     const toupData = await Topup.findOne({
         id: transId,
