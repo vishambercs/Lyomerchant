@@ -396,7 +396,8 @@ async function getTranscationDataForClient(transkey) {
     let status  = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
     status = (status.length == 0 && topupData != null) ? Constant.transstatus.filter(index => index.id == topupData.status) : status;
 
-    let statusnumber              = (statusnumber == null && topup != null) ?  topupData.status : statusnumber
+    let statusnumber    = pyTranPool != null ? pyTranPool.status : null
+    statusnumber              = (statusnumber == null && topupData != null) ?  topupData.status : statusnumber
     datarray.transaction_status = statusnumber;
     
     if (topupData) {
