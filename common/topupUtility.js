@@ -406,7 +406,7 @@ async function getTranscationDataForClient(transkey) {
                 datarray.network = networkData.network;
             }
 
-            let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id}).select('transhash amount createdAt');
+            let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id}).select('transhash amount createdAt').lean();
             datarray.payment_history = Topuptranshashdata;
         }
     }
