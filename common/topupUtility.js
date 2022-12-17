@@ -406,7 +406,7 @@ async function getTranscationDataForClient(transkey) {
                 datarray.network = networkData.network;
             }
 
-            let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id}).select('transhash amount');
+            let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id}).select('transhash amount createdAt');
             datarray.payment_history = Topuptranshashdata;
         }
     }
@@ -708,7 +708,12 @@ async function verifyTheBalance(transkey) {
         let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
         let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
         let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
-        let paymentData         = { "paid_in_usd" :pricecal ,"remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.fixed_amount }
+        let paymentData         = { 
+            "paid_in_usd" :pricecal ,"remain": remain, 
+            "paid": BalanceOfAddress.data.format_token_balance, 
+            "required": addressObject.fixed_amount,
+            "payment_history": trans_data.payment_history, 
+        }
         response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
         return JSON.stringify(response)
     }
@@ -777,7 +782,7 @@ async function verifyTheBalancebyWebsocket(transkey,amount,transhash) {
         let paymentData       = { 
             "paid_in_usd": transactionpool.fiat_amount, "remain": remain, 
             "paid": transactionpool.crypto_paid, "required": transactionpool.fixed_amount, 
-            "transcationDetails": trans_data, 
+            "payment_history": trans_data.payment_history, 
         }
         let ClientWallet      = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, amount)
         let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
