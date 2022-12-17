@@ -392,6 +392,13 @@ async function getTranscationDataForClient(transkey) {
 
     const topupData = await topup.findOne({ id: transkey });
 
+    let status  = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
+    status = (status.length == 0 && topupData != null) ? Constant.transstatus.filter(index => index.id == topupData.status) : status
+
+    let statusnumber    = pyTranPool != null ? pyTranPool.status : null
+    statusnumber              = (statusnumber == null && topup != null) ?  topup.status : statusnumber
+    datarray.transaction_status = statusnumber;
+    
     if (topupData) {
         datarray.id = topupData.id;
         datarray.orderid = topupData.orderid;
@@ -403,13 +410,15 @@ async function getTranscationDataForClient(transkey) {
         const poolwalletData = await PoolWallet.findOne({
             id: topupData.poolwalletID
         });
+
+        console.log(poolwalletData._id, 'Find Ppllawa');
         
         if (poolwalletData) {
-            datarray.transaction_status = poolwalletData.status;
             datarray.address = poolwalletData.address;
 
             const networkData = network.findOne({
                 id: poolwalletData.network_id,
+                status: 1,
             });
 
             if (networkData) {
