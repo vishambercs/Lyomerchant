@@ -136,7 +136,7 @@ const getCoinPrice = async (coin) => {
             const getBalanceRes = await axios.get(`https://openapi.lyotrade.com/sapi/v1/klines?symbol=LYO1USDT&interval=1min&limit=1`);
             return getBalanceRes.data[0]['close'];
          } catch(e) {
-            console.log(e);
+            // console.log(e);
             return 1;
          }
     } 
@@ -145,7 +145,7 @@ const getCoinPrice = async (coin) => {
             const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=USDTUSDT&interval=1m&limit=1`);
             return getBalanceRes.data[0]['close'];
          } catch(e) {
-            console.log(e);
+            // console.log(e);
             return 1;
          }
     }
@@ -155,7 +155,7 @@ const getCoinPrice = async (coin) => {
            const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=1m&limit=1`);
            return getBalanceRes.data[0][4];
         } catch(e) {
-           console.log(e);
+        //    console.log(e);
            return 1;
         }
     }
@@ -166,7 +166,7 @@ const getFiatRates = async (coin) => {
        const rate = await getBalanceRes.data.data.find(element => element.pair.includes(coin)).rate;
        return rate;
     } catch(e) {
-       console.log(e);
+    //    console.log(e);
        return 1;
     }
 }
