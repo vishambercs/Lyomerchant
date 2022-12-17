@@ -718,7 +718,7 @@ async function verifyTheBalance(transkey) {
 
        
         let trans_data          = await getTranscationDataForClient(addressObject.id)
-        let logData             = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
+        let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
         let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
         let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
         let paymentData         = { "paid_in_usd" :pricecal ,"remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.fixed_amount }
@@ -789,7 +789,7 @@ async function verifyTheBalancebyWebsocket(transkey,amount,transhash) {
         let paymentData       = { "paid_in_usd": transactionpool.fiat_amount, "remain": remain, "paid": transactionpool.crypto_paid, "required": transactionpool.fixed_amount }
         let trans_data        = await getTranscationDataForClient(addressObject.id)
         let ClientWallet      = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, amount)
-        let logData           = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
+        let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
         let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
         response              = {transkey: transkey, amountstatus: status, "paymentData":paymentData ,status: 200, message: "success","paymenthistory":paymenthistory };
         return JSON.stringify(response)
