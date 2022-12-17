@@ -360,20 +360,67 @@ async function updateClientWallet(client_api_key, networkid, merchantbalance, pr
 }
 async function getTranscationDataForClient(transkey) {
 
-    let pooldata = await topup.aggregate(
-        [
-            { $match: { id: transkey } },
-            {
-                $lookup: {
-                    from: "transcationlogs", // collection to join
-                    localField: "id",//field from the input documents
-                    foreignField: "trans_pool_id",//field from the documents of the "from" collection
-                    as: "transcationlogsDetails"// output array field
-                }
-            },
+    // let pooldata = await topup.aggregate(
+    //     [
+    //         { $match: { id: transkey } },
+    //         {
+    //             $lookup: {
+    //                 from: "transcationlogs", // collection to join
+    //                 localField: "id",//field from the input documents
+    //                 foreignField: "trans_pool_id",//field from the documents of the "from" collection
+    //                 as: "transcationlogsDetails"// output array field
+    //             }
+    //         },
 
-        ])
-    return pooldata
+    //     ])
+    // return pooldata
+
+    let datarray = {
+        "transaction_status"    :    '',
+        "orderid"               :    '',
+        "status"                :    '', 
+        "transaction_id"        :    '',
+        "address"               :    '',
+        "coin"                  :    '',
+        "network"               :    '',
+        "crypto_amount"         :    '',
+        "fiat_amount"           :    '',
+        "payment_history"       :    '',
+    };
+
+    const topupData = await topup.findOne({ id: transkey });
+
+    if (topupData) {
+        datarray.orderid = topupData.orderid;
+        datarray.status = topupData.status;
+        datarray.transaction_id = transkey;
+        datarray.crypto_amount = topupData.amount;
+        datarray.fiat_amount = topupData.fiat_amount;
+
+        const poolwalletData = await PoolWallet.findOne({
+            id: topupData.poolwalletID
+        });
+        
+        if (poolwalletData) {
+            datarray.transaction_status = poolwalletData.status;
+            datarray.address = poolwalletData.address;
+
+            const networkData = network.findOne({
+                id: poolwalletData.network_id,
+            });
+
+            if (networkData) {
+                datarray.coin = networkData.coin;
+                datarray.network = networkData.network;
+            }
+
+            let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id});
+            if (Topuptranshashdata) {
+                datarray.payment_history = Topuptranshashdata;
+            }
+        }
+    }
+    return datarray;
 }
 async function postRequest(URL, parameters, headers) {
 

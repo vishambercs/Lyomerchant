@@ -51,8 +51,9 @@
     "tronstation": "^1.0.1",
     "tronweb": "^4.3.0",
     "validatorjs": "^3.22.1",
-    "web3": "^1.7.4",
-    "websocket": "^1.0.34"
+    "web3": "^1.8.1",
+    "websocket": "^1.0.34",
+    "ws": "^8.11.0"
   },
   "devDependencies": {
     "validator": "^13.7.0"
