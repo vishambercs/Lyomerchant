@@ -387,7 +387,7 @@ async function getTranscationDataForClient(transkey) {
         "network"               :    '',
         "crypto_amount"         :    '',
         "fiat_amount"           :    '',
-        "payment_history"       :    '',
+        "payment_history"       :    [],
     };
 
     const topupData = await topup.findOne({ id: transkey });
