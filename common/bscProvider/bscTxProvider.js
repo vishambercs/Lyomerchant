@@ -104,7 +104,7 @@ async function createWebSocket (BSCNODEWSURL) {
                 // console.log("BSC BEP20 MAIN",blockHeader.number)
                 if(a)
                 {   
-                    console.log("token address detected")           ;
+                    // console.log("token address detected")           ;
                     transactions = data.transactions;
                     for (i=0;i<transactions.length;i++)
                     {
