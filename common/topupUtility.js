@@ -421,7 +421,7 @@ async function getTranscationDataForClient(transkey) {
                 _id: topupData.nwid,
             });
 
-            console.log(networkData._id, 'Find network');
+            console.log(networkData._id, topupData.nwid, poolwalletData.network_id, poolwalletData.networkDetails, 'Find network');
 
             if (networkData) {
                 datarray.coin = networkData.coin;
