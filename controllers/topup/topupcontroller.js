@@ -496,7 +496,7 @@ module.exports =
     },
     async get_top_payment_data(req, res) {
         try {
-            let transactionPool = await topup.findOne({ id: req.body.id, status: { $in: [0, 2] } })
+            let transactionPool = await topup.findOne({ id: req.body.id })
 
             if (transactionPool == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
