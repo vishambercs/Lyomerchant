@@ -89,7 +89,6 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
             {
             Web3WS.eth.getTransactionReceipt(transactions[i]).then( async (data)=>{
                 for(let walletAddress of userCheckAddresses) {
-                    console.log(walletAddress);
                     const logsBloom2 = data.logsBloom;
                     
                     try {
