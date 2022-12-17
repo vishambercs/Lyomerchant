@@ -830,7 +830,7 @@ async function partialTopupBalance(transkey) {
             "paid_in_usd" :pricecal ,
             "remain": remain, "paid": BalanceOfAddress.data.format_token_balance, 
             "required": addressObject.fixed_amount,
-            "transcationDetails": trans_data,
+            "payment_history": trans_data.payment_history, 
         }
         response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
         return JSON.stringify(response)
