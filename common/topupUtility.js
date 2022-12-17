@@ -34,6 +34,7 @@ const Fixedtopup = require('../Models/Fixedtopup');
 const emailSending = require('./emailSending');
 const transUtility = require('./transUtilityFunction');
 const fetch = require('node-fetch');
+const PoolWallet = require('../Models/poolWallet');
 let priceflag = {};
 let alreadySetCurrency = [];
 async function get_Transcation_topup(transkey) {
