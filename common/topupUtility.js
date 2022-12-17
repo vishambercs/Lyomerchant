@@ -391,16 +391,11 @@ async function getTranscationDataForClient(transkey) {
     };
 
     const topupData = await topup.findOne({ id: transkey });
-
-    let pyTranPool;
-    let status  = pyTranPool != null ? Constant.transstatus.filter(index => index.id == pyTranPool.status) : []
-    status = (status.length == 0 && topupData != null) ? Constant.transstatus.filter(index => index.id == topupData.status) : status;
-
-    let statusnumber    = pyTranPool != null ? pyTranPool.status : null
-    statusnumber              = (statusnumber == null && topupData != null) ?  topupData.status : statusnumber
-    datarray.transaction_status = statusnumber;
     
     if (topupData) {
+        let status = Constant.transstatus.filter(index => index.id == topupData.status);
+        datarray.transaction_status = (status.length > 0 ? status[0].title : "");
+        
         datarray.id = topupData.id;
         datarray.orderid = topupData.orderid;
         datarray.status = topupData.status;
@@ -420,8 +415,6 @@ async function getTranscationDataForClient(transkey) {
             const networkData = await network.findOne({
                 _id: topupData.nwid,
             });
-
-            console.log(networkData._id, topupData.nwid, poolwalletData.network_id, poolwalletData.networkDetails, 'Find network');
 
             if (networkData) {
                 datarray.coin = networkData.coin;
