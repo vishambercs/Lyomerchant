@@ -361,21 +361,6 @@ async function updateClientWallet(client_api_key, networkid, merchantbalance, pr
 }
 async function getTranscationDataForClient(transkey) {
 
-    // let pooldata = await topup.aggregate(
-    //     [
-    //         { $match: { id: transkey } },
-    //         {
-    //             $lookup: {
-    //                 from: "transcationlogs", // collection to join
-    //                 localField: "id",//field from the input documents
-    //                 foreignField: "trans_pool_id",//field from the documents of the "from" collection
-    //                 as: "transcationlogsDetails"// output array field
-    //             }
-    //         },
-
-    //     ])
-    // return pooldata
-
     let datarray = {
         "id"                    :    '',
         "transaction_status"    :    '',
@@ -395,7 +380,7 @@ async function getTranscationDataForClient(transkey) {
     if (topupData) {
         let status = Constant.transstatus.filter(index => index.id == topupData.status);
         datarray.transaction_status = (status.length > 0 ? status[0].title : "");
-        
+
         datarray.id = topupData.id;
         datarray.orderid = topupData.orderid;
         datarray.status = topupData.status;
