@@ -1,6 +1,7 @@
 const axios = require('axios').default;
 const Web3 = require('web3');
 const ethereumBloomFilters = require('ethereum-bloom-filters');
+const Topuptranshash = require('../../Models/Topuptranshash');
 
 // const key = require('../../config/key');
 
@@ -82,12 +83,13 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
         // console.log(" BSC TEST ",blockHeader.number)
         if(a)
         {   
-            //console.log("tokenAddress");
+            console.log("tokenAddress");
             transactions = data.transactions;
             for (i=0;i<transactions.length;i++)
             {
             Web3WS.eth.getTransactionReceipt(transactions[i]).then( async (data)=>{
                 for(let walletAddress of userCheckAddresses) {
+                    console.log(walletAddress);
                     const logsBloom2 = data.logsBloom;
                     
                     try {

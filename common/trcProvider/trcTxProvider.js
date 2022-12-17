@@ -1,5 +1,6 @@
 const TronGrid  = require('trongrid');
 const TronWeb = require('tronweb');
+const Topuptranshash = require('../../Models/Topuptranshash');
 const axios = require('axios').default;
 
 const headers = {

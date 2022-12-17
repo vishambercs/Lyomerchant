@@ -4,6 +4,7 @@ const WebSocket = require('ws').WebSocket;
 const axios = require('axios').default;
 const Web3 = require('web3');
 const ethereumBloomFilters = require('ethereum-bloom-filters');
+const Topuptranshash = require('../../Models/Topuptranshash');
 // var cron = require('node-cron');
 // var qs = require('qs');
 // const key = require('../../config/key');
