@@ -377,6 +377,7 @@ async function getTranscationDataForClient(transkey) {
     // return pooldata
 
     let datarray = {
+        "id"                    :    '',
         "transaction_status"    :    '',
         "orderid"               :    '',
         "status"                :    '', 
@@ -392,6 +393,7 @@ async function getTranscationDataForClient(transkey) {
     const topupData = await topup.findOne({ id: transkey });
 
     if (topupData) {
+        datarray.id = topupData.id;
         datarray.orderid = topupData.orderid;
         datarray.status = topupData.status;
         datarray.transaction_id = transkey;
