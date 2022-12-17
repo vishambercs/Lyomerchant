@@ -144,7 +144,7 @@ async function createWebSocket (BSCNODEWSURL) {
                                             
                         
                                             const newTopuptranshash = new Topuptranshash;
-                                            newTopuptranshash.address = walletAddress.address;
+                                            newTopuptranshash.transhash = data.transactionHash;
                                             newTopuptranshash.amount = amount;
                                             newTopuptranshash.topupdetails = walletAddress.topup_id;
                                             await newTopuptranshash.save();

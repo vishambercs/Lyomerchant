@@ -140,7 +140,7 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
 
                         } else {
                             const newTopuptranshash = new Topuptranshash;
-                            newTopuptranshash.address = address;
+                            newTopuptranshash.transhash = edata.transaction_id;
                             newTopuptranshash.amount = amount;
                             newTopuptranshash.topupdetails = toupIds[address];
                             await newTopuptranshash.save();
