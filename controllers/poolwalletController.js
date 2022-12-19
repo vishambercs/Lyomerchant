@@ -15,21 +15,22 @@ const CryptoAccount         = require("send-crypto");
 const TronWeb = require('tronweb')
 const axios = require('axios')
 async function Save_Address_Data(network_details){
+    
     if (network_details.libarayType == "Web3") {
         let account = await Utility.GetAddress(network_details.nodeUrl)
-        const poolWalletItem = new poolWallet({  networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: account.address, privateKey: account.privateKey, });
+        const poolWalletItem = new poolWallet({  networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_details.id, address: account.address, privateKey: account.privateKey, });
         let val = await poolWalletItem.save()
         return val
     }
     else if (network_details.libarayType == "Tronweb") {
         const { address, privateKey } = generateAccount()
-        const poolWalletItem = new poolWallet({  networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id: network_id, address: address, privateKey: privateKey, });
+        const poolWalletItem = new poolWallet({  networkDetails : network_details._id,remarks: "Created at Run Time: " + (new Date().toString()), id: crypto.randomBytes(20).toString('hex'), network_id:  network_details.id, address: address, privateKey: privateKey, });
         let val = await poolWalletItem.save()
         return val
     }
     else if (network_details.libarayType == "btcnetwork") {
         let URL = process.env.BTC_ADDRESS_GENERATION
-        let hotwallet = await hotWallets.findOne({network_id : network_id , status : 1})
+        let hotwallet = await hotWallets.findOne({network_id :  network_details.id , status : 1})
         URL += "action=createChild_BTC_Wallet"
         URL += "&master_BTC_Wallet="+hotwallet.address
         let btc_address = await Utility.Get_RequestByAxios(URL,{},{})
@@ -41,7 +42,7 @@ async function Save_Address_Data(network_details){
         const poolWalletItem  = new poolWallet({ 
             remarks: "Created at Run Time: " + (new Date().toString()), 
             id: crypto.randomBytes(20).toString('hex'), 
-            network_id: network_id, 
+            network_id:  network_details.id, 
             address: address, 
             networkDetails : network_details._id,
             privateKey: " ", });
@@ -159,8 +160,7 @@ module.exports =
             const poolWalletItem = new poolWallet({ id: crypto.randomBytes(20).toString('hex'), network_id: req.body.network_id, address: account.address, privateKey: account.privateKey, });
             poolWalletItem.save().then(async (val) => {
                 res.json({ status: 200, message: "Successfully", data: val })
-            }).
-                catch(error => { res.json({ status: 400, data: {}, message: error }) })
+            }).catch(error => { res.json({ status: 400, data: {}, message: error }) })
 
         }
         catch (error) {
