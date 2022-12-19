@@ -128,8 +128,8 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
                     amount = amount/10**allDecimanls['USDT'];
                     console.log(address, amount, edata.transaction_id);
 
-                        const foundAdd = false;
-                        const userAddHases = userWbhookAddresses[address]; 
+                        let foundAdd = false;
+                        let userAddHases = userWbhookAddresses[address]; 
                         if (userAddHases) {
                             if (userAddHases.includes(edata.transaction_id)) {
                                 foundAdd = true;
