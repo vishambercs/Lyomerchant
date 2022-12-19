@@ -118,11 +118,10 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
 
             for(let edata of res.data) {
                 let address = hexAddressToBase58(edata.result.to);
-                // console.log(edata.result.to, 'to >>>>>>>>>>>>', address, userCheckAddresses);
                 if (
                     userCheckAddresses.includes(`${address}`)
-                )
-                 {               
+                ) {               
+                     console.log(edata.result.to, 'to >>>>>>>>>>>>', address);
 
                     let amount = parseFloat( (edata.result.value))
                     amount = amount/10**allDecimanls['USDT'];
