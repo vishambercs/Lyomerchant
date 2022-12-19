@@ -503,6 +503,7 @@ async function fetchpostRequest(URL, parameters,id) {
             }).catch(async (error) => {
                 var stringify_response = stringify(error)
                 let webhook = await webHookCall.insertMany({
+                    id: mongoose.Types.ObjectId(),
                     trans_id:id,
                     status:400,
                     response : error,

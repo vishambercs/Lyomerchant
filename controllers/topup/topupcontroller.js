@@ -312,14 +312,17 @@ const addCheckAddressTx = async (transId) => {
     const toupData = await topup.findOne({
         id: transId,
     });
+    console.log(topupData, 'Topup data');
     if (toupData) {
         const poolWalletData = await poolWallet.findOne({
             _id: toupData.pwid,
         });
+        console.log(poolWalletData, 'Poolwallet data');
         if (poolWalletData) {
             const networkData = await networks.findOne({
                 _id: toupData.nwid,
             });
+            console.log(networkData, 'Network data');
             if (networkData) {
                 if (networkData.coin === 'tUSDT') {
                     bscTxTestProvider.addAddressToCheckBEP20({
@@ -332,12 +335,15 @@ const addCheckAddressTx = async (transId) => {
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         });
-                    } else if(networkData.network === 'TRC20') {
+                    }
+                    if(networkData.network === 'TRC20') {
+                        console.log('Add wallet address: ', poolWalletData.address, toupData._id);
                         trcTxProvider.addAddressToCheckTRC20({
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         })
-                    } else if (networkData.network === 'BSC') {
+                    }
+                    if (networkData.network === 'BSC') {
                         bscTxProvider.addAddressToCheckBEP20({
                             address: poolWalletData.address,
                             topup_id: toupData._id,
