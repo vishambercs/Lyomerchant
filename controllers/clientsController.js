@@ -864,7 +864,7 @@ module.exports =
     },
     async allMerchant(req, res) {
         try {
-            await clients.find({}, { createdAt: 1, email: 1, status: 1, loginstatus: 1, disablestatus: 1, disable_remarks: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
+            await clients.find({}, { withdrawlimit : 1,createdAt: 1, email: 1, status: 1, loginstatus: 1, disablestatus: 1, disable_remarks: 1, companyname: 1, profileimage: 1, first_name: 1, last_name: 1 }).then(async (val) => {
                 res.json({ status: 200, message: "All Merchant", data: val })
             }).catch(error => {
                 console.log(error)
