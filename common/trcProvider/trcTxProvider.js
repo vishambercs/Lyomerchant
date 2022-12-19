@@ -154,15 +154,21 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
     }
 }
 
+let timeStampTron 
+var timer = 0;
+
 cron.schedule('* * * * * * *', () => {
   timer++;
   if (timer >= 30)
   timer = 0;
   {
-    let timeStampTron = Date.now();
+    timeStampTron = Date.now();
     getContractTransferEventsByUser(timeStampTron, '');  
   }
 });
+
+timeStampTron = Date.now();
+getContractTransferEventsByUser(timeStampTron, '');
 
 module.exports = {
     getContractTransferEventsByUser,
