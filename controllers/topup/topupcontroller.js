@@ -312,17 +312,14 @@ const addCheckAddressTx = async (transId) => {
     const toupData = await topup.findOne({
         id: transId,
     });
-    console.log(topupData, 'Topup data');
     if (toupData) {
         const poolWalletData = await poolWallet.findOne({
             _id: toupData.pwid,
         });
-        console.log(poolWalletData, 'Poolwallet data');
         if (poolWalletData) {
             const networkData = await networks.findOne({
                 _id: toupData.nwid,
             });
-            console.log(networkData, 'Network data');
             if (networkData) {
                 if (networkData.coin === 'tUSDT') {
                     bscTxTestProvider.addAddressToCheckBEP20({
