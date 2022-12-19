@@ -138,6 +138,11 @@ const clientsSchema = new mongoose.Schema({
         type: String,
         required: false,
     },
+    withdrawlimit: {
+        type: Number,
+        required: false,
+        default : 0,
+    },
     },
     { timestamps: true },
     {

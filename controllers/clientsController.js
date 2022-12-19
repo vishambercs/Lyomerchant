@@ -1577,4 +1577,28 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid", total: 0 })
         }
     },
+
+    async update_withdraw_limit(req, res) {
+        try {
+        
+            let clientdata = await clients.findOneAndUpdate({ email: req.body.email} ,{ $set : 
+            {
+                withdrawlimit: req.body.withdrawlimit
+            }},
+            {
+                returnDocument : 'after'
+            }
+            )
+            if (clientdata == null) {
+                return res.json({ status: 400, data: {}, message: "Invalid Email" })
+            }
+            res.json({ status: 200, data: { "withdrawlimit": clientdata.withdrawlimit, "email" :  req.body.email, },message: "Success" })
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Invalid", total: 0 })
+        }
+    },
+
+    
 }
