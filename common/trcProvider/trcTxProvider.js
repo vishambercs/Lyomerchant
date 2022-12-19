@@ -133,6 +133,8 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
                         if (userAddHases) {
                             if (userAddHases.includes(edata.transaction_id)) {
                                 foundAdd = true;
+                            } else {
+                                userWbhookAddresses[address].push(`${edata.transaction_id}`);
                             }
                         } else {
                             userWbhookAddresses[address] = [];
