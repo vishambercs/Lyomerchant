@@ -1175,7 +1175,7 @@ module.exports =
             res.status(200).json({ status: 200, data : {"transactionPooldata":transactionPooldata ,"paymentLinkdata":paymentLinkdata ,"posdata":posdata ,"topupsdata" : topupsdata }, "message":"Data" });
            
         } catch (error) {
-            console.log(error)
+            console.log("getTranscationofPoolwallet",error)
             res.status(400).json({ status: 400, message:"Error" });
         }
     },
