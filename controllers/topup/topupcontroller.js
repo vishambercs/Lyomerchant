@@ -803,18 +803,14 @@ module.exports =
             {
                 return res.json({ status: 400, message: "Invalid Amount", data: {} })
             }
-            
-            let transactiondata = await topup.findOne(
-                {id: req.body.id , otp:req.body.otp ,status : 0 },
-              )
-                
-
+            let transactiondata = await topup.findOne( { id: req.body.id , otp:req.body.otp ,status : 0 },)
             if (transactiondata == null) 
             {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
             let transWallet = await poolWallet.findOne({ id: transactiondata.poolwalletID })
-            if (transWallet == null) {
+            if (transWallet == null) 
+            {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
             let network     = await networks.findOne({ id: transWallet.network_id })
@@ -827,28 +823,34 @@ module.exports =
             if(Object.keys(balance.data).length  == 0 ){
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
+            let totalamount  = parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount)
+
+            let status  = parseFloat(transactiondata.fixed_amount) == parseFloat(totalamount)  ? 1 : 0
+            status  = parseFloat(totalamount)   > parseFloat(transactiondata.fixed_amount)      ? 1 : 0
+
 
             let transactionPool = await topup.findOneAndUpdate(
                 { id: req.body.id , otp:req.body.otp , status : 0 },
-                {$set : {
-                    status          : 1,
+                { $set : {
+                    status          : status,
                     transhash       : req.body.transhash,
                     amount          : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
                     updated_at      : new Date().toString(),
                 }},
                 {'returnDocument' : 'after'}
                 )
-            
-                if (transactionPool == null) 
+            if (transactionPool == null) 
             {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
+
             let transhashdata = await Topuptranshash.insertMany({
                 transhash    : req.body.transhash,
                 amount       : balance.data.formatedamount,
                 topupdetails : transactionPool._id,
                 updated_at   : new Date().toString() 
             })
+            
             let price  = 1
             if(network.stablecoin == false)
             {
@@ -875,7 +877,7 @@ module.exports =
             
         }
         catch (error) {
-            console.log("checkbalance",error)
+            console.log("updatetrans",error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     }, 
