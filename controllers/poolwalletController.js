@@ -57,12 +57,12 @@ async function Get_RequestByAxios(URL, parameters, headers) {
         params: parameters,
         headers: headers
     }).then(res => {
-        var stringify_response = JSON.stringify(res)
+        var stringify_response = `${res}`
         response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
     })
         .catch(error => {
             console.error("Error", error)
-            var stringify_response = JSON.stringify(error)
+            var stringify_response = `${error}`
             response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
         })
     return response;

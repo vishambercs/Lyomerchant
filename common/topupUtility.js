@@ -484,7 +484,7 @@ async function fetchpostRequest(URL, parameters,id) {
     try {
         let webhooklog = await webHookCall.findOne({trans_id : id})
         let response = {}
-        if((webhooklog == null) && (!savingIds.includes(id))){
+        if((webhooklog == null) && (!savingIds.includes(id))) {
             savingIds.push(id);
         await axios.post(URL,
             qs.stringify(parameters),
