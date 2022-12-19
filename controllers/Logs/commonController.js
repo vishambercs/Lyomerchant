@@ -72,7 +72,7 @@ module.exports =
             order_id = Fixedtopup != null  ? Fixedtopup.orderid : order_id
 
 
-            let Topuptranshashdata = topup != null   ? await Topuptranshash.find({topupdetails : topup._id}) : []
+            let Topuptranshashdata = topup != null   ? await Topuptranshash.find({topupdetails : topup._id}).select('transhash amount createdAt').lean() : []
 
 
            

@@ -302,7 +302,52 @@ async function getTimeprice(time, coin) {
 
 
 
+const bscTxTestProvider = require('../../common/bscProvider/bscTxTestProvider');
+const bscTxProvider = require('../../common/bscProvider/bscTxProvider');
+const ercTxProvider = require('../../common/ercProvider/ercTxProvider');
+const trcTxProvider = require('../../common/trcProvider/trcTxProvider');
 
+
+const addCheckAddressTx = async (transId) => {
+    const toupData = await topup.findOne({
+        id: transId,
+    });
+    if (toupData) {
+        const poolWalletData = await poolWallet.findOne({
+            _id: toupData.pwid,
+        });
+        if (poolWalletData) {
+            const networkData = await networks.findOne({
+                _id: toupData.nwid,
+            });
+            if (networkData) {
+                if (networkData.coin === 'tUSDT') {
+                    bscTxTestProvider.addAddressToCheckBEP20({
+                        address: poolWalletData.address,
+                        topup_id: toupData._id,
+                    })
+                } else {
+                    if(['ERC20', 'ETH'].includes(networkData.network)) {
+                        ercTxProvider.addAddressToCheckERC20({
+                            address: poolWalletData.address,
+                            topup_id: toupData._id,
+                        });
+                    } else if(networkData.network === 'TRC20') {
+                        trcTxProvider.addAddressToCheckTRC20({
+                            address: poolWalletData.address,
+                            topup_id: toupData._id,
+                        })
+                    } else if (networkData.network === 'BSC') {
+                        bscTxProvider.addAddressToCheckBEP20({
+                            address: poolWalletData.address,
+                            topup_id: toupData._id,
+                        })
+                    }
+                }
+            }
+        }
+    }
+}
 
 
 module.exports =
@@ -341,6 +386,7 @@ module.exports =
             });
             transactionPool.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
+                addCheckAddressTx(val.id);
                 let url = process.env.TOP_UP_URL + val.id
                 if(req.body.transtype == "wewe"){
                     url = process.env.WEWE_UP_URL + val.id
@@ -495,7 +541,7 @@ module.exports =
     },
     async get_top_payment_data(req, res) {
         try {
-            let transactionPool = await topup.findOne({ id: req.body.id, status: { $in: [0, 2] } })
+            let transactionPool = await topup.findOne({ id: req.body.id })
 
             if (transactionPool == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })

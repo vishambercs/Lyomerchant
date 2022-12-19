@@ -48,11 +48,13 @@
     "socket.io": "^4.5.1",
     "socket.io-client": "^4.5.3",
     "tron-create-address": "^0.1.10",
+    "trongrid": "^1.2.6",
     "tronstation": "^1.0.1",
-    "tronweb": "^4.3.0",
+    "tronweb": "^4.4.0",
     "validatorjs": "^3.22.1",
-    "web3": "^1.7.4",
-    "websocket": "^1.0.34"
+    "web3": "^1.8.1",
+    "websocket": "^1.0.34",
+    "ws": "^8.11.0"
   },
   "devDependencies": {
     "validator": "^13.7.0"

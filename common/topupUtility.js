@@ -34,6 +34,7 @@ const Fixedtopup = require('../Models/Fixedtopup');
 const emailSending = require('./emailSending');
 const transUtility = require('./transUtilityFunction');
 const fetch = require('node-fetch');
+const PoolWallet = require('../Models/poolWallet');
 let priceflag = {};
 let alreadySetCurrency = [];
 async function get_Transcation_topup(transkey) {
@@ -135,7 +136,7 @@ const getCoinPrice = async (coin) => {
             const getBalanceRes = await axios.get(`https://openapi.lyotrade.com/sapi/v1/klines?symbol=LYO1USDT&interval=1min&limit=1`);
             return getBalanceRes.data[0]['close'];
          } catch(e) {
-            console.log(e);
+            // console.log(e);
             return 1;
          }
     } 
@@ -144,7 +145,7 @@ const getCoinPrice = async (coin) => {
             const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=USDTUSDT&interval=1m&limit=1`);
             return getBalanceRes.data[0]['close'];
          } catch(e) {
-            console.log(e);
+            // console.log(e);
             return 1;
          }
     }
@@ -154,7 +155,7 @@ const getCoinPrice = async (coin) => {
            const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=1m&limit=1`);
            return getBalanceRes.data[0][4];
         } catch(e) {
-           console.log(e);
+        //    console.log(e);
            return 1;
         }
     }
@@ -165,7 +166,7 @@ const getFiatRates = async (coin) => {
        const rate = await getBalanceRes.data.data.find(element => element.pair.includes(coin)).rate;
        return rate;
     } catch(e) {
-       console.log(e);
+    //    console.log(e);
        return 1;
     }
 }
@@ -360,20 +361,56 @@ async function updateClientWallet(client_api_key, networkid, merchantbalance, pr
 }
 async function getTranscationDataForClient(transkey) {
 
-    let pooldata = await topup.aggregate(
-        [
-            { $match: { id: transkey } },
-            {
-                $lookup: {
-                    from: "transcationlogs", // collection to join
-                    localField: "id",//field from the input documents
-                    foreignField: "trans_pool_id",//field from the documents of the "from" collection
-                    as: "transcationlogsDetails"// output array field
-                }
-            },
+    let datarray = {
+        "id"                    :    '',
+        "transaction_status"    :    '',
+        "orderid"               :    '',
+        "status"                :    '', 
+        "transaction_id"        :    '',
+        "address"               :    '',
+        "coin"                  :    '',
+        "network"               :    '',
+        "crypto_amount"         :    '',
+        "fiat_amount"           :    '',
+        "payment_history"       :    [],
+    };
 
-        ])
-    return pooldata
+    const topupData = await topup.findOne({ id: transkey });
+    
+    if (topupData) {
+        let status = Constant.transstatus.filter(index => index.id == topupData.status);
+        datarray.transaction_status = (status.length > 0 ? status[0].title : "");
+
+        datarray.id = topupData.id;
+        datarray.orderid = topupData.orderid;
+        datarray.status = topupData.status;
+        datarray.transaction_id = transkey;
+        datarray.crypto_amount = topupData.amount;
+        datarray.fiat_amount = topupData.fiat_amount;
+
+        const poolwalletData = await PoolWallet.findOne({
+            _id: topupData.pwid,
+        });
+
+        console.log(poolwalletData._id, 'Find Ppllawa');
+        
+        if (poolwalletData) {
+            datarray.address = poolwalletData.address;
+
+            const networkData = await network.findOne({
+                _id: topupData.nwid,
+            });
+
+            if (networkData) {
+                datarray.coin = networkData.coin;
+                datarray.network = networkData.network;
+            }
+
+            let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id}).select('transhash amount createdAt').lean();
+            datarray.payment_history = Topuptranshashdata;
+        }
+    }
+    return datarray;
 }
 async function postRequest(URL, parameters, headers) {
 
@@ -566,7 +603,7 @@ async function getTrasnsBalance(transdata) {
             let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, walletbalance)
             let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 1, "amount": BalanceOfAddress.data.format_token_balance } })
             let trans_data = await getTranscationDataForClient(addressObject.id)
-            let logData = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
+            let logData = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
             let previouspoolwallet = await poolWallets.findOne({ id: addressObject.poolWallet[0].id })
             let totalBalnce = parseFloat(previouspoolwallet.balance) + walletbalance
             let poolwallet = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { status: 4, balance: totalBalnce } })
@@ -668,10 +705,15 @@ async function verifyTheBalance(transkey) {
 
        
         let trans_data          = await getTranscationDataForClient(addressObject.id)
-        let logData             = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
+        let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
         let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
         let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
-        let paymentData         = { "paid_in_usd" :pricecal ,"remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.fixed_amount }
+        let paymentData         = { 
+            "paid_in_usd" :pricecal ,"remain": remain, 
+            "paid": BalanceOfAddress.data.format_token_balance, 
+            "required": addressObject.fixed_amount,
+            "payment_history": trans_data.payment_history, 
+        }
         response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
         return JSON.stringify(response)
     }
@@ -736,10 +778,14 @@ async function verifyTheBalancebyWebsocket(transkey,amount,transhash) {
                 }, { returnDocument: 'after' })
         }
         let remain            = parseFloat(transactionpool.fixed_amount) - parseFloat(transactionpool.crypto_paid)
-        let paymentData       = { "paid_in_usd": transactionpool.fiat_amount, "remain": remain, "paid": transactionpool.crypto_paid, "required": transactionpool.fixed_amount }
         let trans_data        = await getTranscationDataForClient(addressObject.id)
+        let paymentData       = { 
+            "paid_in_usd": transactionpool.fiat_amount, "remain": remain, 
+            "paid": transactionpool.crypto_paid, "required": transactionpool.fixed_amount, 
+            "payment_history": trans_data.payment_history, 
+        }
         let ClientWallet      = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, amount)
-        let logData           = { "transcationDetails": trans_data[0], "paid_in_usd": pricecal }
+        let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
         let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
         response              = {transkey: transkey, amountstatus: status, "paymentData":paymentData ,status: 200, message: "success","paymenthistory":paymenthistory };
         return JSON.stringify(response)
@@ -779,7 +825,13 @@ async function partialTopupBalance(transkey) {
             }, { returnDocument: 'after' })
         let remain = parseFloat(addressObject.fixed_amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
-        let paymentData         = { "paid_in_usd" :pricecal ,"remain": remain, "paid": BalanceOfAddress.data.format_token_balance, "required": addressObject.fixed_amount }
+        let trans_data        = await getTranscationDataForClient(addressObject.id)
+        let paymentData       = { 
+            "paid_in_usd" :pricecal ,
+            "remain": remain, "paid": BalanceOfAddress.data.format_token_balance, 
+            "required": addressObject.fixed_amount,
+            "payment_history": trans_data.payment_history, 
+        }
         response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
         return JSON.stringify(response)
     }
