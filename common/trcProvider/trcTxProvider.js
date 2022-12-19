@@ -2,6 +2,7 @@ const TronGrid  = require('trongrid');
 const TronWeb = require('tronweb');
 const Topuptranshash = require('../../Models/Topuptranshash');
 const axios = require('axios').default;
+var cron = require('node-cron');
 
 const headers = {
     'Content-Type': 'application/json',
@@ -152,6 +153,16 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
         return result;
     }
 }
+
+cron.schedule('* * * * * * *', () => {
+  timer++;
+  if (timer >= 30)
+  timer = 0;
+  {
+    let timeStampTron = Date.now();
+    getContractTransferEventsByUser(timeStampTron, '');  
+  }
+});
 
 module.exports = {
     getContractTransferEventsByUser,
