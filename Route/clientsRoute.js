@@ -97,7 +97,7 @@ router.post('/pluginpriceConversition',              Auth.checkaccess,CurrencyCo
 "============================ Withdraw  ==============================="
 
 router.post('/merchantBalance',                      Auth.is_merchant,withdrawController.merchantBalance);
-router.post('/merchantWithdrawBalance',              withdrawController.withdrawBalance);
+router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 // router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 
 "============================ perfered Network Controller  ==============================="

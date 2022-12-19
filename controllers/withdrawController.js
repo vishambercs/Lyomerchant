@@ -224,8 +224,13 @@ module.exports =
             
             let coinprice         = await priceNewConversition(network.currencyid.toLocaleLowerCase())
             let nativeprice       = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
-            console.log("balance",req.body.amount < (network.transferlimit / coinprice))
-            if (req.body.amount < (network.transferlimit / coinprice)) {
+    
+            const clients_data = await client.findOne({"api_key": req.headers.authorization })
+            let network_withdraw_limit = (req.body.amount < (network.transferlimit / coinprice))
+            let client_withdraw_limit = (req.body.amount < (clients_data.withdrawlimit / coinprice)) 
+           
+
+            if (network_withdraw_limit == true &&  client_withdraw_limit == true) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
             console.log("balance",req.body.amount >= balance)
@@ -702,9 +707,10 @@ module.exports =
 
         try {
         // const balance = await clientWallets.findOne({ "id": req.body.clientWalletid, "client_api_key": req.headers.authorization })
-
-           let totalresponse =   await creat_Total_Depossit(req.body.networkid ,req.headers.authorization)
-           console.log("===total===",totalresponse) 
+         
+           const clients_data = await client.findOne({"api_key": req.headers.authorization })
+           let totalresponse  =   await creat_Total_Depossit(req.body.networkid ,req.headers.authorization)
+         
            const balance = totalresponse.status == 200 ? totalresponse.data.nettotal : null
         //    return res.json({ status: 200, data: {}, message: "Not found" })
 
@@ -750,8 +756,10 @@ module.exports =
             console.log(transfer_fee)
             network_fee = amount * (1 / 100)
             cryptoprice = transfer_fee / coinprice
-      
-            if (amount < (network.transferlimit / coinprice)) {
+         
+            let network_withdraw_limit = (amount < (network.transferlimit / coinprice))
+            let client_withdraw_limit = (amount < (clients_data.withdrawlimit / coinprice)) 
+            if ( network_withdraw_limit == true && client_withdraw_limit == true   ) {
                 return res.json({
                     status : 200,
                     data   :
