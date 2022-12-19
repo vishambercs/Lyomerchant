@@ -19,6 +19,13 @@ const Topuptranshash = new mongoose.Schema({
 		ref     : Topup,
 		default : null,
 	},
+    updated_at: 
+    {
+	    type: String,
+        required: false,
+        default : false,
+    
+	},
 
 },
    

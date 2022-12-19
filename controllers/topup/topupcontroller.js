@@ -142,9 +142,8 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             let hashtrans = await WEB3.eth.getTransactionReceipt(tranxid)
             let transaction = await WEB3.eth.getTransaction(tranxid)
-            console.log("decoder========== transaction", transaction);
-            const result = decoder.decodeData(transaction.input);
-            console.log("decoder==========", result);
+           const result = decoder.decodeData(transaction.input);
+            
             let tradata = {}
 
             if (hashtrans != null && hashtrans.contractAddress == null) {
@@ -760,7 +759,7 @@ module.exports =
             }
             
             let transactiondata = await topup.findOne(
-                {id: req.body.id , otp:req.body.otp , status : 0 },
+                {id: req.body.id , otp:req.body.otp ,status : 0 },
               )
                 
 
@@ -782,10 +781,10 @@ module.exports =
             if(Object.keys(balance.data).length  == 0 ){
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
-            
+
             let transactionPool = await topup.findOneAndUpdate(
-                {id: req.body.id , otp:req.body.otp , status : 0 },
-                { $set : {
+                { id: req.body.id , otp:req.body.otp , status : 0 },
+                {$set : {
                     status          : 1,
                     transhash       : req.body.transhash,
                     amount          : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
@@ -798,24 +797,33 @@ module.exports =
             {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
-           
-
+            let transhashdata = await Topuptranshash.insertMany({
+                transhash    : req.body.transhash,
+                amount       : balance.data.formatedamount,
+                topupdetails : transactionPool._id,
+                updated_at   : new Date().toString() 
+            })
+            let price  = 1
+            if(network.stablecoin == false)
+            {
+             price      = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
+            }
          
-            let price       = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
+           
             let faitprice = price * req.body.amount
             
             await topup.findOneAndUpdate( {id: req.body.id }, { $set : { fiat_amount :  faitprice } })
             
-            await updateOtherAPI(1, 
-                req.body.transhash, 
-                transactionPool.id ,
-                req.body.transhash, 
-                transactionPool.orderid,
-                network.coin,
-                transactionPool.amount,
-                faitprice,network.id,transWallet.address,faitprice,
-                network.network,
-                new Date().toString(),transactionPool.timestamps )
+            // await updateOtherAPI(1, 
+            //     req.body.transhash, 
+            //     transactionPool.id ,
+            //     req.body.transhash, 
+            //     transactionPool.orderid,
+            //     network.coin,
+            //     transactionPool.amount,
+            //     faitprice,network.id,transWallet.address,faitprice,
+            //     network.network,
+            //     new Date().toString(),transactionPool.timestamps )
 
             res.json({ status: 200, message: "Get The Data", data: "" })
             
