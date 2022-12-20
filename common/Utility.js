@@ -357,6 +357,11 @@ module.exports =
             if(getTranscationData.length > 0)
             {
             const connection        = request.accept(null, request.origin);
+
+            connection.on('close', (ws, wsResponse) => {
+                console.log(ws.readyState, 'cLOSED');
+            })
+            
             var index = Constant.topupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
             if(index == -1)
             {

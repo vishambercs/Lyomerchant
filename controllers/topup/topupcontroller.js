@@ -311,22 +311,22 @@ const btcTxProvider = require('../../common/btcProvider/btcTxProvider');
 
 
 const addCheckAddressTx = async (transId) => {
-    console.log("addCheckAddressTx",transId)
+
     const toupData = await topup.findOne({
         id: transId,
     });
-    console.log("toupData",toupData)
+    
     if (toupData) {
         const poolWalletData = await poolWallet.findOne({
             _id: toupData.pwid,
         });
 
-        console.log("poolWalletData",poolWalletData)
+       
         if (poolWalletData) {
             const networkData = await networks.findOne({
                 _id: toupData.nwid,
             });
-            console.log("networkData",networkData)
+            
             if (networkData) {
                 if (networkData.coin === 'tUSDT') {
                     bscTxTestProvider.addAddressToCheckBEP20({

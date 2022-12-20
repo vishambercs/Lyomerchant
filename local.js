@@ -11,6 +11,7 @@ var clientTokenRoute          = require('./Route/clientTokenRoute');
 // var withdrawRoute   = require('./Route/withdrawRoute');
 // var adminRoute      = require('./Route/adminRoute');
 var cornJobs = require('./common/cornJobs');
+var Constant = require('./common/Constant');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
 var path = require('path');
@@ -18,6 +19,7 @@ const Web3 = require('web3');
 var cron = require('node-cron');
 const webSocketServer = require('websocket').server;
 const WebSocketClient = require('websocket').client;
+const w3cwebsocket = require('websocket').w3cwebsocket;
 var app = express();
 const https = require('http');
 const Utility = require('./common/Utility');
@@ -56,7 +58,11 @@ mongoose.connection.once('open', function () {
 //     console.log('running a task every minute',response);
 // });
 
+// cron.schedule('* * * * * *', async() => {
+//     // Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.connection.readyState  != WebSocket.CLOSE);
 
+//     console.log('running a task every minute',Constant.topupTransList[0].connection.socket._readableState);
+// });
 
 app.listen(process.env.SERVER_PORT, function () {
     console.log(`Example app listening at ${process.env.SERVER_PORT}`);
@@ -102,6 +108,9 @@ console.log(`Example app listening at ${process.env.TOP_UP_PORT}`);
 })
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.topupWebScokect)
+// topupserverdata.on('close', (request) => {
+//       console.log("request",request)
+// })
 
 
 
