@@ -62,14 +62,18 @@ const createWebSocket = async (ETHNODEWSURL) => {
         var Web3WS = new Web3(new Web3.providers.WebsocketProvider(ETHNODEWSURL,options));
         var Web3HTTP = new Web3(new Web3.providers.HttpProvider(ETHNODEHTTPURL))
 
-        const checkInputLogs = async (txHash) => {
+        const checkInputLogs = async (txHash, toAddress) => {
             try {
                 const inputLogsRes = await Web3HTTP.eth.getTransactionReceipt(`${txHash}`);
                 let address = JSON.stringify(inputLogsRes.logs[0].topics[2])
                 let address1 = address.slice(27,67)
                 address1=("0x"+address1);
                 address1=address1;
-                return address1;
+                if (toAddress == address1) {
+                    return address1; 
+                } else {
+                    return false;
+                }
             } catch(e) {
                 return false;
             }
@@ -109,7 +113,7 @@ const createWebSocket = async (ETHNODEWSURL) => {
                                     if(b) {
                                         // console.log(logsBloom2);
                                         console.log(walletAddress.address, tokenAddressToCheck, 'Detected Bloom >>>>>>>>>>>>>>>>', data.transactionHash);
-                                        const checkAddInReceipt = await checkInputLogs(data.transactionHash);
+                                        const checkAddInReceipt = await checkInputLogs(data.transactionHash, walletAddress.address);
 
                                         console.log(checkAddInReceipt, 'INput logs >>>>>>>>>>>');
 

@@ -50,14 +50,19 @@ try {
 var Web3WS = new Web3(new Web3.providers.WebsocketProvider(BSCNODEWSURL,options));
 console.log("----------Subscribing Blockheader event------ ",BSCNODEWSURL);
 
-const checkInputLogs = async (txHash) => {
+const checkInputLogs = async (txHash, toAddress) => {
     try {
         const inputLogsRes = await Web3WS.eth.getTransactionReceipt(`${txHash}`);
         let address = JSON.stringify(inputLogsRes.logs[0].topics[2])
         let address1 = address.slice(27,67)
         address1=("0x"+address1);
         address1=address1;
-        return address1; 
+
+        if (toAddress == address1) {
+            return address1; 
+        } else {
+            return false;
+        }
     } catch(e) {
         return false;
     }
@@ -97,7 +102,7 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
                         let b = ethereumBloomFilters.isUserEthereumAddressInBloom(logsBloom2,walletAddress.address)
                         if(b)
                         {
-                            const checkAddInReceipt = await checkInputLogs(data.transactionHash);
+                            const checkAddInReceipt = await checkInputLogs(data.transactionHash, walletAddress.address);
 
                             if (checkAddInReceipt) {
                                 console.log("walletAddress detected",walletAddress.address)
