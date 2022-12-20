@@ -865,17 +865,27 @@ async function checkTopupBalance(transkey) {
             addressObject.networkDetails[0].contractAddress,
             addressObject.poolWallet[0].privateKey
         )
-        let netamount   = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
-        let trans_data  = await getTranscationDataForClient(addressObject.id)
-        let pricecal    = await pricecalculation(addressObject.poolWallet[0].network_id, netamount)
+        
+        let transcationTopup = await Topuptranshash.find({ topupdetails : addressObject._id})
+        const net_amount = transcationTopup.reduce( (partialSum, a) => partialSum + parseFloat(a.amount), 0);
+        console.log("transcationTopup", net_amount)
+        console.log("transcationTopup", transcationTopup)
+
+        //let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
+        
+        let netamount        = net_amount
+        let trans_data       = await getTranscationDataForClient(addressObject.id)
+        let pricecal         = await pricecalculation(addressObject.poolWallet[0].network_id, netamount)
+
+        
         if (addressObject.transtype == 1) 
         {
             let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
                 {
                     $set: {
-                        status: 1,
-                        "amount": BalanceOfAddress.data.format_token_balance,
-                        "fiat_amount": pricecal,
+                        status          : 1,
+                        "amount"        : netamount,
+                        "fiat_amount"   : pricecal,
                     }
                 }, { returnDocument: 'after' })
                 
