@@ -306,6 +306,7 @@ const bscTxTestProvider = require('../../common/bscProvider/bscTxTestProvider');
 const bscTxProvider = require('../../common/bscProvider/bscTxProvider');
 const ercTxProvider = require('../../common/ercProvider/ercTxProvider');
 const trcTxProvider = require('../../common/trcProvider/trcTxProvider');
+const btcTxProvider = require('../../common/btcProvider/btcTxProvider');
 
 
 const addCheckAddressTx = async (transId) => {
@@ -342,6 +343,12 @@ const addCheckAddressTx = async (transId) => {
                     }
                     if (networkData.network === 'BSC') {
                         bscTxProvider.addAddressToCheckBEP20({
+                            address: poolWalletData.address,
+                            topup_id: toupData._id,
+                        })
+                    }
+                    if (networkData.network === 'BTC') {
+                        btcTxProvider.addAddressToCheckBTC({
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         })

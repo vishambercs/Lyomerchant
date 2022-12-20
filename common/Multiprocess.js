@@ -8,6 +8,8 @@ const bscTxTestProvider = require('./bscProvider/bscTxTestProvider');
 const bscTxProvider = require('./bscProvider/bscTxProvider');
 const ercTxProvider = require('./ercProvider/ercTxProvider');
 const trcTxProvider = require('./trcProvider/trcTxProvider');
+const btcTxProvider = require('./btcProvider/btcTxProvider');
+
 const network = require('../Models/network');
 
 const removeCheckAddressTx = async (transId) => {
@@ -34,13 +36,21 @@ const removeCheckAddressTx = async (transId) => {
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         });
-                    } else if(networkData.network === 'TRC20') {
+                    }
+                    if(networkData.network === 'TRC20') {
                         trcTxProvider.removeAddressToCheckTRC20({
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         })
-                    } else if (networkData.network === 'BSC') {
+                    }
+                    if (networkData.network === 'BSC') {
                         bscTxProvider.removeAddressToCheckBEP20({
+                            address: poolWalletData.address,
+                            topup_id: toupData._id,
+                        })
+                    }
+                    if (networkData.network === 'BTC') {
+                        btcTxProvider.removeAddressToCheckBTC({
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         })
