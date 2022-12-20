@@ -1,14 +1,14 @@
-const WebSocketClient = require('websocket').client;
 require("dotenv").config()
-const topupUtility     = require('./topupUtility');
-const Constant        = require('./Constant');
-const Topup = require('../Models/topup');
-const PoolWallet = require('../Models/poolWallet');
+const WebSocketClient   = require('websocket').client;
+const topupUtility      = require('./topupUtility');
+const Constant          = require('./Constant');
+const Topup             = require('../Models/topup');
+const PoolWallet        = require('../Models/poolWallet');
 const bscTxTestProvider = require('./bscProvider/bscTxTestProvider');
-const bscTxProvider = require('./bscProvider/bscTxProvider');
-const ercTxProvider = require('./ercProvider/ercTxProvider');
-const trcTxProvider = require('./trcProvider/trcTxProvider');
-const network = require('../Models/network');
+const bscTxProvider     = require('./bscProvider/bscTxProvider');
+const ercTxProvider     = require('./ercProvider/ercTxProvider');
+const trcTxProvider     = require('./trcProvider/trcTxProvider');
+const network           = require('../Models/network');
 
 const removeCheckAddressTx = async (transId) => {
     const toupData = await Topup.findOne({
@@ -75,34 +75,41 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             {
                 transData       = Constant.topupTransList[index]
             }
-            if((jsondata.status == 1 || jsondata.status == 3 ) && index != -1)
-            {
-                let responseapi     = await topupUtility.verifyTheBalance(jsondata.transid)
-                let responseapijson = JSON.parse(responseapi)
-                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paymentData":responseapijson.paymentData,  status: jsondata.balancedata.status, message: "Success" };
-                transData.connection.sendUTF(JSON.stringify(response));
-                transData.connection.close(1000);
-                removeCheckAddressTx(jsondata.transId);
-                Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
-            }
-            if(jsondata.status == 2  && index != -1)
-            {
+            // if((jsondata.status == 1 || jsondata.status == 3 ) && index != -1)
+            // {
+            //     let responseapi     = await topupUtility.verifyTheBalance(jsondata.transid)
+            //     let responseapijson = JSON.parse(responseapi)
+            //     let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paymentData":responseapijson.paymentData,  status: jsondata.balancedata.status, message: "Success" };
+            //     transData.connection.sendUTF(JSON.stringify(response));
+            //     transData.connection.close(1000);
+            //     removeCheckAddressTx(jsondata.transId);
+            //     Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
+            // }
+            // if(jsondata.status == 2  && index != -1)
+            // {
                  
-                let responseapi     = await topupUtility.partialTopupBalance(jsondata.transid)
-                let responseapijson = JSON.parse(responseapi)
-                let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paymentData":responseapijson.paymentData, status: jsondata.balancedata.status, message: "Success" };
-                transData.connection.sendUTF(JSON.stringify(response));
-          
-            }
-            else if (index != -1)
+            //     let responseapi     = await topupUtility.partialTopupBalance(jsondata.transid)
+            //     let responseapijson = JSON.parse(responseapi)
+            //     let response        = {transkey:jsondata.transid ,amountstatus: jsondata.status,"paymentData":responseapijson.paymentData, status: jsondata.balancedata.status, message: "Success" };
+            //     transData.connection.sendUTF(JSON.stringify(response));
+            // else }
+            if (index != -1)
             {
                 let transData       = Constant.topupTransList[index]
-                let topupdata       = await Topup.findOne({id : jsondata.transid})
-                let paymentData     = { "pricecal" :topupdata.fiat_amount ,"remain": (topupdata.fixed_amount - topupdata.amount), "paid": topupdata.amount , "required": topupdata.fixed_amount }
-                let response        = { transkey:jsondata.transid ,amountstatus: topupdata.status, "paymentData": paymentData, status: jsondata.balancedata.status, message: "Success" };
+                let responseapi     = await topupUtility.checkTopupBalance(jsondata.transid)
+                let responseapijson = JSON.parse(responseapi)
+                console.log(responseapijson)
+                let response        = { transkey:jsondata.transid ,amountstatus: responseapijson.amountstatus, "paymentData": responseapijson.paymentData, status: responseapijson.status, message: "Success" };
                 let balanceResponse = JSON.stringify(response)
-                if(transData != null){
+                if(transData != null)
+                {
                     transData.connection.sendUTF(balanceResponse);
+                }
+
+                if(responseapijson.amountstatus == 3 ||  responseapijson.amountstatus == 1)
+                {
+
+                    Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
                 }
             }
         });

@@ -678,7 +678,6 @@ async function verifyTheBalance(transkey) {
             addressObject.poolWallet[0].privateKey
         )
         let netamount = ( parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance))
-        console.log("netamount",netamount)
         let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, BalanceOfAddress.data.format_token_balance)
         if (addressObject.transtype == 1) {
             let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
@@ -814,25 +813,30 @@ async function partialTopupBalance(transkey) {
             addressObject.poolWallet[0].privateKey
         )
         let netamount = ( parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance))
-        console.log("netamount",netamount)
-        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id,BalanceOfAddress.data.format_token_balance )
+        let latestamount = netamount == addressObject.amount ? addressObject.amount : netamount 
+       
+        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id,latestamount )
         let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
             {
-                $set: {
+                $set: 
+                {
                     status: 2,
-                    "amount"        : BalanceOfAddress.data.format_token_balance,
-                    "crypto_paid"   : BalanceOfAddress.data.format_token_balance,
+                    "amount"        : latestamount ,
+                    "crypto_paid"   : latestamount,
                     "fiat_amount"   : pricecal,
                 }
-            }, { returnDocument: 'after' })
+            }, 
+            { returnDocument: 'after' })
         let remain = parseFloat(addressObject.fixed_amount) - parseFloat(BalanceOfAddress.data.format_token_balance)
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
         let trans_data        = await getTranscationDataForClient(addressObject.id)
-        let paymentData       = { 
-            "paid_in_usd" :pricecal ,
-            "remain": remain, "paid": BalanceOfAddress.data.format_token_balance, 
-            "required": addressObject.fixed_amount,
-            "payment_history": trans_data.payment_history, 
+        let paymentData       = 
+        { 
+            "paid_in_usd"       : pricecal ,
+            "remain"            : remain, 
+            "paid"              : BalanceOfAddress.data.format_token_balance, 
+            "required"          : addressObject.fixed_amount,
+            "payment_history"   : trans_data.payment_history, 
         }
         response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
         return JSON.stringify(response)
@@ -844,6 +848,108 @@ async function partialTopupBalance(transkey) {
         return JSON.stringify(response)
     }
 }
+
+
+async function checkTopupBalance(transkey) {
+    try {
+        let transdata       = await get_Transcation_topup(transkey)
+        let addressObject   = transdata[0]
+        let response        = {}
+        var amountstatus    = 0
+        let paymentData     = {}
+        let BalanceOfAddress = await CheckAddress(
+            addressObject.networkDetails[0].nodeUrl,
+            addressObject.networkDetails[0].libarayType,
+            addressObject.networkDetails[0].cointype,
+            addressObject.poolWallet[0].address,
+            addressObject.networkDetails[0].contractAddress,
+            addressObject.poolWallet[0].privateKey
+        )
+        let netamount   = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
+        let trans_data  = await getTranscationDataForClient(addressObject.id)
+        let pricecal    = await pricecalculation(addressObject.poolWallet[0].network_id, netamount)
+        if (addressObject.transtype == 1) 
+        {
+            let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
+                {
+                    $set: {
+                        status: 1,
+                        "amount": BalanceOfAddress.data.format_token_balance,
+                        "fiat_amount": pricecal,
+                    }
+                }, { returnDocument: 'after' })
+                
+                paymentData  = 
+                { 
+                    "paid_in_usd"     : pricecal ,
+                    "remain"          : 0, 
+                    "paid"            : BalanceOfAddress.data.format_token_balance, 
+                    "required"        : 0,
+                    "payment_history" : trans_data.payment_history, 
+                }   
+                response  = { amountstatus: 1,"paymentData":paymentData, status: 200, message: "success" };
+                return JSON.stringify(response)
+        }
+        
+        let latestamount = netamount 
+        console.log("format_token_balance",BalanceOfAddress.data.format_token_balance)
+        console.log("amount",addressObject.amount)
+       
+        let status    = 0
+        status        =  netamount == 0 ? 0 : status
+        status        =  addressObject.fixed_amount == netamount ? 1 : status
+        status        =  netamount > addressObject.fixed_amount  ? 3 : status
+        status        =  netamount < addressObject.fixed_amount && netamount > 0 ? 2 : status
+        console.log("status",status)
+        paymentData         = 
+        { 
+            "paid_in_usd"       : pricecal,
+            "remain"            : (addressObject.fixed_amount - netamount), 
+            "paid"              : netamount, 
+            "required"          : addressObject.fixed_amount,
+            "payment_history"   : trans_data.payment_history, 
+        }
+        let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
+            {
+                $set: 
+                {
+                    status: status,
+                    "amount"        : latestamount ,
+                    "crypto_paid"   : latestamount,
+                    "fiat_amount"   : pricecal,
+                }
+            }, 
+            { returnDocument: 'after' })
+
+        if(status == 0 ||  status == 2)
+        {
+                response                = { amountstatus: status,"paymentData":paymentData, status: 200, message: "success" };
+                return JSON.stringify(response)
+        }
+            
+        let remain = parseFloat(addressObject.fixed_amount) - parseFloat(latestamount)
+        let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, latestamount)
+       
+         paymentData       = 
+        { 
+            "paid_in_usd"       : pricecal ,
+            "remain"            : remain, 
+            "paid"              : latestamount, 
+            "required"          : addressObject.fixed_amount,
+            "payment_history"   : trans_data.payment_history, 
+        }
+        response                = { amountstatus: status,"paymentData":paymentData, status: 200, message: "success" };
+        return JSON.stringify(response)
+    }
+    catch (error) {
+        console.log("Message %s sent: %s", error);
+        let paymentData         = { "pricecal" :0 ,"remain": 0, "paid": 0, "required": 0 }
+        response                = { amountstatus: 0,"paymentData":paymentData, status: 400, message: "Error" };
+        return JSON.stringify(response)
+    }
+}
+
+
 
 async function expiredTheBalance(transkey) {
     try {
@@ -962,15 +1068,16 @@ async function partialFixedTheBalance(transkey) {
 }
 module.exports =
 {
-    pricection    : pricecalculation,
-    verifyTheBalancebyWebsocket :verifyTheBalancebyWebsocket,
-    get_Transcation_topup: get_Transcation_topup,
-    getTrasnsBalance: getTrasnsBalance,
-    verifyTheBalance: verifyTheBalance,
-    expiredTheBalance: expiredTheBalance,
-    verifyFixedTheBalance: verifyFixedTheBalance,
-    partialFixedTheBalance: partialFixedTheBalance,
-    partialTopupBalance: partialTopupBalance,
+    pricection                  :   pricecalculation,
+    verifyTheBalancebyWebsocket :   verifyTheBalancebyWebsocket,
+    get_Transcation_topup       :   get_Transcation_topup,
+    getTrasnsBalance            :   getTrasnsBalance,
+    verifyTheBalance            :   verifyTheBalance,
+    expiredTheBalance           :   expiredTheBalance,
+    verifyFixedTheBalance       :   verifyFixedTheBalance,
+    partialFixedTheBalance      :   partialFixedTheBalance,
+    partialTopupBalance         :   partialTopupBalance,
+    checkTopupBalance         :   checkTopupBalance,
 }
 
 

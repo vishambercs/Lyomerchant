@@ -914,9 +914,7 @@ module.exports =
             let transData       = Constant.topupTransList[Constant.topupIndex]
             let transcationData = await topupUtility.get_Transcation_topup(transData.transkey)
             let balance_data    = await topupUtility.getTrasnsBalance(transcationData)
-            console.log("balance_data",balance_data)
             let balanceResponse = JSON.parse(balance_data)
-            console.log("balanceResponse",balanceResponse)
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
                 transData.connection.close(1000)
