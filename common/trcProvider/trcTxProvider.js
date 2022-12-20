@@ -2,6 +2,7 @@ const TronGrid  = require('trongrid');
 const TronWeb = require('tronweb');
 const Topuptranshash = require('../../Models/Topuptranshash');
 const axios = require('axios').default;
+var cron = require('node-cron');
 
 const headers = {
     'Content-Type': 'application/json',
@@ -81,7 +82,7 @@ const hexAddressToBase58 = (hexAddress) => {
 async function getContractTransferEventsByUser(timeStampTron, contToken) {
     let timeStampTr = trc20AddressTimestamp.length > 0 ? Math.min(...trc20AddressTimestamp) : Date.now();
 
-    console.log('Checking tron >>>>>>>>>>>>>>');
+    // console.log('Checking tron >>>>>>>>>>>>>>');
     if ((Date.now() - timeStampTron) > 300000) {
         trc20AddressTimestamp.splice(trc20AddressTimestamp.indexOf(timeStampTron), 1)
     }
@@ -118,22 +119,26 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
 
             for(let edata of res.data) {
                 let address = hexAddressToBase58(edata.result.to);
-                // console.log(edata.result.to, 'to >>>>>>>>>>>>', address, userCheckAddresses);
                 if (
                     userCheckAddresses.includes(`${address}`)
-                )
-                 {               
+                ) {               
+                     console.log(edata.result.to, 'to >>>>>>>>>>>>', address);
 
                     let amount = parseFloat( (edata.result.value))
                     amount = amount/10**allDecimanls['USDT'];
                     console.log(address, amount, edata.transaction_id);
 
-                        const foundAdd = false;
-                        const userAddHases = userWbhookAddresses[address]; 
+                        let foundAdd = false;
+                        let userAddHases = userWbhookAddresses[address]; 
                         if (userAddHases) {
                             if (userAddHases.includes(edata.transaction_id)) {
                                 foundAdd = true;
+                            } else {
+                                userWbhookAddresses[address].push(`${edata.transaction_id}`);
                             }
+                        } else {
+                            userWbhookAddresses[address] = [];
+                            userWbhookAddresses[address].push(`${edata.transaction_id}`);
                         }
 
                         if(foundAdd) {
@@ -153,6 +158,22 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
         return result;
     }
 }
+
+let timeStampTron 
+var timer = 0;
+
+cron.schedule('* * * * * * *', () => {
+  timer++;
+  if (timer >= 30)
+  timer = 0;
+  {
+    timeStampTron = Date.now();
+    getContractTransferEventsByUser(timeStampTron, '');  
+  }
+});
+
+timeStampTron = Date.now();
+getContractTransferEventsByUser(timeStampTron, '');
 
 module.exports = {
     getContractTransferEventsByUser,

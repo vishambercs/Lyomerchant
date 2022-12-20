@@ -337,12 +337,15 @@ const addCheckAddressTx = async (transId) => {
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         });
-                    } else if(networkData.network === 'TRC20') {
+                    }
+                    if(networkData.network === 'TRC20') {
+                        console.log('Add wallet address: ', poolWalletData.address, toupData._id);
                         trcTxProvider.addAddressToCheckTRC20({
                             address: poolWalletData.address,
                             topup_id: toupData._id,
                         })
-                    } else if (networkData.network === 'BSC') {
+                    }
+                    if (networkData.network === 'BSC') {
                         bscTxProvider.addAddressToCheckBEP20({
                             address: poolWalletData.address,
                             topup_id: toupData._id,
@@ -365,11 +368,9 @@ module.exports =
             var orderid = req.body.orderid
             let currentDateTemp = Date.now();
             let currentDate = parseInt((currentDateTemp / 1000).toFixed());
-            console.log("networkType",networkType)
+
             let account = await poolwalletController.getPoolWalletID(networkType)
             let network_details = await networks.findOne({ 'id': networkType })
-            console.log("account",account)
-            console.log("network_details",network_details)
 
             let client = await clients.findOne({ 'api_key': req.headers.authorization })
             let amount = Object.keys(req.body).indexOf("amount") == -1 ? 0 : parseFloat(req.body.amount)
