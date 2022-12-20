@@ -981,6 +981,8 @@ async function checkTopupBalance(transkey) {
         }
             
         let remain = parseFloat(addressObject.fixed_amount) - parseFloat(latestamount)
+        let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
+        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, latestamount)
        
          paymentData       = 
