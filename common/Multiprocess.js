@@ -61,6 +61,10 @@ const removeCheckAddressTx = async (transId) => {
     }
 }
 
+
+
+
+
 function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amount) {
     var client = new WebSocketClient();
     client.on('connectFailed', function (error) {
@@ -72,14 +76,16 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
         connection.on('error', function (error) {
             console.log("Connection error: " + error.toString());
         });
-        connection.on('close', function () {
-            console.log('Connection closed!');
+        connection.on('close', function (ws, response) {
+            console.log('Connection closed!', ws.id);
         });
         connection.on('message', async function (message) {
                 
             let jsondata        = JSON.parse(message.utf8Data)
+            console.log("jsondata",jsondata)
             let transData       = {}
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
+           
            
             if(index != -1 )
             {
@@ -116,6 +122,14 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                     transData.connection.sendUTF(balanceResponse);
                 }
 
+                if(jsondata.time > 5 )
+                {
+                    Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
+                    transData.connection.close(1000);
+                    removeCheckAddressTx(jsondata.transId);
+                }
+
+                
                 if(responseapijson.amountstatus == 3 || responseapijson.amountstatus == 1)
                 {
 
