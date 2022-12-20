@@ -36,7 +36,7 @@ router.post('/sendotp',                     topupcontroller.sendotp);
 router.post('/getTransStatus',              commonController.getTransStatus);
 router.post('/updatetrans',                 topupcontroller.updatetrans);
 router.post('/updatetrans_with_network',    topupcontroller.updatetrans_with_network);
-router.post('/update_the_transcation_by_admin',    Auth.Verfiy_Merchant,topupcontroller.update_The_Transcation_BY_Admin);
+// router.post('/update_the_transcation_by_admin',    Auth.Verfiy_Merchant,topupcontroller.update_The_Transcation_BY_Admin);
 router.post('/updatetransbyid',             Auth.Verfiy_WebHook,topupcontroller.updatetransbyid);
 
 "============================Create Fixed Top UP==============================="
