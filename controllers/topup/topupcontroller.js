@@ -309,17 +309,22 @@ const trcTxProvider = require('../../common/trcProvider/trcTxProvider');
 
 
 const addCheckAddressTx = async (transId) => {
+  
     const toupData = await topup.findOne({
         id: transId,
     });
+    console.log("toupData",toupData)
     if (toupData) {
         const poolWalletData = await poolWallet.findOne({
             _id: toupData.pwid,
         });
+
+        console.log("poolWalletData",poolWalletData)
         if (poolWalletData) {
             const networkData = await networks.findOne({
                 _id: toupData.nwid,
             });
+            console.log("networkData",networkData)
             if (networkData) {
                 if (networkData.coin === 'tUSDT') {
                     bscTxTestProvider.addAddressToCheckBEP20({
@@ -390,7 +395,7 @@ module.exports =
             });
             transactionPool.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
-                addCheckAddressTx(val.id);
+                await addCheckAddressTx(val.id);
                 let url = process.env.TOP_UP_URL + val.id
                 if(req.body.transtype == "wewe"){
                     url = process.env.WEWE_UP_URL + val.id

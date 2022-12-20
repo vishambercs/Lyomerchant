@@ -97,7 +97,9 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             else if (index != -1)
             {
                 let transData       = Constant.topupTransList[index]
-                let response        = { transkey:jsondata.transid ,amountstatus: jsondata.status, "paymentData": {}, status: jsondata.balancedata.status, message: "Success" };
+                let topupdata       = await Topup.findOne({id : jsondata.transid})
+                let paymentData     = { "pricecal" :topupdata.fiat_amount ,"remain": (topupdata.fixed_amount - topupdata.amount), "paid": topupdata.amount , "required": topupdata.fixed_amount }
+                let response        = { transkey:jsondata.transid ,amountstatus: topupdata.status, "paymentData": paymentData, status: jsondata.balancedata.status, message: "Success" };
                 let balanceResponse = JSON.stringify(response)
                 if(transData != null){
                     transData.connection.sendUTF(balanceResponse);

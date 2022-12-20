@@ -407,6 +407,7 @@ async function getTranscationDataForClient(transkey) {
             }
 
             let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id}).select('transhash amount createdAt').lean();
+            console.log("Topuptranshashdata",Topuptranshashdata)
             datarray.payment_history = Topuptranshashdata;
         }
     }
