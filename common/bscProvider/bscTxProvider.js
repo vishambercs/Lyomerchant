@@ -77,7 +77,7 @@ async function createWebSocket (BSCNODEWSURL) {
                 let address1 = address.slice(27,67)
                 address1=("0x"+address1);
                 address1=address1;
-                if (toAddress == address1) {
+                if (toAddress.toLowerCase() == address1.toLowerCase()) {
                     return address1; 
                 } else {
                     return false;

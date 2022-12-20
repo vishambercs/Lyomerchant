@@ -171,7 +171,7 @@ const getFiatRates = async (coin) => {
     }
 }
 const getRate = async (stablecoin,crypto, fiat) => {
-    console.log("========getRate========",stablecoin,crypto, fiat)
+    
     if (stablecoin == true) {
         const fiatRate = await getFiatRates(fiat);
         // return (parseFloat(1)*parseFloat(fiatRate)).toFixed(4);
@@ -407,7 +407,7 @@ async function getTranscationDataForClient(transkey) {
             }
 
             let Topuptranshashdata = await Topuptranshash.find({topupdetails : topupData._id}).select('transhash amount createdAt').lean();
-            console.log("Topuptranshashdata",Topuptranshashdata)
+           
             datarray.payment_history = Topuptranshashdata;
         }
     }
@@ -945,15 +945,15 @@ async function checkTopupBalance(transkey) {
         }
         
         let latestamount = netamount 
-        console.log("format_token_balance",BalanceOfAddress.data.format_token_balance)
-        console.log("amount",addressObject.amount)
+        
+      
        
         let status    = 0
         status        =  netamount == 0 ? 0 : status
         status        =  addressObject.fixed_amount == netamount ? 1 : status
         status        =  netamount > addressObject.fixed_amount  ? 3 : status
         status        =  netamount < addressObject.fixed_amount && netamount > 0 ? 2 : status
-        console.log("status",status)
+       
         paymentData         = 
         { 
             "paid_in_usd"       : pricecal,

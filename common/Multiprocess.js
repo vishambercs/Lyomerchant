@@ -108,7 +108,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                 let transData       = Constant.topupTransList[index]
                 let responseapi     = await topupUtility.checkTopupBalance(jsondata.transid)
                 let responseapijson = JSON.parse(responseapi)
-                console.log(responseapijson)
+               
                 let response        = { transkey:jsondata.transid ,amountstatus: responseapijson.amountstatus, "paymentData": responseapijson.paymentData, status: responseapijson.status, message: "Success" };
                 let balanceResponse = JSON.stringify(response)
                 if(transData != null)
@@ -116,10 +116,12 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                     transData.connection.sendUTF(balanceResponse);
                 }
 
-                if(responseapijson.amountstatus == 3 ||  responseapijson.amountstatus == 1)
+                if(responseapijson.amountstatus == 3 || responseapijson.amountstatus == 1)
                 {
 
                     Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
+                    transData.connection.close(1000);
+                    removeCheckAddressTx(jsondata.transId);
                 }
             }
         });

@@ -311,7 +311,7 @@ const btcTxProvider = require('../../common/btcProvider/btcTxProvider');
 
 
 const addCheckAddressTx = async (transId) => {
-  
+    console.log("addCheckAddressTx",transId)
     const toupData = await topup.findOne({
         id: transId,
     });
@@ -573,6 +573,9 @@ module.exports =
           
             let Topup_trans_hash = await Topuptranshash.find({ topupdetails: transactionPool._id })
             
+            if(transactionPool.status == 2 || transactionPool.status == 0  ){
+                await addCheckAddressTx(transactionPool.id)
+            }
             let data =
             {
                 transactionID: transactionPool.id,

@@ -58,7 +58,7 @@ const checkInputLogs = async (txHash, toAddress) => {
         address1=("0x"+address1);
         address1=address1;
 
-        if (toAddress == address1) {
+        if (toAddress.toLowerCase() == address1.toLowerCase()) {
             return address1; 
         } else {
             return false;
