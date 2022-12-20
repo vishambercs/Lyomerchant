@@ -171,6 +171,16 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
+    manaual_update_admin: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    manaual_update_at_by_admin: {
+        type: String,
+        required: false,
+        default: false,
+    },
 },
    
     { timestamps: true }

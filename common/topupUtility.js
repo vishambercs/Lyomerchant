@@ -726,6 +726,49 @@ async function verifyTheBalance(transkey) {
     }
 }
 
+
+async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
+    try {
+        let transdata = await get_Transcation_topup(transkey)
+        let addressObject = transdata[0]
+        let response = {}
+        var amountstatus = 0
+      
+       
+        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.fixed_amount)
+       
+      
+            let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
+                {
+                    $set: 
+                    {
+                        status                       : 1,
+                        "amount"                     : addressObject.fixed_amount,
+                        "fiat_amount"                : pricecal,
+                        manaual_update_admin         : manaual_update_admin,
+                        manaual_update_at_by_admin   : new Date().toString(),
+                    }
+                }, { returnDocument: 'after' })
+        let trans_data          = await getTranscationDataForClient(addressObject.id)
+        let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
+        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, addressObject.fixed_amount)
+        let paymentData         = { 
+            "paid_in_usd"       : pricecal ,
+            "paid"              : addressObject.fixed_amount, 
+            "required"          : addressObject.fixed_amount,
+            "payment_history"   : trans_data.payment_history, 
+        }
+        response                = { amountstatus: 0,"paymentData":paymentData, status: 200, message: "success" };
+        return response
+    }
+    catch (error) {
+        console.log("Message %s sent: %s", error);
+        let paymentData         = { "pricecal" :0 ,"remain": 0, "paid": 0, "required": 0 }
+        response                = { amountstatus: 0,"paymentData":paymentData, status: 400, message: "Error" };
+        return response
+    }
+}
 async function verifyTheBalancebyWebsocket(transkey,amount,transhash) {
     try {
         let transdata = await get_Transcation_topup(transkey)
@@ -867,7 +910,7 @@ async function checkTopupBalance(transkey) {
         )
         
         let transcationTopup = await Topuptranshash.find({ topupdetails : addressObject._id})
-        const net_amount = transcationTopup.reduce( (partialSum, a) => partialSum + parseFloat(a.amount), 0);
+        const net_amount     = transcationTopup.reduce( (partialSum, a) => partialSum + parseFloat(a.amount), 0);
         console.log("transcationTopup", net_amount)
         console.log("transcationTopup", transcationTopup)
 
@@ -1087,7 +1130,8 @@ module.exports =
     verifyFixedTheBalance       :   verifyFixedTheBalance,
     partialFixedTheBalance      :   partialFixedTheBalance,
     partialTopupBalance         :   partialTopupBalance,
-    checkTopupBalance         :   checkTopupBalance,
+    checkTopupBalance           :   checkTopupBalance,
+    verifyTheBalanceBy_Admin    :   verifyTheBalanceBy_Admin
 }
 
 

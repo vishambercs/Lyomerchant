@@ -4,6 +4,7 @@ const networks           = require('../../Models/network');
 const ApiCall            = require('../../common/Api_Call');
 const Constant           = require('../../common/Constant');
 const Topuptranshash     = require('../../Models/Topuptranshash');
+
 const topupUtility       = require('../../common/topupUtility');
 const clients            = require('../../Models/clients');
 var otpGenerator         = require('otp-generator')
@@ -918,6 +919,38 @@ module.exports =
         }
         catch (error) {
             console.log("updatetrans_with_network",error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    }, 
+
+    async update_The_Transcation_BY_Admin(req, res) 
+    {
+        try 
+        {
+            let transactionPool = await topup.findOne( {id: req.body.id })
+           
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Transcation ID" })
+                
+            }
+            if (transactionPool.amount == 0 ) 
+            {
+                return res.json({ status: 400, data: {}, message: "Paid Amount is zero. You can not update" })
+                
+            }
+
+            let topup_verify    = await topupUtility.verifyTheBalanceBy_Admin(transactionPool.id,req.headers.authorization )
+            
+            if (topup_verify.status == 400) 
+            {
+                return res.json({ status: 400, message: "Please Contact Admin", data: { } })
+            }
+            res.json({ status: 200, message: "Updated Successfully", data: { id : transactionPool.id} })
+            
+        }
+        catch (error) {
+            console.log("update_The_Transcation_BY_Admin",error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     }, 
