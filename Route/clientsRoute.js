@@ -11,7 +11,7 @@ router.post('/verfiytranshash',                    topupcontroller.verfiytransha
 router.post('/sendotp',                            topupcontroller.sendotp);
 router.post('/updatetrans',                        topupcontroller.updatetrans);
 router.post('/updatetrans_with_network',           topupcontroller.updatetrans_with_network);
-router.post('/update_the_transcation_by_admin',    topupcontroller.update_the_transcation_by_admin);
+// router.post('/update_the_transcation_by_admin',    topupcontroller.update_the_transcation_by_admin);
 
 
 // router.post('/verfiythebalance',                   topupcontroller.verfiythebalance);
