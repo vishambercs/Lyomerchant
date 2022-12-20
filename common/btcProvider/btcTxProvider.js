@@ -5,13 +5,13 @@ let ws = new WebSocket('wss://ws.blockchain.info/inv');
 let userCheckAddresses = [];
 
 const addAddressToCheckBTC = async (address) => {
-    console.log("addAddressToCheck ERC20")
+    console.log("addAddressToCheck BTC")
     userCheckAddresses.push(address);
 }
 
 const removeAddressToCheckBTC = async (address) => {
     userCheckAddresses.splice(userCheckAddresses.indexOf(address),1);
-    console.log("remove AddressToCheck ERC20")
+    console.log("remove AddressToCheck BTC")
 }
 
 ws.onopen = async () => {
