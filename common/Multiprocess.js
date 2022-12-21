@@ -9,7 +9,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
         console.log('Connect Error: ' + error.toString());
     });
     client.on('connect', function (connection) {
-        console.log('Connection established!');
+       
         connection.on('error', function (error) {
             console.log("Connection error: " + error.toString());
         });

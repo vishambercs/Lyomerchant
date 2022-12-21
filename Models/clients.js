@@ -143,6 +143,8 @@ const clientsSchema = new mongoose.Schema({
         required: false,
         default : 0,
     },
+
+    
     },
     { timestamps: true },
     {

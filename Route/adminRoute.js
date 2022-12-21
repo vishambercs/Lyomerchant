@@ -18,10 +18,11 @@ const commonController              = require('../controllers/Logs/commonControl
 const paylinkController             = require('../controllers/PaymentLinks/paylinkController');
 const Rolescontroller               = require('../controllers/Roles/Rolescontroller');
 const clientHotWallets              = require('../controllers/Masters/clientHotWalletsController');
+const topupcontroller               = require('../controllers/topup/topupcontroller');
 
-router.post('/signupadmin',                                    Auth.is_admin,Auth.verify_signup_admin_api,Auth.Verfiy_Role,adminController.signup_admin_api);
-router.post('/adminlogin',                                     Auth.verify_admin_Login,Auth.Verfiy_Role,adminController.Login);
-router.post('/admingoogleauth',                                Auth.verify_Verfiy_Google_Auth,Auth.Verfiy_Role,adminController.Verfiy_Google_Auth);
+router.post('/signupadmin',                                    Auth.is_admin,Auth.verify_signup_admin_api,adminController.signup_admin_api);
+router.post('/adminlogin',                                     Auth.verify_admin_Login,adminController.Login);
+router.post('/admingoogleauth',                                Auth.verify_Verfiy_Google_Auth,adminController.Verfiy_Google_Auth);
 router.post('/customerstatus',                                 Auth.is_admin,Auth.Verfiy_Role,clientsController.customerstatus);
 router.post('/getTransForAdmin',                               Auth.is_admin, Auth.Verfiy_Role,commonController.getTransForAdminNew);
 router.post('/get_admin_withdraw',                             Auth.is_admin, Auth.Verfiy_Role,withdrawController.get_admin_wihdraw);
@@ -87,13 +88,10 @@ router.get('/alldeposittranscation',        Auth.is_admin,Auth.Verfiy_Role,commo
 router.post('/clientimpersonate',           Auth.is_admin,Auth.Verfiy_Role,adminController.clientimpersonate);
 router.post('/getClientWalletsForAdmin',    Auth.is_admin,Auth.Verfiy_Role,clientsController.getClientWalletsForAdmin);
 router.post('/getKycLevel',                 Auth.is_admin,Auth.Verfiy_Role,adminController.get_kyc_level);
-
 router.post('/get_all_invoice_for_admin',  Auth.is_admin,Auth.Verfiy_Role,paylinkController.get_All_Invoice_For_Admin);
-
-
 router.post('/updateInvoiceByAdmin',            Auth.is_admin,Auth.Verfiy_Role,paylinkController.updateInvoiceByAdmin);
 router.post('/get_all_deposit_client_by_admin', Auth.is_admin,Auth.Verfiy_Role,clientsController.get_For_Admin);
-// router.post('/update_Stable_Coin_Flag',        networkController.update_Stable_Coin_Flag);
+
 
 
 "============= All Role Based ==================="
@@ -110,9 +108,13 @@ router.post('/get_all_clienthotwallets',            Auth.is_admin,Auth.Verfiy_Ro
 router.post('/updateadminrole',  adminController.updateadminrole);
 
 "============= All Pool Wallet ==================="
-router.post('/getAllPoolWallet', Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
+router.post('/getAllPoolWallet',          Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 router.post('/getTranscationofPoolwallet', Auth.is_admin,Auth.Verfiy_Role,commonController.getTranscationofPoolwallet);
 
+router.post('/update_the_transcation_by_admin',     Auth.is_admin,Auth.Verfiy_Role,adminController.update_The_Transcation_BY_Admin);
 router.post('/update_withdraw_limit',      Auth.is_admin,Auth.Verfiy_Role,clientsController.update_withdraw_limit);
+router.post('/change_the_topuptimespent',      Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_the_topuptimespent);
+
+
 // router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 module.exports = router;
