@@ -315,8 +315,7 @@ async function CheckAddress(Nodeurl, Type, cointype, Address, ContractAddress = 
             return { status: 200, data: balanceData, message: "sucess" }
         }
 
-    }
-    catch (error) {
+    } catch (error) {
         console.log(error)
         let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
         return { status: 400, data: balanceData, message: "Error" }

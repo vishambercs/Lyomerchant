@@ -9,11 +9,16 @@ const headers = {
     // 'Authorization': key.callbackKey
 }
 
-const tronWeb = new TronWeb({
-    fullHost: 'https://api.trongrid.io',
-    headers: { "TRON-PRO-API-KEY": '12c2276c-a9e9-4121-8721-31c8ffb4c1c7' },
-    privateKey: '50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78'
-});
+// const tronWeb = new TronWeb({
+//     fullHost: 'https://api.trongrid.io',
+//     headers: { "TRON-PRO-API-KEY": '12c2276c-a9e9-4121-8721-31c8ffb4c1c7' },
+//     privateKey: '50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78'
+// });
+const fullNode = 'https://api.trongrid.io';
+const solidityNode = 'https://api.trongrid.io';
+const eventServer = 'https://api.trongrid.io'
+const privateKey = '50605a439bd50bdaf3481f4af71519ef51f78865ac69bd2fda56e90be5185c78';
+const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
 let CONTRACT_ADDRESS = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 
 let trc20AddressTimestamp = [];
@@ -82,7 +87,7 @@ const hexAddressToBase58 = (hexAddress) => {
 async function getContractTransferEventsByUser(timeStampTron, contToken) {
     let timeStampTr = trc20AddressTimestamp.length > 0 ? Math.min(...trc20AddressTimestamp) : Date.now();
 
-    // console.log('Checking tron >>>>>>>>>>>>>>');
+    console.log('Checking tron >>>>>>>>>>>>>>');
     if ((Date.now() - timeStampTron) > 300000) {
         trc20AddressTimestamp.splice(trc20AddressTimestamp.indexOf(timeStampTron), 1)
     }
