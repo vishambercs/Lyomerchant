@@ -122,7 +122,7 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                     transData.connection.sendUTF(balanceResponse);
                 }
 
-                if(jsondata.time > 5 )
+                if(jsondata.time > 10)
                 {
                     Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
                     transData.connection.close(1000);
