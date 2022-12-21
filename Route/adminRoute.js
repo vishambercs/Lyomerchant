@@ -18,6 +18,7 @@ const commonController              = require('../controllers/Logs/commonControl
 const paylinkController             = require('../controllers/PaymentLinks/paylinkController');
 const Rolescontroller               = require('../controllers/Roles/Rolescontroller');
 const clientHotWallets              = require('../controllers/Masters/clientHotWalletsController');
+const topupcontroller               = require('../controllers/topup/topupcontroller');
 
 router.post('/signupadmin',                                    Auth.is_admin,Auth.verify_signup_admin_api,adminController.signup_admin_api);
 router.post('/adminlogin',                                     Auth.verify_admin_Login,adminController.Login);
@@ -112,5 +113,8 @@ router.post('/getTranscationofPoolwallet', Auth.is_admin,Auth.Verfiy_Role,common
 
 router.post('/update_the_transcation_by_admin',     Auth.is_admin,Auth.Verfiy_Role,adminController.update_The_Transcation_BY_Admin);
 router.post('/update_withdraw_limit',      Auth.is_admin,Auth.Verfiy_Role,clientsController.update_withdraw_limit);
+router.post('/change_the_topuptimespent',      Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_the_topuptimespent);
+
+
 // router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 module.exports = router;

@@ -181,6 +181,16 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
+    admin_updated: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    admin_updatedat: {
+        type: String,
+        required: false,
+        default: false,
+    },
 },
    
     { timestamps: true }

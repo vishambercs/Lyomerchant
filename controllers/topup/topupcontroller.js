@@ -53,6 +53,35 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
+
+    async change_the_topuptimespent(req, res) {
+        try {
+
+            let currentDateTemp = Date.now();
+            let currentDate     = parseInt((currentDateTemp / 1000).toFixed());
+            let topupdata       = await topup.findOneAndUpdate({ id : req.body.id} , 
+                { $set : { 
+                  admin_updated    : req.headers.authorization,
+                  admin_updatedat  : new Date().toString(),
+                  walletValidity   : currentDate,  timestamps     : new Date().getTime() }} , {returnDocument : 'after'})     
+            
+            if(topupdata == null)
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+
+            res.json({ status: 200, data: {id : topupdata.id} , message: "Updated Successfully" })
+            
+            
+            
+            
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
     async get_top_payment_data(req, res) {
         try {
             let transactionPool = await topup.findOne({ id: req.body.id , status : 0 })
