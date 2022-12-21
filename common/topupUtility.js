@@ -729,24 +729,20 @@ async function verifyTheBalance(transkey) {
 
 async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
     try {
-        let transdata = await get_Transcation_topup(transkey)
-        let addressObject = transdata[0]
-        let response = {}
-        var amountstatus = 0
-      
-       
-        let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.fixed_amount)
-       
-      
-            let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
+        let transdata       = await get_Transcation_topup(transkey)
+        let addressObject   = transdata[0]
+        let response        = {}
+        var amountstatus    = 0
+        let pricecal        = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.fixed_amount)
+        let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
                 {
                     $set: 
                     {
-                        status                       : 1,
+                        "status"                       : 1,
                         "amount"                     : addressObject.fixed_amount,
                         "fiat_amount"                : pricecal,
-                        manaual_update_admin         : manaual_update_admin,
-                        manaual_update_at_by_admin   : new Date().toString(),
+                        "manaual_update_admin"         : manaual_update_admin,
+                        "manaual_update_at_by_admin"   : new Date().toString(),
                     }
                 }, { returnDocument: 'after' })
         let trans_data          = await getTranscationDataForClient(addressObject.id)
@@ -1003,8 +999,6 @@ async function checkTopupBalance(transkey) {
         return JSON.stringify(response)
     }
 }
-
-
 
 async function expiredTheBalance(transkey) {
     try {

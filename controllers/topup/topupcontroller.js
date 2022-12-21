@@ -667,6 +667,7 @@ module.exports =
                 fait_amount     : transactionPool.fiat_amount,
                 createdAt       : transactionPool.createdAt,
                 updated_at      : transactionPool.updated_at,
+                fixed_amount      : transactionPool.fixed_amount,
             }
             res.json({ status: 200, message: "Get The Data", data: data })
 
@@ -762,8 +763,20 @@ module.exports =
             transactionPool.otp = otp
             await transactionPool.save()
 
-            var emailTemplateName = { "emailTemplateName": "accountcreation.ejs", "to": process.env.trans_email, "subject": "Email Verification Token", "templateData": { "password": otp, "url": "" } }
+            let trans_email         = transactionPool.api_key   == "8c3f8eea9a29672d889d164a2166a29aa1431681" ? process.env.WEWE_EMAIL  : process.env.trans_email
+            let Email_Template_Name   = transactionPool.api_key == "8c3f8eea9a29672d889d164a2166a29aa1431681" ? "weweaccountcreation.ejs" : "accountcreation.ejs"
+            var emailTemplateName = { "emailTemplateName": Email_Template_Name, "to":trans_email, "subject": "Email Verification Token", "templateData": { "password": otp, "url": "" } }
+            
+            if(transactionPool.api_key == "8c3f8eea9a29672d889d164a2166a29aa1431681")
+            {
+                let email_response = await commonFunction.sendEmailWEWEFunction(emailTemplateName)
+                return res.json({ status: 200, message: "Get The Data", data: "" })
+            }
+
+            
+         
             let email_response = await commonFunction.sendEmailFunction(emailTemplateName)
+            
             res.json({ status: 200, message: "Get The Data", data: "" })
 
         }
@@ -926,38 +939,7 @@ module.exports =
         }
     }, 
 
-    async update_The_Transcation_BY_Admin(req, res) 
-    {
-        try 
-        {
-            let transactionPool = await topup.findOne( {id: req.body.id })
-           
-            if (transactionPool == null) 
-            {
-                return res.json({ status: 400, data: {}, message: "Invalid Transcation ID" })
-                
-            }
-            if (transactionPool.amount == 0 ) 
-            {
-                return res.json({ status: 400, data: {}, message: "Paid Amount is zero. You can not update" })
-                
-            }
-
-            let topup_verify    = await topupUtility.verifyTheBalanceBy_Admin(transactionPool.id,req.headers.authorization )
-            
-            if (topup_verify.status == 400) 
-            {
-                return res.json({ status: 400, message: "Please Contact Admin", data: { } })
-            }
-            res.json({ status: 200, message: "Updated Successfully", data: { id : transactionPool.id} })
-            
-        }
-        catch (error) {
-            console.log("update_The_Transcation_BY_Admin",error)
-            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
-        }
-    }, 
-
+   
 }
 
 
