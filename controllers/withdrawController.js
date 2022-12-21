@@ -239,7 +239,7 @@ module.exports =
             }
 
             if (network == null) {
-                return res.json({ status: 400, data: {}, message: "Unsupported Network " })
+                return res.json({ status: 400, data: {}, message: "Unsupported Network" })
             }
             let amount = parseFloat(req.body.amount)
 
