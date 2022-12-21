@@ -169,9 +169,9 @@ var timer = 0;
 
 cron.schedule('* * * * * * *', () => {
   timer++;
-  if (timer >= 30)
-  timer = 0;
+  if (timer >= 5)
   {
+      timer = 0;
     timeStampTron = Date.now();
     getContractTransferEventsByUser(timeStampTron, '');  
   }
