@@ -10,6 +10,7 @@ var commonFunction = require('../common/commonFunction');
 const bcrypt = require('bcrypt');
 const Web3 = require('web3');
 const getMerchantWallets = require('../Models/clientWallets');
+const adminBalanceUpdate = require('../common/adminBalanceUpdate');
 const poolWallet = require('../Models/poolWallet');
 const transactionPools = require('../Models/transactionPool');
 const { authenticator } = require('otplib')
@@ -350,4 +351,37 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
+
+    async update_The_Transcation_BY_Admin(req, res) 
+    {
+        try 
+        {
+            let transactionPool = await topup.findOne( {id: req.body.id })
+           
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Transcation ID" })
+                
+            }
+            if (transactionPool.amount == 0 ) 
+            {
+                return res.json({ status: 400, data: {}, message: "Paid Amount is zero. You can not update" })
+                
+            }
+
+            let topup_verify    = await adminBalanceUpdate.verifyTheBalanceBy_Admin(transactionPool.id,req.headers.authorization )
+            
+            if (topup_verify.status == 400) 
+            {
+                return res.json({ status: 400, message: "Please Contact Admin", data: { } })
+            }
+            res.json({ status: 200, message: "Updated Successfully", data: { id : transactionPool.id} })
+            
+        }
+        catch (error) {
+            console.log("update_The_Transcation_BY_Admin",error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    }, 
+
 }

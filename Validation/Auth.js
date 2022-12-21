@@ -52,15 +52,23 @@ module.exports =
     async Verfiy_Role(req, res, next) {
         try 
         {
+
+            next()
             // let api_key          = req.headers.authorization;
             // let url              = req.originalUrl;
-            // let adminsdata       =  await admins.findOne({admin_api_key : api_key})
-            // let roles_permission =  await RolesPermisson.findOne({roleid : adminsdata.rolesdata , "apipath" :url  })
-            next()
-            // if(roles_permission != null){
-                
+            // let adminsdata       = await admins.findOne({admin_api_key : api_key})
+
+            // if(adminsdata != null)
+            // {
+            //    return res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
             // }
-            // else{
+            // let roles_permission = await RolesPermisson.findOne({roleid : adminsdata.rolesdata , "apipath" :url  })
+            // if(roles_permission != null)
+            // {
+            //     next()
+            // }
+            // else
+            // {
             //     res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
             // }
             

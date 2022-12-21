@@ -28,6 +28,8 @@ const topupschema = new mongoose.Schema({
 		ref     : Network,
 		default : null,
 	},
+   
+    
     clientdetail: 
     {
 		type    : mongoose.Schema.Types.ObjectId,
@@ -165,6 +167,16 @@ const topupschema = new mongoose.Schema({
         default: false,
     },
     get_address_at: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    manaual_update_admin: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    manaual_update_at_by_admin: {
         type: String,
         required: false,
         default: false,
