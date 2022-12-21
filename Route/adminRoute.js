@@ -111,5 +111,6 @@ router.post('/getAllPoolWallet',          Auth.is_admin,Auth.Verfiy_Role,commonC
 router.post('/getTranscationofPoolwallet', Auth.is_admin,Auth.Verfiy_Role,commonController.getTranscationofPoolwallet);
 
 router.post('/update_the_transcation_by_admin',     Auth.is_admin,Auth.Verfiy_Role,adminController.update_The_Transcation_BY_Admin);
+router.post('/update_withdraw_limit',      Auth.is_admin,Auth.Verfiy_Role,clientsController.update_withdraw_limit);
 // router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 module.exports = router;

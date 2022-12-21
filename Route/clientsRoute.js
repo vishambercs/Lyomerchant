@@ -97,7 +97,7 @@ router.post('/pluginpriceConversition',              Auth.checkaccess,CurrencyCo
 "============================ Withdraw  ==============================="
 
 router.post('/merchantBalance',                      Auth.is_merchant,withdrawController.merchantBalance);
-router.post('/merchantWithdrawBalance',              withdrawController.withdrawBalance);
+router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 // router.post('/merchantWithdrawBalance',              Auth.is_merchant,withdrawController.withdrawBalance);
 
 "============================ perfered Network Controller  ==============================="
@@ -135,7 +135,12 @@ router.post('/pluginallNetworks',           Auth.checkaccess,networkController.a
 router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
 router.post('/get_all_deposit_client',      Auth.is_merchant,clientsController.get_For_client);
+<<<<<<< HEAD
 router.post('/update_withdraw_limit',      Auth.is_merchant,clientsController.update_withdraw_limit);
+=======
+
+
+>>>>>>> 2d2ad0743b89b1f7fbfda4c3acdd46f4a949b349
 
 
 
