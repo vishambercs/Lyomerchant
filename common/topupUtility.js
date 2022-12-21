@@ -907,8 +907,7 @@ async function checkTopupBalance(transkey) {
         
         let transcationTopup = await Topuptranshash.find({ topupdetails : addressObject._id})
         const net_amount     = transcationTopup.reduce( (partialSum, a) => partialSum + parseFloat(a.amount), 0);
-        console.log("transcationTopup", net_amount)
-        console.log("transcationTopup", transcationTopup)
+
 
         //let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
         
@@ -977,7 +976,9 @@ async function checkTopupBalance(transkey) {
         }
             
         let remain = parseFloat(addressObject.fixed_amount) - parseFloat(latestamount)
+        trans_data            = await getTranscationDataForClient(addressObject.id)
         let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
+     
         let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, latestamount)
        
