@@ -150,7 +150,7 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             if (hashtrans != null && hashtrans.contractAddress == null) {
                 if (cointype === 'Native') {
                     let amount = transaction.value;
-                    let format_token_balance = parseFloat(amount) / (1 * 10 ** decimals)
+                    let format_token_balance = parseFloat(amount) / 1e18;
                     let trans_address = transaction.to;
                     tradata = {
                         "amount": amount,
