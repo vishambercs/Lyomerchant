@@ -148,24 +148,41 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             let tradata = {}
 
             if (hashtrans != null && hashtrans.contractAddress == null) {
-                let amount = Web3.utils.hexToNumber(hashtrans.logs[0].data);
-                const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
-                let decimals = await contract.methods.decimals().call();
-                let format_token_balance = parseFloat(amount) / (1 * 10 ** decimals)
-                let address_real_one = Object.keys(result).length > 0 ? result.inputs : []
-                let trans_address = address_real_one.length > 0 ? "0X" + address_real_one[0] : ""
-
-                tradata = {
-                    "amount": amount,
-                    "formatedamount": format_token_balance,
-                    "addressto": trans_address.toLowerCase(),
-                    "transhash": tranxid,
-                    "transaddress": address.toLowerCase(),
-                    "status": trans_address.toLowerCase() == address.toLowerCase(),
-
+                if (cointype === 'Native') {
+                    let amount = transaction.value;
+                    let format_token_balance = parseFloat(amount) / (1 * 10 ** decimals)
+                    let trans_address = transaction.to;
+                    tradata = {
+                        "amount": amount,
+                        "formatedamount": format_token_balance,
+                        "addressto": trans_address.toLowerCase(),
+                        "transhash": tranxid,
+                        "transaddress": address.toLowerCase(),
+                        "status": trans_address.toLowerCase() == address.toLowerCase(),
+    
+                    }
+    
+                    return { status: 200, data: tradata, message: "" }  
+                }  else {
+                    let amount = Web3.utils.hexToNumber(hashtrans.logs[0].data);
+                    const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
+                    let decimals = await contract.methods.decimals().call();
+                    let format_token_balance = parseFloat(amount) / (1 * 10 ** decimals)
+                    let address_real_one = Object.keys(result).length > 0 ? result.inputs : []
+                    let trans_address = address_real_one.length > 0 ? "0X" + address_real_one[0] : ""
+    
+                    tradata = {
+                        "amount": amount,
+                        "formatedamount": format_token_balance,
+                        "addressto": trans_address.toLowerCase(),
+                        "transhash": tranxid,
+                        "transaddress": address.toLowerCase(),
+                        "status": trans_address.toLowerCase() == address.toLowerCase(),
+    
+                    }
+    
+                    return { status: 200, data: tradata, message: "" }
                 }
-
-                return { status: 200, data: tradata, message: "" }
             }
             else if (transaction != null) {
                 tradata = {
