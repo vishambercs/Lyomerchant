@@ -6,6 +6,7 @@ var qs = require('qs');
 var stringify = require('json-stringify-safe');
 const transcationLog = require('../Models/transcationLog');
 const network = require('../Models/network');
+const admin   = require('../Models/admin');
 const Constant = require('./Constant');
 const transferUtility = require('./transferUtility');
 const Utility = require('./Utility');
@@ -734,14 +735,15 @@ async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
         let response        = {}
         var amountstatus    = 0
         let pricecal        = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.fixed_amount)
+        let admindata       = await admin.findOne({ 'admin_api_key': manaual_update_admin })
         let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
                 {
                     $set: 
                     {
                         "status"                       : 1,
-                        "amount"                     : addressObject.fixed_amount,
-                        "fiat_amount"                : pricecal,
-                        "manaual_update_admin"         : manaual_update_admin,
+                        // "amount"                    : addressObject.fixed_amount,
+                        // "fiat_amount"               : pricecal,
+                        "manaual_update_admin"         : admindata._id,
                         "manaual_update_at_by_admin"   : new Date().toString(),
                     }
                 }, { returnDocument: 'after' })
@@ -751,7 +753,7 @@ async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
         let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, addressObject.fixed_amount)
         let paymentData         = { 
             "paid_in_usd"       : pricecal ,
-            "paid"              : addressObject.fixed_amount, 
+            "paid"              : addressObject.amount, 
             "required"          : addressObject.fixed_amount,
             "payment_history"   : trans_data.payment_history, 
         }

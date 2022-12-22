@@ -852,7 +852,7 @@ module.exports =
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
                             { path: "nwid",         select: "id coin network _id" },
                             { path: "clientdetail", select: "id email first_name last_name type _id" },
-
+                            { path: "manaual_update_admin", select: "id email _id" },
                             
                         ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                         total  = await topups.find({}).count();
