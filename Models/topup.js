@@ -172,7 +172,7 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
-    manaual_update_admin: {
+    manaual_update_by_admin: {
         type    : mongoose.Schema.Types.ObjectId,
 		ref     : admin,
 		default : null,
