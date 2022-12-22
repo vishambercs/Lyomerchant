@@ -530,6 +530,9 @@ module.exports =
                 let amount      = parseFloat(req.body.amount);
                 let transhash   = req.body.transhash;
                 let polwallet   = await poolWallet.findOne({ 'address': address, status: 1 })
+                if(polwallet == null){
+                    return  res.status(400).json({ status: 400, data: {}, message: "Invalid Data" })  
+                }
                 let tpup        = await topup.findOne({ 'poolwalletID': polwallet.id, status: { $in: [0, 2] } })
 
                 let Topuptransdata       = await Topuptranshash.findOne({ 'topupdetails': tpup._id, transhash:transhash })
@@ -874,18 +877,30 @@ module.exports =
             if(Object.keys(balance.data).length  == 0 ){
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
+
+            let previousdata = await Topuptranshash.findOne({
+                transhash    : req.body.transhash,
+                topupdetails : transactiondata._id,
+            })
+            
+            if(previousdata != null){
+                return res.json({ status: 400, message: "Trans ID is repeating", data: {} })
+            }
+
             let totalamount  = parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount)
 
             let status  = parseFloat(transactiondata.fixed_amount) == parseFloat(totalamount)  ? 1 : 0
-            status  = parseFloat(totalamount)   > parseFloat(transactiondata.fixed_amount)      ? 1 : 0
-
+            status      = parseFloat(totalamount)   > parseFloat(transactiondata.fixed_amount)      ? 3 : status
+            status      = parseFloat(totalamount)   < parseFloat(transactiondata.fixed_amount)  &&  totalamount > 0   ? 2 : status
 
             let transactionPool = await topup.findOneAndUpdate(
                 { id: req.body.id , otp:req.body.otp , status : 0 },
-                { $set : {
+                { $set : 
+                {
                     status          : status,
                     transhash       : req.body.transhash,
                     amount          : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
+                    crypto_paid     : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
                     updated_at      : new Date().toString(),
                 }},
                 {'returnDocument' : 'after'}
