@@ -1,6 +1,7 @@
 const topup              = require('../../Models/topup');
 const poolWallet         = require('../../Models/poolWallet');
 const networks           = require('../../Models/network');
+const OTPLog             = require('../../Models/OTPLog');
 const ApiCall            = require('../../common/Api_Call');
 const Constant           = require('../../common/Constant');
 const Topuptranshash     = require('../../Models/Topuptranshash');
@@ -19,16 +20,13 @@ var stringify            = require('json-stringify-safe');
 require('dotenv').config()
 
 
-var otpGenerator = require('otp-generator')
-var commonFunction = require('../../common/commonFunction');
-
+var otpGenerator       = require('otp-generator')
+var commonFunction     = require('../../common/commonFunction');
 const InputDataDecoder = require('ethereum-input-data-decoder');
-const decoder = new InputDataDecoder(Constant.USDT_ABI);
+const decoder          = new InputDataDecoder(Constant.USDT_ABI);
 
 
 async function CheckAddress(Nodeurl, Type, cointype, Address, ContractAddress = "", privateKey = "") {
-
-
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
@@ -321,10 +319,10 @@ async function getTimeprice(time, coin) {
 
 
 const bscTxTestProvider = require('../../common/bscProvider/bscTxTestProvider');
-const bscTxProvider = require('../../common/bscProvider/bscTxProvider');
-const ercTxProvider = require('../../common/ercProvider/ercTxProvider');
-const trcTxProvider = require('../../common/trcProvider/trcTxProvider');
-const btcTxProvider = require('../../common/btcProvider/btcTxProvider');
+const bscTxProvider     = require('../../common/bscProvider/bscTxProvider');
+const ercTxProvider     = require('../../common/ercProvider/ercTxProvider');
+const trcTxProvider     = require('../../common/trcProvider/trcTxProvider');
+const btcTxProvider     = require('../../common/btcProvider/btcTxProvider');
 
 
 const addCheckAddressTx = async (transId) => {
@@ -697,6 +695,119 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+
+    async checkbalanceforwewe(req, res) {
+        try {
+          
+            let transactionPool = null
+ 
+           
+            if(req.body.id != "")
+            {
+                transactionPool = await topup.findOne({ id: req.body.id , "api_key" : "8c3f8eea9a29672d889d164a2166a29aa1431681" })
+            }
+
+            // if(Object.keys(req.body).indexOf("orderid") != -1 )
+            if(req.body.orderid != "")
+            {
+                transactionPool = await topup.findOne({ orderid: req.body.orderid , "api_key" : "8c3f8eea9a29672d889d164a2166a29aa1431681" })
+            }
+
+            // if(Object.keys(req.body).indexOf("address") != -1 )
+            if(req.body.address != "")
+            {
+                let poolwalletdata = await poolWallet.findOne({ address: req.body.address, status : {$ne: 0} })
+                let addressdata = []
+                if(poolwalletdata != null)
+                {
+                 let network = await networks.findOne({ id: poolwalletdata.network_id })   
+                 let addresstransactionPool = await topup.find({ poolwalletID: poolwalletdata.id, "api_key" : "8c3f8eea9a29672d889d164a2166a29aa1431681" })
+                 for(var i = 0; i<addresstransactionPool.length; i++ ){
+                    
+                    let statusdata = Constant.transstatus.filter(index => index.id == addresstransactionPool[i].status)
+        
+                    let data =
+                    {
+                        transactionID   : addresstransactionPool[i].id,
+                        address         : poolwalletdata.address,
+                        walletValidity  : addresstransactionPool[i].walletValidity,
+                        amount          : addresstransactionPool[i].amount,
+                        key             : addresstransactionPool[i].api_key,
+                        status          : addresstransactionPool[i].status,
+                        statustitle     : statusdata,
+                        apiredirecturl  : addresstransactionPool[i].apiredirectURL,
+                        callbackURL     : addresstransactionPool[i].callbackURL,
+                        errorurl        : addresstransactionPool[i].errorurl,
+                        orderid         : addresstransactionPool[i].orderid,
+                        network         : network.network,
+                        coin            : network.coin,
+                        balance         : 0,
+                        fait_amount     : addresstransactionPool[i].fiat_amount,
+                        createdAt       : addresstransactionPool[i].createdAt,
+                        updated_at      : addresstransactionPool[i].updated_at,
+                        fixed_amount    : addresstransactionPool[i].fixed_amount,
+                    }
+                    addressdata.push(data)
+                 }
+
+                 return res.json({ status: 200, message: "Get The Data", data: addressdata })
+                }
+            }
+            
+           
+
+
+            if (transactionPool == null) {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let transWallet = await poolWallet.findOne({ id: transactionPool.poolwalletID })
+
+            if (transWallet == null) {
+                return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
+            }
+            let network = await networks.findOne({ id: transWallet.network_id })
+
+            let balance = await CheckAddress(
+                network.nodeUrl,
+                network.libarayType,
+                network.cointype,
+                transWallet.address,
+                network.contractAddress,
+                transWallet.privateKey
+            )
+
+            let statusdata = Constant.transstatus.filter(index => index.id == transactionPool.status)
+
+            let data =
+            {
+                transactionID   : transactionPool.id,
+                address         : transWallet.address,
+                walletValidity  : transactionPool.walletValidity,
+                amount          : transactionPool.amount,
+                key             : transactionPool.api_key,
+                status          : transactionPool.status,
+                statustitle     : statusdata,
+                apiredirecturl  : transactionPool.apiredirectURL,
+                callbackURL     : transactionPool.callbackURL,
+                errorurl        : transactionPool.errorurl,
+                orderid         : transactionPool.orderid,
+                network         : network.network,
+                coin            : network.coin,
+                balance         : balance,
+                fait_amount     : transactionPool.fiat_amount,
+                createdAt       : transactionPool.createdAt,
+                updated_at      : transactionPool.updated_at,
+                fixed_amount    : transactionPool.fixed_amount,
+            }
+            res.json({ status: 200, message: "Get The Data", data: data })
+
+        }
+        catch (error) {
+            console.log("checkbalance", error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
+
     async verfiythebalance(req, res) {
         try {
             let transactionPool = await topup.findOneAndUpdate(
@@ -782,10 +893,10 @@ module.exports =
             }
             transactionPool.otp = otp
             await transactionPool.save()
-
-            let trans_email         = transactionPool.api_key   == "8c3f8eea9a29672d889d164a2166a29aa1431681" ? process.env.WEWE_EMAIL  : process.env.trans_email
+            let otpdata               = await OTPLog.insertMany({"otp" :otp, "topup_details":transactionPool._id, "created_at": new Date().toString() })
+            let trans_email           = transactionPool.api_key   == "8c3f8eea9a29672d889d164a2166a29aa1431681" ? process.env.WEWE_EMAIL  : process.env.trans_email
             let Email_Template_Name   = transactionPool.api_key == "8c3f8eea9a29672d889d164a2166a29aa1431681" ? "weweaccountcreation.ejs" : "accountcreation.ejs"
-            var emailTemplateName = { "emailTemplateName": Email_Template_Name, "to":trans_email, "subject": "Email Verification Token", "templateData": { "password": otp, "url": "" } }
+            var emailTemplateName     = { "emailTemplateName": Email_Template_Name, "to":trans_email, "subject": "Email Verification Token", "templateData": { "password": otp, "url": "" } }
             
             if(transactionPool.api_key == "8c3f8eea9a29672d889d164a2166a29aa1431681")
             {
@@ -883,6 +994,8 @@ module.exports =
                 topupdetails : transactiondata._id,
             })
             
+          
+
             if(previousdata != null){
                 return res.json({ status: 400, message: "Trans ID is repeating", data: {} })
             }
@@ -899,8 +1012,10 @@ module.exports =
                 {
                     status          : status,
                     transhash       : req.body.transhash,
-                    amount          : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
-                    crypto_paid     : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
+                    // amount          : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
+                    // crypto_paid     : parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount),
+                    amount          : balance.data.formatedamount,
+                    crypto_paid     : balance.data.formatedamount,
                     updated_at      : new Date().toString(),
                 }},
                 {'returnDocument' : 'after'}
@@ -971,7 +1086,35 @@ module.exports =
         }
     }, 
 
-   
+    async update_The_Transcation_by_cs(req, res) 
+    {
+        try 
+        {
+            let transactionPool = await topup.findOne( {id: req.body.id , otp :  req.body.otp })
+           
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Transcation ID" })
+                
+            }
+            if (transactionPool.amount == 0 ) 
+            {
+                return res.json({ status: 400, data: {}, message: "Paid Amount is zero. You can not update" })
+                
+            }
+            let topup_verify    = await topupUtility.verifyTheBalanceBy_Admin(transactionPool.id,req.body.otp )
+            if (topup_verify.status == 400) 
+            {
+                return res.json({ status: 400, message: "Please Contact Admin", data: { } })
+            }
+            res.json({ status: 200, message: "Updated Successfully", data: { id : transactionPool.id} })
+            
+        }
+        catch (error) {
+            console.log("update_The_Transcation_BY_Admin",error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    },
 }
 
 

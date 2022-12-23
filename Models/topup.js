@@ -4,6 +4,7 @@ var uniqueValidator = require('mongoose-unique-validator');
 const PoolWallet = require('./poolWallet');
 const Network = require('./network');
 const Clients = require('./clients');
+const admin = require('./admin');
 const topupschema = new mongoose.Schema({
     id:
     {
@@ -171,16 +172,27 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
-    manaual_update_admin: {
+
+    manaual_update_cs: {
         type: String,
         required: false,
         default: false,
+    },
+    manaual_update_at_by_cs: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    manaual_update_by_admin: {
+        type    : mongoose.Schema.Types.ObjectId,
+		ref     : admin,
+		default : null,
     },
     manaual_update_at_by_admin: {
         type: String,
         required: false,
         default: false,
-    },
+    }
 },
    
     { timestamps: true }

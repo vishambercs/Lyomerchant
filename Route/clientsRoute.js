@@ -25,18 +25,21 @@ const fixedtopupcontroller          = require('../controllers/topup/fixedtopupco
 const apitokenController            = require('../controllers/Masters/apitokenController');
 
 
-router.get('/allCurrency',                  CurrencyController.allCurrency);
-router.post('/assigntopupMerchantWallet',   Auth.verify_verifythedata,topupcontroller.create_top_payment);
-router.post('/pluginallNetworks',           Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
-router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data);
-router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
-router.post('/checkbalance',                topupcontroller.checkbalance);
-router.post('/verfiytranshash',             topupcontroller.verfiytranshash);
-router.post('/sendotp',                     topupcontroller.sendotp);
-router.post('/getTransStatus',              commonController.getTransStatus);
-router.post('/updatetrans',                 topupcontroller.updatetrans);
-router.post('/updatetrans_with_network',    topupcontroller.updatetrans_with_network);
-router.post('/updatetransbyid',             Auth.Verfiy_WebHook,topupcontroller.updatetransbyid);
+router.get('/allCurrency',                               CurrencyController.allCurrency);
+router.post('/assigntopupMerchantWallet',                Auth.verify_verifythedata,topupcontroller.create_top_payment);
+router.post('/pluginallNetworks',                        Auth.Verfiy_Merchant,Auth.checkaccess,networkController.allPreferedeNetworkForClient);
+router.post('/getTranscationDataofTopup',                topupcontroller.get_top_payment_data);
+router.post('/canceltopup',                              topupcontroller.cancelpaymentLink);
+router.post('/checkbalance',                             topupcontroller.checkbalance);
+router.post('/verfiytranshash',                          topupcontroller.verfiytranshash);
+router.post('/sendotp',                                  topupcontroller.sendotp);
+router.post('/getTransStatus',                           commonController.getTransStatus);
+router.post('/updatetrans',                              topupcontroller.updatetrans);
+router.post('/updatetrans_with_network',                 topupcontroller.updatetrans_with_network);
+router.post('/updatetransbyid',                          Auth.Verfiy_WebHook,topupcontroller.updatetransbyid);
+router.post('/update_The_Transcation_by_cs',             topupcontroller.update_The_Transcation_by_cs);
+router.post('/checkbalanceforwewe',                      topupcontroller.checkbalanceforwewe);
+
 
 "============================Create Fixed Top UP==============================="
 router.post('/fixedassigntopupMerchantWallet',   fixedtopupcontroller.create_top_payment);

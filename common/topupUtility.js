@@ -726,7 +726,7 @@ async function verifyTheBalance(transkey) {
 }
 
 
-async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
+async function verifyTheBalanceBy_Admin(transkey,otp) {
     try {
         let transdata       = await get_Transcation_topup(transkey)
         let addressObject   = transdata[0]
@@ -737,11 +737,10 @@ async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
                 {
                     $set: 
                     {
-                        "status"                       : 1,
-                        "amount"                     : addressObject.fixed_amount,
-                        "fiat_amount"                : pricecal,
-                        "manaual_update_admin"         : manaual_update_admin,
-                        "manaual_update_at_by_admin"   : new Date().toString(),
+                        "status"                        : 1,
+                        "otp"                           : otp,
+                        "manaual_update_cs"             : "Customer Support",
+                        "manaual_update_at_by_cs"       : new Date().toString(),
                     }
                 }, { returnDocument: 'after' })
         let trans_data          = await getTranscationDataForClient(addressObject.id)
@@ -750,7 +749,7 @@ async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
         let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, addressObject.fixed_amount)
         let paymentData         = { 
             "paid_in_usd"       : pricecal ,
-            "paid"              : addressObject.fixed_amount, 
+            "paid"              : addressObject.amount, 
             "required"          : addressObject.fixed_amount,
             "payment_history"   : trans_data.payment_history, 
         }
