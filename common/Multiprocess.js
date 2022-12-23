@@ -5,7 +5,7 @@ require("dotenv").config()
 function Create_Node_Sockect_Connection(transkey,apikey) {
     var client = new WebSocketClient();
     client.on('connectFailed', function (error) {
-        console.log('Connect Error: ' + error.toString());3
+        console.log('Connect Error: ' + error.toString());
     });
     client.on('connect', function (connection) {
         // console.log('Connection established!');
@@ -23,6 +23,7 @@ function Create_Node_Sockect_Connection(transkey,apikey) {
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transkey)
             if(index != -1 )
             {
+                Constant.topupTransList[index]["client"] = connection
                 transData = Constant.topupTransList[index]
             }
          

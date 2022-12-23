@@ -67,7 +67,16 @@ module.exports =
             let url_paremeters      = url.parse(request.httpRequest.url);
             let queryvariable       = querystring.parse(url_paremeters.query)
             const connection        = request.accept(null, request.origin);
-            
+            connection.on('close',function (ws, response) {
+                var indexdata       = Constant.topupTransList.filter(translist => translist.connection == connection)
+                var transkey        =  indexdata.length > 0 ? indexdata[0].transkey : null
+                if(transkey  != null){
+                    indexdata[0].client.close(1000)
+                }
+               
+                console.log("=====================connection index=================",transkey) 
+                console.log("=====================connection index=================",) 
+            })
             var index               = Constant.topupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
             if(index == -1)
             {
