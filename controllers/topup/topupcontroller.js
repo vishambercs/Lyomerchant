@@ -960,7 +960,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-    async updatetrans(req, res) 
+    async updatetrans(req, res)
     {
         try 
         {
@@ -968,24 +968,27 @@ module.exports =
             {
                 return res.json({ status: 400, message: "Invalid Amount", data: {} })
             }
-            let transactiondata = await topup.findOne( { id: req.body.id , otp:req.body.otp ,status : 0 },)
-            if (transactiondata == null) 
+            let transactiondata = await topup.findOne( { id: req.body.id , otp:req.body.otp , status : 0 },);
+            console.log(transactiondata, 'Transaction data');
+            if (transactiondata == null)
             {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
-            let transWallet = await poolWallet.findOne({ id: transactiondata.poolwalletID })
+            let transWallet = await poolWallet.findOne({ id: transactiondata.poolwalletID });
+            console.log(transWallet, 'trans data');
             if (transWallet == null) 
             {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
-            let network     = await networks.findOne({ id: transWallet.network_id })
+            let network     = await networks.findOne({ id: transWallet.network_id });
+            console.log(network, 'network data');
             let balance = await Check_Trans_Hash(network.nodeUrl, network.libarayType, network.cointype, req.body.transhash, transWallet.address.toLowerCase(), network.contractAddress, transWallet.privateKey)
-            
+            console.log(balance, 'bnalance data');
             if(balance.status == 400){
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
             
-            if(Object.keys(balance.data).length  == 0 ){
+            if(Object.keys(balance.data).length  == 0 ) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
 
@@ -994,9 +997,7 @@ module.exports =
                 topupdetails : transactiondata._id,
             })
             
-          
-
-            if(previousdata != null){
+            if(previousdata != null) {
                 return res.json({ status: 400, message: "Trans ID is repeating", data: {} })
             }
 
