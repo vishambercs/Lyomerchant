@@ -1033,26 +1033,23 @@ module.exports =
             })
             
             let price  = 1
-            if(network.stablecoin == false)
-            {
-             price      = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
-            }
+          
          
            
             let faitprice = price * req.body.amount
             
             await topup.findOneAndUpdate( {id: req.body.id }, { $set : { fiat_amount :  faitprice } })
             
-            // await updateOtherAPI(1, 
-            //     req.body.transhash, 
-            //     transactionPool.id ,
-            //     req.body.transhash, 
-            //     transactionPool.orderid,
-            //     network.coin,
-            //     transactionPool.amount,
-            //     faitprice,network.id,transWallet.address,faitprice,
-            //     network.network,
-            //     new Date().toString(),transactionPool.timestamps )
+            if(network.stablecoin == false)
+            {
+             price      = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
+            }
+
+            if(status == 1 ||  status == 3)
+            {
+             let call_webhook_response    = await topupUtility.SendWebHookResponse(transactionPool.id)
+             console.log("call_webhook_response",call_webhook_response)
+            }
 
             res.json({ status: 200, message: "Get The Data", data: "" })
             

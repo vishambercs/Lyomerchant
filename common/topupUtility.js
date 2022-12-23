@@ -732,7 +732,7 @@ async function verifyTheBalanceBy_Admin(transkey,otp) {
         let addressObject   = transdata[0]
         let response        = {}
         var amountstatus    = 0
-        let pricecal        = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.fixed_amount)
+        let pricecal        = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.amount)
         let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
                 {
                     $set: 
@@ -760,6 +760,25 @@ async function verifyTheBalanceBy_Admin(transkey,otp) {
         console.log("Message %s sent: %s", error);
         let paymentData         = { "pricecal" :0 ,"remain": 0, "paid": 0, "required": 0 }
         response                = { amountstatus: 0,"paymentData":paymentData, status: 400, message: "Error" };
+        return response
+    }
+}
+
+
+async function SendWebHookResponse(transkey) {
+    try {
+        let transdata           = await get_Transcation_topup(transkey)
+        let addressObject       = transdata[0]
+        let trans_data          = await getTranscationDataForClient(addressObject.id)
+        let pricecal            = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.amount)
+        let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
+        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        response                = { data: {}, status: 200, message: "success" };
+        return response
+    }
+    catch (error) {
+        console.log("Message %s sent: %s", error);
+        response                = { data: {}, status: 400, message: "Error" };
         return response
     }
 }
@@ -1127,7 +1146,8 @@ module.exports =
     partialFixedTheBalance      :   partialFixedTheBalance,
     partialTopupBalance         :   partialTopupBalance,
     checkTopupBalance           :   checkTopupBalance,
-    verifyTheBalanceBy_Admin    :   verifyTheBalanceBy_Admin
+    verifyTheBalanceBy_Admin    :   verifyTheBalanceBy_Admin,
+    SendWebHookResponse         :   SendWebHookResponse
 }
 
 
