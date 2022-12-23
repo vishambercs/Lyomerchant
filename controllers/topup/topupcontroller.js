@@ -22,7 +22,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
- 
     async assigntopupMerchantWallet(req, res) {
         try {
            
@@ -48,7 +47,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-  
     async getTranscationDataofTopup(req, res) {
         try {
             var merchantKey         =  ""
@@ -66,7 +64,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async getTransStatus(req, res) {
         try {
             var merchantKey         =  req.headers.authorization
