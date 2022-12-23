@@ -359,7 +359,8 @@ module.exports =
             const connection        = request.accept(null, request.origin);
 
             connection.on('close', (ws, wsResponse) => {
-                console.log(ws.readyState, 'cLOSED');
+                console.log(ws, '==================cLOSED================');
+                console.log(wsResponse, '==================cLOSED================');
             })
             
             var index = Constant.topupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)

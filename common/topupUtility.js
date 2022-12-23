@@ -921,6 +921,7 @@ async function checkTopupBalance(transkey) {
                     $set: {
                         status          : 1,
                         "amount"        : netamount,
+                        "crypto_paid"   : netamount,
                         "fiat_amount"   : pricecal,
                     }
                 }, { returnDocument: 'after' })
@@ -959,7 +960,7 @@ async function checkTopupBalance(transkey) {
             {
                 $set: 
                 {
-                    status: status,
+                    status          : status,
                     "amount"        : latestamount ,
                     "crypto_paid"   : latestamount,
                     "fiat_amount"   : pricecal,
@@ -973,7 +974,7 @@ async function checkTopupBalance(transkey) {
                 return JSON.stringify(response)
         }
             
-        let remain = parseFloat(addressObject.fixed_amount) - parseFloat(latestamount)
+        let remain            = parseFloat(addressObject.fixed_amount) - parseFloat(latestamount)
         trans_data            = await getTranscationDataForClient(addressObject.id)
         let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
      
