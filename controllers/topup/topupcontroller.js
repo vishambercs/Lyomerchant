@@ -240,7 +240,42 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
- 
+    async update_The_Transcation_by_cs(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/update_The_Transcation_by_cs"
+            let parameters          =  
+            {
+                "id"                : req.body.id,
+                "otp"               : req.body.otp,
+            } 
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            console.log("response",response)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async checkbalanceforwewe(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/checkbalanceforwewe"
+            let parameters          =   req.body
+            console.log("parameters",parameters)
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }
 
 

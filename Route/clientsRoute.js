@@ -11,6 +11,10 @@ router.post('/verfiytranshash',                    topupcontroller.verfiytransha
 router.post('/sendotp',                            topupcontroller.sendotp);
 router.post('/updatetrans',                        topupcontroller.updatetrans);
 router.post('/updatetrans_with_network',           topupcontroller.updatetrans_with_network);
+router.post('/update_The_Transcation_by_cs',       topupcontroller.update_The_Transcation_by_cs);
+router.post('/checkbalanceforwewe',                topupcontroller.checkbalanceforwewe);
+
+
 
 // router.post('/verfiythebalance',                   topupcontroller.verfiythebalance);
 // router.post('/updatethetrans',                     topupcontroller.updatethetrans);
