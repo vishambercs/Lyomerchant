@@ -77,19 +77,17 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
             console.log("Connection error: " + error.toString());
         });
         connection.on('close', function (ws, response) {
-            console.log('Connection closed!', ws);
-            console.log('Connection closed!', response);
+            console.log('Connection closed! Multiprocess', ws);
+            console.log('Connection closed! Multiprocess', response);
         });
         connection.on('message', async function (message) {
                 
             let jsondata        = JSON.parse(message.utf8Data)
-            
             let transData       = {}
             var index           = Constant.topupTransList.findIndex(translist => translist.transkey == jsondata.transid)
-           
-           
             if(index != -1 )
             {
+                Constant.topupTransList[index]["client"] = connection
                 transData       = Constant.topupTransList[index]
             }
             // if((jsondata.status == 1 || jsondata.status == 3 ) && index != -1)
@@ -123,13 +121,6 @@ function Create_Node_Sockect_Connection(transid,transkey,apikey,network_id,amoun
                     transData.connection.sendUTF(balanceResponse);
                 }
 
-                if(jsondata.time > 10)
-                {
-                    Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.transkey != jsondata.transid);
-                    transData.connection.close(1000);
-                    removeCheckAddressTx(jsondata.transId);
-                }
-
                 
                 if(responseapijson.amountstatus == 3 || responseapijson.amountstatus == 1)
                 {
@@ -155,4 +146,5 @@ module.exports =
 {
 
     Create_Node_Sockect_Connection: Create_Node_Sockect_Connection,
+    removeCheckAddressTx : removeCheckAddressTx,
 }

@@ -352,18 +352,28 @@ module.exports =
             var hash                = CryptoJS.MD5(queryvariable.transkey + queryvariable.apikey +  process.env.BASE_WORD_FOR_HASH)
             
             let getTranscationData  = await commonFunction.get_Transcation_topup(queryvariable.transkey,queryvariable.apikey)
-         
+            const connection        = request.accept(null, request.origin);
               
+            connection.on('close', async (ws, wsResponse) => {
+                let transData       = {}
+                var index = Constant.topupTransList.findIndex(translist => translist.connection == connection)
+                if(index != -1)
+                {
+                    transData       = Constant.topupTransList[index]
+                    transData.client.close(1000)
+                    Multiprocess.removeCheckAddressTx(transData.transkey);
+                    Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.connection != connection);
+                }
+              })
+
             if(getTranscationData.length > 0)
             {
-            const connection        = request.accept(null, request.origin);
+           
 
-            connection.on('close', (ws, wsResponse) => {
-                console.log(ws, '==================cLOSED================');
-                console.log(wsResponse, '==================cLOSED================');
-            })
+           
             
             var index = Constant.topupTransList.findIndex(translist => translist.transkey == queryvariable.transkey)
+           
             if(index == -1)
             {
             let client_object  = {  "uniqueKey": uniqueKey,  "connection": connection,  "transkey": queryvariable.transkey,  "apikey": queryvariable.apikey}
@@ -396,7 +406,7 @@ module.exports =
         }
         else
         {
-            const connection        = request.accept(null, request.origin);
+         
             let response            = 
             { 
                 transkey        :   queryvariable.transkey,
