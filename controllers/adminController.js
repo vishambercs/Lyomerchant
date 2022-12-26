@@ -344,7 +344,7 @@ module.exports =
     },
     async updateadminrole(req, res) {
         try {
-            let admin = await admins.findOneAndUpdate({ 'admin_api_key': req.headers.authorization }, 
+            let admin = await admins.findOneAndUpdate({ 'email': req.body.adminemail }, 
             { $set: { rolesdata : req.body.roleid } }, 
             { returnDocument : 'after' })
             res.json({ status: 200, data: admin, message: "Success" })

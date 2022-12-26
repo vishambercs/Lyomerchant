@@ -789,6 +789,7 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
+    
     async getTransForAdminNew(req, res) {
             try {
                 const queryOptions    = {};
