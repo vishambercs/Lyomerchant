@@ -105,7 +105,7 @@ router.post('/get_all_roles_with_permission',     Auth.is_admin,Auth.Verfiy_Role
 "============= All Client Wallet API ==================="
 router.post('/create_or_update_clienthotwallets',   Auth.is_admin,Auth.Verfiy_Role,clientHotWallets.create_or_update_clienthotwallets);
 router.post('/get_all_clienthotwallets',            Auth.is_admin,Auth.Verfiy_Role,clientHotWallets.get_all_clienthotwallets);
-router.post('/updateadminrole',  adminController.updateadminrole);
+router.post('/updateadminrole',                     Auth.is_admin,Auth.Verfiy_Role,adminController.updateadminrole);
 
 "============= All Pool Wallet ==================="
 router.post('/getAllPoolWallet',          Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);

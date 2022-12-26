@@ -842,15 +842,15 @@ module.exports =
                     queryOptions["invoicedetails"] =  req.body.paymentdetails
                 }
                 
-                let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
-                let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
-                let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
+                let limit = req.body.limit == ""   || req.body.limit == undefined  ? 25         : parseInt(req.body.limit);
+                let skip  = req.body.skip  == ""   || req.body.skip  == undefined  ? 0          : parseInt(req.body.skip);
+                let type  = req.body.type  == ""   || req.body.type  == undefined  ? "Topup"    : req.body.type;
                 let transactionPoolData = [];
                 let total               = 0;
                 if(req.body?.type == "Topup"){
                    transactionPoolData  = await topups.find(queryOptions, { callbackURL: 0 }).populate([
                             { path: "pwid",         select: "network_id id balance address remarks _id" },
-                            { path: "nwid",         select: "id coin network _id" },
+                            { path: "nwid",         select: "id coin network _id scanurl transcationurl" },
                             { path: "clientdetail", select: "id email first_name last_name type _id" },
                             { path: "manaual_update_by_admin", select: "id email _id" },
                     ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
