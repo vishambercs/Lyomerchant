@@ -87,9 +87,9 @@ module.exports =
     {
         try 
         {
-            let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
-            let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
-            let queryOptions = {}
+            let limit           = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
+            let skip            = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
+            let queryOptions    = { "status": { $ne: 0 } }
 
             let rolesData  = await RolesPermisson.find(queryOptions, ).populate([ { path: "roleid", select: "_id name " },]).
             sort({createdAt : -1}).limit(limit).skip(skip).lean();
@@ -106,7 +106,6 @@ module.exports =
         {
             
             let roles_permission = req.body.roles_permission
-            
             let Role = await RolesPermisson.insertMany(roles_permission)
             return res.json({ status: 200, data: Role, message: "Success" })
             

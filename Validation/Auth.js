@@ -62,7 +62,7 @@ module.exports =
             // {
             //    return res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
             // }
-            // let roles_permission = await RolesPermisson.findOne({roleid : adminsdata.rolesdata , "apipath" :url  })
+            // let roles_permission = await RolesPermisson.findOne({roleid : adminsdata.rolesdata , "apipath" :url , "status":1  })
             // if(roles_permission != null)
             // {
             //     next()
