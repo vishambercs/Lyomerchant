@@ -115,8 +115,7 @@ router.post('/update_the_transcation_by_admin',     Auth.is_admin,Auth.Verfiy_Ro
 router.post('/update_withdraw_limit',               Auth.is_admin,Auth.Verfiy_Role,clientsController.update_withdraw_limit);
 router.post('/change_the_topuptimespent',           Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_the_topuptimespent);
 router.post('/Get_User_Roles',                      Auth.is_admin, adminController.Get_User_Roles);
-
-
+router.post('/get_Payment_History',        Auth.is_admin,commonController.getPaymentHistory);
 
 // router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 module.exports = router;

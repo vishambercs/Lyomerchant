@@ -7,6 +7,7 @@ const payLink                    = require('../../Models/payLink');
 const invoice                    = require('../../Models/invoice');
 const clients                    = require('../../Models/clients');
 const topups                     = require('../../Models/topup');
+const Topuptranshash             = require('../../Models/Topuptranshash');
 const Constant                   = require('../../common/Constant');
 const { getBalance }             = require('bitcoin-core/src/methods');
 const Web3                       = require('web3');
@@ -1173,6 +1174,20 @@ module.exports =
            
         } catch (error) {
             console.log("getTranscationofPoolwallet",error)
+            res.status(400).json({ status: 400, message:"Error" });
+        }
+    },
+    async getPaymentHistory(req, res) {
+        try {
+            const queryOptions  = {"topupdetails" : req.body.topupdetails };
+            let topupsdata      = await Topuptranshash.find(queryOptions).populate([
+                { path: "topupdetails"},
+            ])
+           
+            res.status(200).json({ status: 200, data : topupsdata , "message":"Data" });
+           
+        } catch (error) {
+            console.log("getPaymentHistory",error)
             res.status(400).json({ status: 400, message:"Error" });
         }
     },

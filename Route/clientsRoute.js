@@ -136,7 +136,7 @@ router.post('/getTranscationDataofTopup',   topupcontroller.get_top_payment_data
 router.post('/canceltopup',                 topupcontroller.cancelpaymentLink);
 router.post('/get_all_deposit_client',      Auth.is_merchant,clientsController.get_For_client);
 router.post('/update_withdraw_limit',      Auth.is_merchant,clientsController.update_withdraw_limit);
-
+router.post('/get_Payment_History',      Auth.is_merchant,commonController.getPaymentHistory);
 
 
 
