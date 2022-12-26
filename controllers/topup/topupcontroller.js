@@ -141,7 +141,7 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             const WEB3 = new Web3(new Web3.providers.HttpProvider(Nodeurl))
             let hashtrans = await WEB3.eth.getTransactionReceipt(tranxid)
             let transaction = await WEB3.eth.getTransaction(tranxid)
-           const result = decoder.decodeData(transaction.input);
+            const result = decoder.decodeData(transaction.input);
             
             let tradata = {}
 
@@ -162,7 +162,7 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
     
                     return { status: 200, data: tradata, message: "" }  
                 }  else {
-                    let amount = Web3.utils.hexToNumber(hashtrans.logs[0].data);
+                    let amount = Web3.utils.toBN(hashtrans.logs[0].data).toString();
                     const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
                     let decimals = await contract.methods.decimals().call();
                     let format_token_balance = parseFloat(amount) / (1 * 10 ** decimals)
@@ -264,7 +264,7 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
 
     }
     catch (error) {
-        console.log(error)
+        console.log("Check_Trans_Hash",error)
         let balanceData = { "token_balance": token_balance, "format_token_balance": format_token_balance, "native_balance": native_balance, "format_native_balance": format_native_balance }
         return null
     }
