@@ -2,6 +2,8 @@ const admins         = require('../Models/admin');
 const clients        = require('../Models/clients');
 const transcationLog = require('../Models/transcationLog');
 const topup          = require('../Models/topup');
+const RolesPermisson = require('../Models/RolesPermisson');
+
 const cornJobs       = require('../common/cornJobs');
 var CryptoJS = require('crypto-js')
 var crypto = require("crypto");
@@ -352,7 +354,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Invalid Request" })
         }
     },
-
     async update_The_Transcation_BY_Admin(req, res) 
     {
         try 
@@ -384,5 +385,22 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     }, 
-
+    async Get_User_Roles(req, res) 
+    {
+        try 
+        {
+            let admin = await admins.findOne( { admin_api_key : req.headers.authorization , token : req.headers.token })
+            if (admin == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid User " })
+            }
+            let rolesData  = await RolesPermisson.find({  roleid :admin.rolesdata }).populate([ { path: "roleid", select: "_id name " },])
+            res.json({ status: 200, message: "Roles Data", data: rolesData })
+            
+        }
+        catch (error) {
+            console.log("Get_User_Roles",error)
+            res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+        }
+    }, 
 }

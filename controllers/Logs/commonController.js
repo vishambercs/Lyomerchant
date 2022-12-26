@@ -3,7 +3,6 @@ const posTransactionPool         = require('../../Models/posTransactionPool');
 const network                    = require('../../Models/network');
 const poolWallets                = require('../../Models/poolWallet');
 const transactionPool            = require('../../Models/transactionPool');
-
 const payLink                    = require('../../Models/payLink');
 const invoice                    = require('../../Models/invoice');
 const clients                    = require('../../Models/clients');
@@ -1142,7 +1141,6 @@ module.exports =
             return res.status(500).json({ status: 400, message:"Error" });
         }
     },
-
     async getTranscationofPoolwallet(req, res) {
         try {
             const queryOptions  = {"pwid" : req.body.pwid };
