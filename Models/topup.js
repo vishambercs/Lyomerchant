@@ -182,6 +182,16 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
+    manaual_update_cs: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    manaual_update_at_by_cs: {
+        type: String,
+        required: false,
+        default: false,
+    },
     admin_updated: {
         type: String,
         required: false,

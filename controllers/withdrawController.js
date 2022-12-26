@@ -1,26 +1,26 @@
-const withdrawLogs = require('../Models/withdrawLog');
-const cornJobs = require('../common/cornJobs');
-const networks = require('../Models/network');
-var CryptoJS = require('crypto-js')
-var crypto = require("crypto");
-var Utility = require('../common/Utility');
-const bcrypt = require('bcrypt');
-const Web3 = require('web3');
-const axios = require('axios')
-const clientWallets = require('../Models/clientWallets');
-const client = require('../Models/clients');
-const withdrawSettings = require('../Models/withdrawSettings')
-const currencies = require('../Models/Currency')
-const network = require('../Models/network')
-const kytlogs = require('../Models/kytlogs')
-const topup = require('../Models/topup')
-const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool')
-const posTransactionPool = require('../Models/posTransactionPool')
-const transactionPool = require('../Models/transactionPool')
-var mongoose = require('mongoose');
-var qs = require('qs');
-var FormData = require('form-data');
-const { default: ObjectID } = require('bson-objectid');
+const withdrawLogs                  = require('../Models/withdrawLog');
+const cornJobs                      = require('../common/cornJobs');
+const networks                      = require('../Models/network');
+var CryptoJS                        = require('crypto-js')
+var crypto                          = require("crypto");
+var Utility                         = require('../common/Utility');
+const bcrypt                        = require('bcrypt');
+const Web3                          = require('web3');
+const axios                         = require('axios')
+const clientWallets                 = require('../Models/clientWallets');
+const client                        = require('../Models/clients');
+const withdrawSettings              = require('../Models/withdrawSettings')
+const currencies                    = require('../Models/Currency')
+const network                       = require('../Models/network')
+const kytlogs                       = require('../Models/kytlogs')
+const topup                         = require('../Models/topup')
+const paymentLinkTransactionPool    = require('../Models/paymentLinkTransactionPool')
+const posTransactionPool            = require('../Models/posTransactionPool')
+const transactionPool               = require('../Models/transactionPool')
+var mongoose                        = require('mongoose');
+var qs                              = require('qs');
+var FormData                        = require('form-data');
+const { default: ObjectID }         = require('bson-objectid');
 require("dotenv").config()
 
 
@@ -233,7 +233,7 @@ module.exports =
             if (network_withdraw_limit == true &&  client_withdraw_limit == true) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
-            console.log("balance",req.body.amount >= balance)
+           
             if (req.body.amount >= balance) {
                 return res.json({ status: 200, data: {}, message: "Invalid Amount" })
             }
