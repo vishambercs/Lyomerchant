@@ -108,14 +108,17 @@ router.post('/get_all_clienthotwallets',            Auth.is_admin,Auth.Verfiy_Ro
 router.post('/updateadminrole',                     Auth.is_admin,Auth.Verfiy_Role,adminController.updateadminrole);
 
 "============= All Pool Wallet ==================="
-router.post('/getAllPoolWallet',          Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
-router.post('/getTranscationofPoolwallet', Auth.is_admin,Auth.Verfiy_Role,commonController.getTranscationofPoolwallet);
+router.post('/getAllPoolWallet',                    Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
+router.post('/getTranscationofPoolwallet',          Auth.is_admin,Auth.Verfiy_Role,commonController.getTranscationofPoolwallet);
 
-router.post('/update_the_transcation_by_admin',     Auth.is_admin,Auth.Verfiy_Role,adminController.update_The_Transcation_BY_Admin);
-router.post('/update_withdraw_limit',               Auth.is_admin,Auth.Verfiy_Role,clientsController.update_withdraw_limit);
-router.post('/change_the_topuptimespent',           Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_the_topuptimespent);
-router.post('/Get_User_Roles',                      Auth.is_admin, adminController.Get_User_Roles);
-router.post('/get_Payment_History',        Auth.is_admin,commonController.getPaymentHistory);
+router.post('/update_the_transcation_by_admin', Auth.is_admin,Auth.Verfiy_Role,adminController.update_The_Transcation_BY_Admin);
+router.post('/update_withdraw_limit',           Auth.is_admin,Auth.Verfiy_Role,clientsController.update_withdraw_limit);
+router.post('/change_the_topuptimespent',       Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_the_topuptimespent);
+router.post('/Get_User_Roles',                  Auth.is_admin, adminController.Get_User_Roles);
+router.post('/get_Payment_History',             Auth.is_admin,Auth.Verfiy_Role,commonController.getPaymentHistory);
+router.post('/call_the_webhook',                Auth.is_admin,Auth.Verfiy_Role,topupcontroller.call_the_webhook);
+router.post('/get_the_webhook',                 Auth.is_admin,Auth.Verfiy_Role,topupcontroller.get_the_webhook);
+
 
 // router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 module.exports = router;

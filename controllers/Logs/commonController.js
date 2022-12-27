@@ -854,6 +854,7 @@ module.exports =
                             { path: "nwid",         select: "id coin network _id scanurl transcationurl" },
                             { path: "clientdetail", select: "id email first_name last_name type _id" },
                             { path: "manaual_update_by_admin", select: "id email _id" },
+                            
                     ]).sort({createdAt : -1}).limit(limit).skip(skip).lean();
                     total  = await topups.find({}).count();
                     return res.status(200).json({ status: 200, data : transactionPoolData,"total":total });

@@ -84,7 +84,6 @@ async function get_Transcation_topup(transkey) {
         ])
     return pooldata
 }
-
 async function get_Fixed_Transcation_topup(transkey) {
 
     let pooldata = await Fixedtopup.aggregate(
@@ -393,7 +392,7 @@ async function getTranscationDataForClient(transkey) {
             _id: topupData.pwid,
         });
 
-        console.log(poolwalletData._id, 'Find Ppllawa');
+      
         
         if (poolwalletData) {
             datarray.address = poolwalletData.address;
@@ -432,7 +431,6 @@ async function postRequest(URL, parameters, headers) {
         })
     return response;
 }
-
 async function updateOtherAPI(tx_status, tx_id, toupid, tx_hash, orderid, coin, crypto_amount, fiat_amount, network_id, address, fiat_usd, network_name, createdAt, timestamps) {
 
     console.log("==============updateOtherAPI=======================",
@@ -480,9 +478,9 @@ async function getTimeprice(time, coin) {
         return 1;
     }
 }
-
 let savingIds = [];
-async function fetchpostRequest(URL, parameters,id) {
+
+async function fetchpostRequest(URL, parameters,id,_id, type="auto",admin = null) {
     try {
         let webhooklog = await webHookCall.findOne({trans_id : id})
         let response = {}
@@ -494,38 +492,33 @@ async function fetchpostRequest(URL, parameters,id) {
             .then(async (res) => {
                 var stringify_response = stringify(res)
                 let webhook = await webHookCall.insertMany({
-                    id: mongoose.Types.ObjectId(),
-                    trans_id:id,
-                    status:200,
-                    response : stringify_response,
-                    created_at: new Date().toString()
+                    id                             : mongoose.Types.ObjectId(),
+                    trans_id                       : id,
+                    topupdetails                   : _id,
+                    status                         : 200,
+                    response                       : stringify_response,
+                    manaual_update_at_by_admin     : type == "auto" ? false : new Date().toString(),
+                    manaual_update_by_admin        : admin,
+                    created_at                     : new Date().toString()
                 })
                 savingIds.splice(savingIds.indexOf(id), 1);
                 response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
             }).catch(async (error) => {
                 var stringify_response = stringify(error)
                 let webhook = await webHookCall.insertMany({
-                    id: mongoose.Types.ObjectId(),
-                    trans_id:id,
-                    status:400,
-                    response : error,
-                    created_at: new Date().toString()
+                    id              : mongoose.Types.ObjectId(),
+                    trans_id        : id,
+                    topupdetails             : _id,
+                    status                   : 400,
+                    response                 : error,
+                    manaual_update_at_by_admin     : type == "auto" ? false : new Date().toString(),
+                    manaual_update_by_admin        : admin,
+                    created_at      : new Date().toString()
                 })
                 response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
             })
         }
-        
-        return response;
-   
-    //     if(webhookcall == null)
-    //     {
-    //     await fetch(URL,  {
-    //         method: 'POST',
-    //         body: JSON.stringify(parameters),
-    //         headers: { 'Content-Type': 'application/json' }
-    //     }).then(res => console.log(res))
-    //         .then(json => console.log(json));
-    // }
+    return response;
     }
     catch (error) {
         console.log("======================================== fetchpostRequest", error)
@@ -663,7 +656,6 @@ async function getTrasnsBalance(transdata) {
         return JSON.stringify(response)
     }
 }
-
 async function verifyTheBalance(transkey) {
     try {
         let transdata = await get_Transcation_topup(transkey)
@@ -708,7 +700,7 @@ async function verifyTheBalance(transkey) {
        
         let trans_data          = await getTranscationDataForClient(addressObject.id)
         let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
-        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id,addressObject._id)
         let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, BalanceOfAddress.data.format_token_balance)
         let paymentData         = { 
             "paid_in_usd" :pricecal ,"remain": remain, 
@@ -726,8 +718,6 @@ async function verifyTheBalance(transkey) {
         return JSON.stringify(response)
     }
 }
-
-
 async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
     try {
         let transdata       = await get_Transcation_topup(transkey)
@@ -749,7 +739,7 @@ async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
                 }, { returnDocument: 'after' })
         let trans_data          = await getTranscationDataForClient(addressObject.id)
         let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
-        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id,addressObject._id)
         let ClientWallet        = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, addressObject.fixed_amount)
         let paymentData         = { 
             "paid_in_usd"       : pricecal ,
@@ -828,7 +818,7 @@ async function verifyTheBalancebyWebsocket(transkey,amount,transhash) {
         }
         let ClientWallet      = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, amount)
         let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
-        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id,addressObject._id)
         response              = {transkey: transkey, amountstatus: status, "paymentData":paymentData ,status: 200, message: "success","paymenthistory":paymenthistory };
         return JSON.stringify(response)
     }
@@ -838,7 +828,6 @@ async function verifyTheBalancebyWebsocket(transkey,amount,transhash) {
         return JSON.stringify(response)
     }
 }
-
 async function partialTopupBalance(transkey) {
     try {
         let transdata = await get_Transcation_topup(transkey)
@@ -889,8 +878,6 @@ async function partialTopupBalance(transkey) {
         return JSON.stringify(response)
     }
 }
-
-
 async function checkTopupBalance(transkey) {
     try {
         let transdata       = await get_Transcation_topup(transkey)
@@ -980,7 +967,7 @@ async function checkTopupBalance(transkey) {
             
         let remain = parseFloat(addressObject.fixed_amount) - parseFloat(latestamount)
         let logData           = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
-        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id)
+        let get_addressObject = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id,addressObject._id)
         let ClientWallet = await updateClientWallet(addressObject.api_key, addressObject.networkDetails[0].id, latestamount)
        
          paymentData       = 
@@ -1117,6 +1104,25 @@ async function partialFixedTheBalance(transkey) {
         return JSON.stringify(response)
     }
 }
+
+async function SendWebHookResponse(transkey,adminkey) {
+    try {
+        console.log(transkey,adminkey)
+        let transdata           = await get_Transcation_topup(transkey)
+        let addressObject       = transdata[0]
+        let trans_data          = await getTranscationDataForClient(addressObject.id)
+        let pricecal            = await pricecalculation(addressObject.poolWallet[0].network_id, addressObject.fiat_amount)
+        let logData             = { "transcationDetails": trans_data, "paid_in_usd": pricecal }
+        let get_addressObject   = await fetchpostRequest(addressObject.callbackURL, logData,addressObject.id,addressObject._id,"Manual",adminkey)
+        response                = { data: {}, status: 200, message: "success" };
+        return response
+    }
+    catch (error) {
+        console.log("Message %s sent: %s", error);
+        response                = { data: {}, status: 400, message: "Error" };
+        return response
+    }
+}
 module.exports =
 {
     pricection                  :   pricecalculation,
@@ -1129,7 +1135,8 @@ module.exports =
     partialFixedTheBalance      :   partialFixedTheBalance,
     partialTopupBalance         :   partialTopupBalance,
     checkTopupBalance           :   checkTopupBalance,
-    verifyTheBalanceBy_Admin    :   verifyTheBalanceBy_Admin
+    verifyTheBalanceBy_Admin    :   verifyTheBalanceBy_Admin.apply,
+    SendWebHookResponse         :   SendWebHookResponse,
 }
 
 

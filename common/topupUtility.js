@@ -28,7 +28,7 @@ const invoice = require('../Models/invoice');
 const btchotwallet = require('../Models/btchotwallet');
 const IPNS = require('../Models/IPN');
 const topup = require('../Models/topup');
-const emailSending = require('./emailSending');
+const emailSending = require('./emailSending'); 
 const transUtility = require('./transUtilityFunction');
 
 async function get_Transcation_topup(transkey) {
@@ -517,7 +517,7 @@ async function verifyTheBalance(transkey) {
 }
 module.exports =
 {
-    get_Transcation_topup: get_Transcation_topup,
+    get_Transcation_topup : get_Transcation_topup,
     getTrasnsBalance: getTrasnsBalance,
     verifyTheBalance: verifyTheBalance,
 }
