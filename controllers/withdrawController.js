@@ -758,7 +758,10 @@ module.exports =
             cryptoprice = transfer_fee / coinprice
          
             let network_withdraw_limit = (amount < (network.transferlimit / coinprice))
+ 
+            
             let client_withdraw_limit = (amount < (clients_data.withdrawlimit / coinprice)) 
+
             if ( network_withdraw_limit == true && client_withdraw_limit == true   ) {
                 return res.json({
                     status : 200,
@@ -767,6 +770,8 @@ module.exports =
                         "price": coinprice,
                         "currency": current_currency,
                         "limit": (network.transferlimit / coinprice),
+                        "network_limit": (network.transferlimit / coinprice),
+                        "client_limit":  (clients_data.withdrawlimit / coinprice),
                         "withdraw_amount_in_crypto": parseFloat(req.body.amount),
                         "fee_in_crypto": (transfer_fee / coinprice),
                         "network_fee_in_crypto": network_fee,
@@ -779,7 +784,9 @@ module.exports =
                         "net_amount_in_fiat": (coinprice * parseFloat(req.body.amount)) - (transfer_fee + (network_fee * coinprice)),
                         "Network": network.network,
                         "coin": network.coin,
-                        "enable" : false
+                        "enable" : false,
+                        "network_status" : network_withdraw_limit,
+                        "client_status"  : client_withdraw_limit
                     },
                     message: "Amount shoud be greater than or equal to minimum Withdrawal limit"
                 }
@@ -805,7 +812,11 @@ module.exports =
                         "net_amount_in_fiat": (coinprice * parseFloat(req.body.amount)) - (transfer_fee + (network_fee * coinprice)),
                         "Network": network.network,
                         "coin": network.coin,
-                        "enable" : true
+                        "enable" : true,
+                        "network_limit": (network.transferlimit / coinprice),
+                        "client_limit":  (clients_data.withdrawlimit / coinprice),
+                        "network_status" : network_withdraw_limit,
+                        "client_status"  : client_withdraw_limit
                     },
                     message: "Fee Details"
                 })

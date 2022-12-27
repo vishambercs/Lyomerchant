@@ -742,7 +742,7 @@ async function verifyTheBalanceBy_Admin(transkey,manaual_update_admin) {
                     {
                         "status"                       : 1,
                         // "amount"                    : addressObject.fixed_amount,
-                        "fiat_amount"                  : pricecal,
+                        // "fiat_amount"                  : pricecal,
                         "manaual_update_by_admin"      : admindata._id,
                         "manaual_update_at_by_admin"   : new Date().toString(),
                     }

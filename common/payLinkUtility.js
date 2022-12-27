@@ -578,7 +578,7 @@ module.exports =
             if (amountstatus != 0) 
             {
                 let walletbalance = BalanceOfAddress.status == 200 ? BalanceOfAddress.data.format_token_balance : 0
-                
+                console.log()
                 let transactionpool = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": amountstatus } })
                
                 let logData = { "transcationDetails": [] }
