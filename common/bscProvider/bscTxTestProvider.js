@@ -127,11 +127,19 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
                                     // });
                 
                                     // if (userAddressToSend) 
-                                    const newTopuptranshash = new Topuptranshash;
-                                    newTopuptranshash.transhash = data.transactionHash;
-                                    newTopuptranshash.amount = amount;
-                                    newTopuptranshash.topupdetails = walletAddress.topup_id;
-                                    await newTopuptranshash.save();
+                                    const topupTransHash = Topuptranshash.findOne({
+                                        transhash: data.transactionHash
+                                    });
+
+                                    if (topupTransHash) {
+                                        console.log('Hash already stored: ', data.transactionHash);
+                                    } else {
+                                        const newTopuptranshash = new Topuptranshash;
+                                        newTopuptranshash.transhash = data.transactionHash;
+                                        newTopuptranshash.amount = amount;
+                                        newTopuptranshash.topupdetails = walletAddress.topup_id;
+                                        await newTopuptranshash.save();
+                                    }
         
                                     console.log("amount",amount);
                                     
