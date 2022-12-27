@@ -65,13 +65,17 @@ router.post('/getAllStoreDeviceForMerchantAdmin',    Auth.is_merchant,merchantSt
 router.post('/disableordeletedevices',               Auth.store_have_access,merchantStoreDeviceController.disableordelete);
 router.post('/posGetTransByStorekey',                Auth.store_have_access,posTransactionPoolController.getTranscationDetailsByStoreID);
 router.post('/getallclientstoredevices',             Auth.is_merchant,merchantStoreDeviceController.getAllClientStoreDevices);
+
 "=============Pos Merchant Wallet==========================================="
+
 router.post('/assignPosMerchantWallet',              Auth.check_Store_Device_Access,posTransactionPoolController.assignPosMerchantWallet);
 router.post('/shopTransList',                        Auth.check_Store_Device_Access,posTransactionPoolController.getShopTransList);
 router.get('/posallCurrency',                        Auth.check_Store_Device_Access,CurrencyController.allCurrency);
 router.post('/pospriceConversition',                 Auth.check_Store_Device_Access,CurrencyController.priceConversitionPosChanges);
 router.post('/posallNetworks',                       Auth.check_Store_Device_Access,networkController.allNetworkForPOSClient);
 router.post('/posGetTransByDeviceID',                Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
+router.post('/send_email_pos',                         Auth.check_Store_Device_Access,posTransactionPoolController.SendEmailPOS);
+
 "============================ Currency Master ==============================="
 router.get('/allCurrency',                           CurrencyController.allCurrency);
 router.post('/priceConversition',                    CurrencyController.priceConversition);

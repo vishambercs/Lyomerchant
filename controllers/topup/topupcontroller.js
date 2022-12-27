@@ -1,10 +1,13 @@
 const topup = require('../../Models/topup');
 const poolWallet = require('../../Models/poolWallet');
 const networks = require('../../Models/network');
-var otpGenerator = require('otp-generator')
-var mongoose = require('mongoose');
-const clients = require('../../Models/clients');
-var poolwalletController = require('../poolwalletController');
+const admin         = require('../../Models/admin');
+const webHookCall   = require('../../Models/webHookCall');
+var otpGenerator    = require('otp-generator')
+var mongoose              = require('mongoose');
+const clients             = require('../../Models/clients');
+var poolwalletController  = require('../poolwalletController');
+var adminBalanceUpdate    = require('../../common/adminBalanceUpdate');
 module.exports =
 {
     
@@ -138,7 +141,60 @@ module.exports =
             console.log(error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
-    },   
+    },  
+    async get_the_webhook(req, res) {
+        try {
+            let transactionPool = await webHookCall.findOne({ trans_id: req.body.id, })
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "WebHook is not called" })
+            }
+            res.json({ status: 200, message: "Get The Webhook", data: transactionPool })
+        }
+        catch (error) {
+            console.log("get_the_webhook", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async call_the_webhook(req, res) {
+        try {
+        
+            let transactionPool  = await topup.findOne({ id: req.body.id})
+            let admindata        = await admin.findOne({ admin_api_key : req.headers.authorization})
+            console.log("admindata._id",admindata._id)
+            let previousCallpool = await webHookCall.findOne({ trans_id: req.body.id, })
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+
+            if (admindata == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+
+            if (previousCallpool != null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Webhook is Already Called" })
+            }
+            let topup_verify = await adminBalanceUpdate.SendWebHookResponse(transactionPool.id,admindata._id)
+            if (topup_verify.status == 400) 
+            {
+                return res.json({ status: 400, message: "Please Contact Admin", data: {} })
+            }
+            let webHookCallpool = await webHookCall.find({ trans_id: req.body.id, })
+            if (webHookCallpool == null) 
+            {
+                return res.json({ status: 400, message: "Please Contact Admin", data: {} })
+            }
+            res.json({ status: 200, message: "Get The Webhook", data: webHookCallpool })
+        }
+        catch (error) {
+            console.log("get_the_webhook", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    
 }
 
 
