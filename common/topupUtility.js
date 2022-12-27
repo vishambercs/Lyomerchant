@@ -1165,6 +1165,7 @@ async function partialFixedTheBalance(transkey) {
         return JSON.stringify(response)
     }
 }
+
 module.exports =
 {
     pricection                  :   pricecalculation,

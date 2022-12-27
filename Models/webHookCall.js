@@ -54,7 +54,7 @@ const webHookCall = new mongoose.Schema({
         type: String,
         required: false,
         default: false,
-    }
+    } 
 } ,
 
 { timestamps: true },
