@@ -978,12 +978,10 @@ module.exports =
 
     async Verfiy_WebHook(req, res, next) {
         try {
-            console.log("Verfiy_WebHook", req.headers)
+          
 
             let token = req.headers.authorization;
-            console.log("Verfiy_WebHook", token)
-            console.log("Verfiy_WebHook", req.body)
-
+     
             if (token != "29443d9be42dc1f0fc4f4771d9327e8f6ba57c8a") {
                 res.status(400).send({ status: 400, success: false, message: 'Validation failed', data: "" });
             }
