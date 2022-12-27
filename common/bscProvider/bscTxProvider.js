@@ -146,12 +146,19 @@ async function createWebSocket (BSCNODEWSURL) {
                                             parseFloat(amount);
                                             amount = amount / 10**decimals;
                                             
-                        
-                                            const newTopuptranshash = new Topuptranshash;
-                                            newTopuptranshash.transhash = data.transactionHash;
-                                            newTopuptranshash.amount = amount;
-                                            newTopuptranshash.topupdetails = walletAddress.topup_id;
-                                            await newTopuptranshash.save();
+                                            const topupTransHash = Topuptranshash.findOne({
+                                                transhash: data.transactionHash
+                                            });
+
+                                            if (topupTransHash) {
+                                                console.log('Hash already stored: ', data.transactionHash);
+                                            } else {
+                                                const newTopuptranshash = new Topuptranshash;
+                                                newTopuptranshash.transhash = data.transactionHash;
+                                                newTopuptranshash.amount = amount;
+                                                newTopuptranshash.topupdetails = walletAddress.topup_id;
+                                                await newTopuptranshash.save();
+                                            }
                                         }
                                     }
                                 }

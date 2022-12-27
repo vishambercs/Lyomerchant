@@ -149,11 +149,19 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
                         if(foundAdd) {
 
                         } else {
-                            const newTopuptranshash = new Topuptranshash;
-                            newTopuptranshash.transhash = edata.transaction_id;
-                            newTopuptranshash.amount = amount;
-                            newTopuptranshash.topupdetails = toupIds[address];
-                            await newTopuptranshash.save();
+                            const topupTransHash = Topuptranshash.findOne({
+                                transhash: edata.transaction_id
+                            });
+                
+                            if (topupTransHash) {
+                                console.log('Hash already stored: ', edata.transaction_id);
+                            } else {
+                                const newTopuptranshash = new Topuptranshash;
+                                newTopuptranshash.transhash = edata.transaction_id;
+                                newTopuptranshash.amount = amount;
+                                newTopuptranshash.topupdetails = toupIds[address];
+                                await newTopuptranshash.save();
+                            }
                         }
                 }
             }

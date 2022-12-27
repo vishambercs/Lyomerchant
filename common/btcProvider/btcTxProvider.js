@@ -35,12 +35,20 @@ ws.onmessage = async (event) => {
             console.log(txHash,walletAddress,amount)  
 
             console.log(headers, 'Live >>>>>>>>');
-            
-            const newTopuptranshash = new Topuptranshash;
-            newTopuptranshash.transhash = data.transactionHash;
-            newTopuptranshash.amount = amount;
-            newTopuptranshash.topupdetails = userCheckAddress.topup_id;
-            await newTopuptranshash.save();
+
+            const topupTransHash = Topuptranshash.findOne({
+                transhash: txHash
+            });
+
+            if (topupTransHash) {
+                console.log('Hash already stored: ', txHash);
+            } else {
+                const newTopuptranshash = new Topuptranshash;
+                newTopuptranshash.transhash = txHash;
+                newTopuptranshash.amount = amount;
+                newTopuptranshash.topupdetails = walletAddress.topup_id;
+                await newTopuptranshash.save();
+            }
     
         } else {
             console.log("not found address", address)

@@ -137,11 +137,19 @@ const createWebSocket = async (ETHNODEWSURL) => {
                                                 amount = amount/10**decimals;
                                                 console.log("amount in formated",amount);
 
-                                                const newTopuptranshash = new Topuptranshash;
-                                                newTopuptranshash.transhash = data.transactionHash;
-                                                newTopuptranshash.amount = amount;
-                                                newTopuptranshash.topupdetails = walletAddress.topup_id;
-                                                await newTopuptranshash.save();
+                                                const topupTransHash = Topuptranshash.findOne({
+                                                    transhash: data.transactionHash
+                                                });
+                                    
+                                                if (topupTransHash) {
+                                                    console.log('Hash already stored: ', data.transactionHash);
+                                                } else {
+                                                    const newTopuptranshash = new Topuptranshash;
+                                                    newTopuptranshash.transhash = data.transactionHash;
+                                                    newTopuptranshash.amount = amount;
+                                                    newTopuptranshash.topupdetails = walletAddress.topup_id;
+                                                    await newTopuptranshash.save();
+                                                }
                                             }
                                             console.log(console.log("\n             T O K E N  T R A  N S A C T I O N   D E T E C T E D ! !       \n\n"));
                                         }
