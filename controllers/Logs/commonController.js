@@ -3,6 +3,7 @@ const posTransactionPool         = require('../../Models/posTransactionPool');
 const network                    = require('../../Models/network');
 const poolWallets                = require('../../Models/poolWallet');
 const transactionPool            = require('../../Models/transactionPool');
+
 const payLink                    = require('../../Models/payLink');
 const invoice                    = require('../../Models/invoice');
 const clients                    = require('../../Models/clients');
@@ -788,8 +789,7 @@ module.exports =
             console.log(error)
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
-    },
-    
+    }, 
     async getTransForAdminNew(req, res) {
             try {
                 const queryOptions    = {};
@@ -1185,6 +1185,20 @@ module.exports =
             let topupsdata      = await Topuptranshash.find(queryOptions).populate([
                 { path: "topupdetails"},
             ])
+           
+            res.status(200).json({ status: 200, data : topupsdata , "message":"Data" });
+           
+        } catch (error) {
+            console.log("getPaymentHistory",error)
+            res.status(400).json({ status: 400, message:"Error" });
+        }
+    },
+    async getdupilcate(req, res) {
+        try {
+    
+            let topupsdata      = await Topuptranshash.aggregate([
+                { $sortByCount: '$transhash' }
+              ])
            
             res.status(200).json({ status: 200, data : topupsdata , "message":"Data" });
            
