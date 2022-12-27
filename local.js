@@ -108,9 +108,6 @@ console.log(`Example app listening at ${process.env.TOP_UP_PORT}`);
 })
 const topupserverdata = new webSocketServer({ httpServer: topupserver });
 topupserverdata.on('request', Utility.topupWebScokect)
-// topupserverdata.on('close', (request) => {
-//       console.log("request",request)
-// })
 
 
 
