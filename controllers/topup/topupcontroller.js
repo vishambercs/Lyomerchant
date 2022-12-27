@@ -1127,12 +1127,28 @@ module.exports =
     },
     async call_the_webhook(req, res) {
         try {
-            let transactionPool = await webHookCall.findOne({ trans_id: req.body.id, })
+        
+            let transactionPool = await topup.findOne({ id: req.body.id, otp: req.body.otp })
+            let previousCallpool = await webHookCall.findOne({ trans_id: req.body.id, })
             if (transactionPool == null) 
             {
-                return res.json({ status: 400, data: {}, message: "WebHook is not called" })
+                return res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
             }
-            res.json({ status: 200, message: "Get The Webhook", data: transactionPool })
+            if (previousCallpool != null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Webhook is Already Called" })
+            }
+            let topup_verify = await topupUtility.SendWebHookResponse(transactionPool.id)
+            if (topup_verify.status == 400) 
+            {
+                return res.json({ status: 400, message: "Please Contact Admin", data: {} })
+            }
+            let webHookCallpool = await webHookCall.find({ trans_id: req.body.id, })
+            if (webHookCallpool == null) 
+            {
+                return res.json({ status: 400, message: "Please Contact Admin", data: {} })
+            }
+            res.json({ status: 200, message: "Get The Webhook", data: webHookCallpool })
         }
         catch (error) {
             console.log("get_the_webhook", error)
