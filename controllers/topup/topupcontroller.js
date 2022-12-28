@@ -159,8 +159,8 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
                         "status": trans_address.toLowerCase() == address.toLowerCase(),
 
                     }
-
-                    return { status: 200, data: tradata, message: "" }
+                    let status = trans_address.toLowerCase() == address.toLowerCase() ? 200 : 400
+                    return { status: status, data: tradata, message: "" }
                 } else {
                     console.log("hashtrans", hashtrans.logs[0].data)
                     let amount = Web3.utils.toBN(hashtrans.logs[0].data).toString();
@@ -179,8 +179,8 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
                         "status": trans_address.toLowerCase() == address.toLowerCase(),
 
                     }
-
-                    return { status: 200, data: tradata, message: "" }
+                    let status = trans_address.toLowerCase() == address.toLowerCase() ? 200 : 400
+                    return { status: status, data: tradata, message: "" }
                 }
             }
             else if (transaction != null) {
@@ -194,8 +194,8 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
                     "status": transaction.to.toLowerCase() == address.toLowerCase(),
 
                 }
-
-                return { status: 200, data: tradata, message: "" }
+                let status = trans_address.toLowerCase() == address.toLowerCase() ? 200 : 400
+                return { status: status, data: tradata, message: "" }
             }
 
 
