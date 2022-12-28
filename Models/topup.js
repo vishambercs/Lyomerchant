@@ -193,6 +193,16 @@ const topupschema = new mongoose.Schema({
         type: String,
         required: false,
         default: false,
+    },
+    manaual_update_by_fait_amount: {
+        type: String,
+        required: false,
+        default: false,
+    },
+    manaual_update_at_fait_amount: {
+        type: String,
+        required: false,
+        default: false,
     }
 },
    

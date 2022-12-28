@@ -41,6 +41,8 @@ router.post('/update_The_Transcation_by_cs',             topupcontroller.update_
 router.post('/checkbalanceforwewe',                      topupcontroller.checkbalanceforwewe);
 router.post('/call_the_webhook',                         topupcontroller.call_the_webhook);
 router.post('/get_the_webhook',                          topupcontroller.get_the_webhook);
+router.post('/set_fait_amount',                          topupcontroller.set_fait_amount);
+
 
 "============================Create Fixed Top UP==============================="
 router.post('/fixedassigntopupMerchantWallet',   fixedtopupcontroller.create_top_payment);

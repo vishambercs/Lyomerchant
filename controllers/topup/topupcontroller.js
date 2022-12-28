@@ -692,7 +692,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async checkbalanceforwewe(req, res) {
         try {
 
@@ -800,7 +799,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async verfiythebalance(req, res) {
         try {
             let transactionPool = await topup.findOneAndUpdate(
@@ -1149,6 +1147,26 @@ module.exports =
                 return res.json({ status: 400, message: "Please Contact Admin", data: {} })
             }
             res.json({ status: 200, message: "Get The Webhook", data: webHookCallpool })
+        }
+        catch (error) {
+            console.log("get_the_webhook", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
+    async set_fait_amount(req, res) {
+        try {
+        
+            let transactionPool = await topup.findOne({ id: req.body.id, otp: req.body.otp })
+            
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+
+            let topup_verify = await topupUtility.updateFaitAmount(transactionPool.id)
+             
+            res.json({ status: 200, message: "Get The Webhook", data: {id : req.body.id} })
         }
         catch (error) {
             console.log("get_the_webhook", error)
