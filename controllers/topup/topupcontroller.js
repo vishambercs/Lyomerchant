@@ -273,6 +273,36 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async call_the_webhook(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/call_the_webhook"
+            let parameters          =   req.body
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async get_the_webhook(req, res) {
+        try 
+        {
+            var merchantKey         =  ""
+            const url               =  process.env.API_URL+"/v1/get_the_webhook"
+            let parameters          =   req.body
+            let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
+            var stringify_response  = JSON.parse(response)
+            res.json(stringify_response)
+         }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }
 
 
