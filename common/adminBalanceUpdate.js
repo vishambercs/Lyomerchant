@@ -1135,7 +1135,7 @@ module.exports =
     partialFixedTheBalance      :   partialFixedTheBalance,
     partialTopupBalance         :   partialTopupBalance,
     checkTopupBalance           :   checkTopupBalance,
-    verifyTheBalanceBy_Admin    :   verifyTheBalanceBy_Admin.apply,
+    verifyTheBalanceBy_Admin    :   verifyTheBalanceBy_Admin,
     SendWebHookResponse         :   SendWebHookResponse,
 }
 
