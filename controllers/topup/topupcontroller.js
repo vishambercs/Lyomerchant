@@ -194,7 +194,40 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-    
+    async change_topup_network(req, res) {
+        try {
+            
+            var networkType = req.body.networkType
+
+            let transpool = await topup.findOne({ 'id': req.body.id })
+
+            if(transpool == null)
+            {
+                return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+
+            let network_details = await networks.findOne({ 'id': networkType })
+
+            let admins = await admin.findOne({ 'admin_api_key': req.headers.authorization })
+            if(network_details == null)
+            {
+                return  res.json({ status: 400, data: {}, message: "Invalid Network ID" })
+            }
+
+            let transPoolNetwork = await topup.findOneAndUpdate({ 'id': req.body.id },{ $set : {
+            "nwid"                          : network_details._id,
+            "manaual_network_by_admin"      : admins._id,
+            "manaual_network_at_by_admin"   : new Date().toString()
+            }}, {'returnDocument' : 'after'})
+
+            res.json({ status: 200, data: transPoolNetwork, message: "success" })
+           
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }
 
 

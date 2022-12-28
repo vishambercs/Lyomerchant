@@ -202,6 +202,16 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
+    manaual_network_by_admin: {
+        type    : mongoose.Schema.Types.ObjectId,
+		ref     : admin,
+		default : null,
+    },
+    manaual_network_at_by_admin: {
+        type: String,
+        required: false,
+        default: false,
+    },
 },
    
     { timestamps: true }

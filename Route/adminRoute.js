@@ -118,6 +118,8 @@ router.post('/Get_User_Roles',                  Auth.is_admin, adminController.G
 router.post('/get_Payment_History',             Auth.is_admin,Auth.Verfiy_Role,commonController.getPaymentHistory);
 router.post('/call_the_webhook',                Auth.is_admin,Auth.Verfiy_Role,topupcontroller.call_the_webhook);
 router.post('/get_the_webhook',                 Auth.is_admin,Auth.Verfiy_Role,topupcontroller.get_the_webhook);
+router.post('/change_topup_network',            Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_network);
+
 router.post('/getdupilcate',                 commonController.getdupilcate);
 
 // router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
