@@ -16,6 +16,8 @@ router.post('/checkbalanceforwewe',                topupcontroller.checkbalancef
 router.post('/get_the_webhook',                    topupcontroller.get_the_webhook);
 router.post('/call_the_webhook',                    topupcontroller.call_the_webhook);
 
+router.post('/set_fait_amount',                    topupcontroller.set_fait_amount);
+
 // router.post('/verfiythebalance',                   topupcontroller.verfiythebalance);
 // router.post('/updatethetrans',                     topupcontroller.updatethetrans);
 

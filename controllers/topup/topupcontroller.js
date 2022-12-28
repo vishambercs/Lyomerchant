@@ -289,10 +289,25 @@ module.exports =
         }
     },
     async get_the_webhook(req, res) {
+        try {
+            let transactionPool = await webHookCall.findOne({ trans_id: req.body.id, })
+            if (transactionPool == null) 
+            {
+                return res.json({ status: 400, data: {}, message: "WebHook is not called" })
+            }
+            res.json({ status: 200, message: "Get The Webhook", data: transactionPool })
+        }
+        catch (error) {
+            console.log("get_the_webhook", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
+    async set_fait_amount(req, res) {
         try 
         {
             var merchantKey         =  ""
-            const url               =  process.env.API_URL+"/v1/get_the_webhook"
+            const url               =  process.env.API_URL+"/v1/set_fait_amount"
             let parameters          =   req.body
             let response            = await Utility.Post_Request_By_Axios(url,parameters,merchantKey)
             var stringify_response  = JSON.parse(response)
