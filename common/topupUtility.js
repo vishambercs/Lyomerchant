@@ -940,14 +940,6 @@ async function checkTopupBalance(transkey) {
         let response = {}
         var amountstatus = 0
         let paymentData = {}
-        let BalanceOfAddress = await CheckAddress(
-            addressObject.networkDetails[0].nodeUrl,
-            addressObject.networkDetails[0].libarayType,
-            addressObject.networkDetails[0].cointype,
-            addressObject.poolWallet[0].address,
-            addressObject.networkDetails[0].contractAddress,
-            addressObject.poolWallet[0].privateKey
-        )
 
         let transcationTopup = await Topuptranshash.find({ topupdetails: addressObject._id })
         const net_amount = transcationTopup.reduce((partialSum, a) => partialSum + parseFloat(a.amount), 0);
@@ -961,6 +953,15 @@ async function checkTopupBalance(transkey) {
 
 
         if (addressObject.transtype == 1) {
+            let BalanceOfAddress = await CheckAddress(
+                addressObject.networkDetails[0].nodeUrl,
+                addressObject.networkDetails[0].libarayType,
+                addressObject.networkDetails[0].cointype,
+                addressObject.poolWallet[0].address,
+                addressObject.networkDetails[0].contractAddress,
+                addressObject.poolWallet[0].privateKey
+            )
+
             let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
                 {
                     $set: {
@@ -988,16 +989,16 @@ async function checkTopupBalance(transkey) {
 
 
         let status = 0
-        status = netamount == 0 ? 0 : status
-        status = addressObject.fixed_amount == netamount ? 1 : status
-        status = netamount > addressObject.fixed_amount ? 3 : status
-        status = netamount < addressObject.fixed_amount && netamount > 0 ? 2 : status
+        status = latestamount == 0 ? 0 : status
+        status = addressObject.fixed_amount == latestamount ? 1 : status
+        status = latestamount > addressObject.fixed_amount ? 3 : status
+        status = ((latestamount < addressObject.fixed_amount) && (latestamount > 0)) ? 2 : status
 
         paymentData =
         {
             "paid_in_usd": pricecal,
-            "remain": (addressObject.fixed_amount - netamount),
-            "paid": netamount,
+            "remain": (addressObject.fixed_amount - latestamount),
+            "paid": latestamount,
             "required": addressObject.fixed_amount,
             "payment_history": trans_data.payment_history,
         }
