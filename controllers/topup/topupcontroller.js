@@ -1,13 +1,15 @@
 const topup = require('../../Models/topup');
-const poolWallet = require('../../Models/poolWallet');
+
 const networks = require('../../Models/network');
 const admin         = require('../../Models/admin');
 const webHookCall   = require('../../Models/webHookCall');
 var otpGenerator    = require('otp-generator')
 var mongoose              = require('mongoose');
 const clients             = require('../../Models/clients');
+const poolWallet             = require('../../Models/poolWallet');
 var poolwalletController  = require('../poolwalletController');
 var adminBalanceUpdate    = require('../../common/adminBalanceUpdate');
+var crypto = require("crypto");
 module.exports =
 {
     
@@ -209,16 +211,39 @@ module.exports =
             let network_details = await networks.findOne({ 'id': networkType })
 
             let admins = await admin.findOne({ 'admin_api_key': req.headers.authorization })
+
             if(network_details == null)
             {
                 return  res.json({ status: 400, data: {}, message: "Invalid Network ID" })
             }
 
-            let transPoolNetwork = await topup.findOneAndUpdate({ 'id': req.body.id },{ $set : {
+            let poolWalletDetails = await poolWallet.findOne({id : transpool.poolwalletID})
+
+            if(poolWalletDetails == null)
+            {
+                return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+
+
+            const poolWalletItem = new poolWallet({ 
+                remarks     : "Created at Run Time: " + (new Date().toString())+ "because client paid on different network.", 
+                id          : crypto.randomBytes(20).toString('hex'), 
+                network_id  : network_details._id, 
+                address     : poolWalletDetails.address, 
+                status      : 1, 
+                privateKey  : poolWalletDetails.privateKey });
+            
+            let val = await poolWalletItem.save()
+
+            let transPoolNetwork = await topup.findOneAndUpdate({ 'id': req.body.id },
+            { $set : {
+            "poolwalletID"                  : val.id,
+            "pwid"                          : val._id,
             "nwid"                          : network_details._id,
             "manaual_network_by_admin"      : admins._id,
             "manaual_network_at_by_admin"   : new Date().toString()
             }}, {'returnDocument' : 'after'})
+
 
             res.json({ status: 200, data: transPoolNetwork, message: "success" })
            
