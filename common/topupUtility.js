@@ -953,8 +953,8 @@ async function checkTopupBalance(transkey) {
         // const net_amount = transcationTopup.reduce((partialSum, a) => partialSum + parseFloat(a.amount), 0);
 
 
-        let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
-
+        // let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
+        let netamount = BalanceOfAddress.data.format_token_balance;
         // let netamount = net_amount
         let trans_data = await getTranscationDataForClient(addressObject.id)
         let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, netamount)
