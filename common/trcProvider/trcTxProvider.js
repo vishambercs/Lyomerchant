@@ -149,7 +149,7 @@ async function getContractTransferEventsByUser(timeStampTron, contToken) {
                         if(foundAdd) {
 
                         } else {
-                            const topupTransHash = Topuptranshash.findOne({
+                            const topupTransHash = await Topuptranshash.findOne({
                                 transhash: edata.transaction_id
                             });
                 
