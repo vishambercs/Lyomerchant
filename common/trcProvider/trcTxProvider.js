@@ -87,7 +87,7 @@ const hexAddressToBase58 = (hexAddress) => {
 async function getContractTransferEventsByUser(timeStampTron, contToken) {
     let timeStampTr = trc20AddressTimestamp.length > 0 ? Math.min(...trc20AddressTimestamp) : Date.now();
 
-    // console.log('Checking tron >>>>>>>>>>>>>>');
+    console.log('Checking tron >>>>>>>>>>>>>>');
     if ((Date.now() - timeStampTron) > 300000) {
         trc20AddressTimestamp.splice(trc20AddressTimestamp.indexOf(timeStampTron), 1)
     }
