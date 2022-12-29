@@ -228,7 +228,7 @@ module.exports =
             const poolWalletItem = new poolWallet({ 
                 remarks     : "Created at Run Time: " + (new Date().toString())+ "because client paid on different network.", 
                 id          : crypto.randomBytes(20).toString('hex'), 
-                network_id  : network_details._id, 
+                network_id  : network_details.id, 
                 address     : poolWalletDetails.address, 
                 status      : 1, 
                 privateKey  : poolWalletDetails.privateKey });
