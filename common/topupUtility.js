@@ -940,28 +940,27 @@ async function checkTopupBalance(transkey) {
         let response = {}
         var amountstatus = 0
         let paymentData = {}
+        let BalanceOfAddress = await CheckAddress(
+            addressObject.networkDetails[0].nodeUrl,
+            addressObject.networkDetails[0].libarayType,
+            addressObject.networkDetails[0].cointype,
+            addressObject.poolWallet[0].address,
+            addressObject.networkDetails[0].contractAddress,
+            addressObject.poolWallet[0].privateKey
+        )
 
-        let transcationTopup = await Topuptranshash.find({ topupdetails: addressObject._id })
-        const net_amount = transcationTopup.reduce((partialSum, a) => partialSum + parseFloat(a.amount), 0);
+        // let transcationTopup = await Topuptranshash.find({ topupdetails: addressObject._id })
+        // const net_amount = transcationTopup.reduce((partialSum, a) => partialSum + parseFloat(a.amount), 0);
 
 
-        //let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
+        let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
 
-        let netamount = net_amount
+        // let netamount = net_amount
         let trans_data = await getTranscationDataForClient(addressObject.id)
         let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, netamount)
 
 
         if (addressObject.transtype == 1) {
-            let BalanceOfAddress = await CheckAddress(
-                addressObject.networkDetails[0].nodeUrl,
-                addressObject.networkDetails[0].libarayType,
-                addressObject.networkDetails[0].cointype,
-                addressObject.poolWallet[0].address,
-                addressObject.networkDetails[0].contractAddress,
-                addressObject.poolWallet[0].privateKey
-            )
-
             let transactionpool = await topup.findOneAndUpdate({ 'id': addressObject.id },
                 {
                     $set: {
