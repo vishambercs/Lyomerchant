@@ -137,7 +137,7 @@ const createWebSocket = async (ETHNODEWSURL) => {
                                                 amount = amount/10**decimals;
                                                 console.log("amount in formated",amount);
 
-                                                const topupTransHash = Topuptranshash.findOne({
+                                                const topupTransHash = await Topuptranshash.findOne({
                                                     transhash: data.transactionHash
                                                 });
                                     

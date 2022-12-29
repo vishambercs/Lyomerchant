@@ -127,7 +127,7 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
                                     // });
                 
                                     // if (userAddressToSend) 
-                                    const topupTransHash = Topuptranshash.findOne({
+                                    const topupTransHash = await Topuptranshash.findOne({
                                         transhash: data.transactionHash
                                     });
 
