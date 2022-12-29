@@ -1,15 +1,14 @@
-const topup = require('../../Models/topup');
-
-const networks = require('../../Models/network');
-const admin         = require('../../Models/admin');
-const webHookCall   = require('../../Models/webHookCall');
-var otpGenerator    = require('otp-generator')
+const topup               = require('../../Models/topup');
+const networks            = require('../../Models/network');
+const admin               = require('../../Models/admin');
+const webHookCall         = require('../../Models/webHookCall');
+var otpGenerator          = require('otp-generator')
 var mongoose              = require('mongoose');
 const clients             = require('../../Models/clients');
-const poolWallet             = require('../../Models/poolWallet');
+const poolWallet          = require('../../Models/poolWallet');
 var poolwalletController  = require('../poolwalletController');
 var adminBalanceUpdate    = require('../../common/adminBalanceUpdate');
-var crypto = require("crypto");
+var crypto                = require("crypto");
 module.exports =
 {
     
@@ -58,8 +57,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
-
     async change_the_topuptimespent(req, res) {
         try {
 
@@ -223,8 +220,6 @@ module.exports =
             {
                 return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
             }
-
-
             const poolWalletItem = new poolWallet({ 
                 remarks     : "Created at Run Time: " + (new Date().toString())+ "because client paid on different network.", 
                 id          : crypto.randomBytes(20).toString('hex'), 
@@ -234,7 +229,6 @@ module.exports =
                 privateKey  : poolWalletDetails.privateKey });
             
             let val = await poolWalletItem.save()
-
             let transPoolNetwork = await topup.findOneAndUpdate({ 'id': req.body.id },
             { $set : {
             "poolwalletID"                  : val.id,

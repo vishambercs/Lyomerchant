@@ -431,8 +431,8 @@ async function callIPN(transkey) {
         return { status: 400, message: "Not Found" }
     }
     let poolwallet     = await poolWallets.findOne({ id: pyTranPool.poolwalletID }) 
-    let networkDetails =  await network.findOne({ id: poolwallet.network_id}) 
-    let status         =   Constant.transstatus.filter(index => index.id == pyTranPool.status) 
+    let networkDetails = await network.findOne({ id: poolwallet.network_id}) 
+    let status         = Constant.transstatus.filter(index => index.id == pyTranPool.status) 
     let amount         = pyTranPool.amount 
     let currency       = pyTranPool.currency 
     let apikey         =  pyTranPool.api_key 
@@ -454,7 +454,10 @@ async function callIPN(transkey) {
         "crypto_amount"         :  amount,
         "invoicenumber"         :  (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
         "fiat_amount"           :  (invoice_data != null ) ? invoice_data.totalAmount : "" ,
-        "currency"              : currency   
+        "currency"              : currency   ,
+        "paymentTransectionID"  : (invoice_data != null ) ? invoice_data.invoiceNumber : "" ,
+        "tripId"                : (invoice_data != null ) ? invoice_data.tripId : "" ,
+        // ""                      : pyTranPool.tripId
         
     }
     let IPN = await IPNS.findOne({ client_api_key: apikey,status: 1 } )

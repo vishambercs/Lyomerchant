@@ -133,6 +133,12 @@ const invoiceSchema = new mongoose.Schema({
         type     : String,
         required : false,
     },
+    paymentTransectionID: {
+        type     : String,
+        default  : "false" , 
+        required : false,
+    },
+    
 
     
 },

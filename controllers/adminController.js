@@ -390,10 +390,8 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Unauthorize Access" })
         }
     },
-
     async client_deposit_credit_balance(req, res) {
         try {
-
 
             if (req.body.id == "") {
                 let Role = await adminmerchantbalance.insertMany({
