@@ -64,6 +64,8 @@ module.exports =
                 "network": (networkDetails != null ? networkDetails.network : ""),
                 "crypto_amount": amount,
                 "invoicenumber": (invoice_data != null) ? invoice_data.invoiceNumber : "",
+                "paymentTransectionID": (invoice_data != null) ? invoice_data.invoiceNumber : "",
+                "tripId": (invoice_data != null) ? invoice_data.tripId : "",
                 "fiat_amount": (invoice_data != null) ? invoice_data.totalAmount : "",
                 "currency": currency
 

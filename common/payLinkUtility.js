@@ -462,6 +462,8 @@ async function callIPN(transkey) {
     }
     let IPN = await IPNS.findOne({ client_api_key: apikey,status: 1 } )
     console.log("IPN IPN================",IPN);
+    console.log("IPN datarray================",datarray);
+    
     if(IPN != null){
         var data = qs.stringify( datarray);
             var config = {
