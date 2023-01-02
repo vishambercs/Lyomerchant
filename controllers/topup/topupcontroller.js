@@ -1132,10 +1132,10 @@ module.exports =
             {
                 return res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
             }
-            if (previousCallpool != null) 
-            {
-                return res.json({ status: 400, data: {}, message: "Webhook is Already Called" })
-            }
+            // if (previousCallpool != null) 
+            // {
+            //     return res.json({ status: 400, data: {}, message: "Webhook is Already Called" })
+            // }
             let topup_verify = await topupUtility.SendWebHookResponse(transactionPool.id)
             if (topup_verify.status == 400) 
             {
