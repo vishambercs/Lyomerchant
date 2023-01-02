@@ -392,18 +392,34 @@ module.exports =
     },
     async client_deposit_credit_balance(req, res) {
         try {
+            
+            let admin   = await admins.findOne({admin_api_key  : req.headers.authorization})
+
+            let clients = await clients.findOne({api_key : req.body.client_api_key})
+            
+            if (admin == null )
+            {
+                return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
+            }
+
+            if (clients == null )
+            {
+                return res.json({ status: 400, data: {}, message: "Invalid Merchant " })
+            }
 
             if (req.body.id == "") {
-                let Role = await adminmerchantbalance.insertMany({
-                    cliendetails: req.body.cliendetails,
-                    client_api_key: req.body.client_api_key,
-                    networkdetails: req.body.networkdetails,
-                    amount: req.body.amount,
-                    status: req.body.status,
-                    type: req.body.type,
-                    admindetails: req.body.admindetails,
+
+                let adminmerchantdata = await adminmerchantbalance.insertMany({
+                    cliendetails    : clients._id,
+                    client_api_key  : req.body.client_api_key,
+                    networkdetails  : req.body.networkdetails,
+                    amount          : req.body.amount,
+                    status          : req.body.status,
+                    type            : req.body.type,
+                    admindetails    : admin._id,
                 })
-                return res.json({ status: 200, data: Role, message: "Success" })
+                
+                return res.json({ status: 200, data: adminmerchantdata, message: "Success" })
             }
             else {
                 let Role = await adminmerchantbalance.findOneAndUpdate({ _id: ObjectID(req.body.id) }, { $set: { name: req.body.name, status: req.body.status, updated_by: req.headers.authorization } }, { returnDocument: 'after' })

@@ -172,10 +172,10 @@ module.exports =
                 return res.json({ status: 400, data: {}, message: "Unauthorize Access" })
             }
 
-            if (previousCallpool != null) 
-            {
-                return res.json({ status: 400, data: {}, message: "Webhook is Already Called" })
-            }
+            // if (previousCallpool != null) 
+            // {
+            //     return res.json({ status: 400, data: {}, message: "Webhook is Already Called" })
+            // }
             let topup_verify = await adminBalanceUpdate.SendWebHookResponse(transactionPool.id,admindata._id)
             if (topup_verify.status == 400) 
             {
