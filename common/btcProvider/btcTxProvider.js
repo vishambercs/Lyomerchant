@@ -36,7 +36,7 @@ ws.onmessage = async (event) => {
 
             console.log(headers, 'Live >>>>>>>>');
 
-            const topupTransHash = Topuptranshash.findOne({
+            const topupTransHash = await Topuptranshash.findOne({
                 transhash: txHash
             });
 

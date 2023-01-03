@@ -949,13 +949,13 @@ async function checkTopupBalance(transkey) {
             addressObject.poolWallet[0].privateKey
         )
 
-        let transcationTopup = await Topuptranshash.find({ topupdetails: addressObject._id })
-        const net_amount = transcationTopup.reduce((partialSum, a) => partialSum + parseFloat(a.amount), 0);
+        // let transcationTopup = await Topuptranshash.find({ topupdetails: addressObject._id })
+        // const net_amount = transcationTopup.reduce((partialSum, a) => partialSum + parseFloat(a.amount), 0);
 
 
-        //let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
-
-        let netamount = net_amount
+        // let netamount        = addressObject.amount == BalanceOfAddress.data.format_token_balance ? addressObject.amount : parseFloat(addressObject.amount) + parseFloat(BalanceOfAddress.data.format_token_balance)
+        let netamount = BalanceOfAddress.data.format_token_balance;
+        // let netamount = net_amount
         let trans_data = await getTranscationDataForClient(addressObject.id)
         let pricecal = await pricecalculation(addressObject.poolWallet[0].network_id, netamount)
 
@@ -988,16 +988,16 @@ async function checkTopupBalance(transkey) {
 
 
         let status = 0
-        status = netamount == 0 ? 0 : status
-        status = addressObject.fixed_amount == netamount ? 1 : status
-        status = netamount > addressObject.fixed_amount ? 3 : status
-        status = netamount < addressObject.fixed_amount && netamount > 0 ? 2 : status
+        status = latestamount == 0 ? 0 : status
+        status = addressObject.fixed_amount == latestamount ? 1 : status
+        status = latestamount > addressObject.fixed_amount ? 3 : status
+        status = ((latestamount < addressObject.fixed_amount) && (latestamount > 0)) ? 2 : status
 
         paymentData =
         {
             "paid_in_usd": pricecal,
-            "remain": (addressObject.fixed_amount - netamount),
-            "paid": netamount,
+            "remain": (addressObject.fixed_amount - latestamount),
+            "paid": latestamount,
             "required": addressObject.fixed_amount,
             "payment_history": trans_data.payment_history,
         }

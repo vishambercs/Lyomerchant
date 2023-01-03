@@ -146,7 +146,7 @@ async function createWebSocket (BSCNODEWSURL) {
                                             parseFloat(amount);
                                             amount = amount / 10**decimals;
                                             
-                                            const topupTransHash = Topuptranshash.findOne({
+                                            const topupTransHash = await Topuptranshash.findOne({
                                                 transhash: data.transactionHash
                                             });
 

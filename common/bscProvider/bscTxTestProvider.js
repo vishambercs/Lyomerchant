@@ -26,7 +26,7 @@ const removeAddressToCheckBEP20 = async (address) => {
     userCheckAddresses.splice(userCheckAddresses.indexOf(address),1);
     console.log("remove address funcitn")
 }
-BSCNODEWSURL =  'wss://ws-nd-120-172-313.p2pify.com/8894cc433e39dcc770bf0508892eddec';
+BSCNODEWSURL =  'wss://bsc-testnet.s.chainbase.online/v1/2JaYUZqmE1zww6AZj0aRK51af4b';
 // Websocket
 let createWebSocket =
 async function createWebSocket (BSCNODEWSURL) {
@@ -127,7 +127,7 @@ var subscription = Web3WS.eth.subscribe('newBlockHeaders', function(error, resul
                                     // });
                 
                                     // if (userAddressToSend) 
-                                    const topupTransHash = Topuptranshash.findOne({
+                                    const topupTransHash = await Topuptranshash.findOne({
                                         transhash: data.transactionHash
                                     });
 
