@@ -13,7 +13,9 @@ router.post('/updatetrans',                        topupcontroller.updatetrans);
 router.post('/updatetrans_with_network',           topupcontroller.updatetrans_with_network);
 router.post('/update_The_Transcation_by_cs',       topupcontroller.update_The_Transcation_by_cs);
 router.post('/checkbalanceforwewe',                topupcontroller.checkbalanceforwewe);
-router.post('/checkbalanceforwewe',                topupcontroller.checkbalanceforwewe);
+router.post('/get_the_webhook',                    topupcontroller.get_the_webhook);
+router.post('/call_the_webhook',                    topupcontroller.call_the_webhook);
+
 router.post('/set_fait_amount',                    topupcontroller.set_fait_amount);
 
 // router.post('/verfiythebalance',                   topupcontroller.verfiythebalance);
