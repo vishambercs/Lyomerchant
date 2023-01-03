@@ -350,7 +350,8 @@ module.exports =
             if (account != null) 
             {
               let val_data =  await CheckAddress(network_details.nodeUrl, network_details.libarayType,account.address, network_details.contractAddress) 
-              if( val_data.data.token_balance != 0){
+              if( val_data.data.token_balance != 0)
+            {
                let val = await Save_Address_Data(network_details)
                return val; 
             }

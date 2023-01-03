@@ -982,31 +982,31 @@ module.exports =
                 transhash: req.body.transhash,
                 topupdetails: transactiondata._id,
             })
-
+            let totalamount = 0
             if (previousdata != null && (transactiondata.amount == balance.data.formatedamount) && transactiondata.status == 0) {
                 let topup_verify = await topupUtility.verifyTheBalanceBy_Admin(transactiondata.id, req.body.otp)
                 return  res.json({ status: 200, message: "Get The Data", data: "" })
-
             }
+            
             if (previousdata != null)
             {
-                return res.json({ status: 400, message: "Trans ID is repeating", data: {} })
+                // return res.json({ status: 400, message: "Trans ID is repeating", data: {} })
+                totalamount =  parseFloat(balance.data.formatedamount)
             }
-           
+            else{
+                totalamount = parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount)
+            }
+            
 
-            let totalamount = parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount)
-
-            let status = parseFloat(transactiondata.fixed_amount) == parseFloat(totalamount) ? 1 : 0
-            status = parseFloat(totalamount) > parseFloat(transactiondata.fixed_amount) ? 3 : status
-            status = parseFloat(totalamount) < parseFloat(transactiondata.fixed_amount) && totalamount > 0 ? 2 : status
+            let status      = parseFloat(transactiondata.fixed_amount) == parseFloat(totalamount) ? 1 : 0
+            status          = parseFloat(totalamount) > parseFloat(transactiondata.fixed_amount) ? 3 : status
+            status          = parseFloat(totalamount) < parseFloat(transactiondata.fixed_amount) && totalamount > 0 ? 2 : status
 
             let transactionPool = null
             if ((transactiondata.amount == balance.data.formatedamount) && transactiondata.status == 0) {
                 let topup_verify = await topupUtility.verifyTheBalanceBy_Admin(transactiondata.id, req.body.otp)
-                transactionPool = await topup.findOne({ id: req.body.id,})
-                
+                transactionPool = await topup.findOne({ id: req.body.id,})                
             }
-
             else {
                 transactionPool = await topup.findOneAndUpdate(
                     { id: req.body.id, otp: req.body.otp, status: 0 },
@@ -1022,38 +1022,27 @@ module.exports =
                     },
                     { 'returnDocument': 'after' }
                 )
-
             }
             if (transactionPool == null) {
                 return res.json({ status: 400, message: "Invalid Trans ID", data: {} })
             }
-
             let transhashdata = await Topuptranshash.insertMany({
                 transhash: req.body.transhash,
                 amount: balance.data.formatedamount,
                 topupdetails: transactionPool._id,
                 updated_at: new Date().toString()
             })
-
             let price = 1
-
-
             let faitamount = (transactiondata.amount == balance.data.formatedamount) && transactiondata.status == 0 ? transactiondata.amount : totalamount
-            
             let faitprice = 0
-
-
-
             if (network.stablecoin == false) {
                 price = await getTimeprice(transactionPool.timestamps, network.coin.toUpperCase())
-                console.log("price",price)
+               
                 faitprice = price * faitamount
             }
             else{
                 faitprice = price * faitamount
             }
-            console.log("faitprice",faitamount)
-            console.log("faitprice",faitprice)
             await topup.findOneAndUpdate({ id: req.body.id }, { $set: { fiat_amount: faitprice } })
             if (status == 1 || status == 3) 
             {
