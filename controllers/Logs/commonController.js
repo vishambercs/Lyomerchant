@@ -845,6 +845,16 @@ module.exports =
                     queryOptions["invoicedetails"] =  req.body.paymentdetails
                 }
                 
+                if(req.body?.orderid)
+                {
+                    queryOptions["orderid"] =  req.body.orderid
+                }
+    
+                if(req.body?.transid)
+                {
+                    queryOptions["id"] =  req.body.transid
+                }
+                
                 let limit = req.body.limit == ""   || req.body.limit == undefined  ? 25         : parseInt(req.body.limit);
                 let skip  = req.body.skip  == ""   || req.body.skip  == undefined  ? 0          : parseInt(req.body.skip);
                 let type  = req.body.type  == ""   || req.body.type  == undefined  ? "Topup"    : req.body.type;
@@ -973,7 +983,15 @@ module.exports =
                 queryOptions["invoicedetails"] =  req.body.paymentdetails
             }
 
+            if(req.body?.orderid)
+            {
+                queryOptions["orderid"] =  req.body.orderid
+            }
 
+            if(req.body?.transid)
+            {
+                queryOptions["id"] =  req.body.transid
+            }
             let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
             let skip = req.body.skip == ""   || req.body.skip == undefined  ? 0 : parseInt(req.body.skip);
             let type = req.body.type == ""   || req.body.type == undefined ? "Topup" : req.body.type;
