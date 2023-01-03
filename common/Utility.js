@@ -40,16 +40,17 @@ module.exports =
             let queryvariable = querystring.parse(url_paremeters.query)
             let timestamp = new Date().getTime()
             const connection = request.accept(null, request.origin);
-            connection.on('close', async (ws, wsResponse) => {
-                let transData = {}
-                var index = Constant.topupTransList.findIndex(translist => translist.connection == connection)
-                if (index != -1) 
-                {
-                    transData = Constant.topupTransList[index]
-                    transData.connection.close(1000)
-                    Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.connection != connection);
-                }
-            })
+            
+            // connection.on('close', async (ws, wsResponse) => {
+            //     let transData = {}
+            //     var index = Constant.topupTransList.findIndex(translist => translist.connection == connection)
+            //     if (index != -1) 
+            //     {
+            //         transData = Constant.topupTransList[index]
+            //         transData.connection.close(1000)
+            //         Constant.topupTransList = await Constant.topupTransList.filter(translist => translist.connection != connection);
+            //     }
+            // })
 
 
             var index = Constant.topupTransList.findIndex(translist => translist.transid == queryvariable.transid)
