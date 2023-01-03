@@ -50,6 +50,7 @@ const poolWalletSchema = new mongoose.Schema({
         default: " ",
     },
 },
+  { timestamps: true },
     {
         toJSON: {
             transform(doc, ret) {
@@ -58,6 +59,6 @@ const poolWalletSchema = new mongoose.Schema({
             },
         },
     },
-    { timestamps: true }
+    
 )
 module.exports = mongoose.model('poolWallet', poolWalletSchema)
