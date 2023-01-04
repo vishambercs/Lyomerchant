@@ -212,6 +212,16 @@ const topupschema = new mongoose.Schema({
         required: false,
         default: false,
     },
+    manaual_fait_amount_by_admin: {
+        type    : mongoose.Schema.Types.ObjectId,
+		ref     : admin,
+		default : null,
+    },
+    manaual_fait_amount_at_by_admin: {
+        type: String,
+        required: false,
+        default: false,
+    },
 },
    
     { timestamps: true }
