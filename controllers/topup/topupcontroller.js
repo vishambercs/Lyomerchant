@@ -143,7 +143,7 @@ module.exports =
     },  
     async get_the_webhook(req, res) {
         try {
-            let transactionPool = await webHookCall.findOne({ trans_id: req.body.id, })
+            let transactionPool = await webHookCall.find({ trans_id: req.body.id, })
             if (transactionPool == null) 
             {
                 return res.json({ status: 400, data: {}, message: "WebHook is not called" })
