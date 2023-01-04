@@ -150,12 +150,7 @@ module.exports =
             let rolesData = await Roles.find(queryOptions).sort({ createdAt: -1 }).limit(limit).skip(skip).lean();
             return res.json({ status: 200, data: rolesData, message: "Success" })
 
-
-
-
-
-
-            res.json({ status: 200, data: rolesData, message: "Success" })
+           
         }
         catch (error) {
             console.log("get_all_roles", error)
