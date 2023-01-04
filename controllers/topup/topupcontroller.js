@@ -247,6 +247,35 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+
+    async change_topup_fait_amount(req, res) {
+        try {
+            
+
+
+            let transpool = await topup.findOne({ 'id': req.body.id })
+
+            if(transpool == null)
+            {
+                return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+
+            let admins = await admin.findOne({ 'admin_api_key': req.headers.authorization })
+
+            let transPoolNetwork = await topup.findOneAndUpdate({ 'id': req.body.id },
+            { $set : {
+            "fiat_amount"                       : req.body.fiat_amount,
+            "manaual_fait_amount_by_admin"      : admins._id,
+            "manaual_fait_amount_at_by_admin"   : new Date().toString()
+            }}, {'returnDocument' : 'after'})
+            res.json({ status: 200, data: transPoolNetwork, message: "success" })
+           
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }
 
 
