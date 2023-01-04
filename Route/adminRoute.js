@@ -95,22 +95,24 @@ router.post('/get_all_deposit_client_by_admin', Auth.is_admin,Auth.Verfiy_Role,c
 
 
 "============= All Role Based ==================="
-router.post('/get_all_API',                       Auth.is_admin,Auth.Verfiy_Role,Rolescontroller.get_all_all_API);
-router.post('/create_or_update_roles',            Auth.is_admin,Auth.Verfiy_Role,Rolescontroller.create_or_update_roles);
-router.post('/create_roles_permission',           Auth.is_admin,Auth.Verfiy_Role,Rolescontroller.create_or_update_roles_permission);
-router.post('/get_all_roles',                     Auth.is_admin,Auth.Verfiy_Role,Rolescontroller.get_all_roles);
-router.post('/update_role_Permisson',             Auth.is_admin,Auth.Verfiy_Role,Rolescontroller.update_role_Permisson);
-router.post('/get_all_roles_with_permission',     Auth.is_admin,Auth.Verfiy_Role,Rolescontroller.get_all_roles_with_permission);
+router.post('/get_all_API',                        Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.get_all_all_API);
+router.post('/create_or_update_roles',            Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.create_or_update_roles);
+router.post('/create_roles_permission',           Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.create_or_update_roles_permission);
+router.post('/get_all_roles',                     Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.get_all_roles);
+router.post('/update_role_Permisson',             Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.update_role_Permisson);
+router.post('/get_all_roles_with_permission',     Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.get_all_roles_with_permission);
+router.post('/create_or_update_api_paths',         Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.create_or_update_api_paths);
 
 "============= All Client Wallet API ==================="
+
 router.post('/create_or_update_clienthotwallets',   Auth.is_admin,Auth.Verfiy_Role,clientHotWallets.create_or_update_clienthotwallets);
 router.post('/get_all_clienthotwallets',            Auth.is_admin,Auth.Verfiy_Role,clientHotWallets.get_all_clienthotwallets);
 router.post('/updateadminrole',                     Auth.is_admin,Auth.Verfiy_Role,adminController.updateadminrole);
 
 "============= All Pool Wallet ==================="
+
 router.post('/getAllPoolWallet',                    Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
 router.post('/getTranscationofPoolwallet',          Auth.is_admin,Auth.Verfiy_Role,commonController.getTranscationofPoolwallet);
-
 router.post('/update_the_transcation_by_admin', Auth.is_admin,Auth.Verfiy_Role,adminController.update_The_Transcation_BY_Admin);
 router.post('/update_withdraw_limit',           Auth.is_admin,Auth.Verfiy_Role,clientsController.update_withdraw_limit);
 router.post('/change_the_topuptimespent',       Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_the_topuptimespent);
@@ -120,7 +122,7 @@ router.post('/call_the_webhook',                Auth.is_admin,Auth.Verfiy_Role,t
 router.post('/get_the_webhook',                 Auth.is_admin,Auth.Verfiy_Role,topupcontroller.get_the_webhook);
 router.post('/change_topup_network',            Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_network);
 
-router.post('/getdupilcate',                 commonController.getdupilcate);
 
-// router.post('/getAllPoolWallet',Auth.is_admin,Auth.Verfiy_Role,commonController.getAllPoolWallet);
+
+
 module.exports = router;
