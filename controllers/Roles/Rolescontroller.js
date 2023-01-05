@@ -28,21 +28,35 @@ const { default: ObjectID } = require('bson-objectid');
 const jwt = require('jsonwebtoken');
 const listEndpoints = require('express-list-endpoints');
 require("dotenv").config()
-async function Save_API_List(api_path, category, name, description) {
-    let api_list = await api_lists.insertMany({
+async function Save_API_List(id,api_path, category, name, description) {
+    try {
+      
+    let api_list = await api_lists.findOneAndUpdate({ api_path : api_path},{ $set : {
         api_path: api_path,
         category: category,
         name: name,
         description: description,
         status: 1,
-    })
+    }},{returnDocument : 'after'})
+   
+    console.log("Save_API_List",api_list)
     return api_list
+
 }
+catch (error) {
+    console.log("error", error)
+    return null
+}
+ }
 module.exports =
 {
     async get_all_all_API(req, res) {
         try {
 
+            // constant.updating.forEach( async (element) => {
+            //     console.log("element",element)
+            //     await Save_API_List(element._id,element.api_path, element.category, element.name, element.description)
+            // })
             // constant.ALL_API.forEach( async (element) => {
             //     if(element.path.includes("admin") )
             //     {
