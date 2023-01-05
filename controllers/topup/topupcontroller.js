@@ -252,9 +252,9 @@ module.exports =
         try {
             
 
-
+            console.log("change_topup_fait_amount",req.body)
             let transpool = await topup.findOne({ 'id': req.body.id })
-
+            console.log("change_topup_fait_amount",transpool)
             if(transpool == null)
             {
                 return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
