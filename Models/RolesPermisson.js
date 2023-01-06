@@ -1,6 +1,7 @@
 const mongoose        = require('mongoose');
 const validator       = require('validator');
 const Roles           = require('./Roles');
+const api_list           = require('./api_list');
 const RolesPermisson  = new mongoose.Schema({
   roleid:
   {
@@ -10,8 +11,9 @@ const RolesPermisson  = new mongoose.Schema({
   },
   apipath:
   {
-    type: String,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: api_list,
+    default: null,
 
   },
   status:
