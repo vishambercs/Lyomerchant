@@ -224,15 +224,15 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             if (stringify_response.data.errorCode == 0) {
                 let btcdata = stringify_response.data.data.vout
                 let index = btcdata.filter(translist => translist.scriptPubKey.address.toLowerCase() == address.toLowerCase())
-
+                console.log("btcdata",btcdata)   
                 if (index.length > 0) {
                     tradata = {
-                        "amount": index[0].value,
-                        "formatedamount": index[0].value,
-                        "addressto": index[0].address,
-                        "transhash": tranxid,
-                        "transaddress": address.toLowerCase(),
-                        "status": index[0].address == address.toLowerCase(),
+                        "amount"            : index[0].value,
+                        "formatedamount"    : index[0].value,
+                        "addressto"         : index[0].scriptPubKey.address,
+                        "transhash"         : tranxid,
+                        "transaddress"      : address.toLowerCase(),
+                        "status"            : index[0].scriptPubKey.address.toLowerCase() == address.toLowerCase(),
                     }
                 }
             }
@@ -1087,7 +1087,7 @@ module.exports =
             if (transactionPool.amount == 0) {
                 return res.json({ status: 400, data: {}, message: "Paid Amount is zero. You can not update" })
             }
-            let topup_verify = await topupUtility.verifyTheBalanceBy_Admin(transactionPool.id, req.body.otp)
+            let topup_verify = await topupUtility.verifyTheCompleteBalance(transactionPool.id, req.body.otp)
             if (topup_verify.status == 400) {
                 return res.json({ status: 400, message: "Please Contact Admin", data: {} })
             }
