@@ -87,11 +87,11 @@ router.post('/get_all_invoice_for_admin',           Auth.is_admin,Auth.Verfiy_Ro
 router.post('/updateInvoiceByAdmin',                Auth.is_admin,Auth.Verfiy_Role,paylinkController.updateInvoiceByAdmin);
 router.post('/get_all_deposit_client_by_admin',     Auth.is_admin,Auth.Verfiy_Role,clientsController.get_For_Admin);
 "============= All Role Based ==================="
-router.post('/get_all_API',                         Rolescontroller.get_all_all_API);
+router.post('/get_all_API',                         Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.get_all_all_API);
 router.post('/create_or_update_roles',              Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.create_or_update_roles);
-router.post('/create_roles_permission',             Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.create_or_update_roles_permission);
+router.post('/create_roles_permission',             Rolescontroller.create_or_update_roles_permission);
 router.post('/get_all_roles',                       Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.get_all_roles);
-router.post('/update_role_Permisson',               Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.update_role_Permisson);
+router.post('/update_role_Permisson',               Rolescontroller.update_role_Permisson);
 router.post('/get_all_roles_with_permission',       Auth.is_admin,Auth.Verfiy_Role,  Rolescontroller.get_all_roles_with_permission);
 router.post('/create_or_update_api_paths',          Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.create_or_update_api_paths);
 

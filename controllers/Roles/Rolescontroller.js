@@ -201,15 +201,24 @@ module.exports =
     },
     async update_role_Permisson(req, res) {
         try {
-            let rolesData = await RolesPermisson.findOneAndUpdate({ _id: ObjectID(req.body.id) }, {
-                $set: {
-                    roleid: req.body.roleid,
-                    apipath: req.body.apipath,
-                    status: req.body.status,
-                    updated_by: req.headers.authorization,
-                }
-            }, { 'returnDocument': 'after' })
-            res.json({ status: 200, data: rolesData, message: "Success" })
+            let roles_permission = req.body.roles_permission
+            let roles_data = []
+            for (var index=0; index<roles_permission.length ; index++  ){
+                var element = roles_permission[index]
+                let rolesData = await RolesPermisson.findOneAndUpdate({ _id: ObjectID(element.id) }, {
+                    $set: {
+                        roleid: element.roleid,
+                        apipath: element.apipath,
+                        status: element.status,
+                        updated_by: req.headers.authorization,
+                    }
+                }, { 'returnDocument': 'after' })
+                roles_data.push(rolesData)
+            
+            }
+           
+            
+            res.json({ status: 200, data: roles_data, message: "Update Successfully" })
         }
         catch (error) {
             console.log("update_role_Permisson", error)
