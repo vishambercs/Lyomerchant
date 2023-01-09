@@ -176,7 +176,27 @@ module.exports =
             let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
             let skip = req.body.skip == "" || req.body.skip == undefined ? 0 : parseInt(req.body.skip);
             let queryOptions = { "status": { $ne: 0 } }
+
             let rolesData = await RolesPermisson.find(queryOptions,).populate([{ path: "roleid", select: "_id name " },]).
+            populate([{ path: "apipath", select: "_id category name " },]).sort({ createdAt: -1 }).limit(limit).skip(skip).lean();
+            res.json({ status: 200, data: rolesData, message: "Success" })
+        }
+        catch (error) {
+            console.log("get_all_roles", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async get_permission_of_role(req, res) {
+        try {
+            let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
+            let skip = req.body.skip == "" || req.body.skip == undefined ? 0 : parseInt(req.body.skip);
+            let queryOptions = { "status": { $ne: 0 } }
+            
+            if(req.body?.status)
+            {
+                queryOptions["status"] = { $ne: req.body.status }
+            }
+            let rolesData = await RolesPermisson.find({ "roleid" : req.body.roleid }).populate([{ path: "roleid", select: "_id name " },]).
             populate([{ path: "apipath", select: "_id category name " },]).sort({ createdAt: -1 }).limit(limit).skip(skip).lean();
             res.json({ status: 200, data: rolesData, message: "Success" })
         }
