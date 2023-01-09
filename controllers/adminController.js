@@ -383,7 +383,7 @@ module.exports =
 
             let rolesData = await RolesPermisson.find({ roleid: admin.rolesdata, "status": status }).
             populate([{ path: "roleid", select: "_id name  " },]).
-            populate([{ path: "apipath", select: "_id api_path category name  " },])
+            populate([{ path: "apipath", select: "_id category name middleware " },])
             res.json({ status: 200, message: "Roles Data", data: rolesData })
 
         }
