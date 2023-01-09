@@ -17,6 +17,12 @@ const api_list = new mongoose.Schema({
         type: String,
         required: false,
     },
+    middleware:
+    {
+      type: String,
+      required: false,
+     
+    },
     description: 
     {
         type: String,

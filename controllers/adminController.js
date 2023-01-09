@@ -381,7 +381,9 @@ module.exports =
 
             let status = req.body.status == undefined || req.body.status == "" ? 1 : req.body.status
 
-            let rolesData = await RolesPermisson.find({ roleid: admin.rolesdata, "status": status }).populate([{ path: "roleid", select: "_id name " },])
+            let rolesData = await RolesPermisson.find({ roleid: admin.rolesdata, "status": status }).
+            populate([{ path: "roleid", select: "_id name  " },]).
+            populate([{ path: "apipath", select: "_id api_path category name  " },])
             res.json({ status: 200, message: "Roles Data", data: rolesData })
 
         }

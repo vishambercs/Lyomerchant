@@ -28,15 +28,16 @@ const { default: ObjectID } = require('bson-objectid');
 const jwt = require('jsonwebtoken');
 const listEndpoints = require('express-list-endpoints');
 require("dotenv").config()
-async function Save_API_List(id,api_path, category, name, description) {
+async function Save_API_List(id,api_path, category, name, description,middleware) {
     try {
       
     let api_list = await api_lists.findOneAndUpdate({ api_path : api_path},{ $set : {
-        api_path: api_path,
-        category: category,
-        name: name,
-        description: description,
-        status: 1,
+        api_path    : api_path,
+        category    : category,
+        name        : name,
+        description : description,
+        middleware  : middleware,
+        // status: 1,
     }},{returnDocument : 'after'})
    
     console.log("Save_API_List",api_list)
@@ -55,7 +56,7 @@ module.exports =
 
             // constant.updating.forEach( async (element) => {
             //     console.log("element",element)
-            //     await Save_API_List(element._id,element.api_path, element.category, element.name, element.description)
+            //     await Save_API_List(element._id,element.api_path, element.category, element.name, element.description, element.middleware)
             // })
             // constant.ALL_API.forEach( async (element) => {
             //     if(element.path.includes("admin") )
@@ -105,7 +106,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async create_or_update_api_paths(req, res) {
         try {
             if (req.body.id == "") {
@@ -240,6 +240,17 @@ module.exports =
         }
         catch (error) {
             console.log("update_role_Permisson", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+    async updatecategory(req, res) {
+        try 
+        {
+            let rolesData = await api_lists.updateMany({ "category" : req.body.category },{ $set: { status : 0 } })
+            res.json({ status: 200, data: rolesData, message: "Success" })
+        }
+        catch (error) {
+            console.log("get_all_roles", error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
