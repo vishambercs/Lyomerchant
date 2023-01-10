@@ -811,7 +811,7 @@ module.exports =
             let balance_data    = await payLinkUtility.getTrasnsBalance(transcationData)
             console.log(balance_data);
             let balanceResponse = JSON.parse(balance_data)
-            console.log(balanceResponse);
+       
             if (balanceResponse.amountstatus == 1 || balanceResponse.amountstatus == 3 || balanceResponse.amountstatus == 4) {
                 transData.connection.sendUTF(JSON.stringify(balanceResponse));
                 transData.connection.close(1000)

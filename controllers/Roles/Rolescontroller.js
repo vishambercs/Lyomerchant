@@ -254,4 +254,22 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
+    async savecategory(req, res) {
+        try 
+        {
+            let api_list = await api_lists.insertMany([ {
+                api_path    : req.body.api_path,
+                category    : req.body.category,
+                name        : req.body.name,
+                description : req.body.description,
+                middleware  : req.body.middleware,
+                status      : 1,
+            } ])
+            res.json({ status: 200, data: api_list, message: "Success" })
+        }
+        catch (error) {
+            console.log("savecategory", error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
 }

@@ -540,31 +540,31 @@ module.exports =
                 "required" : addressObject.amount 
             }
 
-            if (minutes > 180) 
-            {
-                let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
-                let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
-                response                = { amountstatus: 4,"paymentdata":paymentData,status: 200, "data": {}, message: "Your Transcation is expired." };
-                var emailTemplateName = 
-                { 
-                    "emailTemplateName": "successtrans.ejs", 
-                    "to": addressObject.clientsdetails[0].email, 
-                    "subject": "LYOMERCHANT Expired Transaction", 
-                    "templateData": {
-                        "status": "Expired" ,
-                        "paymentdata":paymentData ,
-                        "transid": addressObject.id ,
-                        "invoicenumber" :addressObject.invoicedetails[0].invoiceNumber,
-                        "storename" :"",
-                        "network" :addressObject.networkDetails[0].network ,
-                        "coin" :addressObject.networkDetails[0].coin,
-                        "amount" :addressObject.amount 
-                }}
+            // if (minutes > 180) 
+            // {
+            //     let transactionpool     = await paymentLinkTransactionPool.findOneAndUpdate({ 'id': addressObject.id }, { $set: { "status": 4 } })
+            //     let poolwallet          = await poolWallets.findOneAndUpdate({ id: addressObject.poolWallet[0].id }, { $set: { "status": 3 } })
+            //     response                = { amountstatus: 4,"paymentdata":paymentData,status: 200, "data": {}, message: "Your Transcation is expired." };
+            //     var emailTemplateName = 
+            //     { 
+            //         "emailTemplateName": "successtrans.ejs", 
+            //         "to": addressObject.clientsdetails[0].email, 
+            //         "subject": "LYOMERCHANT Expired Transaction", 
+            //         "templateData": {
+            //             "status": "Expired" ,
+            //             "paymentdata":paymentData ,
+            //             "transid": addressObject.id ,
+            //             "invoicenumber" :addressObject.invoicedetails[0].invoiceNumber,
+            //             "storename" :"",
+            //             "network" :addressObject.networkDetails[0].network ,
+            //             "coin" :addressObject.networkDetails[0].coin,
+            //             "amount" :addressObject.amount 
+            //     }}
                
-                let email_response = await emailSending.emailLogs(addressObject.id,emailTemplateName)
-                console.log("email_response Success",email_response)
-                return JSON.stringify(response)
-            }
+            //     let email_response = await emailSending.emailLogs(addressObject.id,emailTemplateName)
+            //     console.log("email_response Success",email_response)
+            //     return JSON.stringify(response)
+            // }
             amountstatus    = await amountCheck(parseFloat(addressObject.poolWallet[0].balance), parseFloat(addressObject.amount), parseFloat(BalanceOfAddress.data.format_token_balance))
             const hotWallet = await hotWallets.findOne({ "network_id": addressObject.networkDetails[0].id, "status": 1 })
            
