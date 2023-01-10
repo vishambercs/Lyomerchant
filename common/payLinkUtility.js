@@ -354,7 +354,8 @@ async function get_Transcation_Paylink_Data(transkey) {
 
     let pooldata = await paymentLinkTransactionPool.aggregate(
         [
-            { $match: { id: transkey, $or: [{ status: 0 }, { status: 2 }] } },
+            // { $match: { id: transkey, $or: [{ status: 0 }, { status: 2 }] } },
+            { $match: { id: transkey } },
             {
                 $lookup: {
                     from: "poolwallets", // collection to join

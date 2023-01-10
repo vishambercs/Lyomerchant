@@ -806,7 +806,7 @@ module.exports =
     async get_data_of_Paymentlink_transcation() 
     {
         if (Constant.paymenlinkIndex < Constant.paymenlinkTransList.length) {
-            let transData = Constant.paymenlinkTransList[Constant.paymenlinkIndex]
+            let transData       = Constant.paymenlinkTransList[Constant.paymenlinkIndex]
             let transcationData = await payLinkUtility.get_Transcation_Paylink_Data(transData.transkey)
             let balance_data    = await payLinkUtility.getTrasnsBalance(transcationData)
             console.log(balance_data);
