@@ -243,9 +243,9 @@ module.exports =
 
             ])
 
-            // if (paylinksData[0].status == 1) {
-            //     return res.json({ status: 400, data: {}, message: "Paylink is expired" })
-            // }
+            if (paylinksData[0].status == 1) {
+                return res.json({ status: 400, data: {}, message: "Paylink is expired" })
+            }
 
             if (paylinksData[0].status != 0) {
                 return res.json({ status: 200, data: paylinksData, message: "Success" })
@@ -260,13 +260,13 @@ module.exports =
                 return res.json({ status: 400, data: [], message: "This Link is expired." })
             }
 
-            // const previousdate = new Date(parseInt(paylinksData[0].timestamps));
-            // const currentdate = new Date().getTime()
-            // var diff = currentdate - previousdate.getTime();
-            // var minutes = (diff / 60000)
-            // if (minutes > 10) {
-            //     return res.json({ status: 400, data: [], message: "This Link is expired." })
-            // }
+            const previousdate = new Date(parseInt(paylinksData[0].timestamps));
+            const currentdate = new Date().getTime()
+            var diff = currentdate - previousdate.getTime();
+            var minutes = (diff / 60000)
+            if (minutes > 180) {
+                return res.json({ status: 400, data: [], message: "This Link is expired." })
+            }
             res.json({ status: 200, data: paylinksData, message: "Successfully Done" })
         }
         catch (error) {
