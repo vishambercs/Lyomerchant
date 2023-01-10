@@ -37,7 +37,7 @@ async function Save_API_List(id,api_path, category, name, description,middleware
         name        : name,
         description : description,
         middleware  : middleware,
-        // status: 1,
+        status: 1,
     }},{returnDocument : 'after'})
    
     console.log("Save_API_List",api_list)
