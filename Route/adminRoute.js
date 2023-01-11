@@ -26,7 +26,7 @@ router.post('/admingoogleauth',                                Auth.verify_Verfi
 router.post('/customerstatus',                                 Auth.is_admin,Auth.Verfiy_Role,clientsController.customerstatus);
 router.post('/getTransForAdmin',                               Auth.is_admin, Auth.Verfiy_Role,commonController.getTransForAdminNew);
 router.post('/get_admin_withdraw',                             Auth.is_admin, Auth.Verfiy_Role,withdrawController.get_admin_wihdraw);
-router.post('/allAdmin',                                       Auth.is_admin,Auth.Verfiy_Role,adminController.allAdmin);
+router.post('/allAdmin',                                       Auth.is_admin, Auth.Verfiy_Role,adminController.allAdmin);
 router.post('/transcationListByNetworkID',                     Auth.is_admin,Auth.Verfiy_Role,transcationpoolController.get_Trans_by_Network_ID_For_Admin);
 router.post('/forgetThePassword',                              adminController.forgetThePassword);
 router.post('/VerfiyTheCode',                                  Auth.verify_Verfiy_Google_Auth,Auth.Verfiy_Role,adminController.VerfiyTheCode);

@@ -197,14 +197,21 @@ module.exports =
     },
     async allAdmin(req, res) {
         try {
-            await admins.find({}, { email: 1, status: 1 }).then(val => {
-                res.json({ "status": 200, "data": val, "message": "All Admins" })
-            }).catch(error => {
-                console.log("get_clients_data", error)
-                res.json({ status: 400, data: {}, message: "Error" })
-            })
+           let val =  await admins.find({}, { email: 1, status: 1 }).populate([{ path: "rolesdata", select: "_id name " },
+        
+            // populate([{ path: "apipath", select: "_id category name status" },])
+        
+        ])
+        res.json({ "status": 200, "data": val, "message": "All Admins" })
+            // then(val => {
+            //     res.json({ "status": 200, "data": val, "message": "All Admins" })
+            // }).catch(error => {
+            //     console.log("get_clients_data", error)
+            //     res.json({ status: 400, data: {}, message: "Error" })
+            // })
         }
         catch (error) {
+            console.log("get_clients_data", error)
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
