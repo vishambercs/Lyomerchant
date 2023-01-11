@@ -16,12 +16,13 @@ const RolesPermisson  = new mongoose.Schema({
     default: null,
 
   },
-  created_by:
+  
+  status:
   {
-    type: String,
-    required: true,
+      type     : Number,
+      required : true,
+
   },
- 
   created_by:
   {
     type: String,

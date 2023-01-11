@@ -193,10 +193,11 @@ module.exports =
             
             if(req.body?.status)
             {
-                queryOptions["status"] = { $ne: req.body.status }
+                queryOptions["status"] =  req.body.status 
             }
-            let rolesData = await RolesPermisson.find({ "roleid" : req.body.roleid }).populate([{ path: "roleid", select: "_id name " },]).
-            populate([{ path: "apipath", select: "_id category name " },]).sort({ createdAt: -1 })
+            queryOptions["roleid"] =  req.body.roleid
+            let rolesData = await RolesPermisson.find(queryOptions).populate([{ path: "roleid", select: "_id name " },]).
+            populate([{ path: "apipath", select: "_id category name status" },]).sort({ createdAt: -1 })
             res.json({ status: 200, data: rolesData, message: "Success" })
         }
         catch (error) {
@@ -222,13 +223,14 @@ module.exports =
             let roles_permission = req.body.roles_permission
             let roles_data = []
             for (var index=0; index<roles_permission.length ; index++  ){
-                var element = roles_permission[index]
-                let rolesData = await RolesPermisson.findOneAndUpdate({ _id: ObjectID(element.id) }, {
+                let element = roles_permission[index]
+                console.log(element)
+                let rolesData = await RolesPermisson.findOneAndUpdate({ _id: element.id }, {
                     $set: {
-                        roleid: element.roleid,
-                        apipath: element.apipath,
-                        status: element.status,
-                        updated_by: req.headers.authorization,
+                        roleid      : element.roleid,
+                        apipath     : element.apipath,
+                        status      : element.status,
+                        updated_by  : req.headers.authorization,
                     }
                 }, { 'returnDocument': 'after' })
                 roles_data.push(rolesData)
