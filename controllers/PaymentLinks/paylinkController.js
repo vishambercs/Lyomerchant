@@ -340,6 +340,26 @@ module.exports =
             newRecord.save().then(async (val) => {
                 await poolWallet.findOneAndUpdate({ 'id': val.poolwalletID }, { $set: { status: 1 } })
                 let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
+                if(invoicedata!= null)
+                {
+                    let url = process.env.PAYMENTLINK.replace("paymentlink", payLink.invoice_id);
+                    url = url.replace("trasnid", val.id);
+                    var emailTemplateName =
+                    {
+                        "emailTemplateName" :    "paymentlink.ejs",
+                        // "to"                :    invoicedata.email,
+                        "to"                :    "v.c@vaimanagement.co",
+                        "subject"           :    "Booking link",
+                        "templateData": 
+                        { 
+                        "paymentlink"   :  url ,
+                        "email"         :  invoicedata.email,
+                       }
+                    }
+                        constant.transid        = ""
+                        constant.addressBalance = [];
+                        let email_response      = await emailSending.sendEmailFunc(emailTemplateName)
+                }
                 res.json({ status: 200, message: "Payment Link Wallet Assigned Successfully", data: data })
             }).catch(error => {
                 console.log("errorr", error)

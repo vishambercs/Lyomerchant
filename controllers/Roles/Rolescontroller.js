@@ -159,12 +159,13 @@ module.exports =
         try {
             let limit = req.body.limit == "" || req.body.limit == undefined ? 25 : parseInt(req.body.limit);
             let skip = req.body.skip == "" || req.body.skip == undefined ? 0 : parseInt(req.body.skip);
-            let queryOptions = {}
-
+            let queryOptions = { "status": { $ne: 0 } }
+            if(req.body?.status)
+            {
+                queryOptions["status"] =  req.body.status 
+            }
             let rolesData = await Roles.find(queryOptions).sort({ createdAt: -1 }).limit(limit).skip(skip).lean();
-            return res.json({ status: 200, data: rolesData, message: "Success" })
-
-           
+            return res.json({ status: 200, data: rolesData, message: "Success" })    
         }
         catch (error) {
             console.log("get_all_roles", error)
