@@ -5,6 +5,7 @@ const webHookCall         = require('../../Models/webHookCall');
 var otpGenerator          = require('otp-generator')
 var mongoose              = require('mongoose');
 const clients             = require('../../Models/clients');
+const Topuptranshash      = require('../../Models/Topuptranshash');
 const poolWallet          = require('../../Models/poolWallet');
 var poolwalletController  = require('../poolwalletController');
 var adminBalanceUpdate    = require('../../common/adminBalanceUpdate');
@@ -276,7 +277,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async change_topup_crypto_amount(req, res) {
         try {
             
@@ -299,6 +299,58 @@ module.exports =
             "manaual_crypto_amount_at_by_admin"     : new Date().toString()
             }}, {'returnDocument' : 'after'})
             res.json({ status: 200, data: transPoolNetwork, message: "success" })
+           
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
+    async create_or_update_trans_hash_topup(req, res) {
+        try {
+            
+            let transpool = await topup.findOne({ 'id': req.body.transid })
+           
+            if(transpool == null)
+            {
+                return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+            let topup_trans_hash = null
+            if(req.body.id != undefined && req.body.id != "")
+            {
+            topup_trans_hash = await Topuptranshash.findOne({ '_id': req.body.id  })
+            }
+            let admins = await admin.findOne({ 'admin_api_key': req.headers.authorization })
+
+            if(topup_trans_hash != null){
+            let transPoolNetwork = await Topuptranshash.findOneAndUpdate({ '_id': topup_trans_hash._id },
+            { $set : {
+            "transhash"                             : req.body.transhash,
+            "amount"                                : req.body.amount,
+            "topupdetails"                          : transpool._id,
+            "updated_at"                            : new Date().toString(),
+            "manaual_by_admin"                      : admins._id,
+            "manaual_update_at_by_admin"            : new Date().toString(),
+            "status"                                : req.body.status,
+            }}, {'returnDocument' : 'after'})
+          return  res.json({ status: 200, data: transPoolNetwork, message: "success" })
+        }
+        else
+        {
+            let transPoolNetwork = await Topuptranshash.insertMany( [ {
+            "transhash"                             : req.body.transhash,
+            "amount"                                : req.body.amount,
+            "topupdetails"                          : transpool._id,
+            "updated_at"                            : new Date().toString(),
+            "manaual_by_admin"                      : admins._id,
+            "manaual_update_at_by_admin"            : new Date().toString(),
+            "status"                                : req.body.status,
+            }])
+          return  res.json({ status: 200, data: transPoolNetwork, message: "success" })
+        }
+
+            
            
         }
         catch (error) {

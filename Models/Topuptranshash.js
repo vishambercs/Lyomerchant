@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 var uniqueValidator = require('mongoose-unique-validator');
 const Topup = require('./topup');
+const admin = require('./admin');
 const Topuptranshash = new mongoose.Schema({
     transhash:
     {
@@ -26,7 +27,23 @@ const Topuptranshash = new mongoose.Schema({
         default : false,
     
 	},
-
+    status: 
+    {
+        type        : Number,
+        required    : false,
+       
+    
+	},
+    manaual_by_admin: {
+        type    : mongoose.Schema.Types.ObjectId,
+		ref     : admin,
+		default : null,
+    },
+    manaual_update_at_by_admin: {
+        type: String,
+        required: false,
+        default: false,
+    },
 },
    
     { timestamps: true }
