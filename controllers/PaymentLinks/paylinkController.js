@@ -6,7 +6,7 @@ const transaction        = require("../transcationpoolController")
 const CurrencyController = require("../Masters/CurrencyController")
 const fastPaymentCode    = require('../../Models/fastPaymentCode');
 const merchantStore      = require('../../Models/merchantstore');
-
+const emailSending      = require('../../common/emailSending');
 const paymentLinkTransactionPool = require('../../Models/paymentLinkTransactionPool');
 const clients                    = require('../../Models/clients');
 const networks                   = require('../../Models/network');
@@ -347,8 +347,8 @@ module.exports =
                     var emailTemplateName =
                     {
                         "emailTemplateName" :    "paymentlink.ejs",
-                        // "to"                :    invoicedata.email,
-                        "to"                :    "v.c@vaimanagement.co",
+                        "to"                :    invoicedata.email,
+                        // "to"                :    "v.c@vaimanagement.co",
                         "subject"           :    "Booking link",
                         "templateData": 
                         { 
@@ -356,8 +356,7 @@ module.exports =
                         "email"         :  invoicedata.email,
                        }
                     }
-                        constant.transid        = ""
-                        constant.addressBalance = [];
+                        
                         let email_response      = await emailSending.sendEmailFunc(emailTemplateName)
                 }
                 res.json({ status: 200, message: "Payment Link Wallet Assigned Successfully", data: data })
