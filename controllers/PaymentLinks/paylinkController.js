@@ -342,8 +342,8 @@ module.exports =
                 let data = { transactionID: val.id, address: account.address, walletValidity: val.walletValidity }
                 if(invoicedata!= null)
                 {
-                    let url = process.env.PAYMENTLINK.replace("paymentlink", payLink.invoice_id);
-                    url = url.replace("trasnid", val.id);
+                    let url = process.env.PAYMENTLINK.replace("paymentlink", val.id );
+                    url = url.replace("trasnid", req.body.payLinkId);
                     var emailTemplateName =
                     {
                         "emailTemplateName" :    "paymentlink.ejs",

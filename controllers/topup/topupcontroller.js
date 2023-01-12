@@ -129,8 +129,8 @@ module.exports =
             let transactionPool = await topup.findOneAndUpdate({ 'id':tranPool.id  }, { $set: { "status" : 5 , "remarks" : "By Client Canceled" , "canceled_at" : new Date().toString() }} ,{ returnDocument: 'after' })
             let data = 
             { 
-                transactionID: transactionPool.id, 
-                orderid     : transactionPool.orderid,
+                transactionID : transactionPool.id, 
+                orderid       : transactionPool.orderid,
             }
             res.json({ status: 200, message: "Get The Data", data: data })
 
@@ -267,6 +267,36 @@ module.exports =
             "fiat_amount"                       : req.body.fiat_amount,
             "manaual_fait_amount_by_admin"      : admins._id,
             "manaual_fait_amount_at_by_admin"   : new Date().toString()
+            }}, {'returnDocument' : 'after'})
+            res.json({ status: 200, data: transPoolNetwork, message: "success" })
+           
+        }
+        catch (error) {
+            console.log(error)
+            res.json({ status: 400, data: {}, message: "Error" })
+        }
+    },
+
+    async change_topup_crypto_amount(req, res) {
+        try {
+            
+
+            
+            let transpool = await topup.findOne({ 'id': req.body.id })
+           
+            if(transpool == null)
+            {
+                return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
+            }
+
+            let admins = await admin.findOne({ 'admin_api_key': req.headers.authorization })
+
+            let transPoolNetwork = await topup.findOneAndUpdate({ 'id': req.body.id },
+            { $set : {
+            "crypto_paid"                           : req.body.crypto_paid,
+            "amount"                                : req.body.crypto_paid,
+            "manaual_crypto_amount_by_admin"        : admins._id,
+            "manaual_crypto_amount_at_by_admin"     : new Date().toString()
             }}, {'returnDocument' : 'after'})
             res.json({ status: 200, data: transPoolNetwork, message: "success" })
            

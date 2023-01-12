@@ -116,7 +116,7 @@ router.post('/call_the_webhook',                    Auth.is_admin,Auth.Verfiy_Ro
 router.post('/get_the_webhook',                     Auth.is_admin,Auth.Verfiy_Role,topupcontroller.get_the_webhook);
 router.post('/change_topup_network',                Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_network);
 router.post('/change_topup_fait_amount',            Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_fait_amount);
-
+router.post('/change_topup_crypto_amount',            Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_crypto_amount);
 
 
 module.exports = router;
