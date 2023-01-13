@@ -391,8 +391,7 @@ async function getTranscationDataForClient(transkey) {
             _id: topupData.pwid,
         });
 
-        console.log(poolwalletData._id, 'Find Ppllawa');
-
+    
         if (poolwalletData) {
             datarray.address = poolwalletData.address;
 

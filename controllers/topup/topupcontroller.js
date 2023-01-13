@@ -162,7 +162,7 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
                     let status = trans_address.toLowerCase() == address.toLowerCase() ? 200 : 400
                     return { status: status, data: tradata, message: "" }
                 } else {
-                    console.log("hashtrans", hashtrans.logs[0].data)
+                    
                     let amount = Web3.utils.toBN(hashtrans.logs[0].data).toString();
                     const contract = new WEB3.eth.Contract(Constant.USDT_ABI, ContractAddress);
                     let decimals = await contract.methods.decimals().call();
@@ -221,6 +221,7 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             var stringify_response = JSON.parse(response.data)
 
             let tradata = null
+            console.log("stringify_response",stringify_response)
             if (stringify_response.data.errorCode == 0) {
                 let btcdata = stringify_response.data.data.vout
                 let index = btcdata.filter(translist => translist.scriptPubKey.address.toLowerCase() == address.toLowerCase())
@@ -245,6 +246,7 @@ async function Check_Trans_Hash(Nodeurl, Type, cointype, tranxid, address, Contr
             const eventServer = new HttpProvider(Nodeurl);
             const tronWeb = new TronWeb(fullNode, solidityNode, eventServer, privateKey);
             let getConfirmedTransc = await tronWeb.getEventByTransactionID(tranxid);
+            console.log("getConfirmedTransc",getConfirmedTransc)
             let tradata = null
             let data = getConfirmedTransc[0].result;
 
@@ -495,7 +497,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async updatetransbyid(req, res) {
         try {
 
@@ -1142,7 +1143,6 @@ module.exports =
             res.json({ status: 400, data: {}, message: "Error" })
         }
     },
-
     async set_fait_amount(req, res) {
         try {
         
