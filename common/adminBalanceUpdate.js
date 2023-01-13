@@ -406,7 +406,7 @@ async function getTranscationDataForClient(transkey) {
                 datarray.network = networkData.network;
             }
 
-            let Topuptranshashdata = await Topuptranshash.find({ topupdetails: topupData._id }).select('transhash amount createdAt').lean();
+            let Topuptranshashdata = await Topuptranshash.find({ topupdetails: topupData._id , status : 1 }).select('transhash amount createdAt').lean();
 
             datarray.payment_history = Topuptranshashdata;
         }
@@ -1130,7 +1130,7 @@ async function partialFixedTheBalance(transkey) {
 
 async function SendWebHookResponse(transkey, adminkey) {
     try {
-        console.log(transkey, adminkey)
+       
         let transdata = await get_Transcation_topup(transkey)
         let addressObject = transdata[0]
         let trans_data = await getTranscationDataForClient(addressObject.id)
