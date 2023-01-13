@@ -291,6 +291,9 @@ module.exports =
 
             let admins = await admin.findOne({ 'admin_api_key': req.headers.authorization })
 
+
+        
+
             let transPoolNetwork = await topup.findOneAndUpdate({ 'id': req.body.id },
             { $set : {
             "crypto_paid"                           : req.body.crypto_paid,
@@ -298,7 +301,11 @@ module.exports =
             "manaual_crypto_amount_by_admin"        : admins._id,
             "manaual_crypto_amount_at_by_admin"     : new Date().toString()
             }}, {'returnDocument' : 'after'})
-            res.json({ status: 200, data: transPoolNetwork, message: "success" })
+
+
+            let topup_verify = await adminBalanceUpdate.update_fiat(transpool.id, req.body.crypto_paid)
+            
+            res.json({ status: 200, data: topup_verify, message: "success" })
            
         }
         catch (error) {
@@ -316,11 +323,14 @@ module.exports =
             {
                 return  res.json({ status: 400, data: {}, message: "Invalid Trans ID" })
             }
+
             let topup_trans_hash = null
+
             if(req.body.id != undefined && req.body.id != "")
             {
             topup_trans_hash = await Topuptranshash.findOne({ '_id': req.body.id  })
             }
+
             let admins = await admin.findOne({ 'admin_api_key': req.headers.authorization })
 
             if(topup_trans_hash != null){
