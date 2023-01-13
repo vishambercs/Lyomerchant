@@ -31,7 +31,7 @@ const Topuptranshash = new mongoose.Schema({
     {
         type        : Number,
         required    : false,
-       
+        default     : 1,
     
 	},
     manaual_by_admin: {

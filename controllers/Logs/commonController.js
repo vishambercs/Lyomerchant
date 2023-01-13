@@ -1201,7 +1201,7 @@ module.exports =
     },
     async getPaymentHistory(req, res) {
         try {
-            const queryOptions  = {"topupdetails" : req.body.topupdetails };
+            const queryOptions  = {"topupdetails" : req.body.topupdetails ,  status:  { $ne : 0 }  };
             let topupsdata      = await Topuptranshash.find(queryOptions).populate([
                 { path: "topupdetails"},
             ])
