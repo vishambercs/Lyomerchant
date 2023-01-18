@@ -987,16 +987,16 @@ module.exports =
                 let topup_verify = await topupUtility.verifyTheBalanceBy_Admin(transactiondata.id, req.body.otp)
                 return  res.json({ status: 200, message: "Get The Data", data: "" })
             }
-            
+
             if (previousdata != null)
             {
                 // return res.json({ status: 400, message: "Trans ID is repeating", data: {} })
                 totalamount =  parseFloat(balance.data.formatedamount)
             }
-            else{
+            else
+            {
                 totalamount = parseFloat(transactiondata.amount) + parseFloat(balance.data.formatedamount)
             }
-            
 
             let status      = parseFloat(transactiondata.fixed_amount) == parseFloat(totalamount) ? 1 : 0
             status          = parseFloat(totalamount) > parseFloat(transactiondata.fixed_amount) ? 3 : status
@@ -1005,7 +1005,7 @@ module.exports =
             let transactionPool = null
             if ((transactiondata.amount == balance.data.formatedamount) && transactiondata.status == 0) {
                 let topup_verify = await topupUtility.verifyTheBalanceBy_Admin(transactiondata.id, req.body.otp)
-                transactionPool = await topup.findOne({ id: req.body.id,})                
+                transactionPool  = await topup.findOne({ id: req.body.id,})                
             }
             else {
                 transactionPool = await topup.findOneAndUpdate(
