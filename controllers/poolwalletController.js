@@ -346,8 +346,8 @@ module.exports =
             let network_details = await network.findOne({ 'id': network_id })
             // let account = await poolWallet.findOne({ network_id: network_id, status: 0 })
             // let account = await poolWallet.find({ network_id: network_id, status: 0 }).sort({'_id': 1}).limit(1)
-            let account = []
-            account = account.length > 0 ? account[0] :  null
+            let account = null
+            // account = account.length > 0 ? account[0] :  null
             if (account != null) 
             {
               let val_data =  await CheckAddress(network_details.nodeUrl, network_details.libarayType,account.address, network_details.contractAddress) 
