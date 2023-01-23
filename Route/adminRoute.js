@@ -37,7 +37,7 @@ router.post('/changeMerchantEmail',                            Auth.is_admin,Aut
 router.post('/changeClientLoginStatus',                        Auth.is_admin,Auth.Verfiy_Role,Auth.verfiyAdminToken,clientsController.changeClientLoginStatus);
 router.post('/changeAdminsLoginStatus',                        Auth.is_admin,Auth.Verfiy_Role,Auth.verfiyAdminToken,adminController.changeAdminsLoginStatus);
 router.post('/createMerchantStoreByAdmin',                     Auth.is_admin,Auth.verfiyAdminToken,Auth.Verfiy_Role,merchantstoreController.createMerchantStoreByAdmin);
-router.post('/getapikey',                                      Auth.verfiyAdminToken,Auth.Verfiy_Role,adminController.getapikey);
+router.post('/getapikey',                                      Auth.verfiyAdminToken,adminController.getapikey);
 router.post('/approvekyc',                                     Auth.is_admin,Auth.Verfiy_Role,Auth.verfiyAdminToken, clientsController.kyc_approved);
 "============================ Orphan Transcation ==============================="
 router.post('/orphanPoolWallet',                              Auth.is_admin,Auth.Verfiy_Role,orphanController.orphanTranscation);
