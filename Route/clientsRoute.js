@@ -71,7 +71,7 @@ router.get('/posallCurrency',                        Auth.check_Store_Device_Acc
 router.post('/pospriceConversition',                 Auth.check_Store_Device_Access,CurrencyController.priceConversitionPosChanges);
 router.post('/posallNetworks',                       Auth.check_Store_Device_Access,networkController.allNetworkForPOSClient);
 router.post('/posGetTransByDeviceID',                Auth.check_Store_Device_Access,posTransactionPoolController.getTranscationDetailsByDeviceID);
-router.post('/send_email_pos',                         Auth.check_Store_Device_Access,posTransactionPoolController.SendEmailPOS);
+router.post('/send_email_pos',                       Auth.check_Store_Device_Access,posTransactionPoolController.SendEmailPOS);
 "============================ Currency Master ==============================="
 router.get('/allCurrency',                           CurrencyController.allCurrency);
 router.post('/priceConversition',                    CurrencyController.priceConversition);

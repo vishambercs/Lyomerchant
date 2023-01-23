@@ -2,6 +2,7 @@ const client = require('../Models/clients');
 const admins = require('../Models/admin');
 const merchantstores = require('../Models/merchantstore');
 const RolesPermisson = require('../Models/RolesPermisson');
+const apilists = require('../Models/api_list');
 const merchantcategory = require('../Models/merchantcategory');
 const storeDevices = require('../Models/storeDevices');
 const paymentLinkTransactionPool = require('../Models/paymentLinkTransactionPool');
@@ -53,24 +54,31 @@ module.exports =
         try 
         {
 
-            next()
-            // let api_key          = req.headers.authorization;
-            // let url              = req.originalUrl;
-            // let adminsdata       = await admins.findOne({admin_api_key : api_key})
+            // next()
+            let api_key          = req.headers.authorization;
+            let url              = req.originalUrl;
+            let adminsdata       = await admins.findOne({admin_api_key : api_key})
+            let apilist         = await apilists.findOne({name : url})
+            if(adminsdata != null)
+            {
+               return res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
+            }
 
-            // if(adminsdata != null)
-            // {
-            //    return res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
-            // }
-            // let roles_permission = await RolesPermisson.findOne({roleid : adminsdata.rolesdata , "apipath" :url , "status":1  })
-            // if(roles_permission != null)
-            // {
-            //     next()
-            // }
-            // else
-            // {
-            //     res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
-            // }
+            if(apilist != null)
+            {
+               return res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
+            }
+
+
+            let roles_permission = await RolesPermisson.findOne({roleid : adminsdata.rolesdata , "apipath" :apilist._id , "status":1  })
+            if(roles_permission != null)
+            {
+                next()
+            }
+            else
+            {
+                res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
+            }
             
         }
         catch (error) {
@@ -944,8 +952,11 @@ module.exports =
                 "email": "required|email",
                 "code": "required|string",
             };
+            console.log("verify_Verfiy_Google_Auth",req.body)
             let authorization = req.headers.authorization;
+            console.log("verify_Verfiy_Google_Auth",req.headers.authorization)
             let user = await admins.findOne({ admin_api_key: authorization, status: true });
+           
             await Validator(req.body, validationRule, {}, (err, status) => {
                 if (!status) {
                     res.status(200).send({ status: 400, success: false, message: 'Validation failed', data: err });
