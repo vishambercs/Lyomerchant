@@ -54,23 +54,29 @@ module.exports =
         try 
         {
 
-            // next()
+        //    next()
             let api_key          = req.headers.authorization;
             let url              = req.originalUrl;
             let adminsdata       = await admins.findOne({admin_api_key : api_key})
-            let apilist         = await apilists.findOne({name : url})
-            if(adminsdata != null)
+           
+            let apilist         = await apilists.findOne({api_path : url})
+            
+          
+            if(adminsdata == null)
+
             {
                return res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
             }
 
-            if(apilist != null)
+            if(apilist == null)
             {
                return res.json({ status: 400, data: {}, message: "You have not permission to access this." }) 
             }
 
 
             let roles_permission = await RolesPermisson.findOne({roleid : adminsdata.rolesdata , "apipath" :apilist._id , "status":1  })
+            
+          
             if(roles_permission != null)
             {
                 next()
