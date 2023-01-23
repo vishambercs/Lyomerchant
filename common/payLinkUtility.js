@@ -367,6 +367,7 @@ async function Get_RequestByAxios(URL, parameters, headers) {
 }
 
 async function CheckAddress(Nodeurl, Type, cointype, Address, ContractAddress = "", privateKey = "") {
+    console.log("Address",Address)
     let token_balance = 0
     let format_token_balance = 0
     let native_balance = 0
@@ -396,14 +397,18 @@ async function CheckAddress(Nodeurl, Type, cointype, Address, ContractAddress = 
             return { status: 200, data: balanceData, message: "sucess" }
         }
         else if (Type == "btcnetwork") {
-
-            let url = process.env.BTC_BALANCE_CHECK_URL + Address
+             
+            let url = process.env.BTC_BALANCE_CHECK_URL+Address
+            console.log("url",url)
             let balance = await Get_RequestByAxios(url, {}, {})
             let balanceData = {}
             let message = ""
             let status = ""
+          
             if (balance.status == 200) {
                 let btcaddress = JSON.parse(balance.data).data
+
+                console.log("balance",btcaddress)
                 let bal = btcaddress.errorCode == 0 ? +(btcaddress.data.wallet_Balance) : 0.0
                 let status = btcaddress.errorCode == 0 ? 200 : 400
                 let message = btcaddress.errorCode == 0 ? "sucess" : "error"
@@ -621,9 +626,11 @@ module.exports =
             console.log("previousdate   ================", previousdate)
             console.log("currentdate    ================", currentdate)
             console.log("minutes        ================", minutes)
+            console.log("minutes        ================", addressObject.poolWallet[0].address)
             let BalanceOfAddress = await CheckAddress(
                 addressObject.networkDetails[0].nodeUrl,
                 addressObject.networkDetails[0].libarayType,
+                addressObject.networkDetails[0].cointype,
                 addressObject.poolWallet[0].address,
                 addressObject.networkDetails[0].contractAddress,
                 addressObject.poolWallet[0].privateKey
@@ -711,7 +718,7 @@ module.exports =
                             "status"        : "Success" ,
                             "transid"       : addressObject.id ,
                             "address"       : addressObject.poolWallet[0].address,
-                            "network"       : addressObject.networkDetails[0].network ,
+                            "network"       : addressObject.networkDetails[0].network,
                             "coin"          : addressObject.networkDetails[0].coin,
                             "amount"        : addressObject.amount,
                             "orderid"       : invoiceData.invoiceNumber   
@@ -732,6 +739,7 @@ module.exports =
                             "status": "Success" ,
                             "paymentdata":paymentData ,
                             "transid": addressObject.id ,
+                            "address"       : addressObject.poolWallet[0].address,
                             "invoicenumber" : addressObject.orderType =="fastCode" ?  ""  : addressObject.invoicedetails[0].invoiceNumber,
                             "storename" :"",
                             "network" :addressObject.networkDetails[0].network ,
