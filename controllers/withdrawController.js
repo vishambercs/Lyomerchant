@@ -284,19 +284,18 @@ module.exports =
             // const clientWallet = await clientWallets.findOne({ client_api_key: req.headers.authorization, network_id: network.id })
             let totalData         = await creat_Total_Depossit(network._id ,req.headers.authorization)
             const balance         = totalData.status == 200 ? totalData.data.nettotal : null
-            console.log("balance",totalData)
-            console.log("balance",balance)
+            
             if (balance == null) {
                 return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
             
             let coinprice         = await priceNewConversition(network.id)
-            console.log("coinprice",coinprice)
+            
             if( coinprice == null ) {
                 return res.json({ status: 400, data: {}, message: "Error" })
             }
             let nativeprice       = await priceNewConversition(network.id)
-            console.log("nativeprice",coinprice)
+          
             if( nativeprice == null ) {
                 return res.json({ status: 400, data: {}, message: "Error" })
             }
@@ -809,8 +808,15 @@ module.exports =
             const network = await networks.findOne({ _id: ObjectID(req.body.networkid) })
             let coinprice = await priceNewConversition(network.id)
 
+             
+            if( coinprice == null ) {
+                return res.json({ status: 400, data: {}, message: "Error" })
+            }
+            
             let nativeprice = await priceNewConversition(network.id)
-
+            if( nativeprice == null ) {
+                return res.json({ status: 400, data: {}, message: "Error" })
+            } 
 
             let transfer_fee = 0;
             let networkFee = null;
@@ -825,24 +831,14 @@ module.exports =
                 console.log(nativeprice)
                 console.log(network.cointype)
                 token_data = (networkFee.data.gaspriceether * nativeprice)
-                console.log("Toeken Total",token_data)
-                console.log("Toeken gaspriceether ",networkFee.data.gaspriceether)
-                console.log("Toeken nativeprice",nativeprice)
+              
             }
             else {
                 token_data = (networkFee.data.gaspriceether * coinprice)
-                console.log("Native Total",token_data)
-                console.log("Native gaspriceether ",networkFee.data.gaspriceether)
-                console.log("Native nativeprice",nativeprice)
+               
 
             }
-
-            console.log("Native withdrawfee",network.withdrawfee)
             transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data;
-            const transferFee= ((network.withdrawfee / network.transferlimit) + 1) * nativeprice;
-console.log("transferFee", transferFee);
-
-            console.log(transfer_fee)
             network_fee = amount * (1 / 100)
             cryptoprice = transfer_fee / coinprice
          
