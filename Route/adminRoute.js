@@ -30,7 +30,7 @@ router.post('/allAdmin',                                       Auth.is_admin, Au
 router.post('/transcationListByNetworkID',                     Auth.is_admin,Auth.Verfiy_Role,transcationpoolController.get_Trans_by_Network_ID_For_Admin);
 router.post('/forgetThePassword',                              adminController.forgetThePassword);
 router.post('/VerfiyTheCode',                                  Auth.verify_Verfiy_Google_Auth,Auth.Verfiy_Role,adminController.VerfiyTheCode);
-router.post('/updatePassword',                                 Auth.verify_admin_Login,Auth.Verfiy_Role,adminController.updateThePassword);
+router.post('/updatePassword',                                 Auth.verify_admin_Login,adminController.updateThePassword);
 router.post('/resettwofa',                                     Auth.is_admin,Auth.Verfiy_Role,adminController.reset_two_fa);
 router.post('/resetMerchantTwoFa',                             Auth.is_admin,Auth.Verfiy_Role,clientsController.reset_merchant_two_fa);
 router.post('/changeMerchantEmail',                            Auth.is_admin,Auth.Verfiy_Role,clientsController.changeMerchantEmail);
@@ -95,7 +95,7 @@ router.post('/get_all_roles',                       Auth.is_admin,Auth.Verfiy_Ro
 router.post('/update_role_Permisson',               Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.update_role_Permisson);
 router.post('/get_all_roles_with_permission',       Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.get_all_roles_with_permission);
 router.post('/create_or_update_api_paths',          Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.create_or_update_api_paths);
-router.post('/get_permission_of_role',              Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.get_permission_of_role);
+router.post('/get_permission_of_role',              Auth.is_admin, Rolescontroller.get_permission_of_role);
 router.post('/save_api_path',                       Auth.is_admin,Auth.Verfiy_Role, Rolescontroller.savecategory);
 
 //  router.post('/updatecategory',              Rolescontroller.updatecategory);
