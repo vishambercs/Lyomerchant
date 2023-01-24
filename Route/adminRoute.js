@@ -117,7 +117,7 @@ router.post('/get_the_webhook',                             Auth.is_admin,Auth.V
 router.post('/change_topup_network',                        Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_network);
 router.post('/change_topup_fait_amount',                    Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_fait_amount);
 router.post('/change_topup_crypto_amount',                  Auth.is_admin,Auth.Verfiy_Role,topupcontroller.change_topup_crypto_amount);
-router.post('/create_or_update_trans_hash_topup',        Auth.is_admin,Auth.Verfiy_Role,topupcontroller.create_or_update_trans_hash_topup);
+router.post('/create_or_update_trans_hash_topup',           Auth.is_admin,Auth.Verfiy_Role,topupcontroller.create_or_update_trans_hash_topup);
 // router.post('/create_or_update_trans_hash_topup',           topupcontroller.create_or_update_trans_hash_topup);
 
 module.exports = router;
