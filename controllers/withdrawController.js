@@ -86,7 +86,7 @@ async function priceNewConversition(currencyid) {
     }
     catch (error) {
         console.log(error)
-        return {}
+        return null
     }
 }
 async function creat_Total_Depossit(network_id ,api_key) {
@@ -223,8 +223,16 @@ module.exports =
             }
             
             let coinprice         = await priceNewConversition(network.currencyid.toLocaleLowerCase())
+            if( coinprice === null ) {
+                return res.json({ status: 400, data: {}, message: "Error" })
+            }
             let nativeprice       = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
-    
+         
+            if( nativeprice === null ) {
+                return res.json({ status: 400, data: {}, message: "Error" })
+            }
+
+
             const clients_data = await client.findOne({"api_key": req.headers.authorization })
             let network_withdraw_limit = (req.body.amount < (network.transferlimit / coinprice))
             let client_withdraw_limit = (req.body.amount < (clients_data.withdrawlimit / coinprice)) 
@@ -748,10 +756,19 @@ module.exports =
                 console.log(nativeprice)
                 console.log(network.cointype)
                 token_data = (networkFee.data.gaspriceether * nativeprice)
+                console.log("Toeken Total",token_data)
+                console.log("Toeken gaspriceether ",networkFee.data.gaspriceether)
+                console.log("Toeken nativeprice",nativeprice)
             }
             else {
                 token_data = (networkFee.data.gaspriceether * coinprice)
+                console.log("Native Total",token_data)
+                console.log("Native gaspriceether ",networkFee.data.gaspriceether)
+                console.log("Native nativeprice",nativeprice)
+
             }
+
+            console.log("Native nativeprice",network.withdrawfee)
             transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data
             console.log(transfer_fee)
             network_fee = amount * (1 / 100)
