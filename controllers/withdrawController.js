@@ -72,23 +72,91 @@ async function priceConversition(currencyid, currency) {
     }
 }
 
-async function priceNewConversition(currencyid) {
-    try {
-        let parameters = `ids=${currencyid}&vs_currencies=usd`
-        let COINGECKO_URL = process.env.COINGECKO + parameters
-        let axiosGetData = await Utility.Get_Request_By_Axios(COINGECKO_URL, {}, {})
-        var stringify_response = JSON.parse(axiosGetData.data)
-        let native_currency = stringify_response.data
-        let pricenative_currency = native_currency[currencyid]
-        let price = pricenative_currency["usd"]
+// async function priceNewConversition(currencyid) {
+//     try {
+//         let parameters = `ids=${currencyid}&vs_currencies=usd`
+//         let COINGECKO_URL = process.env.COINGECKO + parameters
+//         let axiosGetData = await Utility.Get_Request_By_Axios(COINGECKO_URL, {}, {})
+//         var stringify_response = JSON.parse(axiosGetData.data)
+//         let native_currency = stringify_response.data
+//         let pricenative_currency = native_currency[currencyid]
+//         let price = pricenative_currency["usd"]
 
-        return price
+//         return price
+//     }
+//     catch (error) {
+//         console.log(error)
+//         return null
+//     }
+// }
+
+const getCoinPrice = async (coin) => {
+    if (["LYO", "LYO1"].includes(coin)) {
+        try {
+            const getBalanceRes = await axios.get(`https://openapi.lyotrade.com/sapi/v1/klines?symbol=LYO1USDT&interval=1min&limit=1`);
+            return getBalanceRes.data[0]['close'];
+        } catch (e) {
+            // console.log(e);
+            return 1;
+        }
     }
-    catch (error) {
-        console.log(error)
-        return null
+    if (["tUSDT"].includes(coin)) {
+        try {
+            const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=USDTUSDT&interval=1m&limit=1`);
+            return getBalanceRes.data[0]['close'];
+        } catch (e) {
+            // console.log(e);
+            return 1;
+        }
+    }
+
+    else {
+        try {
+            const getBalanceRes = await axios.get(`https://api.binance.com/api/v3/klines?symbol=${coin}USDT&interval=1m&limit=1`);
+            return getBalanceRes.data[0][4];
+        } catch (e) {
+            //    console.log(e);
+            return 1;
+        }
     }
 }
+const getFiatRates = async (coin) => {
+    try {
+        const getBalanceRes = await axios.get(`https://www.binance.com/bapi/asset/v1/public/asset-service/product/currency`);
+        const rate = await getBalanceRes.data.data.find(element => element.pair.includes(coin)).rate;
+        return rate;
+    } catch (e) {
+        //    console.log(e);
+        return 1;
+    }
+}
+const getRate = async (stablecoin, crypto, fiat) => {
+
+    if (stablecoin == true) {
+        const fiatRate = await getFiatRates(fiat);
+        // return (parseFloat(1)*parseFloat(fiatRate)).toFixed(4);
+        return 1
+    } else {
+        const getCryptoToUsdt = await getCoinPrice(crypto);
+        const fiatRate = await getFiatRates(fiat);
+        return (parseFloat(getCryptoToUsdt) * parseFloat(fiatRate)).toFixed(4);
+    }
+}
+async function priceNewConversition(coinid) {
+    try {
+        let networks = await network.findOne({ 'id': coinid })
+        let getRatedata = await getRate(networks.stablecoin, networks.coin, "USD");
+        let price = parseFloat(getRatedata) 
+        return price;
+
+    }
+    catch (error) {
+        console.log("priceNewConversition", error.message)
+        return null;
+
+    }
+}
+
 async function creat_Total_Depossit(network_id ,api_key) {
     try {
         console.log("network_id",network_id)
@@ -222,13 +290,14 @@ module.exports =
                 return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
             
-            let coinprice         = await priceNewConversition(network.currencyid.toLocaleLowerCase())
-            if( coinprice === null ) {
+            let coinprice         = await priceNewConversition(network.id)
+            console.log("coinprice",coinprice)
+            if( coinprice == null ) {
                 return res.json({ status: 400, data: {}, message: "Error" })
             }
-            let nativeprice       = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
-         
-            if( nativeprice === null ) {
+            let nativeprice       = await priceNewConversition(network.id)
+            console.log("nativeprice",coinprice)
+            if( nativeprice == null ) {
                 return res.json({ status: 400, data: {}, message: "Error" })
             }
 
@@ -738,9 +807,9 @@ module.exports =
                 return res.json({ status: 400, data: null, message: "Wallet did not find" })
             }
             const network = await networks.findOne({ _id: ObjectID(req.body.networkid) })
-            let coinprice = await priceNewConversition(network.currencyid.toLocaleLowerCase())
+            let coinprice = await priceNewConversition(network.id)
 
-            let nativeprice = await priceNewConversition(network.native_currency_id.toLocaleLowerCase())
+            let nativeprice = await priceNewConversition(network.id)
 
 
             let transfer_fee = 0;
@@ -768,8 +837,11 @@ module.exports =
 
             }
 
-            console.log("Native nativeprice",network.withdrawfee)
-            transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data
+            console.log("Native withdrawfee",network.withdrawfee)
+            transfer_fee = ((tokencurrency / network.transferlimit) * network.withdrawfee) + token_data;
+            const transferFee= ((network.withdrawfee / network.transferlimit) + 1) * nativeprice;
+console.log("transferFee", transferFee);
+
             console.log(transfer_fee)
             network_fee = amount * (1 / 100)
             cryptoprice = transfer_fee / coinprice

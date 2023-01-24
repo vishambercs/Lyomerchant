@@ -127,17 +127,16 @@ module.exports =
     },
     async Get_Request_By_Axios(URL, parameters, headers) {
         response = {}
-        await axios.get(URL, {
+      return  await axios.get(URL, {
             params: parameters,
             headers: headers
         }).then(res => {
             var stringify_response = stringify(res)
-            response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
-        })
-            .catch(error => {
+           return  response = { status: 200, data: stringify_response, message: "Get The Data From URL" }
+        }).catch(error => {
                 console.error("Error", error)
                 var stringify_response = stringify(error)
-                response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
+                return  response = { status: 404, data: stringify_response, message: "There is an error.Please Check Logs." };
             })
         return response;
     },
